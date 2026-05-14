@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SynthAI</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Inter, Arial, sans-serif;
+      background: #0b1020;
+      color: #f4f7fb;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      overflow: hidden;
+    }
+    .card {
+      width: min(92vw, 760px);
+      padding: 48px;
+      border-radius: 28px;
+      background: rgba(255,255,255,0.06);
+      backdrop-filter: blur(18px);
+      box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+      position: relative;
+    }
+    .badge {
+      display: inline-block;
+      padding: 8px 14px;
+      border-radius: 999px;
+      background: rgba(98, 0, 255, 0.25);
+      font-size: 12px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+    h1 {
+      font-size: clamp(3rem, 10vw, 5rem);
+      margin: 18px 0 10px;
+      line-height: 0.9;
+    }
+    p {
+      font-size: 1.15rem;
+      opacity: 0.84;
+      line-height: 1.6;
+      max-width: 640px;
+    }
+    .buttons {
+      margin-top: 28px;
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    a {
+      text-decoration: none;
+      color: white;
+      padding: 14px 22px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, #6a5cff, #8f44ff);
+      transition: transform 0.2s ease;
+    }
+    a.secondary {
+      background: rgba(255,255,255,0.12);
+    }
+    a:hover {
+      transform: translateY(-2px);
+    }
+    .glow {
+      position: absolute;
+      width: 500px;
+      height: 500px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(111,0,255,0.45), transparent 70%);
+      top: -180px;
+      right: -180px;
+      z-index: -1;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="glow"></div>
+    <span class="badge">SynthAI Demo</span>
+    <h1>Build Faster.<br/>Think Stranger.</h1>
+    <p>
+      Experimental AI tooling, adaptive systems, and synthetic workflows wrapped in a deployable shell.
+      The original repo survived long enough to become archaeology. Now it has a homepage. Nature is healing.
+    </p>
+    <div class="buttons">
+      <a href="https://github.com/justappgrabbin/SynthAi" target="_blank">View GitHub</a>
+      <a class="secondary" href="#">Demo Active</a>
+    </div>
+  </div>
+</body>
+</html>
