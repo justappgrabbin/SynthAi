@@ -4,8 +4,7 @@
   "private": true,
   "description": "Static SynthAI Netlify landing page",
   "scripts": {
-    "build": "node -e \"const fs=require('fs'); if(!fs.existsSync('public/index.html')){throw new Error('Missing public/index.html')} console.log('Static SynthAI build complete')\"",
-    "build:24node": "npm run build"
+    "build": "node -e \"const fs=require('fs'); if(!fs.existsSync('public/index.html')){throw new Error('Missing public/index.html')} console.log('Static SynthAI build complete')\""
   },
   "engines": {
     "node": "20.x"
