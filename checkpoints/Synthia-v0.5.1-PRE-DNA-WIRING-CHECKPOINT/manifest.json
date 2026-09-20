@@ -1,0 +1,13 @@
+{
+  "artifact": "Synthia-v0.5.1-PRE-DNA-WIRING-CHECKPOINT.zip",
+  "checkpoint": "pre-dna-wiring",
+  "size_bytes": 80178682,
+  "chunk_size_bytes": 524288,
+  "part_count": 153,
+  "sha256": "1cd97f41a70006b98fb7a95db927a7e026d42331822c67f07bd99c7b2f67df82",
+  "tests": {
+    "passed": 32,
+    "total": 32
+  },
+  "branch": "synthia-v0.5.1-pre-dna-checkpoint"
+}

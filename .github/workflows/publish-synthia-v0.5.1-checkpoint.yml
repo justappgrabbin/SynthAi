@@ -1,0 +1,58 @@
+name: Publish Synthia v0.5.1 checkpoint
+
+on:
+  push:
+    branches:
+      - synthia-v0.5.1-pre-dna-checkpoint
+    paths:
+      - 'checkpoints/Synthia-v0.5.1-PRE-DNA-WIRING-CHECKPOINT/**'
+      - '.github/workflows/publish-synthia-v0.5.1-checkpoint.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out checkpoint branch
+        uses: actions/checkout@v4
+
+      - name: Reconstruct and verify exact archive
+        shell: bash
+        run: |
+          set -euo pipefail
+          checkpoint='Synthia-v0.5.1-PRE-DNA-WIRING-CHECKPOINT.zip'
+          source_dir='checkpoints/Synthia-v0.5.1-PRE-DNA-WIRING-CHECKPOINT'
+          cat "$source_dir"/parts/part-*.bin > "$RUNNER_TEMP/$checkpoint"
+          echo '1cd97f41a70006b98fb7a95db927a7e026d42331822c67f07bd99c7b2f67df82  '"$RUNNER_TEMP/$checkpoint" | sha256sum -c -
+          cp "$source_dir/CHECKSUMS.sha256" "$RUNNER_TEMP/$checkpoint.sha256"
+
+      - name: Publish one-file GitHub Release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          tag='synthia-v0.5.1-pre-dna-wiring'
+          checkpoint='Synthia-v0.5.1-PRE-DNA-WIRING-CHECKPOINT.zip'
+          cat > "$RUNNER_TEMP/release-notes.md" <<'NOTES'
+          Frozen preservation checkpoint made before the current DNA/swarm wiring work.
+
+          Verification at checkpoint:
+          - 32/32 tests passed
+          - Exact archive size: 80,178,682 bytes
+          - SHA-256: 1cd97f41a70006b98fb7a95db927a7e026d42331822c67f07bd99c7b2f67df82
+
+          This release preserves the pre-DNA runtime and does not claim the later DNA integration is complete. The existing SynthAi main branch was not replaced.
+          NOTES
+          if gh release view "$tag" >/dev/null 2>&1; then
+            gh release upload "$tag" "$RUNNER_TEMP/$checkpoint" "$RUNNER_TEMP/$checkpoint.sha256" --clobber
+            gh release edit "$tag" --title 'Synthia v0.5.1 — Pre-DNA Wiring Checkpoint' --notes-file "$RUNNER_TEMP/release-notes.md"
+          else
+            gh release create "$tag" "$RUNNER_TEMP/$checkpoint" "$RUNNER_TEMP/$checkpoint.sha256" \
+              --title 'Synthia v0.5.1 — Pre-DNA Wiring Checkpoint' \
+              --notes-file "$RUNNER_TEMP/release-notes.md" \
+              --target 'synthia-v0.5.1-pre-dna-checkpoint'
+          fi
