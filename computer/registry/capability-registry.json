@@ -1,6 +1,6 @@
 {
   "schema": "capability-registry-v1",
-  "stage": "4a-address-state-mount + amendment-c",
+  "stage": "4a + amendment-c + excavation-registration",
   "branch_ref": "integration/ecosystem-convergence",
   "donor_pin": "Back-up- @ 1c45318",
   "capabilities": [
@@ -126,6 +126,47 @@
             }
           ],
           "role": "specialized_constructor"
+        },
+        {
+          "provider_id": "back-up-:kimi-coordinate-engine",
+          "capability": "resolve_address",
+          "repository": "donors/Back-up-",
+          "branch_ref": "1c45318",
+          "source_artifact": "vendor/kimi-agent-automata-state-space-merge/pure-synthia-automata/src/engine/v2/coordinate_engine.js",
+          "status": "PRESENT",
+          "environment_requirements": [
+            "node-esm"
+          ],
+          "inputs": {},
+          "outputs": {},
+          "dependencies": [],
+          "persistence_behavior": "none",
+          "verification_evidence": [
+            {
+              "kind": "excavation_probe",
+              "ref": "../../excavation-state-space-dirs.md",
+              "summary": "excavation probe: toAddress({planet:0,gate:41,line:2,...})=12023169149007581n; fromAddress roundtrip true; TOTALS.full=241477720473600000; resonance(self,self)=1",
+              "timestamp": "2026-09-22T00:00:00.000Z"
+            }
+          ],
+          "last_verified": null,
+          "known_limitations": [
+            "parallel/specialized scheme — execution-spine canonical-address.mjs REMAINS the canonical-address authority; coordinate-engine is never a grammar source",
+            "degree cardinality 360 here vs DMS arc-second exactness in kimi addressing.js — reconcile before any canonical use",
+            "adds a 14th 'season' layer outside the canonical 13-field grammar"
+          ],
+          "lineage": {
+            "derived_from": [
+              "synthia_os_complete_v2 (PORT #4)"
+            ],
+            "supersedes_for_scope": []
+          },
+          "selection_hints": {
+            "locality": "local",
+            "performance_notes": "deterministic, zero-dep",
+            "preferred_when": "read-only resonance/enumeration queries; never as canonical grammar source"
+          },
+          "role": "specialized_parallel_addressing"
         }
       ]
     },
@@ -229,6 +270,86 @@
             "locality": "local",
             "performance_notes": "deterministic, no wall-clock",
             "preferred_when": "gate resolvable"
+          }
+        },
+        {
+          "provider_id": "back-up-:kimi-layer5-ssm",
+          "capability": "resolve_state",
+          "repository": "donors/Back-up-",
+          "branch_ref": "1c45318",
+          "source_artifact": "vendor/kimi-agent-automata-state-space-merge/pure-synthia-automata/src/engine/v2/layer5_ssm.js",
+          "status": "PRESENT",
+          "environment_requirements": [
+            "node-esm"
+          ],
+          "inputs": {},
+          "outputs": {},
+          "dependencies": [
+            "state-space/constants.js (mulberry32)"
+          ],
+          "persistence_behavior": "none",
+          "verification_evidence": [
+            {
+              "kind": "excavation_probe",
+              "ref": "../../excavation-state-space-dirs.md",
+              "summary": "excavation probe: step([1,0,1,0,1,0]) -> out[0]=0.4714; recall self-similarity=1.0; mood={dominant:19,secondary:23,tertiary:33,activation:0.0732,mood:'neutral'}; SSM(dim=64,time=1,mood=neutral)",
+              "timestamp": "2026-09-22T00:00:00.000Z"
+            }
+          ],
+          "last_verified": null,
+          "known_limitations": [
+            "recall is cosine-similarity episodic memory, NOT energy-based Hopfield (no Hopfield implementation exists in donor)",
+            "probe-verified only; NOT yet mounted behind Computer contracts"
+          ],
+          "lineage": {
+            "derived_from": [
+              "synthia_os_complete_v2 (PORT #4)"
+            ],
+            "supersedes_for_scope": []
+          },
+          "selection_hints": {
+            "locality": "local",
+            "performance_notes": "deterministic, zero-dep",
+            "preferred_when": "state-memory/attractor dynamics behind state-resolver (event -> SSM step -> recall/mood)"
+          }
+        },
+        {
+          "provider_id": "back-up-:kimi-phase-space-engine",
+          "capability": "resolve_state",
+          "repository": "donors/Back-up-",
+          "branch_ref": "1c45318",
+          "source_artifact": "vendor/kimi-agent-automata-state-space-merge/pure-synthia-automata/src/engine/v2/phase_space_engine.js",
+          "status": "PRESENT",
+          "environment_requirements": [
+            "node-esm"
+          ],
+          "inputs": {},
+          "outputs": {},
+          "dependencies": [],
+          "persistence_behavior": "none",
+          "verification_evidence": [
+            {
+              "kind": "excavation_probe",
+              "ref": "../../excavation-state-space-dirs.md",
+              "summary": "excavation probe: compose({vector:[0.6,0.1,0.8]}, mesh=1 vertex) -> complete=true, stages Movement>Evolution>Being>Design>Space, final _space.address='addr_3134', double-run deterministic=true, project() keys Who/What/Where/When/Why",
+              "timestamp": "2026-09-22T00:00:00.000Z"
+            }
+          ],
+          "last_verified": null,
+          "known_limitations": [
+            "works on numeric vectors; its addr_NNNN hashes are NOT canonical addresses",
+            "probe-verified only; NOT yet mounted"
+          ],
+          "lineage": {
+            "derived_from": [
+              "synthia_os_complete_v2 (PORT #4)"
+            ],
+            "supersedes_for_scope": []
+          },
+          "selection_hints": {
+            "locality": "local",
+            "performance_notes": "deterministic, zero-dep",
+            "preferred_when": "trajectory/trace generator for the milestone pipeline"
           }
         }
       ]
@@ -553,6 +674,256 @@
           }
         }
       ]
+    },
+    {
+      "capability": "state_space_runtime",
+      "description": "Runtime-object mesh: tasks, intents, checkpoints, memory gists, residency, ATO recall, causal trace over the five-dimension mesh.",
+      "providers": [
+        {
+          "provider_id": "back-up-:pure-synthia-emergent-state-space",
+          "capability": "state_space_runtime",
+          "repository": "donors/Back-up-",
+          "branch_ref": "1c45318",
+          "source_artifact": "vendor/pure-synthia-v0.4.0/src/synthia/emergent-state-space/ (core/state_space_core.mjs, mesh/emergent_mesh.mjs, mesh/ato_recall.mjs, core/task_continuity.mjs)",
+          "status": "PRESENT",
+          "environment_requirements": [
+            "node-esm"
+          ],
+          "inputs": {},
+          "outputs": {},
+          "dependencies": [],
+          "persistence_behavior": "none",
+          "verification_evidence": [
+            {
+              "kind": "excavation_probe",
+              "ref": "../../excavation-state-space-dirs.md",
+              "summary": "excavation probe: new StateSpace(gateTable).address(41) -> 5 dims; new EmergentMesh(gateTable) -> nodes=320, structuralEdges=960, fiveFieldStates=320, residency all 0",
+              "timestamp": "2026-09-22T00:00:00.000Z"
+            }
+          ],
+          "last_verified": null,
+          "known_limitations": [
+            "runtime.mjs imports ../canonicalState.mjs which is ABSENT from the vendor copy — use core/mesh directly, not runtime.mjs",
+            "Movement/Space sequences and Being tropical chart are PROJECT_HYPOTHESIS per claim-status"
+          ],
+          "lineage": {
+            "derived_from": [
+              "pure-synthia v0.6.7 canonical 5D mesh"
+            ],
+            "supersedes_for_scope": []
+          },
+          "selection_hints": {
+            "locality": "local",
+            "performance_notes": "deterministic, zero-dep",
+            "preferred_when": "mount only if runtime-object mesh / task continuity / symbolic ATO recall is needed; otherwise defer"
+          }
+        }
+      ]
+    },
+    {
+      "capability": "linguistic_kernel",
+      "description": "Five-projection linguistic kernel: immutable language state L={x,r,c,h} with Movement/Evolution/Being/Design/Space projections and single-pass resolve.",
+      "providers": [
+        {
+          "provider_id": "back-up-:pure-synthia-grammar-kernel",
+          "capability": "linguistic_kernel",
+          "repository": "donors/Back-up-",
+          "branch_ref": "1c45318",
+          "source_artifact": "vendor/pure-synthia-v0.4.0/src/synthia/five-substrate/grammarKernel.mjs",
+          "status": "PRESENT",
+          "environment_requirements": [
+            "node-esm"
+          ],
+          "inputs": {},
+          "outputs": {},
+          "dependencies": [],
+          "persistence_behavior": "none",
+          "verification_evidence": [
+            {
+              "kind": "excavation_probe",
+              "ref": "../../excavation-state-space-dirs.md",
+              "summary": "excavation probe: step(L={x:{term:'hello world'}},{type:'test'}) -> r.perspective='self', h[0].eventId='ling-fa1db543', accepted=true",
+              "timestamp": "2026-09-22T00:00:00.000Z"
+            }
+          ],
+          "last_verified": null,
+          "known_limitations": [
+            "touches none of the canonical 13 address dimensions — grammar/semantics substrate, not addressing"
+          ],
+          "lineage": {
+            "derived_from": [
+              "pure-synthia five-substrate"
+            ],
+            "supersedes_for_scope": []
+          },
+          "selection_hints": {
+            "locality": "local",
+            "performance_notes": "deterministic, zero-dep",
+            "preferred_when": "mount when text-intent parsing is wired"
+          }
+        }
+      ]
+    },
+    {
+      "capability": "state_space_enumeration",
+      "description": "Generic BigInt state-space estimation/enumeration + executable Govinda trigram structure tables.",
+      "providers": [
+        {
+          "provider_id": "back-up-:trainable-assembly-state-space",
+          "capability": "state_space_enumeration",
+          "repository": "donors/Back-up-",
+          "branch_ref": "1c45318",
+          "source_artifact": "vendor/trainable-assembly-v0.4.2/src/core/state-space/ (index.mjs estimator/enumerator + govinda-structure.js; 20/22 files byte-identical duplicates of kimi tree)",
+          "status": "PRESENT",
+          "environment_requirements": [
+            "node-esm"
+          ],
+          "inputs": {},
+          "outputs": {},
+          "dependencies": [],
+          "persistence_behavior": "none",
+          "verification_evidence": [
+            {
+              "kind": "excavation_probe",
+              "ref": "../../excavation-state-space-dirs.md",
+              "summary": "excavation probe: estimateStateSpace({cartesian:{gate:1..64,line:1..6,base:{values:[1..5]}}})=1920n; enumerateStateSpace yielded exactly 1920 states; diff/cmp: 20/22 files byte-IDENTICAL to kimi tree",
+              "timestamp": "2026-09-22T00:00:00.000Z"
+            }
+          ],
+          "last_verified": null,
+          "known_limitations": [
+            "20/22 files are exact duplicates of mounted kimi providers — kimi tree stays sole source for those",
+            "index.mjs + govinda-structure.js are TA-only additions, candidates for mounting"
+          ],
+          "lineage": {
+            "derived_from": [
+              "trainable-assembly-v0.4.2"
+            ],
+            "supersedes_for_scope": []
+          },
+          "selection_hints": {
+            "locality": "local",
+            "performance_notes": "deterministic, zero-dep",
+            "preferred_when": "enumerator for honest state-space size bounds; Govinda tables as claim-status metadata provider"
+          }
+        }
+      ]
+    },
+    {
+      "capability": "penta_group_state",
+      "description": "Penta (composite group-state) implementation.",
+      "providers": [
+        {
+          "provider_id": "NOT-FOUND",
+          "capability": "penta_group_state",
+          "repository": "donors/Back-up-",
+          "branch_ref": "1c45318",
+          "source_artifact": null,
+          "status": "NOT_FOUND",
+          "environment_requirements": [],
+          "inputs": {},
+          "outputs": {},
+          "dependencies": [],
+          "persistence_behavior": "none",
+          "verification_evidence": [
+            {
+              "kind": "excavation_search",
+              "ref": "../../excavation-state-space-dirs.md",
+              "summary": "searched entire donor: no Penta-person group-state code anywhere; only primitive-dimensions.js R-S3 claim mapping pentatonic scale degrees (gong/shang/jue/zhi/yu) to lines 1-5 of a scalegram, plus prose in kimi docs/corpus",
+              "timestamp": "2026-09-22T00:00:00.000Z"
+            }
+          ],
+          "last_verified": null,
+          "known_limitations": [],
+          "lineage": {
+            "derived_from": [],
+            "supersedes_for_scope": []
+          },
+          "selection_hints": {
+            "locality": "local",
+            "performance_notes": "",
+            "preferred_when": ""
+          }
+        }
+      ]
+    },
+    {
+      "capability": "composite_chart",
+      "description": "Composite (relationship) chart implementation.",
+      "providers": [
+        {
+          "provider_id": "NOT-FOUND",
+          "capability": "composite_chart",
+          "repository": "donors/Back-up-",
+          "branch_ref": "1c45318",
+          "source_artifact": null,
+          "status": "NOT_FOUND",
+          "environment_requirements": [],
+          "inputs": {},
+          "outputs": {},
+          "dependencies": [],
+          "persistence_behavior": "none",
+          "verification_evidence": [
+            {
+              "kind": "excavation_search",
+              "ref": "../../excavation-state-space-dirs.md",
+              "summary": "searched entire donor: occurrences are structural only (channel-mesh-body 'higher-order-channel-composite'/'composite-polarity' = channel-level composition, not composite group charts)",
+              "timestamp": "2026-09-22T00:00:00.000Z"
+            }
+          ],
+          "last_verified": null,
+          "known_limitations": [],
+          "lineage": {
+            "derived_from": [],
+            "supersedes_for_scope": []
+          },
+          "selection_hints": {
+            "locality": "local",
+            "performance_notes": "",
+            "preferred_when": ""
+          }
+        }
+      ]
+    },
+    {
+      "capability": "hopfield_network",
+      "description": "Hopfield network implementation (by name).",
+      "providers": [
+        {
+          "provider_id": "NOT-FOUND",
+          "capability": "hopfield_network",
+          "repository": "donors/Back-up-",
+          "branch_ref": "1c45318",
+          "source_artifact": null,
+          "status": "NOT_FOUND",
+          "environment_requirements": [],
+          "inputs": {},
+          "outputs": {},
+          "dependencies": [],
+          "persistence_behavior": "none",
+          "verification_evidence": [
+            {
+              "kind": "excavation_search",
+              "ref": "../../excavation-state-space-dirs.md",
+              "summary": "searched entire donor: only a LABEL — ato ARCHITECTURES table declares channel 18-58 'Judgment' {architecture:'hopfield', behavior:'attractor'}; no implementation exists",
+              "timestamp": "2026-09-22T00:00:00.000Z"
+            }
+          ],
+          "last_verified": null,
+          "known_limitations": [
+            "closest real machinery: layer5_ssm.js StateSpaceModel (64-hex state, distance-weighted coupling, recall) + emergent-state-space ATORecall (deterministic cue recall, not energy-based)"
+          ],
+          "lineage": {
+            "derived_from": [],
+            "supersedes_for_scope": []
+          },
+          "selection_hints": {
+            "locality": "local",
+            "performance_notes": "",
+            "preferred_when": ""
+          }
+        }
+      ]
     }
   ],
   "notes": [
@@ -574,6 +945,27 @@
         "Android/mobile residence in wider ecosystem: PRESENT / REQUIRES PROVIDER INVENTORY (Synthai2 Capacitor, Stellar APK shell + MCP 17 tools, historical packages)"
       ],
       "rule": "Never record 'absent everywhere'; scope the NOT_FOUND to the assembly actually inspected."
+    },
+    {
+      "id": "unresolved-items",
+      "timestamp": "2026-09-22T00:00:00.000Z",
+      "record": "Unresolved/recovery-blocking items",
+      "items": [
+        {
+          "id": "authority-zips-missing",
+          "status": "BLOCKED",
+          "detail": "authorities/ contains ONLY SHA256SUMS.txt (712 bytes, 6 SHA-256 hashes for originals/01..06.zip). The originals/ directory does NOT exist — 6 authority ZIP binaries absent; hashes unverifiable without recovery. RECOVERY BLOCKER: obtain originals/01-06.zip or a provenance statement. (Note: nested vendor/*/donors/*.zip bundles exist but are different, unhashed artifacts.)"
+        }
+      ]
+    },
+    {
+      "id": "alternative-milestone-route",
+      "timestamp": "2026-09-22T00:00:00.000Z",
+      "record": "Excavation-proposed ALTERNATIVE milestone route (documented, NOT implemented): address -> mesh-state-space -> SSM.processMeshEvent (gate 6-bit vector via addressing.js gateBits as input; h-state update = automaton firing) -> phase-space compose() (full five-stage trace, deterministic) -> causal trace / SSM recall + getMood() as consumable result; trajectory via PhaseSpaceEngine trace + project(trace,'interrogative'). Determinism: all engine/v2 modules are wall-clock-free and seed-deterministic (bit-for-bit replay). Status: documented alternative; current milestone route (grammar.learn/generate via swarm gateway) remains the VERIFIED one. Caveat: Movement/Space sequences + Being tropical chart are PROJECT_HYPOTHESIS; Penta/composite genuinely absent.",
+      "open_questions": [
+        "reconcile coordinate-engine degree cardinality (360) with kimi DMS arc-second exactness before canonical use",
+        "recover authority ZIP originals for SHA256SUMS verification"
+      ]
     }
   ]
 }
