@@ -1,6 +1,6 @@
 {
   "schema": "capability-registry-v1",
-  "stage": "4a + amendment-c + excavation-registration",
+  "stage": "4a + amendment-c + excavation-registration + 4d-wave1",
   "branch_ref": "integration/ecosystem-convergence",
   "donor_pin": "Back-up- @ 1c45318",
   "capabilities": [
@@ -94,7 +94,7 @@
           ],
           "last_verified": "2026-09-21T00:00:00.000Z",
           "known_limitations": [
-            "house convention is 1-8 trigram houses (45°), not 12 astrological houses"
+            "house convention is 1-8 trigram houses (45\u00b0), not 12 astrological houses"
           ],
           "lineage": {
             "derived_from": [
@@ -106,7 +106,7 @@
           "selection_hints": {
             "locality": "local",
             "performance_notes": "pure math, deterministic",
-            "preferred_when": "constructing/resolving address parts (arc-seconds <-> gate/line/color/tone/base/DMS); NOT the canonical authority — validate completed addresses against back-up-:execution-spine-canonical-address"
+            "preferred_when": "constructing/resolving address parts (arc-seconds <-> gate/line/color/tone/base/DMS); NOT the canonical authority \u2014 validate completed addresses against back-up-:execution-spine-canonical-address"
           },
           "conclusions": [
             {
@@ -151,8 +151,8 @@
           ],
           "last_verified": null,
           "known_limitations": [
-            "parallel/specialized scheme — execution-spine canonical-address.mjs REMAINS the canonical-address authority; coordinate-engine is never a grammar source",
-            "degree cardinality 360 here vs DMS arc-second exactness in kimi addressing.js — reconcile before any canonical use",
+            "parallel/specialized scheme \u2014 execution-spine canonical-address.mjs REMAINS the canonical-address authority; coordinate-engine is never a grammar source",
+            "degree cardinality 360 here vs DMS arc-second exactness in kimi addressing.js \u2014 reconcile before any canonical use",
             "adds a 14th 'season' layer outside the canonical 13-field grammar"
           ],
           "lineage": {
@@ -167,6 +167,48 @@
             "preferred_when": "read-only resonance/enumeration queries; never as canonical grammar source"
           },
           "role": "specialized_parallel_addressing"
+        },
+        {
+          "provider_id": "recovered:yniv-addressing-engine",
+          "capability": "resolve_address",
+          "repository": "donors/recovered",
+          "branch_ref": "integration/ecosystem-convergence",
+          "source_artifact": "donors/recovered/you-n-i-verse-corrected/ (synthia-bridge.ts; sha256 f913997b787f15ac825446ad93c4664d006e51cabff6361d1d426e2cc2645197)",
+          "status": "WIRED",
+          "environment_requirements": [
+            "node-esm (execution via esbuild type-erasure .ported.mjs; originals TS, Node 20 has no TS runtime)"
+          ],
+          "inputs": {},
+          "outputs": {},
+          "dependencies": [],
+          "persistence_behavior": "none",
+          "verification_evidence": [
+            {
+              "kind": "test_run",
+              "ref": "computer/tests/recovered-donors.test.mjs",
+              "summary": "encodeMicro({41,4,2,5,3})=45088 (matches recovery probe) with exact decode round-trip; encodeMacro=2511/2515 round-trip; MICRO_SIZE=69120 MACRO_SIZE=9360 via ComputerRuntime.resolveAddress contract",
+              "timestamp": "2026-09-22T00:00:00.000Z"
+            }
+          ],
+          "last_verified": "2026-09-22T00:00:00.000Z",
+          "known_limitations": [
+            "classification: SPECIALIZED canonical-resolution engine - execution-spine REMAINS the grammar authority (validator); YNIV resolves, never validates",
+            "donor coords 0-based internally; emergent arcSecond is 0-99 quarter-minutes, NOT contract arc",
+            "donor defect not fixed: runPipeline() reassigns const state (throws if called; we don't call it)",
+            "shipped bugs fixed in extracted copies only (see PROVENANCE.md): paren in encodeMicro; state-space-engine-v2 createNode/export fixes"
+          ],
+          "lineage": {
+            "derived_from": [
+              "justappgrabbin/Synthia@main vault archives (wave-1 recovery)"
+            ],
+            "supersedes_for_scope": []
+          },
+          "selection_hints": {
+            "locality": "local",
+            "performance_notes": "pure integer math / table lookup",
+            "preferred_when": "encoding/decoding the full 13-dim address arithmetic (micro 69120 / macro 9360 / emergent 129.6M)"
+          },
+          "role": "specialized_resolution_engine"
         }
       ]
     },
@@ -197,7 +239,7 @@
             {
               "kind": "test_run",
               "ref": "computer/tests/address-state-mount.test.mjs",
-              "summary": "calculateHumanDesign('1990-01-01','12:00') executed: Manifesting Generator 5/6, Sun 64.5 Capricorn 11°19'15\"",
+              "summary": "calculateHumanDesign('1990-01-01','12:00') executed: Manifesting Generator 5/6, Sun 64.5 Capricorn 11\u00b019'15\"",
               "timestamp": "2026-09-21T00:00:00.000Z"
             }
           ],
@@ -703,7 +745,7 @@
           ],
           "last_verified": null,
           "known_limitations": [
-            "runtime.mjs imports ../canonicalState.mjs which is ABSENT from the vendor copy — use core/mesh directly, not runtime.mjs",
+            "runtime.mjs imports ../canonicalState.mjs which is ABSENT from the vendor copy \u2014 use core/mesh directly, not runtime.mjs",
             "Movement/Space sequences and Being tropical chart are PROJECT_HYPOTHESIS per claim-status"
           ],
           "lineage": {
@@ -748,7 +790,7 @@
           ],
           "last_verified": null,
           "known_limitations": [
-            "touches none of the canonical 13 address dimensions — grammar/semantics substrate, not addressing"
+            "touches none of the canonical 13 address dimensions \u2014 grammar/semantics substrate, not addressing"
           ],
           "lineage": {
             "derived_from": [
@@ -792,7 +834,7 @@
           ],
           "last_verified": null,
           "known_limitations": [
-            "20/22 files are exact duplicates of mounted kimi providers — kimi tree stays sole source for those",
+            "20/22 files are exact duplicates of mounted kimi providers \u2014 kimi tree stays sole source for those",
             "index.mjs + govinda-structure.js are TA-only additions, candidates for mounting"
           ],
           "lineage": {
@@ -905,7 +947,7 @@
             {
               "kind": "excavation_search",
               "ref": "../../excavation-state-space-dirs.md",
-              "summary": "searched entire donor: only a LABEL — ato ARCHITECTURES table declares channel 18-58 'Judgment' {architecture:'hopfield', behavior:'attractor'}; no implementation exists",
+              "summary": "searched entire donor: only a LABEL \u2014 ato ARCHITECTURES table declares channel 18-58 'Judgment' {architecture:'hopfield', behavior:'attractor'}; no implementation exists",
               "timestamp": "2026-09-22T00:00:00.000Z"
             }
           ],
@@ -921,6 +963,96 @@
             "locality": "local",
             "performance_notes": "",
             "preferred_when": ""
+          }
+        }
+      ]
+    },
+    {
+      "capability": "resolve_relationship",
+      "description": "Channel-edge resolution between two addressed entities (36 HD channels as executable edge functions).",
+      "providers": [
+        {
+          "provider_id": "recovered:yniv-emergent-edge-resolver",
+          "capability": "resolve_relationship",
+          "repository": "donors/recovered",
+          "branch_ref": "integration/ecosystem-convergence",
+          "source_artifact": "donors/recovered/you-n-i-verse-corrected/emergent-edge-resolver.ts (shipped working; archive sha256 f913997b787f15ac825446ad93c4664d006e51cabff6361d1d426e2cc2645197)",
+          "status": "WIRED",
+          "environment_requirements": [
+            "node-esm (execution via esbuild type-erasure .ported.mjs; originals TS, Node 20 has no TS runtime)"
+          ],
+          "inputs": {},
+          "outputs": {},
+          "dependencies": [],
+          "persistence_behavior": "none",
+          "verification_evidence": [
+            {
+              "kind": "test_run",
+              "ref": "computer/tests/recovered-donors.test.mjs",
+              "summary": "resolveRelationship(g10,g20) -> EmergentEdgeResolver executed: edgeType AWAKENING, score 0.7, coherence 0.8, resonance 14.094 (matches recovery probe trace 'Awakening: Gates 10 and 20 awaken to 0.800')",
+              "timestamp": "2026-09-22T00:00:00.000Z"
+            }
+          ],
+          "last_verified": "2026-09-22T00:00:00.000Z",
+          "known_limitations": [
+            "edge labels carry donor semantics (AWAKENING 10-20 etc.); coherence/resonance values are donor-internal scoring"
+          ],
+          "lineage": {
+            "derived_from": [
+              "justappgrabbin/Synthia@main vault archives (wave-1 recovery)"
+            ],
+            "supersedes_for_scope": []
+          },
+          "selection_hints": {
+            "locality": "local",
+            "performance_notes": "pure integer math / table lookup",
+            "preferred_when": "resolving relational channel edges between two gates"
+          }
+        }
+      ]
+    },
+    {
+      "capability": "calculate_human_design",
+      "description": "Ephemeris -> gate/line/color/tone/base via the mandala wheel (zodiac+deg/min/sec input).",
+      "providers": [
+        {
+          "provider_id": "recovered:foundry-glyphs-ephemeris",
+          "capability": "calculate_human_design",
+          "repository": "donors/recovered",
+          "branch_ref": "integration/ecosystem-convergence",
+          "source_artifact": "donors/recovered/foundry-glyphs/server/resonance-engine.ts (archive sha256 9d8a894b95fdf7ad42d1bf2f5d9b9b6521c31d567edb7b6dc807dbb8835d84e5)",
+          "status": "VERIFIED",
+          "environment_requirements": [
+            "node-esm (execution via esbuild type-erasure .ported.mjs; originals TS, Node 20 has no TS runtime)"
+          ],
+          "inputs": {},
+          "outputs": {},
+          "dependencies": [],
+          "persistence_behavior": "none",
+          "verification_evidence": [
+            {
+              "kind": "test_run",
+              "ref": "computer/tests/recovered-donors.test.mjs",
+              "summary": "getHDActivation('Capricorn',11,19,15)->G38.L2.C6.T4.B5 via real mandala wheel; CONSUMPTION RECEIPT: address consumed by resolveState (five-level state-space at gate 38, active_structures.ephemeris) -> grammar-v1 event persisted (post_state.resolved_gate=38) -> fresh runtime replayed trajectory intact. Amendment-C VERIFIED: consumption receipt + observable state change + restart replay.",
+              "timestamp": "2026-09-22T00:00:00.000Z"
+            }
+          ],
+          "last_verified": "2026-09-22T00:00:00.000Z",
+          "known_limitations": [
+            "classification: REAL ephemeris provider vs kimi approximate-ephemeris - different calculation engine, NOT a winner-pick; wheels disagree (mandala gate-25-at-0-Aries vs kimi 58.0 anchor) and both are preserved",
+            "covers 9/13 dims (zodiac,degree,minute,second,gate,line,color,tone,base); no planet/dimension/arc/house",
+            "resonance-engine.ported.mjs imports extracted constants module (shared/schema.ts needs drizzle-orm/zod at value level; not installed)"
+          ],
+          "lineage": {
+            "derived_from": [
+              "justappgrabbin/Synthia@main vault archives (wave-1 recovery)"
+            ],
+            "supersedes_for_scope": []
+          },
+          "selection_hints": {
+            "locality": "local",
+            "performance_notes": "pure integer math / table lookup",
+            "preferred_when": "resolving real ecliptic coordinates to GLCTB"
           }
         }
       ]
@@ -954,7 +1086,7 @@
         {
           "id": "authority-zips-missing",
           "status": "BLOCKED",
-          "detail": "authorities/ contains ONLY SHA256SUMS.txt (712 bytes, 6 SHA-256 hashes for originals/01..06.zip). The originals/ directory does NOT exist — 6 authority ZIP binaries absent; hashes unverifiable without recovery. RECOVERY BLOCKER: obtain originals/01-06.zip or a provenance statement. (Note: nested vendor/*/donors/*.zip bundles exist but are different, unhashed artifacts.)"
+          "detail": "authorities/ contains ONLY SHA256SUMS.txt (712 bytes, 6 SHA-256 hashes for originals/01..06.zip). The originals/ directory does NOT exist \u2014 6 authority ZIP binaries absent; hashes unverifiable without recovery. RECOVERY BLOCKER: obtain originals/01-06.zip or a provenance statement. (Note: nested vendor/*/donors/*.zip bundles exist but are different, unhashed artifacts.)"
         }
       ]
     },

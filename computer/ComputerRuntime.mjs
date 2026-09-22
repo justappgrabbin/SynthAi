@@ -89,6 +89,7 @@ export class ComputerRuntime {
       eventLog: () => this.eventEmitter.readAll(),
     });
     this.capabilityRegistryService = await new CapabilityRegistryService({ bus: this.bus }).load();
+    this.addressService.capabilityRegistry = this.capabilityRegistryService; // routing_decision recording
     this.services.register('event-emitter', { provider: this.eventEmitter, contract: 'emitEvent' });
     this.services.register('address-service', { provider: this.addressService, contract: 'resolveAddress' });
     this.services.register('state-resolver', { provider: this.stateResolver, contract: 'resolveState' });

@@ -99,3 +99,41 @@ MOUNTED: nothing new (registration only).
 CONNECTED: system-graph-seed.jsonl appended with 6 provider nodes + PROVIDES/DERIVED_FROM/IMPLEMENTS edges + 3 NOT_FOUND gap nodes + 1 archive blocker node (append-only).
 TESTED: node --test computer/tests/*.test.mjs -> tests 13, pass 13, fail 0 (registration is data-only; no behavior change).
 FAILED: none.
+
+# Change record — Stage 4d wave-1: recovered YNIV + Foundry-Glyphs donors (integration/ecosystem-convergence)
+
+WHAT EXISTED BEFORE: stage-4a/4b mount (13/13 tests); excavation registration complete; archive recovery wave-1 delivered two P0 donors (report: ../../archive-recovery-wave1.md) — the full 13-dim canonical addressing engine (you-n-i-verse-corrected) and the only real ephemeris resolver (Foundry-Glyphs).
+
+PRESERVED: all kimi/Back-up- providers intact (multi-provider, no collapse); execution-spine REMAINS the canonical-address authority; donor originals vendored byte-verbatim (SHA-256 of archives re-verified against the recovery report); 13/13 prior tests still pass (14/14 now).
+
+CHANGED:
+- computer/services/address-service.mjs: multi-provider routing in resolveAddress (input-shape router: birthDate->kimi HD, ephemeris->Foundry mandala, micro/macro/emergent->YNIV, arc->kimi DMS) with RECORDED routing_decision (bus event routing:decision, all candidates listed); new providers _resolveViaYNIV (real donor encode/decode, 0-based->1-based conversion documented), _resolveFromEphemeris (real mandala wheel), resolveEdge (EmergentEdgeResolver, 36 channels); resolveRelationship now invokes the edge resolver when both gates known. FIXED latent bug: normalizeAddress/_resolveViaYNIV mutated the frozen emptyAddress() (TypeError on first use) — now spread-copied.
+- computer/services/state-resolver.mjs: accepts ephemeris/micro/macro/emergent entity inputs; active_structures.ephemeris records foundry activation+engine when the foundry provider resolved the address.
+- computer/ComputerRuntime.mjs: addressService receives capabilityRegistryService for routing-decision candidate lists.
+- computer/registry/capability-registry.json: +3 recovered providers (see ADDED), statuses promoted per evidence.
+
+ADDED:
+- computer/donors/recovered/you-n-i-verse-corrected/ — vendored donor (5 files) + PROVENANCE.md (source justappgrabbin/Synthia@main, archive sha256 f913997b..., exact shipped-bug-fix diffs: encodeMicro paren; state-space-engine-v2 createNode ReferenceError/dup-key/base-clamp; duplicate re-export). KNOWN UNFIXED donor defect recorded: runPipeline() reassigns const state.
+- computer/donors/recovered/you-n-i-verse-corrected/*.ported.mjs — esbuild type-erasure execution copies (repo is Node 20, no TS runtime; NO logic changes; headers document generation + import redirects).
+- computer/donors/recovered/foundry-glyphs/ — vendored donor (full tree) + PROVENANCE.md (archive sha256 9d8a894b..., verbatim); server/resonance-engine.ported.mjs (type-erasure) + server/shared-schema-constants.ported.mjs (verbatim constant extraction — shared/schema.ts needs drizzle-orm/zod at value level, not installed; NO new npm deps).
+- computer/tests/recovered-donors.test.mjs — (a) YNIV round-trip via contract, (b) AWAKENING edge via resolveRelationship, (c) ephemeris->GLCTB consumed by resolveState, (d) routing_decision with all candidates, (e) grammar-v1 event persisted + restart replay.
+
+MOUNTED: recovered:yniv-addressing-engine (resolve_address, specialized_resolution_engine), recovered:yniv-emergent-edge-resolver (resolve_relationship), recovered:foundry-glyphs-ephemeris (calculate_human_design, real ephemeris provider — kimi approximate-ephemeris retained; different engines, no winner-pick; wheels disagree and both are preserved).
+
+CONNECTED: event -> resolveAddress (YNIV/Foundry routed) -> resolveState (ephemeris activation -> five-level state-space at gate 38) -> grammar-v1 event persisted -> restart replay.
+
+DISCONNECTED / NOT MOUNTED: YNIV state-space-engine-v2 runtime pipeline (ported, probed via createNode only; runPipeline donor defect unfixable in scope), Foundry Overseer/Evolution/Builder/routes (need DB), SynthUniverse/glyph_game_system/cynthia-render-engine (P1 wave-1 candidates), Wave-2 hunts (WorldEngine, Embryo, Key-Gnome, Hopfield, true Penta, Vision Board, Indiverse) still UNRECOVERED.
+
+TESTED: node --test computer/tests/*.test.mjs
+EXACT TEST RESULT: tests 14, pass 14, fail 0. Evidence: ../../evidence/stage4d-recovered-donors.txt.
+  (a) YNIV micro index=45088 (= recovery probe) -> G42.L5.C3.T6.B4; macro index=2515; sizes 69120/9360.
+  (b) resolveRelationship(g10,g20) edge=AWAKENING score=0.7 trace "Awakening: Gates 10 and 20 awaken to 0.800" (matches probe).
+  (c) ephemeris Capricorn 11°19'15" -> G38.L2.C6.T4.B5 via foundry mandala; resolveState consumed it (source_provider names both kimi state-space AND foundry ephemeris); human_design null (no fabrication).
+  (d) routing_decision candidates=[execution-spine, kimi-dms, kimi-coordinate-engine, yniv] -> selected recovered:yniv-addressing-engine, rationale recorded.
+  (e) event persisted + replayed on fresh runtime.
+
+PROVIDER STATUSES: WIRED — recovered:yniv-addressing-engine, recovered:yniv-emergent-edge-resolver (real I/O through contracts). VERIFIED — recovered:foundry-glyphs-ephemeris (consumption receipt into resolveState + observable post_state + restart replay). All previous statuses unchanged.
+
+FAILED (then fixed): frozen emptyAddress() mutation bug in address-service (latent since 4a); recovery probe index 45088 requires donor-native (1-based-passed) input — documented convention.
+
+BLOCKED: none new. authority-ZIP recovery blocker from excavation registration still open.

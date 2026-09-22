@@ -28,6 +28,10 @@ import { fileURLToPath } from 'node:url';
 const DONOR_ROOT = fileURLToPath(new URL('../donors/Back-up-/vendor/', import.meta.url));
 const SPINE_ADDRESS = DONOR_ROOT + 'execution-spine-v0.4.0/src/canonical-address.mjs';
 const KIMI_STATE_SPACE = DONOR_ROOT + 'kimi-agent-automata-state-space-merge/pure-synthia-automata/src/state-space/';
+// Recovered wave-1 donors (PROVENANCE.md in each tree; .ported.mjs = esbuild type-erasure, logic unchanged)
+const YNIV_BRIDGE = fileURLToPath(new URL('../donors/recovered/you-n-i-verse-corrected/synthia-bridge.ported.mjs', import.meta.url));
+const YNIV_EDGES = fileURLToPath(new URL('../donors/recovered/you-n-i-verse-corrected/emergent-edge-resolver.ported.mjs', import.meta.url));
+const FOUNDRY_EPHEMERIS = fileURLToPath(new URL('../donors/recovered/foundry-glyphs/server/resonance-engine.ported.mjs', import.meta.url));
 
 export const ADDRESS_FIELDS = Object.freeze([
   'planetary', 'dimension', 'gate', 'line', 'color', 'tone', 'base',
@@ -36,18 +40,25 @@ export const ADDRESS_FIELDS = Object.freeze([
 
 export const PROVIDER_ID = 'back-up-:execution-spine-canonical-address+kimi-dms-codec';
 export const HD_PROVIDER_ID = 'back-up-:kimi-human-design';
+export const YNIV_PROVIDER_ID = 'recovered:yniv-addressing-engine';
+export const YNIV_EDGE_PROVIDER_ID = 'recovered:yniv-emergent-edge-resolver';
+export const FOUNDRY_PROVIDER_ID = 'recovered:foundry-glyphs-ephemeris';
 
 export function emptyAddress() {
   return Object.freeze(Object.fromEntries(ADDRESS_FIELDS.map((f) => [f, null])));
 }
 
 export class AddressService {
-  constructor({ bus = null } = {}) {
+  constructor({ bus = null, capabilityRegistry = null } = {}) {
     this.bus = bus;
+    this.capabilityRegistry = capabilityRegistry; // for recorded routing_decision (multi-provider, no collapse)
     this.providerId = PROVIDER_ID;
     this._spine = null;   // lazy donor modules
     this._dms = null;
     this._hd = null;
+    this._yniv = null;
+    this._ynivEdges = null;
+    this._ephemeris = null;
   }
 
   async _load(name, path) {
@@ -66,6 +77,31 @@ export class AddressService {
   async spine() { return (this._spine ??= await this._load('execution-spine-canonical-address', SPINE_ADDRESS)); }
   async dms() { return (this._dms ??= await this._load('kimi-addressing-dms', KIMI_STATE_SPACE + 'addressing.js')); }
   async hd() { return (this._hd ??= await this._load('kimi-human-design', KIMI_STATE_SPACE + 'human-design.js')); }
+  async yniv() { return (this._yniv ??= await this._load('recovered-yniv-addressing', YNIV_BRIDGE)); }
+  async ynivEdges() { return (this._ynivEdges ??= await this._load('recovered-yniv-edge-resolver', YNIV_EDGES)); }
+  async ephemeris() { return (this._ephemeris ??= await this._load('recovered-foundry-glyphs-ephemeris', FOUNDRY_EPHEMERIS)); }
+
+  /**
+   * Multi-provider routing decision (recorded, never silent). Provider is chosen
+   * by INPUT SHAPE (each provider resolves what it actually implements); the
+   * canonical-address authority remains execution-spine (validation role).
+   */
+  _routingDecision(capability, selected, rationale) {
+    const candidates = this.capabilityRegistry
+      ? this.capabilityRegistry.queryCapability(capability).providers.map((p) => p.provider_id)
+      : [];
+    const decision = {
+      request_id: `req-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+      required_capability: capability,
+      candidate_providers: candidates,
+      selected_provider: selected,
+      selection_rationale: rationale,
+      timestamp: new Date().toISOString(),
+      outcome_event_id: null,
+    };
+    this.bus?.emit('routing:decision', decision);
+    return decision;
+  }
 
   /**
    * Resolve a canonical 13-field address from real input only.
@@ -78,8 +114,22 @@ export class AddressService {
     const input = entityOrEvent?.input ?? entityOrEvent;
     if (input == null || typeof input !== 'object') throw new TypeError('resolveAddress: object input required');
 
-    if (input.birthDate) return this._resolveFromBirthDatum(input);
-    if (Number.isFinite(input.arcSecond ?? input.arc)) return this._resolveFromArc(input.arcSecond ?? input.arc);
+    if (input.birthDate) {
+      this._routingDecision('resolve_address', HD_PROVIDER_ID, 'birth datum present -> HD chart provider (kimi)');
+      return this._resolveFromBirthDatum(input);
+    }
+    if (input.ephemeris && typeof input.ephemeris === 'object') {
+      this._routingDecision('calculate_human_design', FOUNDRY_PROVIDER_ID, 'ephemeris coordinates present -> Foundry-Glyphs mandala resolver (real ephemeris engine)');
+      return this._resolveFromEphemeris(input.ephemeris);
+    }
+    if (input.micro || input.macro || input.emergent) {
+      this._routingDecision('resolve_address', YNIV_PROVIDER_ID, 'YNIV coordinate object present (micro/macro/emergent) -> recovered 13-dim address engine');
+      return this._resolveViaYNIV(input);
+    }
+    if (Number.isFinite(input.arcSecond ?? input.arc)) {
+      this._routingDecision('resolve_address', this.providerId, 'arc-second coordinate present -> kimi DMS wheel codec');
+      return this._resolveFromArc(input.arcSecond ?? input.arc);
+    }
     if (input.address && typeof input.address === 'object') return this.normalizeAddress(input.address);
 
     // Nothing resolvable: return the honest unknown address.
@@ -165,9 +215,117 @@ export class AddressService {
     };
   }
 
+  /**
+   * YNIV recovered 13-dim address engine (donor synthia-bridge.ts, ported verbatim).
+   * Encodes the given coordinates through the REAL donor encoder and decodes back
+   * (round-trip proven); contract fields are filled from donor decode output.
+   * Conventions (donor): micro gate/line/color/tone are 0-based (0 = gate 1); macro
+   * planet 0-12, dimension 0-4, zodiac 0-11, house 0-11; emergent arcSecond is 0-99
+   * (quarter-minute), NOT the contract/kimi arc-second coordinate — kept in
+   * provider_metadata.yniv only; contract `arc` stays null unless supplied.
+   */
+  async _resolveViaYNIV(input) {
+    const yniv = await this.yniv();
+    const address = { ...emptyAddress() };
+    const meta = {};
+    if (input.micro) {
+      const microIndex = yniv.encodeMicro(input.micro);
+      const decoded = yniv.decodeMicro(microIndex);
+      Object.assign(address, {
+        gate: decoded.gate + 1, line: decoded.line + 1, color: decoded.color + 1,
+        tone: decoded.tone + 1, base: decoded.base + 1,
+      });
+      meta.micro = { index: microIndex, decoded, size: yniv.MICRO_SIZE, convention: '0-based donor coords -> 1-based contract fields' };
+    }
+    if (input.macro) {
+      const macroIndex = yniv.encodeMacro(input.macro);
+      const decoded = yniv.decodeMacro(macroIndex);
+      address.planetary = input.macro.planet_name ?? String(decoded.planet); // donor macro is numeric; names not in donor table
+      address.dimension = input.macro.dimension_name ?? String(decoded.dimension);
+      address.zodiac = null; // numeric zodiac index decoded; sign names come from ephemeris provider instead
+      address.house = decoded.house + 1;
+      meta.macro = { index: macroIndex, decoded, size: yniv.MACRO_SIZE, note: 'planetary/dimension/zodiac are numeric in the donor macro layer; left as raw indices unless caller supplies names' };
+      if (input.macro.zodiac_name) address.zodiac = input.macro.zodiac_name;
+      if (address.planetary !== null && input.macro.planet_name === undefined) meta.macro.planetary_raw = address.planetary;
+    }
+    if (input.emergent) {
+      meta.emergent = { ...input.emergent, note: "donor emergent layer (degree 0-360, minute/second 0-60, arcSecond 0-99); arcSecond is NOT contract 'arc'" };
+      if (Number.isFinite(input.emergent.degree)) address.degree = input.emergent.degree;
+      if (Number.isFinite(input.emergent.minute)) address.minute = input.emergent.minute;
+      if (Number.isFinite(input.emergent.second)) address.second = input.emergent.second;
+    }
+    return {
+      address,
+      provider: YNIV_PROVIDER_ID,
+      resolved_fields: ADDRESS_FIELDS.filter((f) => address[f] !== null),
+      status: 'resolved',
+      provider_metadata: { yniv: meta, round_trip: true },
+    };
+  }
+
+  /**
+   * Foundry-Glyphs real ephemeris resolver (mandala wheel, Fagan-Bradley
+   * sidereal, draconic) — DIFFERENT calculation engine from kimi HD
+   * (approximate ephemeris). Both retained; no winner picked.
+   * Input: { sign, degree, minute, second } (tropical ecliptic coordinates).
+   */
+  async _resolveFromEphemeris({ sign, degree = 0, minute = 0, second = 0 }) {
+    const eph = await this.ephemeris();
+    const act = eph.getHDActivation(sign, degree, minute, second);
+    const address = {
+      planetary: null,
+      dimension: null,
+      gate: act.gate,
+      line: act.line,
+      color: act.color,
+      tone: act.tone,
+      base: act.base,
+      degree: act.degree,
+      minute: act.minute,
+      second: act.second,
+      arc: Math.round(act.eclipticDeg * 3600), // absolute ecliptic arc-seconds (contract arc convention)
+      zodiac: act.sign,
+      house: null, // mandala wheel provides no house; unknown stays null
+    };
+    return {
+      address,
+      provider: FOUNDRY_PROVIDER_ID,
+      resolved_fields: ADDRESS_FIELDS.filter((f) => address[f] !== null),
+      status: 'resolved',
+      provider_metadata: {
+        activation: act,
+        engine: 'Foundry-Glyphs mandala wheel (GATE_SEQUENCE from 0° Aries gate 25, GATE_ARC 5°37\'30")',
+        conversions: { sidereal: 'tropicalToSidereal(Fagan-Bradley)', draconic: 'tropicalToDraconic' },
+      },
+    };
+  }
+
+  /**
+   * resolveRelationship via the recovered EmergentEdgeResolver (36 HD channels
+   * as executable functions). Gates are contract 1-64; donor is 0-based.
+   */
+  async resolveEdge(addressA, addressB, stateOverlays = {}) {
+    const edges = await this.ynivEdges();
+    const resolver = new edges.EmergentEdgeResolver();
+    const toNodeState = (a, extra) => ({
+      micro: { gate: a.gate - 1, line: (a.line ?? 1) - 1, color: (a.color ?? 1) - 1, tone: (a.tone ?? 1) - 1, base: (a.base ?? 1) - 1 },
+      macro: { planet: 0, dimension: 0, zodiac: 0, house: 0 },
+      emergent: { degree: a.degree ?? 0, minute: a.minute ?? 0, second: a.second ?? 0, arcSecond: 0 },
+      amplitude: extra.amplitude ?? 0.8,
+      phase: extra.phase ?? 0.5,
+      coherence: extra.coherence ?? 0.9,
+      dimension: extra.dimension ?? 0,
+    });
+    const s = toNodeState(addressA, stateOverlays.source ?? {});
+    const t = toNodeState(addressB, stateOverlays.target ?? {});
+    const result = resolver.resolve(s, t);
+    this.bus?.emit('address-service:edge-resolved', { edgeType: result.edgeType, gates: [addressA.gate, addressB.gate] });
+    return { ...result, provider: YNIV_EDGE_PROVIDER_ID };
+  }
+
   /** Normalize a partial/canonical address onto exactly the 13 contract fields. */
   async normalizeAddress(partial) {
-    const address = emptyAddress();
+    const address = { ...emptyAddress() };
     const resolved = [];
     for (const f of ADDRESS_FIELDS) {
       if (partial[f] !== undefined && partial[f] !== null) { address[f] = partial[f]; resolved.push(f); }
@@ -214,10 +372,25 @@ export class AddressService {
       if (cmp.hamming_distance === 0) structural.push('identical_gate_binary');
       if (cmp.hamming_distance === 6) structural.push('complementary_gates');
     }
+    // Recovered donor edge machinery: the 36 HD channels as executable functions.
+    // Only invoked when BOTH gates are really known — never fabricated.
+    let edge = null;
+    if (Number.isInteger(cmp.a.gate) && Number.isInteger(cmp.b.gate) && context.useEdgeResolver !== false) {
+      edge = await this.resolveEdge(cmp.a, cmp.b, context.stateOverlays ?? {});
+      if (edge.compatible && edge.edgeType !== 'NONE') structural.push(`channel:${edge.edgeType}`);
+    }
     return {
       a: cmp.a, b: cmp.b,
       comparison: cmp,
       structural_relations: structural,
+      edge: edge ? {
+        provider: edge.provider,
+        edge_type: edge.edgeType,
+        edge_name: edge.edgeName,
+        compatible: edge.compatible,
+        score: edge.score,
+        emergent: edge.emergent,
+      } : null,
       relational_class: 'unknown', // grammar v1: do not assert co_occurrence/causal without evidence
       context: context ?? null,
       provider: this.providerId,

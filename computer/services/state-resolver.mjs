@@ -62,6 +62,8 @@ export class StateResolver {
       birthTime: entity?.birthTime ?? event?.input?.birthTime,
       arcSecond: entity?.arcSecond ?? entity?.arc ?? event?.input?.arcSecond,
       address: entity?.address ?? event?.actor_address,
+      ephemeris: entity?.ephemeris ?? event?.input?.ephemeris,
+      micro: entity?.micro, macro: entity?.macro, emergent: entity?.emergent,
     };
     const resolved = await this.addressService.resolveAddress(addressInput);
     const address = resolved.address;
@@ -95,6 +97,9 @@ export class StateResolver {
           incarnationCross: chart.incarnationCross ?? null,
           centers: chart.centers ?? null,
         } : null,
+        ephemeris: resolved.provider === 'recovered:foundry-glyphs-ephemeris'
+          ? { provider: resolved.provider, activation: resolved.provider_metadata?.activation ?? null, engine: resolved.provider_metadata?.engine ?? null }
+          : null,
       };
     } else if (chart) {
       activeStructures = {
