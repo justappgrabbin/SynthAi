@@ -462,6 +462,97 @@
           }
         }
       ]
+    },
+    {
+      "capability": "automata_activation",
+      "description": "Route a capability task into the donor automata organism (pure-synthia v0.4.0 swarm, 47 baseline processes) via the Computer gateway; returns honest execution records.",
+      "providers": [
+        {
+          "provider_id": "back-up-:pure-synthia-v0.4.0-swarm",
+          "capability": "automata_activation",
+          "repository": "donors/Back-up-",
+          "branch_ref": "1c45318",
+          "source_artifact": "vendor/pure-synthia-v0.4.0 (src/synthia/swarm/bootstrap.mjs)",
+          "status": "VERIFIED",
+          "environment_requirements": [
+            "node-esm",
+            "zero npm deps"
+          ],
+          "inputs": {
+            "capability": "string (e.g. grammar.learn, grammar.generate)",
+            "input": "donor process input"
+          },
+          "outputs": {
+            "execution": "{status, workerId, output, cycle}"
+          },
+          "dependencies": [],
+          "persistence_behavior": "none",
+          "verification_evidence": [
+            {
+              "kind": "test_run",
+              "ref": "computer/tests/milestone-one-real-event.test.mjs",
+              "summary": "Full chain: real user_action -> resolveAddress (Sun 64.5 Capricorn) -> resolveState (5-level mesh) -> gateway bootstrapped 47 donor processes -> grammar.learn (15 rules, worker deg-grammar-learner) -> grammar.generate (4-node graph, 3 rule applications) -> CONSUMPTION RECEIPT (result consumed into StateStore milestone.consumption + referenced downstream) -> grammar-v1 event persisted (trajectory traj-milestone-one-real-event) -> fresh runtime replayed trajectory with receipt intact. Amendment-C VERIFIED: consumption receipt + observable state change both present.",
+              "timestamp": "2026-09-22T00:00:00.000Z"
+            }
+          ],
+          "last_verified": "2026-09-22T00:00:00.000Z",
+          "known_limitations": [
+            "gateway routes one capability task per execute(); multi-step orchestration remains the donor swarm's own assigner"
+          ],
+          "lineage": {
+            "derived_from": [
+              "pure-synthia-v0.4.0"
+            ],
+            "supersedes_for_scope": []
+          },
+          "selection_hints": {
+            "locality": "local",
+            "performance_notes": "bootstrap ~2-3s (47 processes), cached per runtime",
+            "preferred_when": "any donor swarm capability execution behind Computer contracts"
+          }
+        },
+        {
+          "provider_id": "computer:services/automata-engine",
+          "capability": "automata_activation",
+          "repository": "computer",
+          "branch_ref": "integration/ecosystem-convergence",
+          "source_artifact": "services/automata-engine.mjs",
+          "status": "VERIFIED",
+          "environment_requirements": [
+            "node"
+          ],
+          "inputs": {
+            "capability": "string",
+            "input": "object"
+          },
+          "outputs": {
+            "record": "execution record or unroutable"
+          },
+          "dependencies": [
+            "back-up-:pure-synthia-v0.4.0-swarm"
+          ],
+          "persistence_behavior": "local",
+          "verification_evidence": [
+            {
+              "kind": "test_run",
+              "ref": "computer/tests/milestone-one-real-event.test.mjs",
+              "summary": "gateway execute() routed grammar.learn/generate to real donor workers; unroutable capabilities return honest 'unroutable' record",
+              "timestamp": "2026-09-22T00:00:00.000Z"
+            }
+          ],
+          "last_verified": "2026-09-22T00:00:00.000Z",
+          "known_limitations": [],
+          "lineage": {
+            "derived_from": [],
+            "supersedes_for_scope": []
+          },
+          "selection_hints": {
+            "locality": "local",
+            "performance_notes": "wraps donor swarm lazily",
+            "preferred_when": "executing through ComputerRuntime.executeOnSwarm"
+          }
+        }
+      ]
     }
   ],
   "notes": [
