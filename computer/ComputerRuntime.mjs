@@ -11,6 +11,7 @@ import { AddressService } from './services/address-service.mjs';
 import { StateResolver } from './services/state-resolver.mjs';
 import { CapabilityRegistryService } from './registry/capability-registry.mjs';
 import { EventEmitter } from './events/event-emitter.mjs';
+import { AutomataEngineGateway } from './services/automata-engine.mjs';
 
 export class ComputerRuntime {
   constructor({ persistence = new MemoryPersistence(), namespace = 'synthai-computer', github = null, eventLogPath = null } = {}) {
@@ -92,7 +93,11 @@ export class ComputerRuntime {
     this.services.register('address-service', { provider: this.addressService, contract: 'resolveAddress' });
     this.services.register('state-resolver', { provider: this.stateResolver, contract: 'resolveState' });
     this.services.register('capability-registry', { provider: this.capabilityRegistryService, contract: 'queryCapability' });
-    for (const id of ['resolve_address', 'resolve_state', 'emit_event', 'query_capability']) {
+    // Stage-4b/Amendment-C: automata organism gateway (donor pure-synthia
+    // v0.4.0 swarm behind execute/route; gateway only, donor stays sovereign).
+    this.automataGateway = new AutomataEngineGateway({ bus: this.bus, state: this.state });
+    this.services.register('automata-engine', { provider: this.automataGateway, contract: 'execute' });
+    for (const id of ['resolve_address', 'resolve_state', 'emit_event', 'query_capability', 'automata_activation']) {
       if (!this.capabilityRegistry.has(id)) this.capabilities.register(id, { providers: ['back-up-', 'computer'] });
     }
 
@@ -109,6 +114,7 @@ export class ComputerRuntime {
   resolveRelationship(a, b, context) { return this.addressService.resolveRelationship(a, b, context); }
   resolveState(entity, event, context) { return this.stateResolver.resolveState(entity, event, context); }
   emitEvent(event) { return this.eventEmitter.emitEvent(event); }
+  executeOnSwarm(capability, input, ctx) { return this.automataGateway.execute(capability, input, ctx); }
 
   snapshot() {
     return {
