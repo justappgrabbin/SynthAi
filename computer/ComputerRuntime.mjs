@@ -7,9 +7,14 @@ import { ProjectWorkspace } from './runtime/projects.mjs';
 import { GitHubWorkspaceAdapter } from './adapters/GitHubWorkspaceAdapter.mjs';
 import { registerCanonicalMicros } from './micros/MicroRegistry.mjs';
 import { registerSystemAdapters } from './adapters/SystemAdapters.mjs';
+import { AddressService } from './services/address-service.mjs';
+import { StateResolver } from './services/state-resolver.mjs';
+import { CapabilityRegistryService } from './registry/capability-registry.mjs';
+import { EventEmitter } from './events/event-emitter.mjs';
 
 export class ComputerRuntime {
-  constructor({ persistence = new MemoryPersistence(), namespace = 'synthai-computer', github = null } = {}) {
+  constructor({ persistence = new MemoryPersistence(), namespace = 'synthai-computer', github = null, eventLogPath = null } = {}) {
+    this.eventLogPath = eventLogPath;
     this.bus = new EventBus();
     this.state = new StateStore({ bus: this.bus, persistence, namespace });
     const registry = kind => new Registry({ kind, bus: this.bus });
@@ -26,6 +31,7 @@ export class ComputerRuntime {
     this.artifacts = registry('artifact');
     this.micros = registry('micro');
     this.systems = registry('system');
+    this.services = registry('service');
 
     this.vfs = new VirtualFileSystem({ bus: this.bus, state: this.state });
     this.shellManager = new ShellManager({ bus: this.bus, shells: this.shells, apps: this.apps, state: this.state });
@@ -70,10 +76,39 @@ export class ComputerRuntime {
       if (!this.capabilityRegistry.has(id)) this.capabilities.register(id, { providers: ['computer'] });
     }
 
+    // Stage-4a mount: Back-up- addressing + state-space providers behind
+    // Computer contracts. Services are Computer components; donor modules stay
+    // sovereign and are only wrapped (lazy dynamic import, failures surface
+    // as 'service:provider-failure' bus events).
+    this.eventEmitter = new EventEmitter({ bus: this.bus, ...(this.eventLogPath ? { logPath: this.eventLogPath } : {}) });
+    this.addressService = new AddressService({ bus: this.bus });
+    this.stateResolver = new StateResolver({
+      bus: this.bus,
+      addressService: this.addressService,
+      eventLog: () => this.eventEmitter.readAll(),
+    });
+    this.capabilityRegistryService = await new CapabilityRegistryService({ bus: this.bus }).load();
+    this.services.register('event-emitter', { provider: this.eventEmitter, contract: 'emitEvent' });
+    this.services.register('address-service', { provider: this.addressService, contract: 'resolveAddress' });
+    this.services.register('state-resolver', { provider: this.stateResolver, contract: 'resolveState' });
+    this.services.register('capability-registry', { provider: this.capabilityRegistryService, contract: 'queryCapability' });
+    for (const id of ['resolve_address', 'resolve_state', 'emit_event', 'query_capability']) {
+      if (!this.capabilityRegistry.has(id)) this.capabilities.register(id, { providers: ['back-up-', 'computer'] });
+    }
+
     await this.state.set('computer.boot', { status: 'ready', at: Date.now(), version: '0.2.0-project-workspace' }, { source: 'boot' });
     this.bus.emit('computer:ready', this.snapshot());
     return this;
   }
+
+  // ── Stage-4a contract surface (delegates to mounted services, not direct donor imports) ──
+  queryCapability(name) { return this.capabilityRegistryService.queryCapability(name); }
+  route(capability, ctx = {}) { return this.capabilityRegistryService.route(capability, ctx); }
+  resolveAddress(entityOrEvent) { return this.addressService.resolveAddress(entityOrEvent); }
+  compareAddresses(a, b) { return this.addressService.compareAddresses(a, b); }
+  resolveRelationship(a, b, context) { return this.addressService.resolveRelationship(a, b, context); }
+  resolveState(entity, event, context) { return this.stateResolver.resolveState(entity, event, context); }
+  emitEvent(event) { return this.eventEmitter.emitEvent(event); }
 
   snapshot() {
     return {
