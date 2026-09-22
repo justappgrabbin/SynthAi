@@ -1,0 +1,488 @@
+{
+  "schema": "capability-registry-v1",
+  "stage": "4a-address-state-mount + amendment-c",
+  "branch_ref": "integration/ecosystem-convergence",
+  "donor_pin": "Back-up- @ 1c45318",
+  "capabilities": [
+    {
+      "capability": "resolve_address",
+      "description": "Canonical 13-field address resolution (planetary, dimension, gate, line, color, tone, base, degree, minute, second, arc, zodiac, house).",
+      "providers": [
+        {
+          "provider_id": "back-up-:execution-spine-canonical-address",
+          "capability": "resolve_address",
+          "repository": "donors/Back-up-",
+          "branch_ref": "1c45318",
+          "source_artifact": "vendor/execution-spine-v0.4.0/src/canonical-address.mjs",
+          "status": "PRESENT",
+          "environment_requirements": [
+            "node-esm"
+          ],
+          "inputs": {
+            "address": "canonical address object"
+          },
+          "outputs": {
+            "validation": "boolean",
+            "canonical_key": "string"
+          },
+          "dependencies": [],
+          "persistence_behavior": "none",
+          "verification_evidence": [],
+          "last_verified": null,
+          "known_limitations": [
+            "Spine schema names field 11 'arcAxis' (arcUnit 1-99 + axis); contract field 'arc' is served by the kimi DMS codec instead. Spine structure metadata is preserved via ADDRESS_STRUCTURE.",
+            "authority-by-designation (Amendment C); automated validation of contract-shaped addresses blocked on arcAxis<->arc field-mapping reconciliation"
+          ],
+          "lineage": {
+            "derived_from": [
+              "execution-spine-v0.4.0"
+            ],
+            "supersedes_for_scope": []
+          },
+          "selection_hints": {
+            "locality": "local",
+            "performance_notes": "pure schema/validation",
+            "preferred_when": "ALWAYS as final validator: completed addresses (from any constructor, incl. kimi DMS codec) should be validated against execution-spine canonical schema before being treated as canonical. NOTE: spine field 11 is 'arcAxis' (arcUnit 1-99 + axis) vs contract/DMS 'arc' (arc-seconds); validation adapter for this field mapping is a pending reconciliation item, so authority is designated but automated spine-validation is not yet wired."
+          },
+          "conclusions": [
+            {
+              "timestamp": "2026-09-22T00:00:00.000Z",
+              "kind": "classification_change",
+              "previous": {
+                "role": "schema/validation provider (undesignated)",
+                "status_at_change": "PRESENT"
+              },
+              "conclusion": "DESIGNATED canonical-address AUTHORITY (Amendment C): its schema/validator decides canonicity of completed 13-field addresses. Other address providers construct/resolve parts; completed addresses SHOULD be validated against execution-spine before being called canonical.",
+              "reason": "Amendment C ruling: address authority and address construction are distinct roles; the execution-spine holds the full canonical spine (incl. arcAxis/ADDRESS_STRUCTURE) and must remain the arbiter.",
+              "evidence": {
+                "kind": "governance",
+                "ref": "amendment-C",
+                "summary": "orchestrator amendment C directive"
+              }
+            }
+          ],
+          "role": "canonical_address_authority"
+        },
+        {
+          "provider_id": "back-up-:kimi-dms-codec",
+          "capability": "resolve_address",
+          "repository": "donors/Back-up-",
+          "branch_ref": "1c45318",
+          "source_artifact": "vendor/kimi-agent-automata-state-space-merge/pure-synthia-automata/src/state-space/addressing.js",
+          "status": "VERIFIED",
+          "environment_requirements": [
+            "node-esm"
+          ],
+          "inputs": {
+            "arcSecond": "int 0..1295999",
+            "address": "partial canonical address"
+          },
+          "outputs": {
+            "address": "13-field canonical address (arc, house=trigram 1-8)"
+          },
+          "dependencies": [
+            "state-space/constants.js"
+          ],
+          "persistence_behavior": "none",
+          "verification_evidence": [
+            {
+              "kind": "test_run",
+              "ref": "computer/tests/address-state-mount.test.mjs",
+              "summary": "addressForArcSec/arcSecForAddress/gateBits executed via ComputerRuntime.resolveAddress; 13-field address for 1990-01-01 12:00 UTC (Sun gate 64 line 5, Capricorn); arc 123456 -> G7.L1.C4.T3.B5",
+              "timestamp": "2026-09-21T00:00:00.000Z"
+            }
+          ],
+          "last_verified": "2026-09-21T00:00:00.000Z",
+          "known_limitations": [
+            "house convention is 1-8 trigram houses (45°), not 12 astrological houses"
+          ],
+          "lineage": {
+            "derived_from": [
+              "COHERENT donor substrate",
+              "pure-synthia-automata"
+            ],
+            "supersedes_for_scope": []
+          },
+          "selection_hints": {
+            "locality": "local",
+            "performance_notes": "pure math, deterministic",
+            "preferred_when": "constructing/resolving address parts (arc-seconds <-> gate/line/color/tone/base/DMS); NOT the canonical authority — validate completed addresses against back-up-:execution-spine-canonical-address"
+          },
+          "conclusions": [
+            {
+              "timestamp": "2026-09-22T00:00:00.000Z",
+              "kind": "classification_change",
+              "previous": {
+                "role": "resolve_address provider (implicitly canonical)",
+                "status_at_change": "VERIFIED"
+              },
+              "conclusion": "RECLASSIFIED as SPECIALIZED provider: constructs/resolves address parts (DMS wheel encode/decode, Fu Xi gate bits, trigram house). It is NOT the canonical provider; completed addresses are validated against the execution-spine authority.",
+              "reason": "Amendment C ruling: construction != canonicity.",
+              "evidence": {
+                "kind": "governance",
+                "ref": "amendment-C",
+                "summary": "orchestrator amendment C directive"
+              }
+            }
+          ],
+          "role": "specialized_constructor"
+        }
+      ]
+    },
+    {
+      "capability": "hd_chart",
+      "description": "Human Design chart from a real birth datum (13 placements, centers, type/profile/authority).",
+      "providers": [
+        {
+          "provider_id": "back-up-:kimi-human-design",
+          "capability": "hd_chart",
+          "repository": "donors/Back-up-",
+          "branch_ref": "1c45318",
+          "source_artifact": "vendor/kimi-agent-automata-state-space-merge/pure-synthia-automata/src/state-space/human-design.js",
+          "status": "VERIFIED",
+          "environment_requirements": [
+            "node-esm"
+          ],
+          "inputs": {
+            "birthDate": "YYYY-MM-DD",
+            "birthTime": "HH:MM (UTC)"
+          },
+          "outputs": {
+            "chart": "placements, centers, type, profile, authority"
+          },
+          "dependencies": [],
+          "persistence_behavior": "none",
+          "verification_evidence": [
+            {
+              "kind": "test_run",
+              "ref": "computer/tests/address-state-mount.test.mjs",
+              "summary": "calculateHumanDesign('1990-01-01','12:00') executed: Manifesting Generator 5/6, Sun 64.5 Capricorn 11°19'15\"",
+              "timestamp": "2026-09-21T00:00:00.000Z"
+            }
+          ],
+          "last_verified": "2026-09-21T00:00:00.000Z",
+          "known_limitations": [
+            "approximate ephemeris (mean longitudes)",
+            "wheel anchor 58.0 per donor F2 conflict, recorded in HD_WHEEL_ANCHOR_VARIANTS"
+          ],
+          "lineage": {
+            "derived_from": [
+              "Kimi_Agent Human Design Agent Builder humanDesign.ts"
+            ],
+            "supersedes_for_scope": []
+          },
+          "selection_hints": {
+            "locality": "local",
+            "performance_notes": "pure math, deterministic",
+            "preferred_when": "birth datum available"
+          }
+        }
+      ]
+    },
+    {
+      "capability": "resolve_state",
+      "description": "Entity state resolution: identity, address, current state, five-level active structures, trajectory, confidence, provenance.",
+      "providers": [
+        {
+          "provider_id": "back-up-:kimi-mesh-state-space",
+          "capability": "resolve_state",
+          "repository": "donors/Back-up-",
+          "branch_ref": "1c45318",
+          "source_artifact": "vendor/kimi-agent-automata-state-space-merge/pure-synthia-automata/src/state-space/mesh-state-space.js",
+          "status": "VERIFIED",
+          "environment_requirements": [
+            "node-esm"
+          ],
+          "inputs": {
+            "entity": "{identity|birthDate|arcSecond|address}",
+            "event": "grammar-v1 event",
+            "context": "object"
+          },
+          "outputs": {
+            "state": "{identity, address, current_state, active_structures, trajectory, confidence, source_provider}"
+          },
+          "dependencies": [
+            "state-space/addressing.js",
+            "state-space/constants.js",
+            "state-space/claim-status.js"
+          ],
+          "persistence_behavior": "none",
+          "verification_evidence": [
+            {
+              "kind": "test_run",
+              "ref": "computer/tests/address-state-mount.test.mjs",
+              "summary": "StateSpace.address(64) executed via resolveState: five dimensions (Movement/Evolution/Being/Design/Space) each returned real gate-64 node with binary+trigrams",
+              "timestamp": "2026-09-21T00:00:00.000Z"
+            }
+          ],
+          "last_verified": "2026-09-21T00:00:00.000Z",
+          "known_limitations": [
+            "Movement='reverse' and Space='complement' dimension orderings are donor PROJECT_HYPOTHESIS claims, exposed as dimension_claim_status"
+          ],
+          "lineage": {
+            "derived_from": [
+              "COHERENT state_space_core.mjs"
+            ],
+            "supersedes_for_scope": []
+          },
+          "selection_hints": {
+            "locality": "local",
+            "performance_notes": "deterministic, no wall-clock",
+            "preferred_when": "gate resolvable"
+          }
+        }
+      ]
+    },
+    {
+      "capability": "living_loop",
+      "description": "Organism LivingLoop episode loop with hash-chained episode log.",
+      "providers": [
+        {
+          "provider_id": "back-up-:kimi-living-loop",
+          "capability": "living_loop",
+          "repository": "donors/Back-up-",
+          "branch_ref": "1c45318",
+          "source_artifact": "vendor/kimi-agent-automata-state-space-merge/pure-synthia-automata/src/organism/living-loop.js",
+          "status": "PRESENT",
+          "environment_requirements": [
+            "node-esm"
+          ],
+          "inputs": {
+            "engine": "SynthiaAutomata-compatible surface"
+          },
+          "outputs": {
+            "episodes": "hash-chained episode log"
+          },
+          "dependencies": [
+            "automata swarm engine"
+          ],
+          "persistence_behavior": "none",
+          "verification_evidence": [],
+          "last_verified": null,
+          "known_limitations": [
+            "requires a live automata engine surface; not yet mounted"
+          ],
+          "lineage": {
+            "derived_from": [
+              "pure-synthia-automata organism"
+            ],
+            "supersedes_for_scope": []
+          },
+          "selection_hints": {
+            "locality": "local",
+            "performance_notes": "needs engine",
+            "preferred_when": "automata engine mounted (stage 4b+)"
+          }
+        }
+      ]
+    },
+    {
+      "capability": "emit_event",
+      "description": "Shared event grammar v1 emission with append-only JSONL persistence.",
+      "providers": [
+        {
+          "provider_id": "computer:events/event-emitter",
+          "capability": "emit_event",
+          "repository": "computer",
+          "branch_ref": "integration/ecosystem-convergence",
+          "source_artifact": "events/event-emitter.mjs",
+          "status": "VERIFIED",
+          "environment_requirements": [
+            "node"
+          ],
+          "inputs": {
+            "event": "partial grammar-v1 event"
+          },
+          "outputs": {
+            "event": "complete grammar-v1 event with event_id/timestamp/trajectory_id"
+          },
+          "dependencies": [],
+          "persistence_behavior": "local",
+          "verification_evidence": [
+            {
+              "kind": "test_run",
+              "ref": "computer/tests/address-state-mount.test.mjs",
+              "summary": "emitEvent appended grammar-v1 event to events.jsonl; new runtime instance read back identical event_id and actor_address.gate=64 (restart survival)",
+              "timestamp": "2026-09-21T00:00:00.000Z"
+            }
+          ],
+          "last_verified": "2026-09-21T00:00:00.000Z",
+          "known_limitations": [],
+          "lineage": {
+            "derived_from": [],
+            "supersedes_for_scope": []
+          },
+          "selection_hints": {
+            "locality": "local",
+            "performance_notes": "append-only jsonl",
+            "preferred_when": "always"
+          }
+        }
+      ]
+    },
+    {
+      "capability": "execute",
+      "description": "Routed real execution via selected provider.",
+      "providers": [
+        {
+          "provider_id": "computer:runtime/execution",
+          "capability": "execute",
+          "repository": "computer",
+          "branch_ref": "integration/ecosystem-convergence",
+          "source_artifact": "runtime/execution.mjs",
+          "status": "PRESENT",
+          "environment_requirements": [
+            "node"
+          ],
+          "inputs": {},
+          "outputs": {},
+          "dependencies": [],
+          "persistence_behavior": "local",
+          "verification_evidence": [],
+          "last_verified": null,
+          "known_limitations": [],
+          "lineage": {
+            "derived_from": [],
+            "supersedes_for_scope": []
+          },
+          "selection_hints": {
+            "locality": "local",
+            "performance_notes": "",
+            "preferred_when": ""
+          }
+        }
+      ]
+    },
+    {
+      "capability": "route",
+      "description": "Provider selection + recorded routing_decision.",
+      "providers": [
+        {
+          "provider_id": "computer:registry/capability-registry",
+          "capability": "route",
+          "repository": "computer",
+          "branch_ref": "integration/ecosystem-convergence",
+          "source_artifact": "registry/capability-registry.mjs",
+          "status": "VERIFIED",
+          "environment_requirements": [
+            "node"
+          ],
+          "inputs": {
+            "capability": "string"
+          },
+          "outputs": {
+            "routing_decision": "object"
+          },
+          "dependencies": [],
+          "persistence_behavior": "local",
+          "verification_evidence": [
+            {
+              "kind": "test_run",
+              "ref": "computer/tests/address-state-mount.test.mjs",
+              "summary": "queryCapability('resolve_address') listed donor providers; route() selected back-up-:kimi-dms-codec; evidence-less WIRED promotion correctly refused",
+              "timestamp": "2026-09-21T00:00:00.000Z"
+            }
+          ],
+          "last_verified": "2026-09-21T00:00:00.000Z",
+          "known_limitations": [],
+          "lineage": {
+            "derived_from": [],
+            "supersedes_for_scope": []
+          },
+          "selection_hints": {
+            "locality": "local",
+            "performance_notes": "",
+            "preferred_when": ""
+          }
+        }
+      ]
+    },
+    {
+      "capability": "observe",
+      "description": "Runtime observability records via kernel EventBus.",
+      "providers": [
+        {
+          "provider_id": "computer:core/kernel",
+          "capability": "observe",
+          "repository": "computer",
+          "branch_ref": "integration/ecosystem-convergence",
+          "source_artifact": "core/kernel.mjs",
+          "status": "PRESENT",
+          "environment_requirements": [
+            "node"
+          ],
+          "inputs": {},
+          "outputs": {},
+          "dependencies": [],
+          "persistence_behavior": "local",
+          "verification_evidence": [],
+          "last_verified": null,
+          "known_limitations": [],
+          "lineage": {
+            "derived_from": [],
+            "supersedes_for_scope": []
+          },
+          "selection_hints": {
+            "locality": "local",
+            "performance_notes": "",
+            "preferred_when": ""
+          }
+        }
+      ]
+    },
+    {
+      "capability": "remember",
+      "description": "Append-only memory via StateStore persistence.",
+      "providers": [
+        {
+          "provider_id": "computer:core/kernel",
+          "capability": "remember",
+          "repository": "computer",
+          "branch_ref": "integration/ecosystem-convergence",
+          "source_artifact": "core/kernel.mjs",
+          "status": "PRESENT",
+          "environment_requirements": [
+            "node"
+          ],
+          "inputs": {},
+          "outputs": {},
+          "dependencies": [],
+          "persistence_behavior": "local",
+          "verification_evidence": [],
+          "last_verified": null,
+          "known_limitations": [],
+          "lineage": {
+            "derived_from": [],
+            "supersedes_for_scope": []
+          },
+          "selection_hints": {
+            "locality": "local",
+            "performance_notes": "",
+            "preferred_when": ""
+          }
+        }
+      ]
+    }
+  ],
+  "notes": [
+    {
+      "id": "amendment-c-synthia-server",
+      "timestamp": "2026-09-22T00:00:00.000Z",
+      "record": "Synthia Server = repository justappgrabbin/Synthia-server. Computer/GitHub bridge work happens on branch computer-github-bridge-2026-09-22.",
+      "open_questions": [
+        "authoritative branch for Synthia-server bridge work",
+        "bridge convergence (how Synthia-server and Computer bridge code merge)",
+        "Computer -> bridge -> real GitHub -> result-into-events round-trip path (not yet executed end-to-end)"
+      ]
+    },
+    {
+      "id": "amendment-c-android-truth-record",
+      "timestamp": "2026-09-22T00:00:00.000Z",
+      "record": [
+        "Android/Capacitor in current SynthAi assembly: NOT FOUND",
+        "Android/mobile residence in wider ecosystem: PRESENT / REQUIRES PROVIDER INVENTORY (Synthai2 Capacitor, Stellar APK shell + MCP 17 tools, historical packages)"
+      ],
+      "rule": "Never record 'absent everywhere'; scope the NOT_FOUND to the assembly actually inspected."
+    }
+  ]
+}
