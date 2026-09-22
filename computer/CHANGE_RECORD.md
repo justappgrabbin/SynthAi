@@ -74,3 +74,28 @@ PROVIDER STATUSES: VERIFIED (new) — back-up-:pure-synthia-v0.4.0-swarm, comput
 FAILED: none in this stage. (Pre-existing syntax-error fixes from Stage 4a remain the only repairs.)
 
 BLOCKED: none. Dependency noted: state-space excavation dirs under concurrent agent read — do not touch until reconciliation.
+
+# Change record — Excavation registration (state-space dirs, integration/ecosystem-convergence)
+
+WHAT EXISTED BEFORE: one-real-event milestone VERIFIED (13/13 tests); four state-space vendor dirs under excavation (engine/v2, emergent-state-space, five-substrate, trainable-assembly/core/state-space) untouched pending the excavation agent.
+
+PRESERVED: all mounted providers, tests (13/13 still pass), donor sources untouched. Registration-only change — NO new wiring/mounting performed.
+
+ADDED (registry only, status PRESENT with excavation probe evidence unless noted):
+- back-up-:kimi-layer5-ssm (resolve_state) — SSM/attractor machinery (step/processMeshEvent/predict/recall/getMood, 64-hex Hamming-coupled state); nearest-attractor candidate; complements mesh-state-space. Probe: step([1,0,1,0,1,0])->out[0]=0.4714, recall self-sim=1.0.
+- back-up-:kimi-coordinate-engine (resolve_address) — 13-layer BigInt mixed-radix addressing + resonance; SPECIALIZED/PARALLEL scheme; execution-spine canonical-address.mjs REMAINS authority. Probe: toAddress=12023169149007581n, roundtrip true.
+- back-up-:kimi-phase-space-engine (resolve_state) — five-stage deterministic compose with trace + Who/What/Where/When/Why projections. Probe: compose complete=true, double-run deterministic.
+- back-up-:pure-synthia-emergent-state-space (new capability state_space_runtime) — v0.6.7 VERSIONED ANCESTOR of mounted kimi mesh-state-space; EmergentMesh 320 nodes/960 edges; runtime/task/recall layer unmounted. Caveat: runtime.mjs needs absent ../canonicalState.mjs — use core/mesh directly.
+- back-up-:pure-synthia-grammar-kernel (new capability linguistic_kernel) — five-projection linguistic kernel (resolve/step/replay). Probe: step accepted, eventId ling-fa1db543.
+- back-up-:trainable-assembly-state-space (new capability state_space_enumeration) — 20/22 files byte-identical to kimi tree + index.mjs estimator (1920n probe) + govinda-structure.js.
+
+RECORDED NOT FOUND (explicit): penta_group_state (no Penta composite group-state code anywhere); composite_chart (no relationship composite charts; only channel-level composite relations); hopfield_network (only an ARCHITECTURES label for channel 18-58; closest real machinery = layer5_ssm.js + ATORecall).
+
+BLOCKED / UNRESOLVED: authorities/originals/01..06.zip ABSENT — authorities/ contains only SHA256SUMS.txt (6 hashes); recovery blocker, listed in registry notes unresolved-items.
+
+DOCUMENTED (not implemented): excavation-proposed ALTERNATIVE milestone route (address -> mesh-state-space -> SSM.processMeshEvent -> phase-space compose -> causal trace; seed-deterministic bit-for-bit replay) recorded in registry notes alternative-milestone-route. Current swarm-gateway milestone route remains the VERIFIED one.
+
+MOUNTED: nothing new (registration only).
+CONNECTED: system-graph-seed.jsonl appended with 6 provider nodes + PROVIDES/DERIVED_FROM/IMPLEMENTS edges + 3 NOT_FOUND gap nodes + 1 archive blocker node (append-only).
+TESTED: node --test computer/tests/*.test.mjs -> tests 13, pass 13, fail 0 (registration is data-only; no behavior change).
+FAILED: none.
