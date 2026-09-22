@@ -31,3 +31,24 @@ line, color, tone, base, degree, minute, second, arc, zodiac, house.
 - State-space providers remain sovereign modules behind these contracts.
 - Individual automata keep their own boundaries, I/O, state, activation conditions.
 - Unknown fields stay unknown. No fabricated resolution.
+
+## Verification semantics (Amendment C, 2026-09-22)
+- Federation transfer != successful interaction. A message/task arriving at a
+  provider is NOT proof of interaction.
+- CONSUMPTION RECEIPT = proof that the interaction actually reached a consumer
+  and was consumed downstream (e.g. result written into append-only state,
+  referenced by a subsequent process, or persisted with a consumer id).
+- A route is VERIFIED only with BOTH: (1) a consumption receipt and (2) an
+  observable state change. WIRED requires real executed I/O on the hop itself.
+- Canonical-address authority: back-up-:execution-spine-canonical-address
+  decides canonicity of completed addresses; kimi DMS codec is a specialized
+  constructor of address parts (see capability-registry.json conclusions).
+
+## Truth record (Amendment C)
+- Android/Capacitor in current SynthAi assembly: NOT FOUND.
+- Android/mobile residence in wider ecosystem: PRESENT / REQUIRES PROVIDER
+  INVENTORY (Synthai2 Capacitor, Stellar APK shell + MCP 17 tools, historical
+  packages). Never record "absent everywhere".
+- Synthia Server = justappgrabbin/Synthia-server; Computer/GitHub bridge work
+  on branch computer-github-bridge-2026-09-22. Open: authoritative branch,
+  bridge convergence, Computer->bridge->real GitHub->result-into-events path.
