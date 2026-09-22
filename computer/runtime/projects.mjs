@@ -1,4 +1,4 @@
-const cleanPath = value => String(value || '').replaceAll('\\\\','/').replace(/^\\/+/, '').replace(/\\/+/g,'/');
+const cleanPath = value => String(value || '').replaceAll('\\','/').replace(/^\/+/, '').replace(/\/{2,}/g,'/');
 
 export class ProjectWorkspace {
   constructor({ bus, state, vfs, backends } = {}) {

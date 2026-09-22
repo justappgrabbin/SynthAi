@@ -1,13 +1,13 @@
 export class GitHubWorkspaceAdapter {
   constructor({ baseUrl = '', token = '', fetchImpl = globalThis.fetch } = {}) {
     if (typeof fetchImpl !== 'function') throw new Error('fetch implementation required');
-    this.baseUrl = String(baseUrl || '').replace(/\\/$/, '');
+    this.baseUrl = String(baseUrl || '').replace(/\/$/, '');
     this.token = String(token || '');
     this.fetchImpl = fetchImpl;
   }
 
   configure({ baseUrl = this.baseUrl, token = this.token } = {}) {
-    this.baseUrl = String(baseUrl || '').replace(/\\/$/, '');
+    this.baseUrl = String(baseUrl || '').replace(/\/$/, '');
     this.token = String(token || '');
     return this;
   }
