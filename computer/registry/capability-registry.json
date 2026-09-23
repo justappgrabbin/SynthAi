@@ -893,6 +893,49 @@
             "performance_notes": "",
             "preferred_when": ""
           }
+        },
+        {
+          "provider_id": "recovered:synthai2-penta-ephemeris",
+          "capability": "penta_group_state",
+          "repository": "justappgrabbin/Synthai2",
+          "branch_ref": "main @ cfbe3ee3018c41fc8abe6e1734eee5b630595a3f",
+          "source_artifact": "computer/donors/recovered/synthai2-ephemeris/ephemeris.py (verbatim) + services/penta-runner.py adapter",
+          "status": "WIRED",
+          "environment_requirements": [
+            "python3 + pyephem 4.2.1 (pip user install, documented in PROVENANCE.md)"
+          ],
+          "inputs": {
+            "members": "[{birth_date, birth_time}]"
+          },
+          "outputs": {
+            "group": "{members: penta roles, filled/needed positions}"
+          },
+          "dependencies": [],
+          "persistence_behavior": "none",
+          "verification_evidence": [
+            {
+              "kind": "test_run",
+              "ref": "computer/tests/acceptance-3-world-event.test.mjs",
+              "summary": "REAL PyEphem triple-zodiac execution via child_process: 5 members -> gates A44/B42/C46/D54/E33, roles Provider/Foundation/Director/Director/Foundation, needed=Connector,Transmitter; position formula PLACEHOLDER flagged in output",
+              "timestamp": "2026-09-23T00:00:00.000Z"
+            }
+          ],
+          "last_verified": "2026-09-23T00:00:00.000Z",
+          "known_limitations": [
+            "penta POSITION FORMULA is a PLACEHOLDER hash ((body+mind+heart)%5+1); gates are real PyEphem, group completion logic real",
+            "calc_wa/nine_fields not wrapped (need extra Synthai2 modules not vendored)"
+          ],
+          "lineage": {
+            "derived_from": [
+              "justappgrabbin/Synthai2@main"
+            ],
+            "supersedes_for_scope": []
+          },
+          "selection_hints": {
+            "locality": "local",
+            "performance_notes": "child_process python3, ~1s per member",
+            "preferred_when": "group penta/composite ephemeris roles"
+          }
         }
       ]
     },
@@ -1109,6 +1152,56 @@
             "locality": "local",
             "performance_notes": "",
             "preferred_when": "mounting artifact apps"
+          }
+        }
+      ]
+    },
+    {
+      "capability": "world_simulation",
+      "description": "Embodied free-agent world: agent movement, short/long-term memory with consolidation, bonding/intent, 5W event-collapse substrate.",
+      "providers": [
+        {
+          "provider_id": "recovered:glowing-winner-world-engine",
+          "capability": "world_simulation",
+          "repository": "justappgrabbin/glowing-winner",
+          "branch_ref": "main @ a9afc57a455e0c6070b8107c0a32ea299c591414",
+          "source_artifact": "computer/donors/recovered/glowing-winner/EmbodiedWorldEngine.ts (+ .ported.mjs)",
+          "status": "VERIFIED",
+          "environment_requirements": [
+            "node-esm (execution via esbuild type-erasure .ported.mjs; uuid npm dep substituted by documented crypto.randomUUID shim)"
+          ],
+          "inputs": {
+            "event": "grammar-v1 event {spawn|intent|move|tick_ms|consolidate}"
+          },
+          "outputs": {
+            "record": "{actions, snapshot, fiveW deltas}"
+          },
+          "dependencies": [],
+          "persistence_behavior": "none",
+          "verification_evidence": [
+            {
+              "kind": "test_run",
+              "ref": "computer/tests/acceptance-3-world-event.test.mjs",
+              "summary": "REAL donor execution through gateway: createAgent x2 (5W emergence collapses), processIntent 'store \"arrival memory\"' -> shortTerm memory, moveAgent + 600ms real ticks -> agent moved 34.2->32.0 toward target, donor consolidateMemory -> longTerm=1; observed via Computer observe contract; CONSUMPTION RECEIPT in StateStore acc3.world-receipt; consequence event with parents=[origin] persisted; restart replay + backward trace intact. Amendment-C VERIFIED.",
+              "timestamp": "2026-09-23T00:00:00.000Z"
+            }
+          ],
+          "last_verified": "2026-09-23T00:00:00.000Z",
+          "known_limitations": [
+            "Placement13/OntologicalAddressGenerator ephemeris is a PLACEHOLDER (synthetic) — future wiring path: consume recovered:foundry-glyphs-ephemeris (routing note, not implemented)",
+            "movement integrates over real ticks (moveAgent sets target)",
+            "HumanDesignSimulation.ts/InfluenceManager.ts/SharedSession.ts vendored but NOT ported (need onnxruntime-node/react/SynthiaClient-network) — PRESENT only"
+          ],
+          "lineage": {
+            "derived_from": [
+              "justappgrabbin/glowing-winner@main"
+            ],
+            "supersedes_for_scope": []
+          },
+          "selection_hints": {
+            "locality": "local",
+            "performance_notes": "10fps tick engine, in-memory",
+            "preferred_when": "any embodied world/agent simulation behind Computer contracts"
           }
         }
       ]
