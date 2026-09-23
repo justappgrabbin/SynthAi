@@ -12,10 +12,14 @@ on:
       - 'computer/residents/**'
       - 'computer/worlds/**'
       - 'computer/mobile/MobileComputerRuntime.mjs'
+      - 'computer/native/**'
+      - 'computer/adapters/termux-compiler.mjs'
       - 'computer/tests/resident-*.test.mjs'
       - 'computer/tests/synthia57-*.test.mjs'
       - 'computer/tests/world-federation.test.mjs'
       - 'computer/tests/mesh-core-routing.test.mjs'
+      - 'computer/tests/native-seed.test.mjs'
+      - 'computer/tests/termux-compiler.test.mjs'
       - '.github/workflows/resident-integration-check.yml'
 
 permissions:
@@ -34,6 +38,8 @@ jobs:
         run: >
           node --test
           computer/tests/mesh-core-routing.test.mjs
+          computer/tests/native-seed.test.mjs
+          computer/tests/termux-compiler.test.mjs
           computer/tests/resident-mesh-indiverse.test.mjs
           computer/tests/synthia57-resident.test.mjs
           computer/tests/synthia57-package-loader.test.mjs
