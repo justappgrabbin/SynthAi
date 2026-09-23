@@ -65,7 +65,7 @@ export class Synthia57PackageLoader {
       },
     });
     await adapter.start();
-    const organs = new Synthia57OrganBridge({ runtime, mesh: this.computer.meshKernel, bus: this.bus, residentId });
+    const organs = new Synthia57OrganBridge({ runtime, embodiment, mesh: this.computer.meshKernel, bus: this.bus, residentId });
     await organs.mount();
 
     if (this.computer.meshKernel.participant('computer:self')) {
