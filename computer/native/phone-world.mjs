@@ -1,3 +1,4 @@
+import { DeviceWorldResolver } from './device-world-resolver.mjs';
 const clone = value => value === undefined ? undefined : structuredClone(value);
 const safe = value => String(value ?? 'unknown').replace(/[^A-Za-z0-9._-]/g, '_');
 
@@ -29,12 +30,12 @@ function genericExperience(app){
 }
 
 export class PhoneWorldBridge {
-  constructor({ host, mesh, indiverse, state, bus = null, clock = () => Date.now(), id = 'phone:world' } = {}) {
+  constructor({ host, mesh, indiverse, state, bus = null, clock = () => Date.now(), id = 'phone:world', resolver = new DeviceWorldResolver() } = {}) {
     if (!host?.listApplications || !host?.launchApplication) throw new TypeError('PhoneWorldBridge requires native host listApplications() and launchApplication()');
     if (!mesh?.registerParticipant || !mesh?.request) throw new TypeError('PhoneWorldBridge requires relational mesh');
     if (!indiverse?.registerCanonicalObject) throw new TypeError('PhoneWorldBridge requires IndiVerse runtime');
     if (!state?.get || !state?.set) throw new TypeError('PhoneWorldBridge requires StateStore-like persistence');
-    Object.assign(this,{host,mesh,indiverse,state,bus,clock,id});
+    Object.assign(this,{host,mesh,indiverse,state,bus,clock,id,resolver});
     this.experiences=[...DEFAULT_APP_EXPERIENCES];
     this.apps=new Map();
     this.documents=new Map();
@@ -72,27 +73,27 @@ export class PhoneWorldBridge {
       hostMethod:'listDocuments', collection:this.documents, prefix:'phone:document:', objectPrefix:'document:',
       kind:'document-object', functionName:item=>item.kind??item.mimeType??'document',
       relation:'stored-in', presentation:item=>({label:item.label??item.name??'Document',symbol:'document',material:'shared-interface'}),
-      metadata:item=>({uri:item.uri??null,mimeType:item.mimeType??null,size:item.size??null}),
+      sourceType:'document', metadata:item=>({uri:item.uri??null,mimeType:item.mimeType??null,size:item.size??null}),
       privateByDefault:true,
     });
     await this.#syncOptionalSurface({
       hostMethod:'listContacts', collection:this.contacts, prefix:'phone:contact:', objectPrefix:'contact:',
       kind:'person-presence', functionName:()=> 'contact',
       relation:'known-by', presentation:item=>({label:item.label??item.name??'Contact',symbol:'person',material:'shared-interface'}),
-      metadata:item=>({lookupKey:item.lookupKey??null}),
+      sourceType:'contact', metadata:item=>({lookupKey:item.lookupKey??null}),
       privateByDefault:true,
     });
     await this.#syncOptionalSurface({
       hostMethod:'listSettings', collection:this.settings, prefix:'phone:setting:', objectPrefix:'setting:',
       kind:'world-law', functionName:item=>item.category??'setting',
       relation:'governs', presentation:item=>({label:item.label??item.name??'Setting',symbol:'control',material:'shared-interface'}),
-      metadata:item=>({category:item.category??null,valueType:item.valueType??typeof item.value}),
+      sourceType:'setting', metadata:item=>({category:item.category??null,valueType:item.valueType??typeof item.value}),
       privateByDefault:true,
     });
     return this.snapshot();
   }
 
-  async #syncOptionalSurface({hostMethod,collection,prefix,objectPrefix,kind,functionName,relation,presentation,metadata,privateByDefault=false}){
+  async #syncOptionalSurface({hostMethod,collection,prefix,objectPrefix,kind,functionName,relation,presentation,metadata,sourceType='unknown',privateByDefault=false}){
     const list=this.host?.[hostMethod];
     if(typeof list!=='function') return {available:false,count:0};
     const items=await list.call(this.host);
@@ -103,6 +104,7 @@ export class PhoneWorldBridge {
       collection.set(key,item);
       const participantId=prefix+safe(key);
       const objectId=objectPrefix+key;
+      const resolved=this.resolver.resolve({sourceType,id:key,name:item.name,label:item.label,category:item.category,mimeType:item.mimeType,kind:item.kind,metadata:item.metadata});
       if(!this.mesh.participant(participantId)){
         await this.mesh.registerParticipant(participantId,{
           kind,residency:'warm',capabilities:[],
@@ -117,8 +119,8 @@ export class PhoneWorldBridge {
         id:objectId,kind,function:functionName(item),
         affordances:[],entryPoints:[],
         relations:[{type:'backed-by',target:participantId}],
-        presentation:presentation(item),
-        metadata:{...metadata(item),privateByDefault},
+        presentation:{...presentation(item),glyph:resolved.glyph},
+        metadata:{...metadata(item),privateByDefault,resolver:resolved.resolver,resolverVersion:resolved.version,resolvedCategory:resolved.category,resolvedRole:resolved.role,resolutionConfidence:resolved.confidence},
       });
     }
     return {available:true,count:collection.size};
@@ -136,7 +138,9 @@ export class PhoneWorldBridge {
         metadata:clone(raw.metadata??{}),
       };
       if(!app.packageName) continue;
-      const exp=this.experienceFor(app);
+      const resolved=this.resolver.resolve({sourceType:'application',...app});
+      const matched=this.experiences.find(e=>e.match(app));
+      const exp=matched ?? {id:'legacy-resolved',place:{kind:resolved.world.kind,function:resolved.world.function,presentation:resolved.world.presentation},routes:{}};
       const participantId='phone:app:'+safe(app.packageName);
       const objectId='app:'+app.packageName;
       app.participantId=participantId;app.objectId=objectId;app.experienceId=exp.id;
@@ -166,8 +170,9 @@ export class PhoneWorldBridge {
           label:app.label,
           iconRef:app.iconRef,
           ...clone(exp.place.presentation??{}),
+          glyph:resolved.glyph,
         },
-        metadata:{packageName:app.packageName,experienceId:exp.id,category:app.category,...clone(app.metadata)},
+        metadata:{packageName:app.packageName,experienceId:exp.id,category:app.category,resolver:resolved.resolver,resolverVersion:resolved.version,resolvedCategory:resolved.category,resolvedRole:resolved.role,resolutionConfidence:resolved.confidence,...clone(app.metadata)},
       });
     }
     const snapshot=this.snapshot();
@@ -224,6 +229,7 @@ export class PhoneWorldBridge {
   }
 
   async observeNotification(notification,{residentId='synthia'}={}){
+    const resolution=this.resolver.resolve({sourceType:'notification',id:notification?.id,name:notification?.title,packageName:notification?.packageName,category:notification?.category,metadata:notification?.metadata});
     const event={
       id:notification?.id??'notification-'+this.clock(),
       type:'phone:notification',
@@ -237,6 +243,7 @@ export class PhoneWorldBridge {
         text:notification?.text??null,
         category:notification?.category??null,
         metadata:clone(notification?.metadata??{}),
+        resolution:{category:resolution.category,glyph:resolution.glyph,role:resolution.role,world:clone(resolution.world)},
       },
       at:notification?.at??new Date(this.clock()).toISOString(),
     };
@@ -274,6 +281,7 @@ export class PhoneWorldBridge {
       activeApp:this.state.get('phoneWorld.activeApp',null),
       experienceIds:[...new Set(this.apps.values().map(a=>a.experienceId))],
       authority:'canonical-phone-object-map',
+      resolver:{id:this.resolver.id,version:this.resolver.version},
     };
   }
 }
