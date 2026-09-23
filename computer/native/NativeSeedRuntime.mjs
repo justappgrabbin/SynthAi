@@ -12,6 +12,8 @@ import { ConsciousnessRealmPackageLoader } from '../worlds/consciousness-realm-l
 import { HumanAgentMechanicsAdapter } from '../worlds/adapters/human-agent.mjs';
 import { TriformPackageLoader } from '../worlds/triform-loader.mjs';
 import { PhoneWorldBridge } from './phone-world.mjs';
+import { NativeTerminalService } from './terminal-service.mjs';
+import { TermuxCompilerAdapter } from '../adapters/termux-compiler.mjs';
 
 const clone = value => value === undefined ? undefined : structuredClone(value);
 
@@ -56,6 +58,7 @@ export class NativeSeedRuntime {
     this.humanAgent = null;
     this.triform = new TriformPackageLoader({ computer: this, bus: this.bus });
     this.phoneWorld = null;
+    this.terminal = null;
   }
 
   async boot() {
@@ -65,7 +68,7 @@ export class NativeSeedRuntime {
     await this.#ensureParticipant('computer:self', {
       kind: 'native-seed',
       residency: 'active',
-      capabilities: ['mesh.host','state-space','execution','resident-host','compiler.dormant','indiverse','world-federation'],
+      capabilities: ['mesh.host','state-space','execution','resident-host','compiler.dormant','terminal','app.host','indiverse','world-federation'],
       publicState: { name: 'SynthAI Native Seed', runtime: 'native-seed' },
     });
     await this.#ensureParticipant('system:state-space', {
@@ -209,6 +212,39 @@ export class NativeSeedRuntime {
   async mountTriform(options = {}) { return this.triform.mount(options); }
   async mountInstalledTriform(options = {}) { return this.triform.mountInstalledPackage(options); }
 
+  async bindTerminalHost(host, { compilerTarget = 'termux' } = {}) {
+    this.terminal = new NativeTerminalService({
+      executor:host,
+      state:this.state,
+      mesh:this.meshKernel,
+      bus:this.bus,
+      clock:this.clock,
+    });
+    await this.terminal.mount();
+    this.registerCompilerBackend(compilerTarget, new TermuxCompilerAdapter({
+      executor:host,
+      files:host,
+      id:'computer-terminal-compiler',
+    }));
+    if (!this.meshKernel.relationshipsFor('system:terminal').some(e => e.type === 'hosted-by' && e.to === 'computer:self')) {
+      await this.meshKernel.connect('system:terminal','computer:self',{type:'hosted-by'});
+    }
+    if (!this.meshKernel.relationshipsFor('system:compiler').some(e => e.type === 'executes-through' && e.to === 'system:terminal')) {
+      await this.meshKernel.connect('system:compiler','system:terminal',{type:'executes-through'});
+    }
+    return this.terminal.snapshot();
+  }
+
+  async terminalRequest(operation, payload = {}) {
+    if (!this.terminal) throw new Error('Computer terminal host not bound');
+    const routed = await this.meshKernel.request('system:terminal', {
+      operation,
+      payload:clone(payload),
+    });
+    if (!routed.delivered) return { queued:routed.queued, result:null };
+    return routed.result;
+  }
+
   async bindPhoneHost(host) {
     this.phoneWorld = new PhoneWorldBridge({
       host,
@@ -287,6 +323,7 @@ export class NativeSeedRuntime {
       stellar: this.stellarLab.snapshot(),
       humanAgent: this.humanAgent?.snapshot?.() ?? null,
       phoneWorld: this.phoneWorld?.snapshot?.() ?? null,
+      terminal: this.terminal?.snapshot?.() ?? null,
       triform: this.triform.get()?.adapter?.snapshot?.() ?? null,
       indiverse: this.indiverse.snapshot(),
       synthia57: this.synthia57.get('synthia')?.adapter?.snapshot?.() ?? null,
