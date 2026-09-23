@@ -39,9 +39,11 @@ final class PhoneWorldView extends View {
     private final Paint stroke = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Synthia57MirrorRenderer synthiaRenderer = new Synthia57MirrorRenderer();
     private final RectF mirrorButton = new RectF();
+    private final RectF packageButton = new RectF();
     private final List<AppPlace> apps = new ArrayList<>();
     private Listener listener;
     private Runnable mirrorListener;
+    private Runnable packageListener;
     private Bitmap mirrorFace;
     private String status = "MESH WAKING";
     private String residentName = "YOU";
@@ -76,6 +78,10 @@ final class PhoneWorldView extends View {
 
     void setMirrorListener(Runnable listener) {
         this.mirrorListener = listener;
+    }
+
+    void setPackageListener(Runnable listener) {
+        this.packageListener = listener;
     }
 
     void setMirrorFace(Bitmap bitmap) {
@@ -166,6 +172,7 @@ final class PhoneWorldView extends View {
         canvas.drawText(status, 18f * density, 50f * density, paint);
 
         if (residentName.equals("SYNTHIA")) {
+            packageButton.setEmpty();
             paint.setColor(Color.rgb(61, 40, 79));
             mirrorButton.set(width - 86f*density, 15f*density, width - 14f*density, 50f*density);
             canvas.drawRoundRect(mirrorButton, 12f*density, 12f*density, paint);
@@ -178,6 +185,16 @@ final class PhoneWorldView extends View {
             paint.setFakeBoldText(false);
         } else {
             mirrorButton.setEmpty();
+            paint.setColor(Color.rgb(61, 40, 79));
+            packageButton.set(width - 116f*density, 15f*density, width - 14f*density, 50f*density);
+            canvas.drawRoundRect(packageButton, 12f*density, 12f*density, paint);
+            stroke.setColor(Color.rgb(132, 92, 168));
+            canvas.drawRoundRect(packageButton, 12f*density, 12f*density, stroke);
+            paint.setColor(Color.rgb(225, 204, 244));
+            paint.setTextSize(8.5f*density);
+            paint.setFakeBoldText(true);
+            canvas.drawText("INSTALL 5.7", packageButton.left + 12f*density, packageButton.centerY() + 3f*density, paint);
+            paint.setFakeBoldText(false);
         }
 
         canvas.save();
@@ -368,6 +385,11 @@ final class PhoneWorldView extends View {
             case MotionEvent.ACTION_UP:
                 if (!dragging && !mirrorButton.isEmpty() && mirrorButton.contains(event.getX(), event.getY())) {
                     if (mirrorListener != null) mirrorListener.run();
+                    performClick();
+                    return true;
+                }
+                if (!dragging && !packageButton.isEmpty() && packageButton.contains(event.getX(), event.getY())) {
+                    if (packageListener != null) packageListener.run();
                     performClick();
                     return true;
                 }
