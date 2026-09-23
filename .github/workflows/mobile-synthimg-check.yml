@@ -4,7 +4,10 @@ on:
   pull_request:
     paths:
       - 'computer/mobile/**'
-      - 'computer/tests/mobile-synthimg.test.mjs'
+      - 'computer/runtime/**'
+      - 'computer/worlds/**'
+      - 'computer/residents/**'
+      - 'computer/tests/**'
       - 'computer/build-web.mjs'
       - 'public/mobile-computer.html'
       - 'public/synthimg-sw.js'
@@ -26,7 +29,7 @@ jobs:
         with:
           node-version: '22'
       - name: Mobile SynthIMG acceptance
-        run: node --test computer/tests/mobile-synthimg.test.mjs
+        run: node --test computer/tests/mobile-synthimg.test.mjs computer/tests/resident-mesh-indiverse.test.mjs computer/tests/world-federation.test.mjs computer/tests/synthia57-resident.test.mjs
       - name: Stage browser runtime
         run: node computer/build-web.mjs
       - name: Verify staged launcher dependencies
