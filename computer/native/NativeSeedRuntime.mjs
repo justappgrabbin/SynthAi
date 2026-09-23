@@ -360,6 +360,19 @@ export class NativeSeedRuntime {
   }
 
   async createIndiVerse(ownerId, options = {}) { return this.indiverse.createWorld(ownerId, options); }
+  async activateIndiVerse(worldId) {
+    const world=this.indiverse.world(worldId);
+    if(!world) throw new Error('unknown IndiVerse: '+worldId);
+    await this.state.set('phoneWorld.activeIndiVerse',String(worldId),{source:'indiverse-active-world'});
+    const profile=this.indiverse.worldProfile(worldId);
+    this.bus.emit('indiverse:activated',{worldId:String(worldId),profile:clone(profile)});
+    return {worldId:String(worldId),profile};
+  }
+  activeIndiVerse() {
+    const worldId=this.state.get('phoneWorld.activeIndiVerse',null);
+    if(!worldId) return {worldId:null,profile:null};
+    return {worldId,profile:this.indiverse.world(worldId)?this.indiverse.worldProfile(worldId):null};
+  }
   async registerCanonicalWorldObject(object) { return this.indiverse.registerCanonicalObject(object); }
   viewSharedWorldObject(objectId) { return this.indiverse.renderShared(objectId); }
   viewIndiVerseObject(worldId, objectId) { return this.indiverse.renderInWorld(worldId, objectId); }
@@ -388,6 +401,7 @@ export class NativeSeedRuntime {
       terminal: this.terminal?.snapshot?.() ?? null,
       triform: this.triform.get()?.adapter?.snapshot?.() ?? null,
       indiverse: this.indiverse.snapshot(),
+      activeIndiVerse: this.activeIndiVerse(),
       synthia57: this.synthia57.get('synthia')?.adapter?.snapshot?.() ?? null,
       synthiaMirror: this.synthiaMirror.snapshot(),
     };
