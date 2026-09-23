@@ -27,22 +27,34 @@ export class ConsciousnessRealmAdapter {
 
   bindProjection(residentId, { humanProfile, canonicalIdentity = {} } = {}) {
     if (!residentId || !humanProfile?.id) throw new Error('Realm projection requires residentId and humanProfile.id');
+    if (!canonicalIdentity.birthChart) {
+      throw new Error('Realm projection requires externally resolved canonicalIdentity.birthChart');
+    }
     let agent = typeof this.engine.getAgentForHuman === 'function'
       ? this.engine.getAgentForHuman(humanProfile.id)
       : valuesOf(this.engine.agents).find(item => item.humanId === humanProfile.id);
-    if (!agent) agent = this.engine.createAgent(humanProfile);
 
-    // AgentLifeEngine's built-in chart generator is explicitly non-canonical.
-    // Keep the created object only as a visible world projection, then overlay
-    // externally supplied canonical identity. Never treat Realm mood,
-    // consciousness, or generated chart as Synthia's authoritative core.
-    if (canonicalIdentity.name) agent.name = canonicalIdentity.name;
-    if (canonicalIdentity.birthChart) {
-      agent.birthChart = clone(canonicalIdentity.birthChart);
-      if (typeof this.engine.determineElement === 'function') agent.element = this.engine.determineElement(agent.birthChart);
-      if (typeof this.engine.determineArchetype === 'function') agent.archetype = this.engine.determineArchetype(agent.birthChart);
-      if (typeof this.engine.generateSchedule === 'function') agent.dailySchedule = this.engine.generateSchedule(agent.birthChart);
+    if (!agent) {
+      // Reuse the donor's real createAgent path while replacing only its
+      // explicitly non-canonical random/simple chart generator for this call.
+      // This preserves donor needs, places, schedule, memories and event setup.
+      const originalGenerateBirthChart = this.engine.generateBirthChart;
+      if (typeof originalGenerateBirthChart !== 'function') {
+        throw new Error('AgentLifeEngine generateBirthChart hook unavailable for canonical projection');
+      }
+      this.engine.generateBirthChart = () => clone(canonicalIdentity.birthChart);
+      try { agent = this.engine.createAgent(humanProfile); }
+      finally { this.engine.generateBirthChart = originalGenerateBirthChart; }
     }
+
+    // Realm agent is a world projection only. Canonical identity remains owned
+    // by Synthia 5.7 and is overlaid after donor creation.
+    if (canonicalIdentity.name) agent.name = canonicalIdentity.name;
+    agent.birthChart = clone(canonicalIdentity.birthChart);
+    if (canonicalIdentity.traits) agent.traits = clone(canonicalIdentity.traits);
+    if (typeof this.engine.determineElement === 'function') agent.element = this.engine.determineElement(agent.birthChart);
+    if (typeof this.engine.determineArchetype === 'function') agent.archetype = this.engine.determineArchetype(agent.birthChart);
+    if (typeof this.engine.generateSchedule === 'function') agent.dailySchedule = this.engine.generateSchedule(agent.birthChart);
     agent.externalIdentity = clone(canonicalIdentity);
     agent.projectionOf = String(residentId);
     this.projections.set(String(residentId), agent.id);
@@ -79,7 +91,27 @@ export class ConsciousnessRealmAdapter {
       residents: valuesOf(this.engine.agents).map(agent => this.#publicAgent(agent)),
       events: clone((this.engine.events ?? []).slice(-50)),
       projectionAuthority: 'world-only',
+      checkpointState: {
+        time: clone(this.engine.time),
+        agents: valuesOf(this.engine.agents).map(clone),
+        places: valuesOf(this.engine.places).map(clone),
+        events: clone(this.engine.events ?? []),
+        messages: clone(this.engine.messages ?? []),
+        projections: [...this.projections.entries()].map(clone),
+      },
     };
+  }
+
+  hydrate(snapshot = {}) {
+    const saved = snapshot.checkpointState ?? snapshot;
+    if (saved.time) this.engine.time = clone(saved.time);
+    if (Array.isArray(saved.agents)) this.engine.agents = new Map(saved.agents.map(agent => [agent.id, clone(agent)]));
+    if (Array.isArray(saved.places)) this.engine.places = new Map(saved.places.map(place => [place.id, clone(place)]));
+    if (Array.isArray(saved.events)) this.engine.events = clone(saved.events);
+    if (Array.isArray(saved.messages)) this.engine.messages = clone(saved.messages);
+    if (Array.isArray(saved.projections)) this.projections = new Map(saved.projections.map(clone));
+    this.#emit({ type:'realm:hydrated', source:this.id, summary:this.#timeSummary(), payload:{ time:clone(this.engine.time) } });
+    return this.snapshot();
   }
 
   async applyAction(action = {}) {
@@ -132,15 +164,25 @@ export class ConsciousnessRealmAdapter {
   }
 
   advanceElapsed(elapsedMs, { maxTicks = this.maxCatchUpTicks } = {}) {
-    const requestedTicks = Math.max(0, Math.floor(Number(elapsedMs ?? 0) / 1000));
+    // Live Realm intentionally runs accelerated (1 real second = 10 world minutes).
+    // Dormancy follows Animal-Crossing-style elapsed real time instead: one real
+    // minute advances one world minute, replayed through the donor in 10-minute ticks.
+    const elapsed = Math.max(0, Number(elapsedMs ?? 0));
+    const worldMinutes = Math.floor(elapsed / 60000);
+    const requestedTicks = Math.floor(worldMinutes / 10);
     const executedTicks = Math.min(requestedTicks, Math.max(0, Number(maxTicks)));
     for (let i = 0; i < executedTicks; i += 1) this.engine.tick();
+    const replayedMinutes = executedTicks * 10;
+    const pendingMinutes = Math.max(0, worldMinutes - replayedMinutes);
     return {
-      elapsedMs: Number(elapsedMs ?? 0),
+      elapsedMs: elapsed,
+      worldMinutes,
       requestedTicks,
       executedTicks,
-      pendingTicks: requestedTicks - executedTicks,
-      complete: requestedTicks === executedTicks,
+      replayedMinutes,
+      pendingMinutes,
+      pendingTicks: Math.floor(pendingMinutes / 10),
+      complete: pendingMinutes < 10,
       time: clone(this.engine.time),
     };
   }
@@ -150,6 +192,9 @@ export class ConsciousnessRealmAdapter {
     if (!place) return { accepted: false, reason: 'UNKNOWN_PLACE', placeId };
     if (typeof this.engine.startActivity === 'function') {
       this.engine.startActivity(agent, activity, placeId);
+      // Donor writes Date.now() but updateAgent subtracts startTime/60000 from
+      // world totalMinutes. Normalize only the clock basis at the adapter edge.
+      if (agent.currentActivity) agent.currentActivity.startTime = Number(this.engine.time?.totalMinutes ?? 0) * 60000;
     } else {
       this.#move(agent, placeId);
       agent.currentActivity = { id: `external-${this.clock()}`, type: activity, placeId, startTime: this.clock(), duration: 60 };
