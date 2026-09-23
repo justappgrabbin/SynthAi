@@ -15,6 +15,7 @@ import { AutomataEngineGateway } from './services/automata-engine.mjs';
 import { WorldEngineGateway } from './services/world-engine.mjs';
 import { PentaEphemerisService } from './services/penta-ephemeris.mjs';
 import { ExperimentLoop } from './services/experiment-loop.mjs';
+import { PurposeGuideService } from './services/purpose-guide.mjs';
 
 export class ComputerRuntime {
   constructor({ persistence = new MemoryPersistence(), namespace = 'synthai-computer', github = null, eventLogPath = null } = {}) {
@@ -110,6 +111,23 @@ export class ComputerRuntime {
     // Acceptance-7: experiment loop (donor HypothesisRegistry, wrap-only).
     this.experiments = new ExperimentLoop({ bus: this.bus });
     this.services.register('experiment-loop', { provider: this.experiments, contract: 'runExperiment' });
+    // Pathways-to-Purpose is a Computer host invariant for Computer-backed
+    // surfaces. It consumes real project/capability/profile context and persists
+    // roadmaps + observable outcomes without inventing missing user goals.
+    this.purposeGuide = new PurposeGuideService({
+      bus: this.bus,
+      state: this.state,
+      projects: this.projects,
+      listCapabilities: () => this.capabilityRegistry.list(),
+      emitEvent: event => this.emitEvent(event),
+    });
+    this.services.register('purpose-guide', { provider: this.purposeGuide, contract: 'buildRoadmap/recordOutcome/getRoadmap' });
+    if (!this.capabilityRegistry.has('pathways-to-purpose')) {
+      this.capabilities.register('pathways-to-purpose', {
+        providers: ['computer'],
+        description: 'Persistent personal purpose roadmap and outcome-feedback service backed by live Computer state.'
+      });
+    }
     for (const id of ['resolve_address', 'resolve_state', 'emit_event', 'query_capability', 'automata_activation']) {
       if (!this.capabilityRegistry.has(id)) this.capabilities.register(id, { providers: ['back-up-', 'computer'] });
     }
@@ -131,6 +149,9 @@ export class ComputerRuntime {
   worldEvent(event) { return this.worldGateway.process(event); }
   observeWorld() { return this.worldGateway.snapshot(); }
   groupPenta(members) { return this.pentaEphemeris.groupPenta(members); }
+  buildPurposeRoadmap(input) { return this.purposeGuide.buildRoadmap(input); }
+  recordPurposeOutcome(input) { return this.purposeGuide.recordOutcome(input); }
+  getPurposeRoadmap(userId, roadmapId = null) { return this.purposeGuide.getRoadmap(userId, roadmapId); }
 
   /**
    * Contract: mount(application, contract). Mounts a real artifact app through
