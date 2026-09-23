@@ -1,9 +1,13 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { webcrypto } from 'node:crypto';
 import { MemoryPersistence, StateStore, EventBus } from '../core/kernel.mjs';
 import { ExperienceCompiler } from '../worlds/experience-compiler.mjs';
 import { registerDefaultExperienceAdapters } from '../mobile/AppExperienceAdapters.mjs';
 import { AppExperienceRuntime } from '../mobile/AppExperienceRuntime.mjs';
+import { MobileComputerRuntime } from '../mobile/MobileComputerRuntime.mjs';
+
+globalThis.crypto ??= webcrypto;
 
 async function makeRuntime(namespace) {
   const bus = new EventBus();
@@ -75,4 +79,31 @@ test('APP EXPERIENCE: persisted observation history increments and preserves evi
   assert.equal(history[0].sequence, 1);
   assert.equal(history[1].sequence, 2);
   assert.equal(history[1].evidence.packageName, 'com.picsart.studio');
+});
+
+
+test('MOBILE COMPUTER: Android observation reaches experience state and canonical event log', async () => {
+  const computer = await new MobileComputerRuntime({
+    persistence: new MemoryPersistence(),
+    namespace: 'experience-mobile-integration',
+  }).boot();
+
+  const experience = await computer.observeApplication({
+    packageName: 'com.openai.chatgpt',
+    appLabel: 'ChatGPT',
+    activity: 'MainActivity',
+    screenType: 'active_conversation',
+    source: 'accessibility',
+    ui: [{ id: 'composer', text: 'Message ChatGPT', role: 'textbox', editable: true }],
+  });
+
+  assert.equal(experience.environment.type, 'conversation_house');
+  assert.equal(computer.currentApplicationExperience().scene.type, 'conversation_room');
+  assert.equal(computer.snapshot().experiences.current.application.packageName, 'com.openai.chatgpt');
+
+  const events = await computer.events.readAll();
+  const event = events.find(item => item.event_type === 'application_experience');
+  assert.ok(event);
+  assert.equal(event.evidence.packageName, 'com.openai.chatgpt');
+  assert.match(event.observable_effect, /conversation_house/);
 });
