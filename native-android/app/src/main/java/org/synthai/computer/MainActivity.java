@@ -28,6 +28,7 @@ import java.util.concurrent.Executors;
 public final class MainActivity extends Activity {
     private static final int REQUEST_TERMUX_RUN = 7001;
     private static final int REQUEST_MIRROR_IMAGE = 7002;
+    private static final int REQUEST_SYNTHIA_PACKAGE = 7003;
     private final ExecutorService io = Executors.newSingleThreadExecutor();
     private final Handler main = new Handler(Looper.getMainLooper());
     private NativeSeedClient client;
@@ -46,6 +47,7 @@ public final class MainActivity extends Activity {
         world = new PhoneWorldView(this);
         world.setListener(this::enterApp);
         world.setMirrorListener(this::pickMirrorImage);
+        world.setPackageListener(this::pickSynthiaPackage);
         mirrorFile = new File(getFilesDir(), "synthia-mirror-face.jpg");
         loadMirrorFace();
         setContentView(world);
@@ -120,6 +122,58 @@ public final class MainActivity extends Activity {
         }
     }
 
+    private void pickSynthiaPackage() {
+        Intent pick = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+        pick.addCategory(Intent.CATEGORY_OPENABLE);
+        pick.setType("*/*");
+        pick.putExtra(Intent.EXTRA_MIME_TYPES, new String[]{"application/zip", "application/octet-stream"});
+        startActivityForResult(pick, REQUEST_SYNTHIA_PACKAGE);
+    }
+
+    private void acceptSynthiaPackage(Uri uri) {
+        world.setStatus("INSTALLING SYNTHIA 5.7");
+        io.execute(() -> {
+            try {
+                NativeSeedClient.Result health = client.health();
+                if (!health.ok) {
+                    TermuxBridge.startNativeSeed(this);
+                    for (int i = 0; i < 7 && !health.ok; i++) {
+                        try { Thread.sleep(700L * (i + 1)); } catch (InterruptedException ignored) {}
+                        health = client.health();
+                    }
+                }
+                if (!health.ok) throw new IllegalStateException("Native Seed is not available");
+
+                long length = -1L;
+                try (android.content.res.AssetFileDescriptor afd = getContentResolver().openAssetFileDescriptor(uri, "r")) {
+                    if (afd != null) length = afd.getLength();
+                } catch (Exception ignored) {}
+
+                NativeSeedClient.Result result;
+                try (InputStream in = getContentResolver().openInputStream(uri)) {
+                    if (in == null) throw new IllegalStateException("Could not open Synthia 5.7 package");
+                    String mime = getContentResolver().getType(uri);
+                    result = client.upload(
+                        "/packages/synthia57/install",
+                        in,
+                        length,
+                        mime == null ? "application/zip" : mime,
+                        "android-document-picker"
+                    );
+                }
+                if (!result.ok) throw new IllegalStateException("Synthia package install failed: " + result.body);
+
+                main.post(() -> {
+                    world.setResidentName("SYNTHIA");
+                    world.setStatus("MESH ACTIVE · SYNTHIA 5.7 MOUNTED");
+                    loadMirrorFace();
+                });
+            } catch (Exception error) {
+                main.post(() -> world.setStatus("SYNTHIA 5.7 INSTALL ERROR"));
+            }
+        });
+    }
+
     private void pickMirrorImage() {
         Intent pick = new Intent(Intent.ACTION_OPEN_DOCUMENT);
         pick.addCategory(Intent.CATEGORY_OPENABLE);
@@ -186,6 +240,13 @@ public final class MainActivity extends Activity {
             } catch (Exception ignored) {}
             acceptMirrorImage(uri);
         }
+        if (requestCode == REQUEST_SYNTHIA_PACKAGE && resultCode == RESULT_OK && data != null && data.getData() != null) {
+            Uri uri = data.getData();
+            try {
+                getContentResolver().takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            } catch (Exception ignored) {}
+            acceptSynthiaPackage(uri);
+        }
     }
 
     private void wakeRuntimeAndFlush(long elapsedMs) {
@@ -233,6 +294,7 @@ public final class MainActivity extends Activity {
             Object value = mounts.opt("synthia57");
             if (value instanceof JSONObject) {
                 JSONObject object = (JSONObject)value;
+                if (object.has("mounted")) return object.optBoolean("mounted", false);
                 return !object.has("error");
             }
             return value != null && value != JSONObject.NULL;
