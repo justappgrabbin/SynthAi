@@ -107,8 +107,6 @@ export class AddressService {
    * Resolve a canonical 13-field address from real input only.
    * Accepted inputs (first match wins, rest recorded as unknown):
    *   { birthDate: 'YYYY-MM-DD', birthTime: 'HH:MM', planet? }  -> HD chart placement (default Sun)
-   *   { ephemeris: {sign,degree,minute,second} }                -> Foundry-Glyphs mandala resolver
-   *   { micro | macro | emergent }                              -> YNIV 13-dim engine
    *   { arcSecond | arc: int }                                  -> DMS wheel decode
    *   { address: {...} }                                        -> normalize/validate onto 13 fields
    */
