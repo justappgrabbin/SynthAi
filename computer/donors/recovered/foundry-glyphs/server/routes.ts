@@ -1,333 +1,452 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertGlyphSchema, insertAttestationSchema, insertAuditLogSchema, type Glyph, type ResonanceScoreRequest } from "@shared/schema";
-import { fromError } from "zod-validation-error";
-import { resonanceEngine } from "./resonance-engine";
-import { builder, type BuildManifest } from "./builder";
-import { overseer, type OverseerRequest } from "./overseer";
-import { financialEngine, type RevenueOpportunity } from "./financial-engine";
-import { agentSystem } from "./agent-system";
+import { insertGlyphSchema, insertEdgeSchema, insertAttestationSchema, insertRecipeSchema, insertAuditLogSchema } from "@shared/schema";
+import { randomUUID } from "crypto";
+import { evaluateResonance, getHDActivation, diagnoseField } from "./resonance-engine";
+import { overseer } from "./overseer";
 import { selector } from "./selector";
+import { builder } from "./builder";
+import { financialEngine } from "./financial-engine";
 import { evolutionEngine } from "./evolution-engine";
 
-export async function registerRoutes(app: Express): Promise<Server> {
-  // Dashboard stats
+export async function registerRoutes(
+  httpServer: Server,
+  app: Express
+): Promise<Server> {
+  // Stats
   app.get("/api/stats", async (_req, res) => {
-    const stats = await storage.getStats();
-    res.json(stats);
+    try {
+      const stats = await storage.getStats();
+      res.json(stats);
+    } catch (error) {
+      console.error("Error fetching stats:", error);
+      res.status(500).json({ error: "Failed to fetch stats" });
+    }
   });
 
   // Glyphs
   app.get("/api/glyphs", async (_req, res) => {
-    const glyphs = await storage.getGlyphs();
-    res.json(glyphs);
+    try {
+      const glyphs = await storage.getGlyphs();
+      res.json(glyphs);
+    } catch (error) {
+      console.error("Error fetching glyphs:", error);
+      res.status(500).json({ error: "Failed to fetch glyphs" });
+    }
   });
 
   app.get("/api/glyphs/:id", async (req, res) => {
-    const glyph = await storage.getGlyph(req.params.id);
-    if (!glyph) {
-      return res.status(404).json({ error: "Glyph not found" });
+    try {
+      const glyph = await storage.getGlyph(req.params.id);
+      if (!glyph) {
+        return res.status(404).json({ error: "Glyph not found" });
+      }
+      res.json(glyph);
+    } catch (error) {
+      console.error("Error fetching glyph:", error);
+      res.status(500).json({ error: "Failed to fetch glyph" });
     }
-    res.json(glyph);
   });
 
   app.post("/api/glyphs", async (req, res) => {
     try {
-      const body = insertGlyphSchema.parse(req.body);
-      const id = `blake3:${Date.now().toString(16)}${Math.random().toString(16).slice(2, 18)}`;
-      
-      const glyph = await storage.createGlyph(id, {
-        ...body,
-        producedAt: new Date(),
-      });
-
+      const result = insertGlyphSchema.safeParse(req.body);
+      if (!result.success) {
+        return res.status(400).json({ error: result.error.issues });
+      }
+      const id = `blake3:${randomUUID().replace(/-/g, "")}`;
+      const glyph = await storage.createGlyph(id, result.data);
       await storage.createAuditLog({
         actor: "api",
-        action: "ingest",
-        glyphId: id,
-        payload: { type: body.type, name: body.name },
+        action: "create",
+        glyphId: glyph.id,
+        payload: { name: glyph.name },
       });
-
       res.status(201).json(glyph);
     } catch (error) {
-      if (error instanceof Error && error.name === "ZodError") {
-        return res.status(400).json({ error: fromError(error as any).toString() });
-      }
-      throw error;
+      console.error("Error creating glyph:", error);
+      res.status(500).json({ error: "Failed to create glyph" });
     }
   });
 
-  // Edges
+  app.patch("/api/glyphs/:id", async (req, res) => {
+    try {
+      const glyph = await storage.updateGlyph(req.params.id, req.body);
+      if (!glyph) {
+        return res.status(404).json({ error: "Glyph not found" });
+      }
+      res.json(glyph);
+    } catch (error) {
+      console.error("Error updating glyph:", error);
+      res.status(500).json({ error: "Failed to update glyph" });
+    }
+  });
+
+  app.post("/api/glyphs/:id/promote", async (req, res) => {
+    try {
+      const { targetQuality } = req.body;
+      if (!["tested", "production"].includes(targetQuality)) {
+        return res.status(400).json({ error: "Invalid target quality" });
+      }
+      const glyph = await storage.getGlyph(req.params.id);
+      if (!glyph) {
+        return res.status(404).json({ error: "Glyph not found" });
+      }
+      const fromQuality = glyph.quality;
+      const updated = await storage.updateGlyph(req.params.id, { quality: targetQuality });
+      await storage.createAttestation({
+        glyphId: glyph.id,
+        fromQuality,
+        toQuality: targetQuality,
+        signerKeyId: "api-key",
+        signature: `sig-${Date.now()}`,
+      });
+      await storage.createAuditLog({
+        actor: "api",
+        action: "promote",
+        glyphId: glyph.id,
+        payload: { from: fromQuality, to: targetQuality },
+      });
+      res.json(updated);
+    } catch (error) {
+      console.error("Error promoting glyph:", error);
+      res.status(500).json({ error: "Failed to promote glyph" });
+    }
+  });
+
+  app.delete("/api/glyphs/:id", async (req, res) => {
+    try {
+      const deleted = await storage.deleteGlyph(req.params.id);
+      if (!deleted) {
+        return res.status(404).json({ error: "Glyph not found" });
+      }
+      await storage.createAuditLog({
+        actor: "api",
+        action: "delete",
+        glyphId: req.params.id,
+        payload: {},
+      });
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting glyph:", error);
+      res.status(500).json({ error: "Failed to delete glyph" });
+    }
+  });
+
+  // Edges (lineage)
   app.get("/api/edges", async (_req, res) => {
-    const edges = await storage.getEdges();
-    res.json(edges);
+    try {
+      const edgeList = await storage.getEdges();
+      res.json(edgeList);
+    } catch (error) {
+      console.error("Error fetching edges:", error);
+      res.status(500).json({ error: "Failed to fetch edges" });
+    }
+  });
+
+  app.get("/api/edges/glyph/:glyphId", async (req, res) => {
+    try {
+      const edgeList = await storage.getEdgesByGlyph(req.params.glyphId);
+      res.json(edgeList);
+    } catch (error) {
+      console.error("Error fetching edges:", error);
+      res.status(500).json({ error: "Failed to fetch edges" });
+    }
   });
 
   app.post("/api/edges", async (req, res) => {
     try {
-      const edge = await storage.createEdge(req.body);
+      const result = insertEdgeSchema.safeParse(req.body);
+      if (!result.success) {
+        return res.status(400).json({ error: result.error.issues });
+      }
+      const edge = await storage.createEdge(result.data);
       res.status(201).json(edge);
     } catch (error) {
-      res.status(400).json({ error: "Invalid edge data" });
+      console.error("Error creating edge:", error);
+      res.status(500).json({ error: "Failed to create edge" });
     }
   });
 
   // Attestations
   app.get("/api/attestations", async (_req, res) => {
-    const attestations = await storage.getAttestations();
-    res.json(attestations);
-  });
-
-  app.post("/api/attestations", async (req, res) => {
     try {
-      const body = insertAttestationSchema.parse(req.body);
-      const attestation = await storage.createAttestation({
-        ...body,
-        at: new Date(),
-      });
-      res.status(201).json(attestation);
+      const attestationList = await storage.getAttestations();
+      res.json(attestationList);
     } catch (error) {
-      if (error instanceof Error && error.name === "ZodError") {
-        return res.status(400).json({ error: fromError(error as any).toString() });
-      }
-      throw error;
+      console.error("Error fetching attestations:", error);
+      res.status(500).json({ error: "Failed to fetch attestations" });
     }
   });
 
-  // Quality promotion with attestation
-  app.post("/api/promote", async (req, res) => {
-    const { glyphId, toQuality, evidenceUri, signerKeyId } = req.body;
-
-    if (!glyphId || !toQuality || !evidenceUri) {
-      return res.status(400).json({ error: "Missing required fields" });
+  app.get("/api/attestations/glyph/:glyphId", async (req, res) => {
+    try {
+      const attestationList = await storage.getAttestationsByGlyph(req.params.glyphId);
+      res.json(attestationList);
+    } catch (error) {
+      console.error("Error fetching attestations:", error);
+      res.status(500).json({ error: "Failed to fetch attestations" });
     }
+  });
 
-    const glyph = await storage.getGlyph(glyphId);
-    if (!glyph) {
-      return res.status(404).json({ error: "Glyph not found" });
+  // Recipes
+  app.get("/api/recipes", async (_req, res) => {
+    try {
+      const recipeList = await storage.getRecipes();
+      res.json(recipeList);
+    } catch (error) {
+      console.error("Error fetching recipes:", error);
+      res.status(500).json({ error: "Failed to fetch recipes" });
     }
+  });
 
-    // Create attestation
-    await storage.createAttestation({
-      glyphId,
-      fromQuality: glyph.quality,
-      toQuality,
-      signerKeyId: signerKeyId || "foundry.local",
-      signature: "sig_" + Date.now(), // Simplified signature
-      evidenceUri,
-      at: new Date(),
-    });
-
-    // Update glyph quality
-    const updated = await storage.updateGlyph(glyphId, { quality: toQuality });
-
-    await storage.createAuditLog({
-      actor: "api",
-      action: "promote",
-      glyphId,
-      payload: { from: glyph.quality, to: toQuality, evidenceUri },
-    });
-
-    res.json(updated);
+  app.get("/api/recipes/:glyphId", async (req, res) => {
+    try {
+      const recipe = await storage.getRecipe(req.params.glyphId);
+      if (!recipe) {
+        return res.status(404).json({ error: "Recipe not found" });
+      }
+      res.json(recipe);
+    } catch (error) {
+      console.error("Error fetching recipe:", error);
+      res.status(500).json({ error: "Failed to fetch recipe" });
+    }
   });
 
   // Audit logs
   app.get("/api/audit", async (_req, res) => {
-    const logs = await storage.getAuditLogs();
-    res.json(logs);
+    try {
+      const logs = await storage.getAuditLogs();
+      res.json(logs);
+    } catch (error) {
+      console.error("Error fetching audit logs:", error);
+      res.status(500).json({ error: "Failed to fetch audit logs" });
+    }
   });
 
   // Lineage graph
   app.get("/api/lineage", async (_req, res) => {
-    const graph = await storage.getLineageGraph();
-    res.json(graph);
-  });
-
-  // Assembly (build simulation)
-  app.post("/api/assembly", async (req, res) => {
-    const { recipe } = req.body;
-    
-    if (!recipe || !recipe.name) {
-      return res.status(400).json({ error: "Invalid recipe" });
-    }
-
-    // Simulate assembly process
-    const result = {
-      success: true,
-      appGlyphId: `blake3:${Date.now().toString(16)}${Math.random().toString(16).slice(2, 18)}`,
-      logs: [
-        { level: "info", message: `Assembling ${recipe.name}...` },
-        { level: "info", message: `Resolved ${recipe.fragments?.length || 0} fragments` },
-        { level: "success", message: "Assembly complete" },
-      ],
-      artifacts: recipe.fragments || [],
-    };
-
-    await storage.createAuditLog({
-      actor: "api",
-      action: "assemble",
-      glyphId: result.appGlyphId,
-      payload: { recipe: recipe.name },
-    });
-
-    res.json(result);
-  });
-
-  // ============================================================================
-  // RESONANCE ENGINE ROUTES
-  // ============================================================================
-
-  // Calculate Resonance Score for birth data
-  app.post("/api/resonance/score", async (req, res) => {
     try {
-      const request: ResonanceScoreRequest = req.body;
-      
-      if (!request.birthData) {
-        return res.status(400).json({ error: "Missing birthData" });
-      }
-
-      const result = resonanceEngine.calculateResonanceScore(request.birthData);
-      
-      await storage.createAuditLog({
-        actor: "resonance-engine",
-        action: "score",
-        glyphId: request.targetGlyphId || null,
-        payload: {
-          location: request.birthData.location,
-          hdType: result.blueprint.hdType,
-          coherenceScore: result.diagnosis.coherenceScore,
-          resonanceScore: result.diagnosis.resonanceScore,
-          approved: result.diagnosis.approved,
-        },
-      });
-
-      res.json(result);
+      const graph = await storage.getLineageGraph();
+      res.json(graph);
     } catch (error) {
-      console.error("Resonance score error:", error);
-      res.status(500).json({ error: error instanceof Error ? error.message : "Failed to calculate resonance score" });
+      console.error("Error fetching lineage:", error);
+      res.status(500).json({ error: "Failed to fetch lineage" });
     }
   });
 
-  // Get blueprint only (no full scoring)
-  app.post("/api/resonance/blueprint", async (req, res) => {
+  // ============================================
+  // RESONANCE ENGINE API
+  // ============================================
+
+  app.post("/api/resonance/calculate", async (req, res) => {
     try {
-      const { birthData } = req.body;
-      
-      if (!birthData) {
-        return res.status(400).json({ error: "Missing birthData" });
+      const { sign, degree, minute, second } = req.body;
+      if (!sign || degree === undefined) {
+        return res.status(400).json({ error: "sign and degree required" });
       }
-
-      const result = resonanceEngine.calculateResonanceScore(birthData);
-      res.json({ blueprint: result.blueprint });
+      const activation = getHDActivation(sign, degree, minute || 0, second || 0);
+      res.json(activation);
     } catch (error) {
-      res.status(500).json({ error: error instanceof Error ? error.message : "Failed to generate blueprint" });
+      console.error("Error calculating activation:", error);
+      res.status(500).json({ error: "Failed to calculate activation" });
     }
   });
 
-  // ============================================================================
-  // FOUNDRY-BUILDER ROUTES
-  // ============================================================================
-
-  // Build a new artifact from manifest
-  app.post("/api/build", async (req, res) => {
+  app.post("/api/resonance/diagnose", async (req, res) => {
     try {
-      const manifest: BuildManifest = req.body;
-      
-      if (!manifest.name || !manifest.type || !manifest.components) {
-        return res.status(400).json({ error: "Invalid build manifest" });
-      }
-
-      const result = await builder.build(manifest);
-
-      await storage.createAuditLog({
-        actor: "builder",
-        action: "build",
-        glyphId: result.artifact?.id || null,
-        payload: {
-          name: manifest.name,
-          status: result.status,
-          componentCount: manifest.components.length,
-          resonanceScore: result.overseerDecision.resonanceScore,
-          coherenceScore: result.overseerDecision.coherenceScore,
-        },
-      });
-
-      if (result.status === "failed") {
-        return res.status(400).json(result);
-      }
-
-      res.status(201).json(result);
+      const { bodyActivations, mindActivations, heartActivations } = req.body;
+      const diagnosis = diagnoseField(
+        bodyActivations || [],
+        mindActivations || [],
+        heartActivations || []
+      );
+      res.json(diagnosis);
     } catch (error) {
-      res.status(500).json({ error: error instanceof Error ? error.message : "Build failed" });
+      console.error("Error diagnosing field:", error);
+      res.status(500).json({ error: "Failed to diagnose field" });
     }
   });
 
-  // Get build history
-  app.get("/api/builds", async (_req, res) => {
-    const history = builder.getBuildHistory();
-    res.json(history);
+  app.post("/api/resonance/evaluate", async (req, res) => {
+    try {
+      const response = evaluateResonance(req.body);
+      res.json(response);
+    } catch (error) {
+      console.error("Error evaluating resonance:", error);
+      res.status(500).json({ error: "Failed to evaluate resonance" });
+    }
   });
 
-  // ============================================================================
-  // OVERSEER ROUTES
-  // ============================================================================
+  // ============================================
+  // OVERSEER GOVERNANCE API
+  // ============================================
 
-  // Evaluate a decision
   app.post("/api/overseer/evaluate", async (req, res) => {
     try {
-      const request: OverseerRequest = req.body;
-      const decision = overseer.evaluate(request);
+      const decision = overseer.evaluate(req.body);
       res.json(decision);
     } catch (error) {
-      res.status(500).json({ error: error instanceof Error ? error.message : "Evaluation failed" });
+      console.error("Error in overseer evaluation:", error);
+      res.status(500).json({ error: "Failed to evaluate" });
     }
   });
 
-  // Get decision log
   app.get("/api/overseer/decisions", async (_req, res) => {
-    const decisions = overseer.getDecisionLog();
-    res.json(decisions);
-  });
-
-  // Check if target is frozen
-  app.get("/api/overseer/frozen/:targetId", async (req, res) => {
-    const frozen = overseer.isFrozen(req.params.targetId);
-    res.json({ targetId: req.params.targetId, frozen });
-  });
-
-  // Unfreeze a target
-  app.post("/api/overseer/unfreeze", async (req, res) => {
-    const { targetId, reason } = req.body;
-    if (!targetId || !reason) {
-      return res.status(400).json({ error: "Missing targetId or reason" });
+    try {
+      const decisions = overseer.getRecentDecisions(50);
+      res.json(decisions);
+    } catch (error) {
+      console.error("Error fetching decisions:", error);
+      res.status(500).json({ error: "Failed to fetch decisions" });
     }
-    const success = overseer.unfreeze(targetId, reason);
-    res.json({ success, targetId });
   });
 
-  // ============================================================================
-  // FINANCIAL ENGINE ROUTES
-  // ============================================================================
+  app.get("/api/overseer/config", async (_req, res) => {
+    try {
+      const config = overseer.getConfig();
+      res.json(config);
+    } catch (error) {
+      console.error("Error fetching config:", error);
+      res.status(500).json({ error: "Failed to fetch config" });
+    }
+  });
 
-  // Get financial state
+  app.patch("/api/overseer/config", async (req, res) => {
+    try {
+      overseer.updateConfig(req.body);
+      res.json(overseer.getConfig());
+    } catch (error) {
+      console.error("Error updating config:", error);
+      res.status(500).json({ error: "Failed to update config" });
+    }
+  });
+
+  app.post("/api/overseer/unfreeze", async (req, res) => {
+    try {
+      const { targetId, reason } = req.body;
+      if (!targetId || !reason) {
+        return res.status(400).json({ error: "targetId and reason required" });
+      }
+      const success = overseer.unfreeze(targetId, reason);
+      res.json({ success, targetId });
+    } catch (error) {
+      console.error("Error unfreezing:", error);
+      res.status(500).json({ error: "Failed to unfreeze" });
+    }
+  });
+
+  app.get("/api/overseer/frozen/:targetId", async (req, res) => {
+    try {
+      const frozen = overseer.isFrozen(req.params.targetId);
+      res.json({ targetId: req.params.targetId, frozen });
+    } catch (error) {
+      console.error("Error checking frozen status:", error);
+      res.status(500).json({ error: "Failed to check frozen status" });
+    }
+  });
+
+  // ============================================
+  // SELECTOR API
+  // ============================================
+
+  app.post("/api/selector/select", async (req, res) => {
+    try {
+      const glyphs = await storage.getGlyphs();
+      selector.clearCandidates();
+      selector.addCandidatesFromGlyphs(glyphs);
+      const result = selector.select(req.body);
+      res.json(result);
+    } catch (error) {
+      console.error("Error in selection:", error);
+      res.status(500).json({ error: "Failed to select" });
+    }
+  });
+
+  app.get("/api/selector/candidates", async (_req, res) => {
+    try {
+      const glyphs = await storage.getGlyphs();
+      selector.clearCandidates();
+      selector.addCandidatesFromGlyphs(glyphs);
+      res.json(selector.getCandidates());
+    } catch (error) {
+      console.error("Error fetching candidates:", error);
+      res.status(500).json({ error: "Failed to fetch candidates" });
+    }
+  });
+
+  // ============================================
+  // BUILDER API
+  // ============================================
+
+  app.post("/api/builder/build", async (req, res) => {
+    try {
+      const result = await builder.build(req.body);
+      res.json(result);
+    } catch (error) {
+      console.error("Error in build:", error);
+      res.status(500).json({ error: "Failed to build" });
+    }
+  });
+
+  app.get("/api/builder/history", async (_req, res) => {
+    try {
+      const history = builder.getRecentBuilds(20);
+      res.json(history);
+    } catch (error) {
+      console.error("Error fetching build history:", error);
+      res.status(500).json({ error: "Failed to fetch history" });
+    }
+  });
+
+  app.get("/api/builder/causal-graph", async (_req, res) => {
+    try {
+      const graph = builder.getCausalGraph();
+      res.json(graph);
+    } catch (error) {
+      console.error("Error fetching causal graph:", error);
+      res.status(500).json({ error: "Failed to fetch causal graph" });
+    }
+  });
+
+  // ============================================
+  // FINANCIAL ENGINE API
+  // ============================================
+
   app.get("/api/financial/state", async (_req, res) => {
-    res.json(financialEngine.getState());
+    try {
+      const state = financialEngine.getState();
+      res.json(state);
+    } catch (error) {
+      console.error("Error fetching financial state:", error);
+      res.status(500).json({ error: "Failed to fetch state" });
+    }
   });
 
-  // Update financial state
-  app.post("/api/financial/state", async (req, res) => {
-    financialEngine.updateState(req.body);
-    res.json(financialEngine.getState());
+  app.patch("/api/financial/state", async (req, res) => {
+    try {
+      financialEngine.updateState(req.body);
+      res.json(financialEngine.getState());
+    } catch (error) {
+      console.error("Error updating financial state:", error);
+      res.status(500).json({ error: "Failed to update state" });
+    }
   });
 
-  // Evaluate opportunity
+  app.post("/api/financial/opportunity", async (req, res) => {
+    try {
+      financialEngine.addOpportunity(req.body);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error adding opportunity:", error);
+      res.status(500).json({ error: "Failed to add opportunity" });
+    }
+  });
+
   app.post("/api/financial/evaluate", async (req, res) => {
     try {
       const { opportunity, bodyActivations, mindActivations, heartActivations } = req.body;
-      if (!opportunity) {
-        return res.status(400).json({ error: "Missing opportunity" });
-      }
       const decision = financialEngine.evaluateOpportunity(
         opportunity,
         bodyActivations,
@@ -336,130 +455,223 @@ export async function registerRoutes(app: Express): Promise<Server> {
       );
       res.json(decision);
     } catch (error) {
-      res.status(500).json({ error: error instanceof Error ? error.message : "Evaluation failed" });
+      console.error("Error evaluating opportunity:", error);
+      res.status(500).json({ error: "Failed to evaluate" });
     }
   });
 
-  // Suggest revenue paths
-  app.get("/api/financial/suggestions", async (_req, res) => {
-    const suggestions = financialEngine.suggestRevenuePaths();
-    res.json(suggestions);
-  });
-
-  // ============================================================================
-  // AGENT SYSTEM ROUTES
-  // ============================================================================
-
-  // Get all agents
-  app.get("/api/agents", async (_req, res) => {
-    const agents = agentSystem.getAgents();
-    res.json(agents);
-  });
-
-  // Get specific agent
-  app.get("/api/agents/:id", async (req, res) => {
-    const agent = agentSystem.getAgent(req.params.id);
-    if (!agent) {
-      return res.status(404).json({ error: "Agent not found" });
-    }
-    res.json(agent);
-  });
-
-  // Get agent stats
-  app.get("/api/agents/stats", async (_req, res) => {
-    const stats = agentSystem.getStats();
-    res.json(stats);
-  });
-
-  // Pause agent
-  app.post("/api/agents/:id/pause", async (req, res) => {
-    const success = agentSystem.pauseAgent(req.params.id);
-    if (!success) {
-      return res.status(404).json({ error: "Agent not found" });
-    }
-    res.json({ success: true });
-  });
-
-  // Resume agent
-  app.post("/api/agents/:id/resume", async (req, res) => {
-    const success = agentSystem.resumeAgent(req.params.id);
-    if (!success) {
-      return res.status(404).json({ error: "Agent not found" });
-    }
-    res.json({ success: true });
-  });
-
-  // ============================================================================
-  // SELF-EVOLUTION ROUTES
-  // ============================================================================
-
-  // Analyze and propose improvements
-  app.post("/api/evolution/analyze", async (req, res) => {
+  app.get("/api/financial/opportunities", async (_req, res) => {
     try {
-      const { targetScope = "all", includeResonanceCheck = true } = req.body;
-      const result = await evolutionEngine.analyze({ targetScope, includeResonanceCheck });
-      res.json(result);
+      const opportunities = financialEngine.getOpportunities();
+      res.json(opportunities);
     } catch (error) {
-      res.status(500).json({ error: error instanceof Error ? error.message : "Analysis failed" });
+      console.error("Error fetching opportunities:", error);
+      res.status(500).json({ error: "Failed to fetch opportunities" });
     }
   });
 
-  // Approve an improvement
+  app.get("/api/financial/suggestions", async (_req, res) => {
+    try {
+      const suggestions = financialEngine.suggestRevenuePaths();
+      res.json(suggestions);
+    } catch (error) {
+      console.error("Error fetching suggestions:", error);
+      res.status(500).json({ error: "Failed to fetch suggestions" });
+    }
+  });
+
+  app.get("/api/financial/decisions", async (_req, res) => {
+    try {
+      const decisions = financialEngine.getDecisions();
+      res.json(decisions);
+    } catch (error) {
+      console.error("Error fetching decisions:", error);
+      res.status(500).json({ error: "Failed to fetch decisions" });
+    }
+  });
+
+  app.post("/api/financial/project", async (req, res) => {
+    try {
+      const { targetAmount } = req.body;
+      if (!targetAmount) {
+        return res.status(400).json({ error: "targetAmount required" });
+      }
+      const projection = financialEngine.getProjectedTimeline(targetAmount);
+      res.json(projection);
+    } catch (error) {
+      console.error("Error projecting timeline:", error);
+      res.status(500).json({ error: "Failed to project timeline" });
+    }
+  });
+
+  // ============================================
+  // SYSTEM MODE API
+  // ============================================
+
+  let systemMode: "admin" | "dev" | "user" = "user";
+
+  app.get("/api/system/mode", async (_req, res) => {
+    res.json({ mode: systemMode });
+  });
+
+  app.post("/api/system/mode", async (req, res) => {
+    const { mode } = req.body;
+    if (!["admin", "dev", "user"].includes(mode)) {
+      return res.status(400).json({ error: "Invalid mode" });
+    }
+    systemMode = mode;
+    await storage.createAuditLog({
+      actor: "system",
+      action: "mode-change",
+      glyphId: null,
+      payload: { newMode: mode },
+    });
+    res.json({ mode: systemMode });
+  });
+
+  app.get("/api/system/health", async (_req, res) => {
+    try {
+      const stats = await storage.getStats();
+      const overseerConfig = overseer.getConfig();
+      const financialState = financialEngine.getState();
+
+      res.json({
+        status: "healthy",
+        mode: systemMode,
+        glyphCount: stats.totalGlyphs,
+        overseerStrict: overseerConfig.strictMode,
+        financialStability: financialState.stabilityScore,
+        timestamp: new Date(),
+      });
+    } catch (error) {
+      console.error("Error fetching health:", error);
+      res.status(500).json({ status: "unhealthy", error: "Health check failed" });
+    }
+  });
+
+  // ============================================
+  // EVOLUTION ENGINE API (User-Gated)
+  // ============================================
+
+  app.get("/api/evolution/status", async (_req, res) => {
+    try {
+      const proposal = evolutionEngine.getCurrentProposal();
+      const history = evolutionEngine.getEvolutionHistory();
+      const version = evolutionEngine.getAppVersion();
+
+      res.json({
+        hasActiveProposal: !!proposal,
+        currentProposal: proposal,
+        historyCount: history.length,
+        appVersion: version,
+      });
+    } catch (error) {
+      console.error("Error fetching evolution status:", error);
+      res.status(500).json({ error: "Failed to fetch evolution status" });
+    }
+  });
+
+  app.post("/api/evolution/start", async (_req, res) => {
+    try {
+      const proposal = await evolutionEngine.startAnalysis();
+      res.json(proposal);
+    } catch (error) {
+      console.error("Error starting analysis:", error);
+      res.status(500).json({ error: "Failed to start analysis" });
+    }
+  });
+
+  app.post("/api/evolution/analyze", async (_req, res) => {
+    try {
+      const analysis = await evolutionEngine.analyzeSystem();
+      res.json(analysis);
+    } catch (error) {
+      console.error("Error analyzing system:", error);
+      res.status(500).json({ error: "Failed to analyze system" });
+    }
+  });
+
+  app.post("/api/evolution/select", async (req, res) => {
+    try {
+      const { improvementId } = req.body;
+      if (!improvementId) {
+        return res.status(400).json({ error: "improvementId required" });
+      }
+      const proposal = await evolutionEngine.selectImprovement(improvementId);
+      if (!proposal) {
+        return res.status(404).json({ error: "Improvement not found or no active proposal" });
+      }
+      res.json(proposal);
+    } catch (error) {
+      console.error("Error selecting improvement:", error);
+      res.status(500).json({ error: "Failed to select improvement" });
+    }
+  });
+
   app.post("/api/evolution/approve", async (req, res) => {
     try {
-      const { proposalId, improvementId, approved, reason } = req.body;
-      if (!proposalId || !improvementId) {
-        return res.status(400).json({ error: "Missing proposalId or improvementId" });
+      const { proposalId, approved, reason } = req.body;
+      if (!proposalId || approved === undefined) {
+        return res.status(400).json({ error: "proposalId and approved required" });
       }
-      const result = await evolutionEngine.approve({ proposalId, improvementId, approved, reason });
-      if (!result) {
-        return res.status(404).json({ error: "Proposal or improvement not found" });
+      const proposal = await evolutionEngine.submitUserApproval(proposalId, approved, reason);
+      if (!proposal) {
+        return res.status(404).json({ error: "Proposal not found" });
       }
-      res.json(result);
+      res.json(proposal);
     } catch (error) {
-      res.status(500).json({ error: error instanceof Error ? error.message : "Approval failed" });
+      console.error("Error submitting approval:", error);
+      res.status(500).json({ error: "Failed to submit approval" });
     }
   });
 
-  // Apply an improvement
   app.post("/api/evolution/apply", async (req, res) => {
     try {
-      const { proposalId, improvementId, dryRun = false } = req.body;
-      if (!proposalId || !improvementId) {
-        return res.status(400).json({ error: "Missing proposalId or improvementId" });
+      const { proposalId } = req.body;
+      if (!proposalId) {
+        return res.status(400).json({ error: "proposalId required" });
       }
-      const result = await evolutionEngine.apply({ proposalId, improvementId, dryRun });
-      if (!result) {
-        return res.status(404).json({ error: "Proposal or improvement not found" });
+      const proposal = await evolutionEngine.applyEvolution(proposalId);
+      if (!proposal) {
+        return res.status(400).json({ error: "Cannot apply - proposal not approved or not found" });
       }
-      res.json(result);
+      res.json(proposal);
     } catch (error) {
-      res.status(500).json({ error: error instanceof Error ? error.message : "Application failed" });
+      console.error("Error applying evolution:", error);
+      res.status(500).json({ error: "Failed to apply evolution" });
     }
   });
 
-  // Rollback an improvement
-  app.post("/api/evolution/rollback/:historyId", async (req, res) => {
-    const success = await evolutionEngine.rollback(req.params.historyId);
-    if (!success) {
-      return res.status(404).json({ error: "History entry not found or rollback unavailable" });
+  app.post("/api/evolution/back", async (_req, res) => {
+    try {
+      const newStage = evolutionEngine.goBack();
+      const proposal = evolutionEngine.getCurrentProposal();
+      res.json({ stage: newStage, proposal });
+    } catch (error) {
+      console.error("Error going back:", error);
+      res.status(500).json({ error: "Failed to go back" });
     }
-    res.json({ success: true });
   });
 
-  // Get evolution state
-  app.get("/api/evolution/state", async (_req, res) => {
-    res.json({
-      currentProposal: evolutionEngine.getCurrentProposal(),
-      history: evolutionEngine.getHistory(),
-    });
+  app.post("/api/evolution/cancel", async (_req, res) => {
+    try {
+      evolutionEngine.cancelProposal();
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error canceling proposal:", error);
+      res.status(500).json({ error: "Failed to cancel proposal" });
+    }
   });
 
-  // Get evolution history
   app.get("/api/evolution/history", async (_req, res) => {
-    res.json(evolutionEngine.getHistory());
+    try {
+      const history = evolutionEngine.getEvolutionHistory();
+      res.json(history);
+    } catch (error) {
+      console.error("Error fetching history:", error);
+      res.status(500).json({ error: "Failed to fetch history" });
+    }
   });
 
-  const httpServer = createServer(app);
   return httpServer;
 }
