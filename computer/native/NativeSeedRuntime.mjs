@@ -8,6 +8,7 @@ import { IndiVerseRuntime } from '../worlds/indiverse.mjs';
 import { WorldFederation } from '../worlds/world-federation.mjs';
 import { Synthia57PackageLoader } from '../residents/synthia57-package-loader.mjs';
 import { StellarLabAdapter } from '../labs/stellar-lab-adapter.mjs';
+import { ConsciousnessRealmPackageLoader } from '../worlds/consciousness-realm-loader.mjs';
 
 const clone = value => value === undefined ? undefined : structuredClone(value);
 
@@ -48,6 +49,7 @@ export class NativeSeedRuntime {
     this.worldFederation = new WorldFederation({ state: this.state, bus: this.bus, mesh: this.meshKernel, residents: this.residents, clock });
     this.synthia57 = new Synthia57PackageLoader({ computer: this, bus: this.bus });
     this.stellarLab = new StellarLabAdapter({ mesh: this.meshKernel, state: this.state, bus: this.bus, clock });
+    this.consciousnessRealm = new ConsciousnessRealmPackageLoader({ computer: this, bus: this.bus });
   }
 
   async boot() {
@@ -197,6 +199,10 @@ export class NativeSeedRuntime {
     if (!r.delivered) throw new Error('compiler mesh service unavailable');
     return r.result;
   }
+
+  async mountConsciousnessRealm(options = {}) { return this.consciousnessRealm.mount(options); }
+  async mountInstalledConsciousnessRealm(options = {}) { return this.consciousnessRealm.mountInstalledPackage(options); }
+  async sendResidentHome(residentId = 'synthia') { return this.consciousnessRealm.attachResident(residentId); }
 
   async registerResident(id, options = {}) { return this.residents.registerResident(id, options); }
   bindResidentRuntime(id, runtime) { return this.residents.bindRuntime(id, runtime); }
