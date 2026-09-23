@@ -8,6 +8,9 @@ on:
       - 'integration/synthia-reality-resident'
     paths:
       - 'computer/mobile/**'
+      - 'computer/runtime/**'
+      - 'computer/worlds/**'
+      - 'computer/tests/**'
       - 'computer/build-mobile-web.mjs'
       - 'computer/build-web.mjs'
       - 'public/mobile-computer.html'
@@ -39,7 +42,7 @@ jobs:
         run: npm install --no-audit --no-fund
 
       - name: Run mobile acceptance tests
-        run: node --test computer/tests/mobile-synthimg.test.mjs computer/tests/resident-mesh-indiverse.test.mjs
+        run: node --test computer/tests/mobile-synthimg.test.mjs computer/tests/resident-mesh-indiverse.test.mjs computer/tests/world-federation.test.mjs
 
       - name: Stage mobile web bundle
         run: npm run build:mobile
