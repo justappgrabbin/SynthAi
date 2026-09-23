@@ -5,8 +5,10 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
+import java.io.FileOutputStream;
+import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 
 final class EventJournal {
@@ -27,7 +29,7 @@ final class EventJournal {
     }
 
     synchronized void append(JSONObject event) {
-        try (FileWriter writer = new FileWriter(pending, StandardCharsets.UTF_8, true)) {
+        try (OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(pending, true), StandardCharsets.UTF_8)) {
             writer.write(event.toString());
             writer.write("\n");
         } catch (Exception ignored) {}
@@ -54,7 +56,7 @@ final class EventJournal {
         try {
             String old = readText(batch.file);
             String newer = pending.exists() ? readText(pending) : "";
-            try (FileWriter writer = new FileWriter(pending, StandardCharsets.UTF_8, false)) {
+            try (OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(pending, false), StandardCharsets.UTF_8)) {
                 writer.write(old);
                 writer.write(newer);
             }
@@ -65,7 +67,7 @@ final class EventJournal {
     private String readText(File file) {
         StringBuilder text = new StringBuilder();
         if (file == null || !file.exists()) return "";
-        try (BufferedReader reader = new BufferedReader(new FileReader(file, StandardCharsets.UTF_8))) {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8))) {
             String line;
             while ((line = reader.readLine()) != null) {
                 text.append(line).append("\n");
@@ -77,7 +79,7 @@ final class EventJournal {
     private JSONArray read(File file) {
         JSONArray array = new JSONArray();
         if (file == null || !file.exists()) return array;
-        try (BufferedReader reader = new BufferedReader(new FileReader(file, StandardCharsets.UTF_8))) {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8))) {
             String line;
             while ((line = reader.readLine()) != null) {
                 if (line.trim().isEmpty()) continue;
