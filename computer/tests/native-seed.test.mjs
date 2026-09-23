@@ -12,6 +12,9 @@ test('NATIVE SEED: boots mesh-first with state space, execution, compiler, resid
   assert.ok(runtime.worldFederation.layer('mechanics:human-agent'));
   assert.ok(runtime.worldFederation.layer('lab:triform'));
   assert.ok(runtime.worldFederation.layer('lab:stellar'));
+  assert.equal(runtime.worldFederation.layer('lab:stellar').bound,true);
+  assert.equal(runtime.stellarLab.snapshot().mounted,true);
+  assert.equal(runtime.meshKernel.participant('lab:stellar').residency,'active');
 });
 
 test('NATIVE SEED: state-space and automata calls travel through relational mesh', async()=>{
