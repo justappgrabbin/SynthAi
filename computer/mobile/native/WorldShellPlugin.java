@@ -8,6 +8,8 @@ import android.content.pm.LauncherApps;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.os.Process;
+import android.provider.Settings;
+import android.text.TextUtils;
 
 import com.getcapacitor.JSArray;
 import com.getcapacitor.JSObject;
@@ -106,6 +108,56 @@ public class WorldShellPlugin extends Plugin {
         } catch (Exception error) {
             call.reject("Unable to launch " + packageName, error);
         }
+    }
+
+    private boolean isObservationEnabled() {
+        String enabled = Settings.Secure.getString(
+            getContext().getContentResolver(),
+            Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES
+        );
+        if (enabled == null || enabled.isBlank()) return false;
+
+        String target = new ComponentName(getContext(), WorldObservationService.class).flattenToString();
+        TextUtils.SimpleStringSplitter splitter = new TextUtils.SimpleStringSplitter(':');
+        splitter.setString(enabled);
+        while (splitter.hasNext()) {
+            if (target.equalsIgnoreCase(splitter.next())) return true;
+        }
+        return false;
+    }
+
+    @PluginMethod
+    public void accessibilityStatus(PluginCall call) {
+        JSObject result = new JSObject();
+        result.put("enabled", isObservationEnabled());
+        call.resolve(result);
+    }
+
+    @PluginMethod
+    public void openAccessibilitySettings(PluginCall call) {
+        try {
+            Intent intent = new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            getContext().startActivity(intent);
+            JSObject result = new JSObject();
+            result.put("opened", true);
+            call.resolve(result);
+        } catch (Exception error) {
+            call.reject("Unable to open Android accessibility settings", error);
+        }
+    }
+
+    @PluginMethod
+    public void latestObservation(PluginCall call) {
+        String json = getContext()
+            .getSharedPreferences(WorldObservationService.PREFS, Context.MODE_PRIVATE)
+            .getString(WorldObservationService.KEY_LATEST, null);
+
+        JSObject result = new JSObject();
+        result.put("available", json != null);
+        result.put("observationJson", json);
+        result.put("enabled", isObservationEnabled());
+        call.resolve(result);
     }
 
     @PluginMethod
