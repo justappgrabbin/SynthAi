@@ -85,7 +85,7 @@ ADDED (registry only, status PRESENT with excavation probe evidence unless noted
 - back-up-:kimi-layer5-ssm (resolve_state) — SSM/attractor machinery (step/processMeshEvent/predict/recall/getMood, 64-hex Hamming-coupled state); nearest-attractor candidate; complements mesh-state-space. Probe: step([1,0,1,0,1,0])->out[0]=0.4714, recall self-sim=1.0.
 - back-up-:kimi-coordinate-engine (resolve_address) — 13-layer BigInt mixed-radix addressing + resonance; SPECIALIZED/PARALLEL scheme; execution-spine canonical-address.mjs REMAINS authority. Probe: toAddress=12023169149007581n, roundtrip true.
 - back-up-:kimi-phase-space-engine (resolve_state) — five-stage deterministic compose with trace + Who/What/Where/When/Why projections. Probe: compose complete=true, double-run deterministic.
-- back-up-:pure-synthia-emergent-state-space (new capability state_space_runtime) — v0.6.7 VERSIONED ANCESTOR of mounted kimi mesh-state-space; EmergentMesh 320 nodes/960 edges; runtime/task/recall layer unmounted. Caveat: runtime.mjs needs absent ../canonicalState.mjs — use core/mesh directly, not runtime.mjs.
+- back-up-:pure-synthia-emergent-state-space (new capability state_space_runtime) — v0.6.7 VERSIONED ANCESTOR of mounted kimi mesh-state-space; EmergentMesh 320 nodes/960 edges; runtime/task/recall layer unmounted. Caveat: runtime.mjs needs absent ../canonicalState.mjs — use core/mesh directly.
 - back-up-:pure-synthia-grammar-kernel (new capability linguistic_kernel) — five-projection linguistic kernel (resolve/step/replay). Probe: step accepted, eventId ling-fa1db543.
 - back-up-:trainable-assembly-state-space (new capability state_space_enumeration) — 20/22 files byte-identical to kimi tree + index.mjs estimator (1920n probe) + govinda-structure.js.
 
