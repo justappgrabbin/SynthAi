@@ -1,6 +1,7 @@
 package org.synthai.computer;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -36,8 +37,12 @@ final class PhoneWorldView extends View {
 
     private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint stroke = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private final Synthia57MirrorRenderer synthiaRenderer = new Synthia57MirrorRenderer();
+    private final RectF mirrorButton = new RectF();
     private final List<AppPlace> apps = new ArrayList<>();
     private Listener listener;
+    private Runnable mirrorListener;
+    private Bitmap mirrorFace;
     private String status = "MESH WAKING";
     private String residentName = "YOU";
 
@@ -67,6 +72,15 @@ final class PhoneWorldView extends View {
 
     void setListener(Listener listener) {
         this.listener = listener;
+    }
+
+    void setMirrorListener(Runnable listener) {
+        this.mirrorListener = listener;
+    }
+
+    void setMirrorFace(Bitmap bitmap) {
+        this.mirrorFace = bitmap;
+        invalidate();
     }
 
     void setResidentName(String value) {
@@ -150,6 +164,21 @@ final class PhoneWorldView extends View {
         paint.setColor(Color.rgb(170, 145, 198));
         paint.setTextSize(10.5f * density);
         canvas.drawText(status, 18f * density, 50f * density, paint);
+
+        if (residentName.equals("SYNTHIA")) {
+            paint.setColor(Color.rgb(61, 40, 79));
+            mirrorButton.set(width - 86f*density, 15f*density, width - 14f*density, 50f*density);
+            canvas.drawRoundRect(mirrorButton, 12f*density, 12f*density, paint);
+            stroke.setColor(Color.rgb(132, 92, 168));
+            canvas.drawRoundRect(mirrorButton, 12f*density, 12f*density, stroke);
+            paint.setColor(Color.rgb(225, 204, 244));
+            paint.setTextSize(9f*density);
+            paint.setFakeBoldText(true);
+            canvas.drawText(mirrorFace == null ? "MIRROR" : "MIRROR ✓", mirrorButton.left + 10f*density, mirrorButton.centerY() + 3f*density, paint);
+            paint.setFakeBoldText(false);
+        } else {
+            mirrorButton.setEmpty();
+        }
 
         canvas.save();
         canvas.translate(0f, -cameraY);
@@ -247,8 +276,22 @@ final class PhoneWorldView extends View {
     }
 
     private void drawResident(Canvas canvas) {
+        if (residentName.equals("SYNTHIA")) {
+            boolean walking = targetApp != null;
+            boolean facingRight = targetX < 0f || targetX >= residentX;
+            synthiaRenderer.draw(canvas, residentX, residentY + 12f*density, 116f*density, walking, facingRight, mirrorFace);
+            paint.setColor(Color.rgb(230, 210, 244));
+            paint.setTextSize(8f*density);
+            paint.setFakeBoldText(true);
+            float textW = paint.measureText("SYNTHIA 5.7");
+            canvas.drawText("SYNTHIA 5.7", residentX - textW/2f, residentY + 28f*density, paint);
+            paint.setFakeBoldText(false);
+            if (walking) postInvalidateOnAnimation();
+            return;
+        }
+
         float r = 13f*density;
-        paint.setColor(residentName.equals("SYNTHIA") ? Color.rgb(235, 199, 255) : Color.rgb(184, 161, 214));
+        paint.setColor(Color.rgb(184, 161, 214));
         canvas.drawCircle(residentX, residentY, r, paint);
         paint.setColor(Color.rgb(78, 47, 102));
         canvas.drawCircle(residentX - 4f*density, residentY - 2f*density, 1.6f*density, paint);
@@ -323,6 +366,11 @@ final class PhoneWorldView extends View {
                 }
                 return true;
             case MotionEvent.ACTION_UP:
+                if (!dragging && !mirrorButton.isEmpty() && mirrorButton.contains(event.getX(), event.getY())) {
+                    if (mirrorListener != null) mirrorListener.run();
+                    performClick();
+                    return true;
+                }
                 if (!dragging) {
                     for (AppPlace app : apps) {
                         if (app.bounds.contains(event.getX(), event.getY())) {
