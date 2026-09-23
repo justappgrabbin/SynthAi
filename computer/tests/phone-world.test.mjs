@@ -163,3 +163,55 @@ test('PHONE WORLD: files contacts and settings become private-by-default world o
   assert.equal(runtime.meshKernel.participant('phone:contact:person-1').publicState.private,true);
   assert.ok(runtime.meshKernel.participant('phone:contact:person-1').privateStateRef);
 });
+
+
+test('PHONE WORLD: live interface becomes world bricks and real actions require receipts',async()=>{
+  const {runtime,observed}=await rig('phone-world-interface-bricks');
+  await runtime.bindPhoneHost(fakePhoneHost());
+
+  const surface=await runtime.phoneRequest('interface.observe',{
+    residentId:'synthia',
+    snapshot:{
+      packageName:'com.openai.chatgpt',
+      windowId:12,
+      title:'Conversation',
+      root:{
+        path:'0',
+        className:'android.widget.ScrollView',
+        scrollable:true,
+        children:[
+          {path:'0.0',className:'android.widget.EditText',hintText:'Message',editable:true,focusable:true},
+          {path:'0.1',className:'android.widget.Button',text:'Send',clickable:true},
+        ],
+      },
+    },
+  });
+
+  const send=surface.bricks.find(brick=>brick.label==='Send');
+  const input=surface.bricks.find(brick=>brick.role==='input');
+  assert.ok(send);
+  assert.ok(input);
+  assert.equal(runtime.indiverse.canonicalObject('interface-brick:'+send.id).kind,'control-plinth');
+  assert.equal(runtime.indiverse.canonicalObject('interface-brick:'+input.id).kind,'writing-desk');
+
+  const action=await runtime.phoneRequest('interface.action',{
+    brickId:send.id,
+    action:'activate',
+    residentId:'synthia',
+  });
+  assert.equal(action.status,'queued');
+  const pending=await runtime.phoneRequest('interface.actions.pending',{});
+  assert.equal(pending.length,1);
+  assert.equal(pending[0].binding.path,'0.1');
+  assert.equal(pending[0].action,'click');
+
+  const receipt=await runtime.phoneRequest('interface.actions.receipt',{
+    actionId:action.id,
+    success:true,
+    packageName:'com.openai.chatgpt',
+    windowId:12,
+  });
+  assert.equal(receipt.status,'completed');
+  assert.equal((await runtime.phoneRequest('interface.actions.pending',{})).length,0);
+  assert.equal(observed.at(-1).type,'phone:interface-action-receipt');
+});
