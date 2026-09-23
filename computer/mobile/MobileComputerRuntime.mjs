@@ -13,6 +13,7 @@ import { RelationalMeshKernel } from '../runtime/mesh-kernel.mjs';
 import { DormantCompilerBroker } from '../runtime/dormant-compiler.mjs';
 import { ResidentHost } from '../runtime/resident-host.mjs';
 import { IndiVerseRuntime } from '../worlds/indiverse.mjs';
+import { WorldFederation } from '../worlds/world-federation.mjs';
 
 export const ADDRESS_FIELDS = Object.freeze([
   'planetary', 'dimension', 'gate', 'line', 'color', 'tone', 'base',
@@ -215,6 +216,9 @@ export class MobileComputerRuntime {
       state: this.state, bus: this.bus, mesh: this.meshKernel,
       compiler: this.compiler, indiverse: this.indiverse,
     });
+    this.worldFederation = new WorldFederation({
+      state: this.state, bus: this.bus, mesh: this.meshKernel, residents: this.residents,
+    });
   }
 
   async boot() {
@@ -230,6 +234,7 @@ export class MobileComputerRuntime {
     } else {
       await this.meshKernel.setResidency('computer:self', 'active');
     }
+    await this.worldFederation.seedCanonicalLayers();
     if (!this.shells.has('workspace')) this.shells.register('workspace', { name: 'Mobile Workspace', kind: 'mobile' });
     if (!this.shells.has('compact')) this.shells.register('compact', { name: 'Compact Phone Shell', kind: 'mobile-lazy' });
     registerCanonicalMicros(this.micros);
@@ -247,6 +252,7 @@ export class MobileComputerRuntime {
       'resident-host': '5.7-compatible resident world-port host with sleep/wake continuity',
       'indiverse': 'Canonical shared reality plus host-specific qualia/world-grammar transforms',
       'on-demand-compiler': 'Dormant compiler broker with content-hash reuse; compiler adapter binds separately',
+      'world-federation': 'Mesh roles for home, daily-life mechanics, diagnostic lab, research lab and profile worlds',
     })) {
       if (!this.capabilityRegistry.has(id)) this.capabilities.register(id, { providers: ['mobile-computer'], description });
     }
@@ -259,6 +265,7 @@ export class MobileComputerRuntime {
     this.services.register('resident-host', { provider: this.residents, contract: 'registerResident/bindRuntime/registerWorld/enterWorld/sleep/wake' });
     this.services.register('indiverse', { provider: this.indiverse, contract: 'createWorld/registerCanonicalObject/renderShared/renderInWorld/visitorContract' });
     this.services.register('compiler-broker', { provider: this.compiler, contract: 'attachCompiler/ensure/snapshot' });
+    this.services.register('world-federation', { provider: this.worldFederation, contract: 'defineLayer/seedCanonicalLayers/bind/invoke/attachHome/registerProfileWorld' });
 
     await this.state.set('computer.boot', {
       status: 'ready',
@@ -537,6 +544,7 @@ export class MobileComputerRuntime {
       residents: this.residents.snapshot(),
       indiverse: this.indiverse.snapshot(),
       compiler: this.compiler.snapshot(),
+      worlds: this.worldFederation.snapshot(),
     };
   }
 }
