@@ -1,224 +1,518 @@
-import type { BirthData, HDActivation, ChartLayer, ChartLayerData, NatalBlueprint, FieldDiagnosis, ZodiacSign, HDType, HDCenter } from "@shared/schema";
-import { MANDALA_CONSTANTS, GATE_SEQUENCE, GATE_MEANINGS } from "@shared/schema";
+import {
+  HDActivation,
+  ZodiacSign,
+  zodiacSigns,
+  MANDALA_CONSTANTS,
+  GATE_SEQUENCE,
+  GATE_MEANINGS,
+  FieldDiagnosis,
+  ChartLayer,
+} from "@shared/schema";
 
-const ZODIAC_SIGNS: ZodiacSign[] = [
-  "Aries", "Taurus", "Gemini", "Cancer", "Leo", "Virgo",
-  "Libra", "Scorpio", "Sagittarius", "Capricorn", "Aquarius", "Pisces"
-];
+const SIGN_BASE: Record<ZodiacSign, number> = {
+  Aries: 0,
+  Taurus: 30,
+  Gemini: 60,
+  Cancer: 90,
+  Leo: 120,
+  Virgo: 150,
+  Libra: 180,
+  Scorpio: 210,
+  Sagittarius: 240,
+  Capricorn: 270,
+  Aquarius: 300,
+  Pisces: 330,
+};
 
-function getGateAtDegree(degree: number): number {
-  const normalizedDegree = ((degree % 360) + 360) % 360;
+export function calculateFaganBradleyAyanamsa(year: number): number {
+  return (
+    MANDALA_CONSTANTS.FAGAN_BRADLEY_BASE +
+    MANDALA_CONSTANTS.PRECESSION_RATE * (year - MANDALA_CONSTANTS.FAGAN_BRADLEY_EPOCH)
+  );
+}
 
-  for (let i = GATE_SEQUENCE.length - 1; i >= 0; i--) {
-    if (normalizedDegree >= GATE_SEQUENCE[i].start) {
-      return GATE_SEQUENCE[i].gate;
+export function degreeToSign(totalDeg: number): ZodiacSign {
+  const normalized = ((totalDeg % 360) + 360) % 360;
+  const signIndex = Math.floor(normalized / 30);
+  return zodiacSigns[signIndex];
+}
+
+export function getHDActivation(
+  sign: ZodiacSign,
+  deg: number,
+  min: number = 0,
+  sec: number = 0
+): HDActivation {
+  const totalDeg = SIGN_BASE[sign] + deg + min / 60 + sec / 3600;
+  const normalized = ((totalDeg % 360) + 360) % 360;
+
+  let gate = 0;
+  let gateStart = 0;
+
+  for (let i = 0; i < GATE_SEQUENCE.length; i++) {
+    const current = GATE_SEQUENCE[i];
+    const next = GATE_SEQUENCE[(i + 1) % GATE_SEQUENCE.length];
+    const end = next.start === 0 ? 360 : next.start;
+
+    if (current.start === 358.25) {
+      if (normalized >= 358.25 || normalized < 3.875) {
+        gate = current.gate;
+        gateStart = normalized >= 358.25 ? current.start : 358.25 - 360;
+        break;
+      }
+    } else if (normalized >= current.start && normalized < end) {
+      gate = current.gate;
+      gateStart = current.start;
+      break;
     }
   }
-  return GATE_SEQUENCE[0].gate;
-}
 
-function degreeToActivation(degree: number): HDActivation {
-  const normalizedDegree = ((degree % 360) + 360) % 360;
+  let within = normalized - gateStart;
+  if (within < 0) within += 360;
 
-  const signIndex = Math.floor(normalizedDegree / 30);
-  const sign = ZODIAC_SIGNS[signIndex];
-  const signDegree = normalizedDegree % 30;
-  const deg = Math.floor(signDegree);
-  const minuteDecimal = (signDegree - deg) * 60;
-  const minute = Math.floor(minuteDecimal);
-  const second = Math.floor((minuteDecimal - minute) * 60);
+  const { LINE_ARC, COLOR_ARC, TONE_ARC, BASE_ARC } = MANDALA_CONSTANTS;
 
-  const gate = getGateAtDegree(normalizedDegree);
+  const line = Math.floor(within / LINE_ARC) + 1;
+  const remLine = within % LINE_ARC;
 
-  const gateInfo = GATE_SEQUENCE.find(g => g.gate === gate)!;
-  const degreeInGate = normalizedDegree - gateInfo.start;
+  const color = Math.floor(remLine / COLOR_ARC) + 1;
+  const remColor = remLine % COLOR_ARC;
 
-  const line = Math.min(6, Math.floor(degreeInGate / MANDALA_CONSTANTS.LINE_ARC) + 1);
-  const degreeInLine = degreeInGate - (line - 1) * MANDALA_CONSTANTS.LINE_ARC;
-  const color = Math.min(6, Math.floor(degreeInLine / MANDALA_CONSTANTS.COLOR_ARC) + 1);
-  const degreeInColor = degreeInLine - (color - 1) * MANDALA_CONSTANTS.COLOR_ARC;
-  const tone = Math.min(6, Math.floor(degreeInColor / MANDALA_CONSTANTS.TONE_ARC) + 1);
-  const degreeInTone = degreeInColor - (tone - 1) * MANDALA_CONSTANTS.TONE_ARC;
-  const base = Math.min(5, Math.floor(degreeInTone / MANDALA_CONSTANTS.BASE_ARC) + 1);
+  const tone = Math.floor(remColor / TONE_ARC) + 1;
+  const remTone = remColor % TONE_ARC;
+
+  const base = Math.floor(remTone / BASE_ARC) + 1;
 
   return {
-    gate,
-    line,
-    color,
-    tone,
-    base,
-    eclipticDeg: normalizedDegree,
+    gate: Math.min(64, Math.max(1, gate)),
+    line: Math.min(6, Math.max(1, line)),
+    color: Math.min(6, Math.max(1, color)),
+    tone: Math.min(6, Math.max(1, tone)),
+    base: Math.min(5, Math.max(1, base)),
+    eclipticDeg: normalized,
     sign,
-    degree: deg,
-    minute,
-    second,
+    degree: Math.floor(deg),
+    minute: Math.floor(min),
+    second: sec,
   };
 }
 
-export function calculateResonanceScore(birthData: BirthData): {
-  blueprint: NatalBlueprint;
-  diagnosis: FieldDiagnosis;
-  compositeSentence: string;
-  correctionSentence?: string;
-  recommendations: string[];
-} {
-  const birthDateTime = new Date(`${birthData.date}T${birthData.time}:00`);
-  const j2000 = new Date("2000-01-01T12:00:00Z");
-  const daysSinceJ2000 = (birthDateTime.getTime() - j2000.getTime()) / (1000 * 60 * 60 * 24);
+export function tropicalToSidereal(
+  tropicalDeg: number,
+  year: number
+): number {
+  const ayanamsa = calculateFaganBradleyAyanamsa(year);
+  return ((tropicalDeg - ayanamsa) % 360 + 360) % 360;
+}
 
-  const sunLongitude = (280.460 + 0.9856474 * daysSinceJ2000) % 360;
-  const moonLongitude = (218.316 + 13.176396 * daysSinceJ2000) % 360;
-  const mercuryLongitude = (sunLongitude + 27 * Math.sin(daysSinceJ2000 * 0.16)) % 360;
-  const venusLongitude = (sunLongitude + 45 * Math.sin(daysSinceJ2000 * 0.1)) % 360;
-  const marsLongitude = (sunLongitude + 100 * Math.sin(daysSinceJ2000 * 0.053)) % 360;
-  const jupiterLongitude = (sunLongitude + 150 * Math.sin(daysSinceJ2000 * 0.0084)) % 360;
-  const saturnLongitude = (sunLongitude + 200 * Math.sin(daysSinceJ2000 * 0.0034)) % 360;
-  const uranusLongitude = (sunLongitude + 250 * Math.sin(daysSinceJ2000 * 0.0012)) % 360;
-  const neptuneLongitude = (sunLongitude + 290 * Math.sin(daysSinceJ2000 * 0.0006)) % 360;
-  const plutoLongitude = (sunLongitude + 320 * Math.sin(daysSinceJ2000 * 0.0004)) % 360;
-  const northNodeLongitude = (125.04 - 0.052954 * daysSinceJ2000) % 360;
-  const southNodeLongitude = (northNodeLongitude + 180) % 360;
-  const ascendantLongitude = (sunLongitude + 90) % 360;
-  const midheavenLongitude = (sunLongitude + 180) % 360;
+export function tropicalToDraconic(
+  tropicalDeg: number,
+  northNodeDeg: number
+): number {
+  return ((tropicalDeg - northNodeDeg) % 360 + 360) % 360;
+}
 
-  const tropicalSun = degreeToActivation(sunLongitude);
+export function formatActivation(act: HDActivation): string {
+  return `${act.gate}.${act.line}.${act.color}.${act.tone}.${act.base}`;
+}
 
-  const ayanamsa = MANDALA_CONSTANTS.FAGAN_BRADLEY_BASE +
-    (birthDateTime.getFullYear() - MANDALA_CONSTANTS.FAGAN_BRADLEY_EPOCH) * MANDALA_CONSTANTS.PRECESSION_RATE;
+export function formatActivationShort(act: HDActivation): string {
+  return `${act.gate}.${act.line}`;
+}
 
-  const nodeShift = 360 - northNodeLongitude;
+export function getGateMeaning(gate: number): { name: string; theme: string; center: string } {
+  return GATE_MEANINGS[gate] || { name: "Unknown", theme: "unknown energy", center: "Unknown" };
+}
 
-  const createLayer = (layer: ChartLayer): ChartLayerData => {
-    let offset = 0;
-    if (layer === "mind") offset = -ayanamsa;
-    if (layer === "heart") offset = nodeShift;
+export function generateSentence(activations: HDActivation[], layer: ChartLayer): string {
+  if (activations.length === 0) return "";
 
-    return {
-      layer,
-      ayanamsa: layer === "mind" ? ayanamsa : undefined,
-      nodeShift: layer === "heart" ? nodeShift : undefined,
-      sun: degreeToActivation(sunLongitude + offset),
-      moon: degreeToActivation(moonLongitude + offset),
-      mercury: degreeToActivation(mercuryLongitude + offset),
-      venus: degreeToActivation(venusLongitude + offset),
-      mars: degreeToActivation(marsLongitude + offset),
-      jupiter: degreeToActivation(jupiterLongitude + offset),
-      saturn: degreeToActivation(saturnLongitude + offset),
-      uranus: degreeToActivation(uranusLongitude + offset),
-      neptune: degreeToActivation(neptuneLongitude + offset),
-      pluto: degreeToActivation(plutoLongitude + offset),
-      northNode: degreeToActivation(northNodeLongitude + offset),
-      southNode: degreeToActivation(southNodeLongitude + offset),
-      ascendant: degreeToActivation(ascendantLongitude + offset),
-      descendant: degreeToActivation((ascendantLongitude + 180) % 360 + offset),
-      midheaven: degreeToActivation(midheavenLongitude + offset),
-      imumCoeli: degreeToActivation((midheavenLongitude + 180) % 360 + offset),
-    };
-  };
-
-  const bodyLayer = createLayer("body");
-  const mindLayer = createLayer("mind");
-  const heartLayer = createLayer("heart");
-
-  const allGates = [
-    bodyLayer.sun.gate, bodyLayer.moon.gate, bodyLayer.mars.gate, bodyLayer.venus.gate,
-    mindLayer.sun.gate, mindLayer.moon.gate, mindLayer.mars.gate, mindLayer.venus.gate,
-    heartLayer.sun.gate, heartLayer.moon.gate, heartLayer.mars.gate, heartLayer.venus.gate,
-  ];
-
-  const centerMap: Record<number, HDCenter> = {};
-  Object.entries(GATE_MEANINGS).forEach(([gate, info]) => {
-    centerMap[parseInt(gate)] = info.center;
+  const parts = activations.map((act) => {
+    const meaning = getGateMeaning(act.gate);
+    return `${meaning.theme} (${act.gate}.${act.line})`;
   });
 
-  const activatedCenters = [...new Set(allGates.map(g => centerMap[g]))].filter(Boolean);
+  const layerName = layer === "body" ? "Body" : layer === "mind" ? "Mind" : "Heart";
+  
+  if (parts.length === 1) {
+    return `The ${layerName} expresses through ${parts[0]}.`;
+  }
 
-  const sacralActive = activatedCenters.includes("Sacral");
-  const throatActive = activatedCenters.includes("Throat");
-  const heartActive = activatedCenters.includes("Heart");
+  const last = parts.pop();
+  return `The ${layerName} expresses through ${parts.join(", ")}, and ${last}.`;
+}
 
-  let hdType: HDType = "Generator";
-  if (!sacralActive && !throatActive) hdType = "Reflector";
-  else if (!sacralActive && heartActive) hdType = "Projector";
-  else if (sacralActive && throatActive && heartActive) hdType = "ManifestingGenerator";
-  else if (!sacralActive && throatActive) hdType = "Manifestor";
+export function calculateResonanceScore(
+  hdAlignment: number,
+  iChingProbability: number,
+  frictionFactor: number
+): number {
+  if (frictionFactor <= 0) return 0;
+  return (hdAlignment * iChingProbability) / frictionFactor;
+}
 
-  const gateCounts = new Map<number, number>();
-  allGates.forEach(g => gateCounts.set(g, (gateCounts.get(g) || 0) + 1));
-  const uniqueGates = gateCounts.size;
+export function calculateCoherenceScore(
+  missingNodes: number,
+  imbalanceDeviation: number,
+  disorderVariance: number
+): number {
+  let score = 100;
+  score -= missingNodes * 25;
+  score -= imbalanceDeviation * 0.5;
+  score -= disorderVariance * 0.3;
+  return Math.max(0, Math.min(100, score));
+}
 
-  let definition: NatalBlueprint["definition"] = "Single";
-  if (uniqueGates < 4) definition = "None";
-  else if (uniqueGates < 7) definition = "Split";
-  else if (uniqueGates < 10) definition = "TripleSplit";
-  else definition = "QuadrupleSplit";
+export function calculateHDAlignment(
+  activations: HDActivation[],
+  targetGates?: number[]
+): number {
+  if (!targetGates || targetGates.length === 0) {
+    const uniqueGates = new Set(activations.map((a) => a.gate));
+    return Math.min(1, uniqueGates.size / 64);
+  }
 
-  const blueprint: NatalBlueprint = {
-    birthData,
-    body: bodyLayer,
-    mind: mindLayer,
-    heart: heartLayer,
-    hdType,
-    definition,
-    activatedChannels: [],
-    activatedCenters,
-  };
+  const activeGates = new Set(activations.map((a) => a.gate));
+  const matched = targetGates.filter((g) => activeGates.has(g)).length;
+  return matched / targetGates.length;
+}
 
-  const gateVariety = uniqueGates / 12;
-  const layerAlignment = 1 - Math.abs(bodyLayer.sun.gate - mindLayer.sun.gate) / 64;
-  const heartAlignment = 1 - Math.abs(bodyLayer.sun.gate - heartLayer.sun.gate) / 64;
+export function calculateFrictionFactor(activations: HDActivation[]): number {
+  const lineDistribution = [0, 0, 0, 0, 0, 0];
+  activations.forEach((a) => {
+    if (a.line >= 1 && a.line <= 6) {
+      lineDistribution[a.line - 1]++;
+    }
+  });
 
-  const hdAlignment = (gateVariety + layerAlignment + heartAlignment) / 3;
-  const iChingProbability = 0.5 + (tropicalSun.line / 6) * 0.3;
-  const frictionFactor = 0.7 + (1 - layerAlignment) * 0.3;
+  const total = activations.length;
+  if (total === 0) return 0.5;
 
-  const coherenceScore = Math.round(hdAlignment * 100);
-  const resonanceScore = (hdAlignment * iChingProbability) / frictionFactor;
-  const approved = coherenceScore >= 70 && resonanceScore >= 0.5;
+  const expected = total / 6;
+  let variance = 0;
+  lineDistribution.forEach((count) => {
+    variance += Math.pow(count - expected, 2);
+  });
+  variance /= 6;
 
-  const diagnosis: FieldDiagnosis = {
-    missingNodes: [],
-    chargeImbalance: [],
-    chartDisorder: [],
+  const maxVariance = Math.pow(total, 2) / 6;
+  const normalizedVariance = variance / maxVariance;
+
+  return 0.1 + normalizedVariance * 0.9;
+}
+
+export function calculateIChingProbability(activations: HDActivation[]): number {
+  if (activations.length === 0) return 0.5;
+
+  let yangCount = 0;
+  let yinCount = 0;
+
+  activations.forEach((a) => {
+    if (a.line <= 3) yangCount++;
+    else yinCount++;
+  });
+
+  const balance = Math.abs(yangCount - yinCount) / activations.length;
+  return 1 - balance * 0.5;
+}
+
+const HD_CHANNELS: Array<[number, number]> = [
+  [1, 8], [2, 14], [3, 60], [4, 63], [5, 15], [6, 59], [7, 31],
+  [9, 52], [10, 20], [10, 34], [10, 57], [11, 56], [12, 22], [13, 33],
+  [16, 48], [17, 62], [18, 58], [19, 49], [20, 34], [20, 57], [21, 45],
+  [23, 43], [24, 61], [25, 51], [26, 44], [27, 50], [28, 38], [29, 46],
+  [30, 41], [32, 54], [34, 57], [35, 36], [37, 40], [39, 55], [42, 53],
+  [47, 64],
+];
+
+function detectMissingHarmonics(
+  bodyActivations: HDActivation[],
+  mindActivations: HDActivation[],
+  heartActivations: HDActivation[]
+): FieldDiagnosis["missingNodes"] {
+  const missingNodes: FieldDiagnosis["missingNodes"] = [];
+
+  const pairs = [
+    { idx: 0, acts1: bodyActivations, acts2: mindActivations, label: "body-mind" },
+    { idx: 1, acts1: mindActivations, acts2: heartActivations, label: "mind-heart" },
+    { idx: 2, acts1: bodyActivations, acts2: heartActivations, label: "body-heart" },
+  ];
+
+  pairs.forEach(({ idx, acts1, acts2 }) => {
+    if (acts1.length === 0 || acts2.length === 0) return;
+
+    const gates1 = new Set(acts1.map((a) => a.gate));
+    const gates2 = new Set(acts2.map((a) => a.gate));
+
+    let channelsWithOneEnd = 0;
+    let crossLayerComplete = 0;
+
+    HD_CHANNELS.forEach(([g1, g2]) => {
+      const layer1HasG1 = gates1.has(g1);
+      const layer1HasG2 = gates1.has(g2);
+      const layer2HasG1 = gates2.has(g1);
+      const layer2HasG2 = gates2.has(g2);
+
+      const anyHasEnd = layer1HasG1 || layer1HasG2 || layer2HasG1 || layer2HasG2;
+
+      if (anyHasEnd) {
+        channelsWithOneEnd++;
+
+        const crossComplete =
+          (layer1HasG1 && layer2HasG2) ||
+          (layer1HasG2 && layer2HasG1) ||
+          (layer1HasG1 && layer1HasG2) ||
+          (layer2HasG1 && layer2HasG2);
+
+        if (crossComplete) {
+          crossLayerComplete++;
+        }
+      }
+    });
+
+    if (channelsWithOneEnd > 0 && crossLayerComplete < channelsWithOneEnd) {
+      missingNodes.push({
+        pairIdx: idx,
+        expected: channelsWithOneEnd,
+        actual: crossLayerComplete,
+        gap: channelsWithOneEnd - crossLayerComplete,
+      });
+    }
+  });
+
+  return missingNodes;
+}
+
+function detectResonanceImbalance(
+  bodyActivations: HDActivation[],
+  mindActivations: HDActivation[],
+  heartActivations: HDActivation[]
+): FieldDiagnosis["chargeImbalance"] {
+  const imbalances: FieldDiagnosis["chargeImbalance"] = [];
+  const TOLERANCE = 15;
+
+  const bodyPairs: Array<[string, HDActivation[], string, HDActivation[]]> = [
+    ["body", bodyActivations, "mind", mindActivations],
+    ["mind", mindActivations, "heart", heartActivations],
+    ["body", bodyActivations, "heart", heartActivations],
+  ];
+
+  bodyPairs.forEach(([name1, acts1, name2, acts2]) => {
+    if (acts1.length === 0 || acts2.length === 0) return;
+
+    const avgGate1 = acts1.reduce((sum, a) => sum + a.gate, 0) / acts1.length;
+    const avgGate2 = acts2.reduce((sum, a) => sum + a.gate, 0) / acts2.length;
+
+    const avgLine1 = acts1.reduce((sum, a) => sum + a.line, 0) / acts1.length;
+    const avgLine2 = acts2.reduce((sum, a) => sum + a.line, 0) / acts2.length;
+
+    const natalDiff = Math.abs(avgGate1 - avgGate2);
+    const lineDiff = Math.abs(avgLine1 - avgLine2);
+    const currentDiff = (natalDiff + lineDiff * 10) / 2;
+
+    const deviation = Math.abs(natalDiff - currentDiff);
+
+    if (deviation > TOLERANCE || lineDiff > 2) {
+      imbalances.push({
+        bodies: [name1, name2],
+        natalDiff: natalDiff,
+        currentDiff: currentDiff,
+        deviation: Math.max(deviation, lineDiff * 5),
+      });
+    }
+  });
+
+  return imbalances;
+}
+
+export interface LabeledActivation extends HDActivation {
+  celestialBody?: string;
+}
+
+function detectChartDisorder(
+  bodyActivations: HDActivation[],
+  mindActivations: HDActivation[],
+  heartActivations: HDActivation[]
+): FieldDiagnosis["chartDisorder"] {
+  const disorders: FieldDiagnosis["chartDisorder"] = [];
+  const VARIANCE_THRESHOLD = 100;
+
+  const bodyAvg = bodyActivations.length > 0
+    ? bodyActivations.reduce((s, a) => s + a.eclipticDeg, 0) / bodyActivations.length
+    : null;
+  const mindAvg = mindActivations.length > 0
+    ? mindActivations.reduce((s, a) => s + a.eclipticDeg, 0) / mindActivations.length
+    : null;
+  const heartAvg = heartActivations.length > 0
+    ? heartActivations.reduce((s, a) => s + a.eclipticDeg, 0) / heartActivations.length
+    : null;
+
+  const positions: number[] = [];
+  if (bodyAvg !== null) positions.push(bodyAvg);
+  if (mindAvg !== null) positions.push(mindAvg);
+  if (heartAvg !== null) positions.push(heartAvg);
+
+  if (positions.length >= 2) {
+    const mean = positions.reduce((a, b) => a + b, 0) / positions.length;
+    const variance = positions.reduce((sum, p) => sum + Math.pow(p - mean, 2), 0) / positions.length;
+
+    if (variance > VARIANCE_THRESHOLD) {
+      const layers: ChartLayer[] = [];
+      if (bodyAvg !== null) layers.push("body");
+      if (mindAvg !== null) layers.push("mind");
+      if (heartAvg !== null) layers.push("heart");
+
+      let dominant: ChartLayer | undefined;
+      if (positions.length >= 2) {
+        const distances = positions.map((p) => Math.abs(p - mean));
+        const minIdx = distances.indexOf(Math.min(...distances));
+        dominant = layers[minIdx];
+      }
+
+      disorders.push({
+        body: "layer-composite",
+        tropical: bodyAvg ?? 0,
+        sidereal: mindAvg ?? 0,
+        draconic: heartAvg ?? 0,
+        variance,
+        dominant,
+      });
+    }
+  }
+
+  if (bodyActivations.length > 0 && mindActivations.length > 0 && heartActivations.length > 0) {
+    const bodySun = bodyActivations[0];
+    const mindSun = mindActivations[0];
+    const heartSun = heartActivations[0];
+
+    const sunPositions = [bodySun.eclipticDeg, mindSun.eclipticDeg, heartSun.eclipticDeg];
+    const sunMean = sunPositions.reduce((a, b) => a + b, 0) / 3;
+    const sunVariance = sunPositions.reduce((sum, p) => sum + Math.pow(p - sunMean, 2), 0) / 3;
+
+    if (sunVariance > VARIANCE_THRESHOLD) {
+      const distances = [
+        Math.abs(bodySun.eclipticDeg - sunMean),
+        Math.abs(mindSun.eclipticDeg - sunMean),
+        Math.abs(heartSun.eclipticDeg - sunMean),
+      ];
+      const minIdx = distances.indexOf(Math.min(...distances));
+      const dominant = (["body", "mind", "heart"] as ChartLayer[])[minIdx];
+
+      disorders.push({
+        body: "sun",
+        tropical: bodySun.eclipticDeg,
+        sidereal: mindSun.eclipticDeg,
+        draconic: heartSun.eclipticDeg,
+        variance: sunVariance,
+        dominant,
+      });
+    }
+  }
+
+  return disorders;
+}
+
+export function diagnoseField(
+  bodyActivations: HDActivation[],
+  mindActivations: HDActivation[],
+  heartActivations: HDActivation[]
+): FieldDiagnosis {
+  const allActivations = [...bodyActivations, ...mindActivations, ...heartActivations];
+
+  const hdAlignment = calculateHDAlignment(allActivations);
+  const iChingProbability = calculateIChingProbability(allActivations);
+  const frictionFactor = calculateFrictionFactor(allActivations);
+  const resonanceScore = calculateResonanceScore(hdAlignment, iChingProbability, frictionFactor);
+
+  const missingNodes = detectMissingHarmonics(bodyActivations, mindActivations, heartActivations);
+  const chargeImbalance = detectResonanceImbalance(bodyActivations, mindActivations, heartActivations);
+  const chartDisorder = detectChartDisorder(bodyActivations, mindActivations, heartActivations);
+
+  const totalImbalanceDeviation = chargeImbalance.reduce((sum, i) => sum + i.deviation, 0);
+  const totalDisorderVariance = chartDisorder.reduce((sum, d) => sum + d.variance, 0);
+
+  const coherenceScore = calculateCoherenceScore(
+    missingNodes.length,
+    totalImbalanceDeviation,
+    totalDisorderVariance
+  );
+
+  return {
+    missingNodes,
+    chargeImbalance,
+    chartDisorder,
     coherenceScore,
     hdAlignment,
     iChingProbability,
     frictionFactor,
     resonanceScore,
-    approved,
-  };
-
-  const sunMeaning = GATE_MEANINGS[bodyLayer.sun.gate];
-  const moonMeaning = GATE_MEANINGS[bodyLayer.moon.gate];
-
-  const compositeSentence = `You are a ${hdType} with ${sunMeaning?.theme || "unknown theme"} through Gate ${bodyLayer.sun.gate} (${sunMeaning?.name || "Unknown"}). Your emotional nature reflects ${moonMeaning?.theme || "unknown"} via Gate ${bodyLayer.moon.gate}. Your ${definition} definition suggests ${definition === "Single" ? "integrated self-processing" : definition === "Split" ? "need for bridging connections" : "complex multi-part processing"}.`;
-
-  const recommendations: string[] = [];
-  if (coherenceScore < 70) {
-    recommendations.push("Focus on integrating your three chart layers through meditation");
-  }
-  if (resonanceScore < 0.5) {
-    recommendations.push("Seek environments that match your natural resonance frequency");
-  }
-  if (definition !== "Single") {
-    recommendations.push("Honor your need for others to bridge your split definition");
-  }
-  if (hdType === "Projector") {
-    recommendations.push("Wait for recognition and invitation before major decisions");
-  }
-  if (hdType === "Reflector") {
-    recommendations.push("Take a full lunar cycle before important choices");
-  }
-
-  return {
-    blueprint,
-    diagnosis,
-    compositeSentence,
-    correctionSentence: approved ? undefined : "Consider realignment practices to improve coherence",
-    recommendations,
+    approved: coherenceScore >= 70 && resonanceScore >= 0.5,
   };
 }
 
-export const resonanceEngine = {
-  calculateResonanceScore,
+export function generateCompositeSentence(
+  bodySun: HDActivation,
+  mindSun: HDActivation,
+  heartSun: HDActivation
+): string {
+  const bodyMeaning = getGateMeaning(bodySun.gate);
+  const mindMeaning = getGateMeaning(mindSun.gate);
+  const heartMeaning = getGateMeaning(heartSun.gate);
+
+  return `The Body resolves through ${bodyMeaning.theme} (${formatActivation(bodySun)}), ` +
+    `the Mind perceives through ${mindMeaning.theme} (${formatActivation(mindSun)}), ` +
+    `and the Heart expresses through ${heartMeaning.theme} (${formatActivation(heartSun)}) — ` +
+    `all anchored in a unified field of desire, possibility, and love.`;
+}
+
+export function generateCorrectionSentence(diagnosis: FieldDiagnosis): string {
+  const parts: string[] = [];
+
+  if (diagnosis.missingNodes.length > 0) {
+    const pairNames = ["Body-Mind", "Mind-Heart", "Body-Heart"];
+    const missingPairs = diagnosis.missingNodes.map((n) => pairNames[n.pairIdx]).join(", ");
+    parts.push(`restore harmonic alignment in ${missingPairs} layer connections`);
+  }
+
+  if (diagnosis.chargeImbalance.length > 0) {
+    const maxDev = Math.max(...diagnosis.chargeImbalance.map((i) => i.deviation));
+    parts.push(`balance resonance imbalance (deviation up to ${maxDev.toFixed(1)}°)`);
+  }
+
+  if (diagnosis.chartDisorder.length > 0) {
+    const bodies = diagnosis.chartDisorder.map((d) => d.body).join(", ");
+    parts.push(`reduce chart disorder in ${bodies} positions`);
+  }
+
+  if (diagnosis.coherenceScore < 70) {
+    parts.push("realign through Strategy & Authority to restore field coherence");
+  }
+
+  if (diagnosis.frictionFactor > 0.7) {
+    parts.push("reduce friction by embracing natural rhythm patterns");
+  }
+
+  if (diagnosis.hdAlignment < 0.5) {
+    parts.push("activate dormant gates through intentional engagement");
+  }
+
+  if (parts.length === 0) {
+    return "The field is coherent. Continue following your design.";
+  }
+
+  return `Correction: ${parts.join("; ")}.`;
+}
+
+export const DEMO_ACTIVATIONS = {
+  body: {
+    sun: getHDActivation("Virgo", 25, 59, 31.92),
+    moon: getHDActivation("Libra", 0, 0, 0),
+    ascendant: getHDActivation("Aries", 26, 2, 11),
+  },
+  mind: {
+    sun: getHDActivation("Virgo", 1, 22, 39),
+  },
+  heart: {
+    sun: getHDActivation("Scorpio", 19, 59, 31.92),
+  },
 };
