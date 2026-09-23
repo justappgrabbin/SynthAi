@@ -121,3 +121,45 @@ test('MOBILE COMPUTER: micro/macro addressing remains reversible', async () => {
   assert.deepEqual(decoded.micro, { gate: 24, line: 1, color: 3, tone: 3, base: 1 });
   assert.deepEqual(decoded.macro, { planet: 0, dimension: 0, zodiac: 5, house: 4 });
 });
+
+
+test('MESH COMPUTER: dormant state holds events and resumes without losing mesh identity', async () => {
+  let now = 1000;
+  const runtime = await new MobileComputerRuntime({ persistence: new MemoryPersistence(), namespace: 'mesh-sleep-test' }).boot();
+  runtime.continuity.clock = () => now;
+  await runtime.meshKernel.join('synthia', { kind: 'resident-agent', residency: 'hot', publicState: { identity: 'Synthia' } });
+  await runtime.sleep();
+  assert.equal(runtime.meshKernel.get('synthia').residency, 'warm');
+  now += 86_400_000;
+  await runtime.queueDormantEvent({ type: 'world:event', payload: { kind: 'visitor-arrived' }, at: now - 1000 });
+  const woke = await runtime.wake({ resolveEvent: async event => ({ eventId: event.id, status: 'reconciled' }) });
+  assert.equal(woke.pending, 1);
+  assert.equal(woke.elapsed, 86_400_000);
+  assert.equal(runtime.meshKernel.get('synthia').publicState.identity, 'Synthia');
+});
+
+test('INDIVERSE: canonical object remains invariant while host qualia grammar changes expression', async () => {
+  const runtime = await new MobileComputerRuntime({ persistence: new MemoryPersistence(), namespace: 'indiverse-test' }).boot();
+  await runtime.defineIndiVerse('adaya', {
+    grammar: { orientation: { roof: 'ground-plane' }, threshold: { entry: 'extends-to-floor' }, palette: 'host-defined' },
+    invariants: { preserve: ['identity','function','relationships','entry'] },
+  });
+  const house = { id: 'house-1', type: 'building', function: 'home', entry: { id: 'front-door' }, relationships: ['resident:adaya'] };
+  const view = runtime.renderIndiVerse('adaya', house, { id: 'visitor' });
+  assert.equal(view.canonical.id, 'house-1');
+  assert.equal(view.rendered.id, 'house-1');
+  assert.equal(view.grammar.orientation.roof, 'ground-plane');
+  assert.equal(view.rendered.qualiaGrammar.threshold.entry, 'extends-to-floor');
+});
+
+test('DORMANT COMPILER: compiles only on cache miss then sleeps again', async () => {
+  const runtime = await new MobileComputerRuntime({ persistence: new MemoryPersistence(), namespace: 'compiler-test' }).boot();
+  let calls = 0;
+  runtime.registerCompilerBackend('wasm', { compile: async spec => { calls++; return { artifactHash: 'artifact-'+spec.sourceHash, location: '/cache/'+spec.id+'.wasm' }; } });
+  const first = await runtime.ensureCompiled({ id: 'grapple-hand', target: 'wasm', sourceHash: 'abc123' });
+  const second = await runtime.ensureCompiled({ id: 'grapple-hand', target: 'wasm', sourceHash: 'abc123' });
+  assert.equal(calls, 1);
+  assert.equal(first.reused, false);
+  assert.equal(second.reused, true);
+  assert.equal(runtime.compiler.lifecycle, 'dormant');
+});
