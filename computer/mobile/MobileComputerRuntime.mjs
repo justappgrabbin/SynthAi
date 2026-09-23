@@ -193,6 +193,23 @@ export class MobileComputerRuntime {
     // persistent, and owns resident/world/event continuity.
     this.meshKernel = new RelationalMeshKernel({ state: this.state, bus: this.bus });
     this.compiler = new DormantCompilerBroker({ state: this.state, bus: this.bus });
+    this.compilerBackends = new Map();
+    this.compiler.attachCompiler({
+      id: 'mobile-compiler-backend-router',
+      compile: async (spec) => {
+        const backend = this.compilerBackends.get(spec.target);
+        if (!backend?.compile) throw new Error(`compiler backend unavailable: ${spec.target}`);
+        const result = await backend.compile(spec);
+        return {
+          ...result,
+          target: result?.target ?? spec.target,
+          artifactRef: result?.artifactRef ?? result?.location ?? null,
+        };
+      },
+    });
+    // Compatibility clock for the first global sleep/wake prototype. Resident
+    // agents use ResidentHost + meshKernel's dormant checkpoint path instead.
+    this.continuity = { clock: () => Date.now() };
     this.indiverse = new IndiVerseRuntime({ state: this.state, bus: this.bus, mesh: this.meshKernel });
     this.residents = new ResidentHost({
       state: this.state, bus: this.bus, mesh: this.meshKernel,
@@ -258,6 +275,77 @@ export class MobileComputerRuntime {
     this.launchProfile = profile;
     await this.state.set('computer.launchProfile', profile, { source: 'mobile-computer' });
     return profile;
+  }
+
+  registerCompilerBackend(target, adapter) {
+    if (!target || typeof adapter?.compile !== 'function') throw new Error('compiler backend target and compile(spec) required');
+    this.compilerBackends.set(String(target), adapter);
+    return adapter;
+  }
+
+  async ensureCompiled(spec) {
+    return this.compiler.ensure(spec);
+  }
+
+  async sleep() {
+    const since = this.continuity.clock();
+    await this.state.set('continuity.lifecycle', { state: 'dormant', since }, { source: 'mobile-computer-compat' });
+    for (const participant of this.meshKernel.listParticipants()) {
+      if (participant.residency === 'hot') await this.meshKernel.setResidency(participant.id, 'warm');
+    }
+    return { state: 'dormant', since };
+  }
+
+  async queueDormantEvent(event = {}) {
+    const pending = this.state.get('continuity.pending', []);
+    const record = {
+      id: event.id ?? `event-${Date.now()}-${Math.random().toString(36).slice(2,7)}`,
+      at: event.at ?? this.continuity.clock(),
+      ...clone(event),
+    };
+    pending.push(record);
+    pending.sort((a,b) => Number(a.at ?? 0) - Number(b.at ?? 0));
+    await this.state.set('continuity.pending', pending, { source: 'mobile-computer-compat' });
+    return record;
+  }
+
+  async wake({ resolveEvent = null } = {}) {
+    const life = this.state.get('continuity.lifecycle', { state: 'new', since: this.continuity.clock() });
+    const now = this.continuity.clock();
+    const elapsed = Math.max(0, now - Number(life.since ?? now));
+    const pending = this.state.get('continuity.pending', []);
+    const receipts = [];
+    for (const event of pending) {
+      receipts.push(resolveEvent ? await resolveEvent(clone(event), { elapsed, now }) : { event: clone(event), status: 'held' });
+    }
+    await this.state.set('continuity.pending', [], { source: 'mobile-computer-compat' });
+    await this.state.set('continuity.lifecycle', { state: 'active', since: now, lastElapsedMs: elapsed }, { source: 'mobile-computer-compat' });
+    return { elapsed, pending: pending.length, receipts };
+  }
+
+  async defineIndiVerse(ownerId, options = {}) {
+    return this.createIndiVerse(ownerId, {
+      id: options.id ?? `indiverse:${ownerId}`,
+      name: options.name,
+      grammar: options.grammar ?? {},
+      publicState: options.publicState ?? {},
+      metadata: { ...(options.metadata ?? {}), invariants: clone(options.invariants ?? {}) },
+    });
+  }
+
+  renderIndiVerse(ownerId, canonicalObject, visitor = {}) {
+    const world = this.indiverse.world(`indiverse:${ownerId}`) ?? this.indiverse.world(ownerId);
+    if (!world) throw new Error(`unknown IndiVerse: ${ownerId}`);
+    const grammar = clone(world.grammar ?? {});
+    return {
+      canonicalId: canonicalObject.id,
+      canonicalType: canonicalObject.type ?? canonicalObject.kind ?? null,
+      canonical: clone(canonicalObject),
+      host: ownerId,
+      grammar,
+      visitor: clone(visitor),
+      rendered: { ...clone(canonicalObject), qualiaGrammar: grammar },
+    };
   }
 
   async resolveAddress(input) { return this.addresses.resolveAddress(input); }
