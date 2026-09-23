@@ -35,6 +35,23 @@ export class TriformWorldAdapter {
     return { id: this.id, name: this.name, tick: this.tick, eventId: this.eventId, state: clone(this.state), residents: Object.fromEntries(this.residentCharacters) };
   }
 
+  hydrate(snapshot = {}) {
+    if (snapshot.state) this.state = clone(snapshot.state);
+    if (Number.isFinite(snapshot.tick)) this.tick = Number(snapshot.tick);
+    if (Number.isFinite(snapshot.eventId)) this.eventId = Number(snapshot.eventId);
+    if (snapshot.residents && typeof snapshot.residents === 'object') this.residentCharacters = new Map(Object.entries(snapshot.residents));
+    this.#emit({ type:'triform:hydrated', summary:`Triform restored at tick ${this.tick}`, payload:{ tick:this.tick,eventId:this.eventId } });
+    return this.snapshot();
+  }
+
+  async request({ operation, payload = {} } = {}) {
+    if (operation === 'snapshot') return this.snapshot();
+    if (operation === 'hydrate') return this.hydrate(payload.snapshot ?? payload);
+    if (operation === 'bind-resident') return this.bindResident(payload.residentId, payload.character);
+    if (operation === 'apply-action') return this.applyAction(payload.action ?? payload);
+    throw new Error(`unsupported Triform operation: ${operation}`);
+  }
+
   async applyAction(action = {}) {
     const residentId = String(action.actor ?? action.residentId ?? 'synthia');
     const characterId = this.residentCharacters.get(residentId) ?? Number(action.actorId);
