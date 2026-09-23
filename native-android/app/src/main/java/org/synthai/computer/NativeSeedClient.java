@@ -31,6 +31,10 @@ final class NativeSeedClient {
         return request("GET", "/health", null);
     }
 
+    Result snapshot() {
+        return request("GET", "/snapshot", null);
+    }
+
     Result post(String path, JSONObject body) {
         return request("POST", path, body == null ? new JSONObject() : body);
     }
