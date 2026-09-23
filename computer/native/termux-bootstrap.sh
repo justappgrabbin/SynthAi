@@ -3,7 +3,7 @@ set -euo pipefail
 
 APP_DIR="${APP_DIR:-$HOME/SynthAi}"
 REPO_URL="${REPO_URL:-https://github.com/justappgrabbin/SynthAi.git}"
-REPO_BRANCH="${REPO_BRANCH:-integration/synthia-reality-resident}"
+REPO_BRANCH="${REPO_BRANCH:-integration/indiverse-phone-world-convergence-2026-09-23}"
 
 echo "SynthAI Native Seed bootstrap"
 echo "============================"
