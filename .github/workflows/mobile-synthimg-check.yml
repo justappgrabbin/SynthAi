@@ -36,6 +36,11 @@ jobs:
         run: |
           test -f public/computer-runtime/mobile/MobileComputerRuntime.mjs
           test -f public/computer-runtime/mobile/SynthImageRuntime.mjs
+          test -f public/computer-runtime/runtime/mesh-kernel.mjs
+          test -f public/computer-runtime/worlds/indiverse.mjs
+          test -f public/computer-runtime/worlds/world-federation.mjs
+          test -f public/computer-runtime/residents/synthia57-resident.mjs
+          test -f public/computer-runtime/residents/synthia57-package-loader.mjs
           test -f public/computer-runtime/donors/recovered/you-n-i-verse-corrected/state-space-engine-v2.ported.mjs
           test -f public/mobile-computer.html
           test -f public/synthimg-sw.js
