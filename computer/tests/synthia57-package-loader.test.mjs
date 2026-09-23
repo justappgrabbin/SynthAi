@@ -10,22 +10,64 @@ class FakeBody extends EventTarget {
   addEventListener(...args){return super.addEventListener(...args)}
   removeEventListener(...args){return super.removeEventListener(...args)}
 }
-test('SYNTHIA 5.7 LOADER: mounts full package contract as resident without flattening it', async()=>{
+
+test('SYNTHIA 5.7 LOADER: mounts full package contract and exposes real runtime organs on mesh', async()=>{
   const computer=await new MobileComputerRuntime({persistence:new MemoryPersistence(),namespace:'synthia-loader'}).boot();
   const body=new FakeBody();
   const embodiment={body,bindHost:def=>def,request:async()=>({status:'completed'})};
   const worldPort={attach(){return {connected:true}},detach(){},observe(){},act(){},snapshot(){return {connected:false}}};
   const physiology={observeOutcome(){return {}},tick(){return {felt:{}}},snapshot(){return {}}};
+
+  const automata=new Map([
+    ['klein-analogy',{id:'klein-analogy',run:(input)=>({ok:true,result:['mapped'],input})}],
+    ['iching-grammar',{id:'iching-grammar',run:(input)=>({ok:true,input})}],
+  ]);
+  const atoMesh={automata,get:id=>automata.get(id)??null};
   const fakeRuntime={
     worldPort,physiology,
     configureBirthMirror:async input=>({configured:true,input}),
+    system:{
+      engine:{mesh:atoMesh},
+      coordinatePopulation:(input)=>({accepted:true,input}),
+      executeArtifact:async artifact=>({strategy:'INTERNAL',artifact}),
+      route:async task=>({routed:true,task}),
+    },
+    stateSpaceRuntime:{
+      execute:async input=>({executed:true,input}),
+      runInstrument:async(id,input)=>({id,input}),
+      catalog:()=>[{id:'five-level-state-space'}],
+    },
+    swarm:{
+      submit:async tasks=>({cycle:1,executions:tasks.map(task=>({taskId:task.id,capability:task.capability,status:'complete',output:{status:'generated',tool:{id:'tool-1'}}}))}),
+    },
   };
   class FakeFederatedSynthia { static async create(){return fakeRuntime;} }
   const importModule=async spec=>spec.includes('federated-synthia')?{FederatedSynthia:FakeFederatedSynthia}:{embodiment};
   const loader=new Synthia57PackageLoader({computer,importModule});
   const mounted=await loader.mount({base:'file:///synthia57',birthMirror:{birthDate:'example'}});
+
   assert.equal(mounted.runtime,fakeRuntime);
   assert.equal(computer.meshKernel.participant('synthia').metadata.version,'0.5.7');
   assert.ok(computer.meshKernel.relationshipsFor('synthia').some(e=>e.type==='resident-of'));
   assert.equal(loader.get('synthia').adapter.started,true);
+  assert.equal(loader.get('synthia').organs.mounted,true);
+
+  for (const id of ['synthia:ato','synthia:tool-factory','synthia:klein','synthia:execution','synthia:state-space']) {
+    assert.equal(computer.meshKernel.participant(id).residency,'active');
+    assert.ok(computer.meshKernel.relationshipsFor(id).some(edge=>edge.type==='organ-of'&&edge.to==='synthia'));
+  }
+
+  const klein=await computer.meshKernel.request('synthia:klein',{operation:'run',payload:{input:{A:['a'],B:['b'],C:['c']}}});
+  assert.equal(klein.delivered,true);
+  assert.equal(klein.result.ok,true);
+
+  const grown=await computer.meshKernel.request('synthia:tool-factory',{operation:'synthesize',payload:{purpose:'make a useful hand',input:'make a useful hand'}});
+  assert.equal(grown.delivered,true);
+  assert.equal(grown.result.executions[0].capability,'tool.synthesize');
+
+  const executed=await computer.meshKernel.request('synthia:execution',{operation:'execute-artifact',payload:{artifact:{kind:'task'}}});
+  assert.equal(executed.result.strategy,'INTERNAL');
+
+  const state=await computer.meshKernel.request('synthia:state-space',{operation:'catalog',payload:{}});
+  assert.equal(state.result[0].id,'five-level-state-space');
 });
