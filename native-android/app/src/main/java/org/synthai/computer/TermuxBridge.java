@@ -23,12 +23,12 @@ final class TermuxBridge {
         if (!isInstalled(context)) return false;
         Intent intent = new Intent(ACTION);
         intent.setClassName(TERMUX_PACKAGE, TERMUX_SERVICE);
-        intent.putExtra("com.termux.RUN_COMMAND_PATH", "$PREFIX/bin/bash");
+        intent.putExtra("com.termux.RUN_COMMAND_PATH", "/data/data/com.termux/files/usr/bin/bash");
         intent.putExtra("com.termux.RUN_COMMAND_ARGUMENTS", new String[]{
             "-lc",
             "cd ~/SynthAi && exec node computer/native/native-seed-server.mjs"
         });
-        intent.putExtra("com.termux.RUN_COMMAND_WORKDIR", "~/SynthAi");
+        intent.putExtra("com.termux.RUN_COMMAND_WORKDIR", "/data/data/com.termux/files/home/SynthAi");
         intent.putExtra("com.termux.RUN_COMMAND_BACKGROUND", true);
         intent.putExtra("com.termux.RUN_COMMAND_COMMAND_LABEL", "SynthAI Native Seed");
         try {
