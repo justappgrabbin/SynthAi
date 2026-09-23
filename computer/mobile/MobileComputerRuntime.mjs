@@ -497,11 +497,19 @@ export class MobileComputerRuntime {
 
   async installSynthImage(source, options = {}) {
     const record = await this.images.install(source, options);
-    if (!this.apps.has(record.id)) {
+    if (record.entry && !this.apps.has(record.id)) {
       this.apps.register(record.id, {
         kind: 'synthimg-app',
         imageSha256: record.payloadSha256,
         entry: record.entry,
+        manifest: record.manifest,
+      });
+    }
+    if (record.residentEntry && !this.agents.has(record.id)) {
+      this.agents.register(record.id, {
+        kind: 'synthimg-resident',
+        imageSha256: record.payloadSha256,
+        residentEntry: record.residentEntry,
         manifest: record.manifest,
       });
     }
@@ -510,6 +518,7 @@ export class MobileComputerRuntime {
 
   async launchSynthImage(appId, { full = this.launchProfile === 'full' } = {}) {
     const wake = await this.images.wake(appId, { full });
+    if (!wake.launchUrl) throw new Error(`${appId} is a resident Synth image, not an iframe application; use mountResidentSynthImage()`);
     const mount = await this.shellManager.mount(appId, {
       shell: full ? 'workspace' : 'compact',
       options: { launchUrl: wake.launchUrl, image: wake.record.payloadSha256 },
@@ -523,6 +532,26 @@ export class MobileComputerRuntime {
       observable_effect: 'Synth image mounted in mobile Computer',
     });
     return { ...wake, mount };
+  }
+
+  async mountResidentSynthImage(imageId, options = {}) {
+    const wake = await this.images.wake(imageId, { full: true });
+    if (!wake.residentModuleUrl) throw new Error(`${imageId} has no resident runtime entry`);
+    const manifest = wake.record.manifest ?? {};
+    const residentType = manifest.resident_type ?? manifest.residentType ?? null;
+    if (residentType !== 'synthia57') {
+      throw new Error(`No resident loader is registered for ${residentType ?? 'unknown resident type'}`);
+    }
+    const base = new URL(wake.record.base, globalThis.location?.origin ?? 'https://synth.local').href;
+    const runtimeEntry = manifest.embodiment_entry ?? manifest.embodimentEntry
+      ?? 'vendor/pure-synthia-v0.4.0/src/synthia/synthiaRuntime.mjs';
+    return this.mountSynthia57({
+      ...options,
+      base,
+      federatedModule: wake.residentModuleUrl,
+      synthiaRuntimeModule: new URL(runtimeEntry, base).href,
+      residentId: options.residentId ?? manifest.resident_id ?? manifest.residentId ?? 'synthia',
+    });
   }
 
   async sleepSynthImage(appId, { address = null, previewRef = null, memoryRef = null } = {}) {
