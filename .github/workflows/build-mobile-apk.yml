@@ -29,12 +29,10 @@ jobs:
         with:
           node-version: '22'
 
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v5
         with:
           distribution: 'temurin'
           java-version: '21'
-
-      - uses: android-actions/setup-android@v3
 
       - name: Install Capacitor toolchain
         run: npm install --no-audit --no-fund
