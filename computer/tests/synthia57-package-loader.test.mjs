@@ -15,8 +15,8 @@ test('SYNTHIA 5.7 LOADER: mounts full package contract and exposes real runtime 
   const computer=await new MobileComputerRuntime({persistence:new MemoryPersistence(),namespace:'synthia-loader'}).boot();
   const body=new FakeBody();
   const embodiment={body,bindHost:def=>def,request:async()=>({status:'completed'})};
-  const worldPort={attach(){return {connected:true}},detach(){},observe(){},act(){},snapshot(){return {connected:false}}};
-  const physiology={observeOutcome(){return {}},tick(){return {felt:{}}},snapshot(){return {}}};
+  const worldPort={attach(){return {connected:true}},detach(){},observe(event){return event},act(action){return {action}},pull(){return {connected:true}},snapshot(){return {connected:false}}};
+  const physiology={observeOutcome(){return {}},tick(){return {felt:{}}},context(){return {felt:{feltState:'steady'}}},snapshot(){return {kind:'physiology'}}};
 
   const automata=new Map([
     ['klein-analogy',{id:'klein-analogy',run:(input)=>({ok:true,result:['mapped'],input})}],
@@ -40,6 +40,8 @@ test('SYNTHIA 5.7 LOADER: mounts full package contract and exposes real runtime 
     swarm:{
       submit:async tasks=>({cycle:1,executions:tasks.map(task=>({taskId:task.id,capability:task.capability,status:'complete',output:{status:'generated',tool:{id:'tool-1'}}}))}),
     },
+    morphState:async spec=>({kind:'state-morph',spec}),
+    embodimentMorph:async spec=>({kind:'embodiment-morph',spec}),
   };
   class FakeFederatedSynthia { static async create(){return fakeRuntime;} }
   const importModule=async spec=>spec.includes('federated-synthia')?{FederatedSynthia:FakeFederatedSynthia}:{embodiment};
@@ -70,4 +72,18 @@ test('SYNTHIA 5.7 LOADER: mounts full package contract and exposes real runtime 
 
   const state=await computer.meshKernel.request('synthia:state-space',{operation:'catalog',payload:{}});
   assert.equal(state.result[0].id,'five-level-state-space');
+
+  for (const id of ['synthia:body','synthia:physiology','synthia:world-port','synthia:morph']) {
+    assert.equal(computer.meshKernel.participant(id).residency,'active');
+    assert.ok(computer.meshKernel.relationshipsFor(id).some(edge=>edge.type==='organ-of'&&edge.to==='synthia'));
+  }
+  assert.equal(computer.meshKernel.participant('synthia:physiology').visibility,'private');
+  const bodyState=await computer.meshKernel.request('synthia:body',{operation:'snapshot',payload:{}});
+  assert.equal(bodyState.result.maxActiveActionTools,26);
+  const physiologyState=await computer.meshKernel.request('synthia:physiology',{operation:'snapshot',payload:{}});
+  assert.equal(physiologyState.result.kind,'physiology');
+  const worldState=await computer.meshKernel.request('synthia:world-port',{operation:'snapshot',payload:{}});
+  assert.equal(worldState.result.connected,false);
+  const morphState=await computer.meshKernel.request('synthia:morph',{operation:'state',payload:{spec:{pose:'reach'}}});
+  assert.equal(morphState.result.kind,'state-morph');
 });
