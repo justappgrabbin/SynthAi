@@ -327,7 +327,10 @@ export class MobileComputerRuntime {
     return this.createIndiVerse(ownerId, {
       id: options.id ?? `indiverse:${ownerId}`,
       name: options.name,
-      grammar: options.grammar ?? {},
+      grammar: {
+        ...(options.grammar ?? {}),
+        thresholds: options.grammar?.thresholds ?? options.grammar?.threshold ?? {},
+      },
       publicState: options.publicState ?? {},
       metadata: { ...(options.metadata ?? {}), invariants: clone(options.invariants ?? {}) },
     });
@@ -337,6 +340,9 @@ export class MobileComputerRuntime {
     const world = this.indiverse.world(`indiverse:${ownerId}`) ?? this.indiverse.world(ownerId);
     if (!world) throw new Error(`unknown IndiVerse: ${ownerId}`);
     const grammar = clone(world.grammar ?? {});
+    // Early IndiVerse drafts used singular "threshold"; preserve that read
+    // surface while canonical storage uses the plural thresholds grammar.
+    if (grammar.threshold === undefined) grammar.threshold = clone(grammar.thresholds ?? {});
     return {
       canonicalId: canonicalObject.id,
       canonicalType: canonicalObject.type ?? canonicalObject.kind ?? null,
