@@ -44,7 +44,9 @@ export class Synthia57PackageStore {
   constructor({state,bus=null,root=path.join(os.homedir(),'.synthai','packages','synthia57'),maxBytes=256*1024*1024,extract=null}={}){
     if(!state?.get||!state?.set) throw new TypeError('Synthia57PackageStore requires StateStore');
     Object.assign(this,{state,bus,root,maxBytes});
-    this.extract=extract ?? (async (archive,destination)=>run(['unzip','-q',archive,'-d',destination]));
+    this.extract=extract ?? (async (archive,destination)=>run([
+      'python','-m','zipfile','-e',archive,destination
+    ]));
   }
 
   current(){ return this.state.get('synthia57.package',null); }
