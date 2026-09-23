@@ -101,7 +101,7 @@
           ],
           "last_verified": "2026-09-21T00:00:00.000Z",
           "known_limitations": [
-            "house convention is 1-8 trigram houses (45\u00b0), not 12 astrological houses"
+            "house convention is 1-8 trigram houses (45°), not 12 astrological houses"
           ],
           "lineage": {
             "derived_from": [
@@ -113,7 +113,7 @@
           "selection_hints": {
             "locality": "local",
             "performance_notes": "pure math, deterministic",
-            "preferred_when": "constructing/resolving address parts (arc-seconds <-> gate/line/color/tone/base/DMS); NOT the canonical authority \u2014 validate completed addresses against back-up-:execution-spine-canonical-address"
+            "preferred_when": "constructing/resolving address parts (arc-seconds <-> gate/line/color/tone/base/DMS); NOT the canonical authority — validate completed addresses against back-up-:execution-spine-canonical-address"
           },
           "conclusions": [
             {
@@ -158,8 +158,8 @@
           ],
           "last_verified": null,
           "known_limitations": [
-            "parallel/specialized scheme \u2014 execution-spine canonical-address.mjs REMAINS the canonical-address authority; coordinate-engine is never a grammar source",
-            "degree cardinality 360 here vs DMS arc-second exactness in kimi addressing.js \u2014 reconcile before any canonical use",
+            "parallel/specialized scheme — execution-spine canonical-address.mjs REMAINS the canonical-address authority; coordinate-engine is never a grammar source",
+            "degree cardinality 360 here vs DMS arc-second exactness in kimi addressing.js — reconcile before any canonical use",
             "adds a 14th 'season' layer outside the canonical 13-field grammar"
           ],
           "lineage": {
@@ -246,7 +246,7 @@
             {
               "kind": "test_run",
               "ref": "computer/tests/address-state-mount.test.mjs",
-              "summary": "calculateHumanDesign('1990-01-01','12:00') executed: Manifesting Generator 5/6, Sun 64.5 Capricorn 11\u00b019'15\"",
+              "summary": "calculateHumanDesign('1990-01-01','12:00') executed: Manifesting Generator 5/6, Sun 64.5 Capricorn 11°19'15\"",
               "timestamp": "2026-09-21T00:00:00.000Z"
             }
           ],
@@ -752,7 +752,7 @@
           ],
           "last_verified": null,
           "known_limitations": [
-            "runtime.mjs imports ../canonicalState.mjs which is ABSENT from the vendor copy \u2014 use core/mesh directly, not runtime.mjs",
+            "runtime.mjs imports ../canonicalState.mjs which is ABSENT from the vendor copy — use core/mesh directly, not runtime.mjs",
             "Movement/Space sequences and Being tropical chart are PROJECT_HYPOTHESIS per claim-status"
           ],
           "lineage": {
@@ -797,7 +797,7 @@
           ],
           "last_verified": null,
           "known_limitations": [
-            "touches none of the canonical 13 address dimensions \u2014 grammar/semantics substrate, not addressing"
+            "touches none of the canonical 13 address dimensions — grammar/semantics substrate, not addressing"
           ],
           "lineage": {
             "derived_from": [
@@ -841,7 +841,7 @@
           ],
           "last_verified": null,
           "known_limitations": [
-            "20/22 files are exact duplicates of mounted kimi providers \u2014 kimi tree stays sole source for those",
+            "20/22 files are exact duplicates of mounted kimi providers — kimi tree stays sole source for those",
             "index.mjs + govinda-structure.js are TA-only additions, candidates for mounting"
           ],
           "lineage": {
@@ -997,7 +997,7 @@
             {
               "kind": "excavation_search",
               "ref": "../../excavation-state-space-dirs.md",
-              "summary": "searched entire donor: only a LABEL \u2014 ato ARCHITECTURES table declares channel 18-58 'Judgment' {architecture:'hopfield', behavior:'attractor'}; no implementation exists",
+              "summary": "searched entire donor: only a LABEL — ato ARCHITECTURES table declares channel 18-58 'Judgment' {architecture:'hopfield', behavior:'attractor'}; no implementation exists",
               "timestamp": "2026-09-22T00:00:00.000Z"
             }
           ],
@@ -1188,9 +1188,9 @@
           ],
           "last_verified": "2026-09-23T00:00:00.000Z",
           "known_limitations": [
-            "Placement13/OntologicalAddressGenerator ephemeris is a PLACEHOLDER (synthetic) \u2014 future wiring path: consume recovered:foundry-glyphs-ephemeris (routing note, not implemented)",
+            "Placement13/OntologicalAddressGenerator ephemeris is a PLACEHOLDER (synthetic) — future wiring path: consume recovered:foundry-glyphs-ephemeris (routing note, not implemented)",
             "movement integrates over real ticks (moveAgent sets target)",
-            "HumanDesignSimulation.ts/InfluenceManager.ts/SharedSession.ts vendored but NOT ported (need onnxruntime-node/react/SynthiaClient-network) \u2014 PRESENT only"
+            "HumanDesignSimulation.ts/InfluenceManager.ts/SharedSession.ts vendored but NOT ported (need onnxruntime-node/react/SynthiaClient-network) — PRESENT only"
           ],
           "lineage": {
             "derived_from": [
@@ -1202,6 +1202,143 @@
             "locality": "local",
             "performance_notes": "10fps tick engine, in-memory",
             "preferred_when": "any embodied world/agent simulation behind Computer contracts"
+          }
+        }
+      ]
+    },
+    {
+      "capability": "morph_expression",
+      "description": "Digital Skynthia effect substrate: morph-expression state changes driven by real system processes.",
+      "providers": [
+        {
+          "provider_id": "computer:runtime/morph-engine",
+          "capability": "morph_expression",
+          "repository": "computer",
+          "branch_ref": "integration/ecosystem-convergence",
+          "source_artifact": "runtime/experience.mjs MorphEngine",
+          "status": "WIRED",
+          "environment_requirements": [
+            "node"
+          ],
+          "inputs": {
+            "target": "string",
+            "patch": "expression patch"
+          },
+          "outputs": {
+            "expression": "morph.targets.* state"
+          },
+          "dependencies": [],
+          "persistence_behavior": "local",
+          "verification_evidence": [
+            {
+              "kind": "test_run",
+              "ref": "computer/tests/acceptance-4-skynthia-effect.test.mjs",
+              "summary": "real world-engine movement (2.74 units over real ticks) -> MorphEngine.express('skynthia-avatar') -> observable StateStore morph.targets state + morph:expressed bus event -> persisted grammar-v1 event -> restart replay",
+              "timestamp": "2026-09-23T00:00:00.000Z"
+            }
+          ],
+          "last_verified": "2026-09-23T00:00:00.000Z",
+          "known_limitations": [
+            "state-only substrate; NO renderer exists (see skynthia_rendering NOT_FOUND)"
+          ],
+          "lineage": {
+            "derived_from": [],
+            "supersedes_for_scope": []
+          },
+          "selection_hints": {
+            "locality": "local",
+            "performance_notes": "",
+            "preferred_when": "expressing real process output as morph state"
+          }
+        }
+      ]
+    },
+    {
+      "capability": "skynthia_rendering",
+      "description": "Visual renderer for Digital Skynthia morph state.",
+      "providers": [
+        {
+          "provider_id": "NOT-FOUND",
+          "capability": "skynthia_rendering",
+          "repository": "computer",
+          "branch_ref": "integration/ecosystem-convergence",
+          "source_artifact": null,
+          "status": "NOT_FOUND",
+          "environment_requirements": [],
+          "inputs": {},
+          "outputs": {},
+          "dependencies": [],
+          "persistence_behavior": "none",
+          "verification_evidence": [
+            {
+              "kind": "acceptance_search",
+              "ref": "computer/tests/acceptance-4-skynthia-effect.test.mjs",
+              "summary": "searched computer/ services + runtime: no render component; public/*.mjs shells are DOM demos not wired to a runtime",
+              "timestamp": "2026-09-23T00:00:00.000Z"
+            }
+          ],
+          "last_verified": null,
+          "known_limitations": [
+            "PATH FORWARD: wire morph.targets.* to a renderer service (canvas/DOM) consuming morph:expressed bus events; public/ shells are the natural host"
+          ],
+          "lineage": {
+            "derived_from": [],
+            "supersedes_for_scope": []
+          },
+          "selection_hints": {
+            "locality": "local",
+            "performance_notes": "",
+            "preferred_when": ""
+          }
+        }
+      ]
+    },
+    {
+      "capability": "experiment_loop",
+      "description": "Hypothesis -> experiment -> real execution -> observation -> explicit evidence classification (never auto-upgraded) -> replication.",
+      "providers": [
+        {
+          "provider_id": "back-up-:kimi-hypothesis-registry",
+          "capability": "experiment_loop",
+          "repository": "donors/Back-up-",
+          "branch_ref": "1c45318",
+          "source_artifact": "vendor/kimi-agent-automata-state-space-merge/pure-synthia-automata/src/experiments/hypothesis-registry.js",
+          "status": "VERIFIED",
+          "environment_requirements": [
+            "node-esm"
+          ],
+          "inputs": {
+            "hypothesis": "H=(claim,nullHypothesis,metric,test,threshold)",
+            "method": "real provider callable"
+          },
+          "outputs": {
+            "classification": "hypothesis|observation|correlation|candidate_mechanism|supported_result|rejected_result|unknown"
+          },
+          "dependencies": [],
+          "persistence_behavior": "none",
+          "verification_evidence": [
+            {
+              "kind": "test_run",
+              "ref": "computer/tests/acceptance-7-experiment-loop.test.mjs",
+              "summary": "REAL experiment loop: hypothesis 'ephemeris determinism' -> experiment (conditions/variables) -> run1 real foundry execution gate 38 -> NEGATIVE: classify stays 'observation' (no replication, no auto-upgrade) -> run2 replicated -> explicit classify -> donor evaluate(1.0>=0.99) -> supported_result, hypothesis supported -> events persisted (observation then supported_result) -> restart replay. Amendment-C VERIFIED: consumption receipt + observable state change (hypothesis status) + restart replay.",
+              "timestamp": "2026-09-23T00:00:00.000Z"
+            }
+          ],
+          "last_verified": "2026-09-23T00:00:00.000Z",
+          "known_limitations": [
+            "donor rule preserved: execution never classifies; Hypothesis.evaluate() is a separate explicit step",
+            "alternative donor candidates registered but not wrapped: synthia-core-v1.0.0 learning/scientist-loop.mjs (question/evidence loop), pure-synthia-v0.4.0 orchestrator/experimentEngine.mjs"
+          ],
+          "lineage": {
+            "derived_from": [
+              "pure-synthia-automata experiments"
+            ],
+            "supersedes_for_scope": []
+          },
+          "selection_hints": {
+            "locality": "local",
+            "performance_notes": "zero-dep, in-memory registry",
+            "preferred_when": "any experiment/evidence classification loop"
           }
         }
       ]
@@ -1235,7 +1372,7 @@
         {
           "id": "authority-zips-missing",
           "status": "BLOCKED",
-          "detail": "authorities/ contains ONLY SHA256SUMS.txt (712 bytes, 6 SHA-256 hashes for originals/01..06.zip). The originals/ directory does NOT exist \u2014 6 authority ZIP binaries absent; hashes unverifiable without recovery. RECOVERY BLOCKER: obtain originals/01-06.zip or a provenance statement. (Note: nested vendor/*/donors/*.zip bundles exist but are different, unhashed artifacts.)"
+          "detail": "authorities/ contains ONLY SHA256SUMS.txt (712 bytes, 6 SHA-256 hashes for originals/01..06.zip). The originals/ directory does NOT exist — 6 authority ZIP binaries absent; hashes unverifiable without recovery. RECOVERY BLOCKER: obtain originals/01-06.zip or a provenance statement. (Note: nested vendor/*/donors/*.zip bundles exist but are different, unhashed artifacts.)"
         }
       ]
     },

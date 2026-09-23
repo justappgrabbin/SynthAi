@@ -45,6 +45,7 @@ export class CapabilityRegistryService {
         last_verified: p.last_verified ?? null,
         verification_evidence: p.verification_evidence ?? [],
         known_limitations: p.known_limitations ?? [],
+        lineage: p.lineage ?? { derived_from: [], supersedes_for_scope: [] },
       })),
       description: entry?.description ?? null,
     };
