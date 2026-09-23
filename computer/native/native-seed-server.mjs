@@ -90,6 +90,11 @@ async function replayNativeEvents(events=[]){
           residentId:event.residentId??'synthia',
           context:event.context??{replayed:true},
         });
+      }else if(event.type==='app.observe'){
+        result=await runtime.phoneRequest('app.observe',{
+          residentId:event.residentId??'synthia',
+          observation:event.observation??event,
+        });
       }else if(event.type==='route.enter'){
         result=await runtime.phoneRequest('route.enter',event);
       }else if(event.type==='notification'){
@@ -133,6 +138,12 @@ async function route(req,res){
         packageName:body.packageName,
         residentId:body.residentId??'synthia',
         context:body.context??{},
+      }));
+    }
+    if(req.method==='POST' && url.pathname==='/phone/app-observe'){
+      return json(res,200,await runtime.phoneRequest('app.observe',{
+        residentId:body.residentId??'synthia',
+        observation:body.observation??body,
       }));
     }
     if(req.method==='POST' && url.pathname==='/phone/route'){
