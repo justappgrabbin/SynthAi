@@ -15,6 +15,7 @@ import { ResidentHost } from '../runtime/resident-host.mjs';
 import { IndiVerseRuntime } from '../worlds/indiverse.mjs';
 import { WorldFederation } from '../worlds/world-federation.mjs';
 import { Synthia57PackageLoader } from '../residents/synthia57-package-loader.mjs';
+import { PhoneWorldBridge } from '../native/phone-world.mjs';
 
 export const ADDRESS_FIELDS = Object.freeze([
   'planetary', 'dimension', 'gate', 'line', 'color', 'tone', 'base',
@@ -221,6 +222,7 @@ export class MobileComputerRuntime {
       state: this.state, bus: this.bus, mesh: this.meshKernel, residents: this.residents,
     });
     this.synthia57 = new Synthia57PackageLoader({ computer: this, bus: this.bus });
+    this.phoneWorld = null;
   }
 
   async boot() {
@@ -286,6 +288,7 @@ export class MobileComputerRuntime {
       'on-demand-compiler': 'Dormant compiler broker with content-hash reuse; compiler adapter binds separately',
       'world-federation': 'Mesh roles for home, daily-life mechanics, diagnostic lab, research lab and profile worlds',
       'synthia57-resident': 'Mounts the canonical Synthia v0.5.7 package intact as a Computer resident',
+      'phone-world': 'Maps real Android applications and observed app state into canonical IndiVerse places and events',
     })) {
       if (!this.capabilityRegistry.has(id)) this.capabilities.register(id, { providers: ['mobile-computer'], description });
     }
@@ -300,6 +303,7 @@ export class MobileComputerRuntime {
     this.services.register('compiler-broker', { provider: this.compiler, contract: 'attachCompiler/ensure/snapshot' });
     this.services.register('world-federation', { provider: this.worldFederation, contract: 'defineLayer/seedCanonicalLayers/bind/invoke/attachHome/registerProfileWorld' });
     this.services.register('synthia57-loader', { provider: this.synthia57, contract: 'mount/get/unmount' });
+    this.services.register('phone-world-gateway', { provider: this, contract: 'bindPhoneHost/phoneRequest/observePhoneApplication' });
 
     await this.state.set('computer.boot', {
       status: 'ready',
@@ -572,6 +576,32 @@ export class MobileComputerRuntime {
     return this.state.get(path ? `apps.${appId}.${path}` : `apps.${appId}`, null);
   }
 
+  async bindPhoneHost(host) {
+    this.phoneWorld = new PhoneWorldBridge({
+      host,
+      mesh: this.meshKernel,
+      indiverse: this.indiverse,
+      state: this.state,
+      bus: this.bus,
+    });
+    return this.phoneWorld.mount();
+  }
+
+  async phoneRequest(operation, payload = {}) {
+    if (!this.phoneWorld) throw new Error('Phone World host not bound');
+    const routed = await this.meshKernel.request('phone:world', {
+      operation,
+      payload: clone(payload),
+    });
+    if (!routed.delivered) return { queued: routed.queued, result: null };
+    return routed.result;
+  }
+
+  async observePhoneApplication(observation, options = {}) {
+    if (!this.phoneWorld) throw new Error('Phone World host not bound');
+    return this.phoneWorld.observeApplication(clone(observation), clone(options));
+  }
+
   async mountSynthia57(options = {}) {
     return this.synthia57.mount(options);
   }
@@ -648,6 +678,7 @@ export class MobileComputerRuntime {
       compiler: this.compiler.snapshot(),
       worlds: this.worldFederation.snapshot(),
       synthia57: this.synthia57.get('synthia')?.adapter?.snapshot?.() ?? null,
+      phoneWorld: this.phoneWorld?.snapshot?.() ?? null,
     };
   }
 }
