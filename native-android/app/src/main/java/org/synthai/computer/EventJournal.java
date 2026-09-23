@@ -23,16 +23,26 @@ final class EventJournal {
     }
 
     private final File pending;
+    private volatile String lastError = null;
 
     EventJournal(Context context) {
         pending = new File(context.getFilesDir(), "mesh-events.jsonl");
     }
 
-    synchronized void append(JSONObject event) {
+    synchronized boolean append(JSONObject event) {
         try (OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(pending, true), StandardCharsets.UTF_8)) {
             writer.write(event.toString());
             writer.write("\n");
-        } catch (Exception ignored) {}
+            lastError = null;
+            return true;
+        } catch (Exception error) {
+            lastError = error.getClass().getSimpleName() + ": " + String.valueOf(error.getMessage());
+            return false;
+        }
+    }
+
+    String lastError() {
+        return lastError;
     }
 
     synchronized Batch beginBatch() {
@@ -43,6 +53,7 @@ final class EventJournal {
             JSONArray events = read(inflight);
             return new Batch(inflight, events);
         } catch (Exception error) {
+            lastError = error.getClass().getSimpleName() + ": " + String.valueOf(error.getMessage());
             return new Batch(null, new JSONArray());
         }
     }
@@ -61,7 +72,9 @@ final class EventJournal {
                 writer.write(newer);
             }
             batch.file.delete();
-        } catch (Exception ignored) {}
+        } catch (Exception error) {
+            lastError = error.getClass().getSimpleName() + ": " + String.valueOf(error.getMessage());
+        }
     }
 
     private String readText(File file) {
