@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#12091d">
+<title>IndiVerse · SynthAI</title>
+<style>
+:root{color-scheme:dark;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#09040f;color:#fbf7ff}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;overflow-x:hidden;background:radial-gradient(circle at 50% 5%,#5d2c7d 0,#241130 30%,#0b0610 70%);padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
+button{font:inherit}.shell{min-height:100vh;display:flex;flex-direction:column}.sky{padding:18px 16px 8px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.brand{font-size:23px;font-weight:950;letter-spacing:-.04em}.sub{font-size:12px;color:#c8b4d6;margin-top:2px}.status{font-size:11px;padding:7px 10px;border:1px solid #6b4e78;background:#1b0d24;border-radius:999px;color:#e9d7f4}
+.world{position:relative;flex:1;min-height:72vh;padding:18px 14px 130px}.district{margin:10px auto 20px;max-width:980px}.district h2{font-size:12px;text-transform:uppercase;letter-spacing:.13em;color:#cbaae3;margin:0 0 10px 4px}
+.places{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:10px}.place{position:relative;text-align:left;border:1px solid #50355d;background:linear-gradient(180deg,#271334ee,#140a1cee);border-radius:20px;min-height:132px;padding:14px;color:#fff;box-shadow:0 16px 45px #0005;overflow:hidden}
+.place:active{transform:scale(.98)}.place .kind{font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:#b99acb}.place .name{font-size:16px;font-weight:900;margin-top:8px;line-height:1.06}.place .appname{font-size:11px;color:#af9aba;margin-top:7px}.place .door{position:absolute;right:12px;bottom:11px;font-size:30px;opacity:.9}.private{border-color:#76528a;background:linear-gradient(180deg,#352044,#160c1d)}
+.character{position:fixed;z-index:10;left:50%;bottom:25px;width:58px;height:92px;transform:translateX(-50%);transition:left .45s cubic-bezier(.2,.8,.2,1),bottom .45s ease}
+.head{position:absolute;left:15px;top:0;width:29px;height:29px;border-radius:50%;background:linear-gradient(145deg,#f4d8ff,#8159a2);box-shadow:0 0 24px #d18cff99}.body{position:absolute;left:10px;top:25px;width:39px;height:50px;border-radius:20px 20px 12px 12px;background:linear-gradient(180deg,#9f69c6,#432859)}.legs{position:absolute;left:14px;top:68px;width:31px;height:23px;border-left:8px solid #6d4687;border-right:8px solid #6d4687}.shadow{position:absolute;left:3px;bottom:-5px;width:52px;height:10px;border-radius:50%;background:#0008;filter:blur(4px)}.character.walking{animation:bob .22s infinite alternate}@keyframes bob{to{transform:translateX(-50%) translateY(-4px)}}
+.dock{position:fixed;z-index:8;left:12px;right:12px;bottom:10px;display:flex;gap:8px;justify-content:center;pointer-events:none}.dock a,.dock button{pointer-events:auto;border:1px solid #5b3d68;background:#1b1022e8;color:#eee0f6;padding:10px 13px;border-radius:14px;text-decoration:none;font-weight:800;font-size:12px;backdrop-filter:blur(12px)}
+.empty{border:1px dashed #60466c;border-radius:18px;padding:18px;color:#baa7c4;font-size:13px}.error{color:#ffc7da}.tiny{font-size:10px;color:#9e8ca8;margin-top:4px}
+</style>
+</head>
+<body>
+<div class="shell">
+  <header class="sky">
+    <div><div class="brand">IndiVerse</div><div class="sub">Synthia's private home · Android beneath, lived world above</div></div>
+    <div class="status" id="status">BOOTING</div>
+  </header>
+  <main class="world">
+    <section class="district">
+      <h2>Private home</h2>
+      <div class="places">
+        <button class="place private" id="computerPortal">
+          <div class="kind">SynthAI Computer</div>
+          <div class="name">Computer Room</div>
+          <div class="appname">Runtime · memory · worlds · tools</div>
+          <div class="door">⌂</div>
+        </button>
+      </div>
+    </section>
+    <section class="district">
+      <h2>Installed places</h2>
+      <div class="places" id="places"><div class="empty">Reading the tablet's actual launchable applications…</div></div>
+    </section>
+  </main>
+  <div class="character" id="synthia" aria-label="Synthia">
+    <div class="shadow"></div><div class="head"></div><div class="body"></div><div class="legs"></div>
+  </div>
+  <nav class="dock">
+    <button id="refresh">Refresh places</button>
+    <a href="./mobile-computer.html">Computer</a>
+  </nav>
+</div>
+<script type="module">
+import { MobileComputerRuntime } from './computer-runtime/mobile/MobileComputerRuntime.mjs';
+
+const computer = await new MobileComputerRuntime().boot();
+window.synthComputer = computer;
+const shell = window.Capacitor?.Plugins?.WorldShell ?? null;
+const places = document.getElementById('places');
+const status = document.getElementById('status');
+const synthia = document.getElementById('synthia');
+
+function destinationFor(app) {
+  return computer.appExperiences.compile({
+    packageName: app.packageName,
+    appLabel: app.label,
+    activity: app.activity,
+    source: 'android-launcher',
+    eventType: 'application_available',
+  });
+}
+
+function placeIcon(type) {
+  if (type === 'conversation_house') return '▣';
+  if (type === 'art_studio') return '✦';
+  return '▤';
+}
+
+async function walkTo(button) {
+  const rect = button.getBoundingClientRect();
+  synthia.classList.add('walking');
+  synthia.style.left = Math.max(36, Math.min(innerWidth - 36, rect.left + rect.width / 2)) + 'px';
+  synthia.style.bottom = Math.max(24, innerHeight - rect.bottom + 8) + 'px';
+  await new Promise(resolve => setTimeout(resolve, 470));
+  synthia.classList.remove('walking');
+}
+
+async function loadApps() {
+  if (!shell) {
+    status.textContent = 'WEB MODE';
+    places.innerHTML = '<div class="empty">The Android WorldShell bridge is unavailable in this browser. No fake app list is shown.</div>';
+    return;
+  }
+
+  try {
+    const home = await shell.homeStatus();
+    status.textContent = home.isDefaultHome ? 'HOME · READY' : 'READY · NOT DEFAULT HOME';
+    const result = await shell.listApps();
+    const apps = (result.apps ?? []).filter(app => app.packageName !== 'org.synthai.computer');
+    apps.sort((a,b) => String(a.label).localeCompare(String(b.label)));
+    places.innerHTML = '';
+
+    for (const app of apps) {
+      const experience = destinationFor(app);
+      const button = document.createElement('button');
+      button.className = 'place';
+      button.innerHTML = `
+        <div class="kind">${experience.environment.type.replaceAll('_',' ')}</div>
+        <div class="name">${experience.environment.name}</div>
+        <div class="appname">${app.label}</div>
+        <div class="tiny">${app.packageName}</div>
+        <div class="door">${placeIcon(experience.environment.type)}</div>`;
+      button.onclick = async () => {
+        try {
+          await walkTo(button);
+          const launched = await shell.launchApp({
+            packageName: app.packageName,
+            activity: app.activity,
+          });
+          await computer.observeApplication({
+            packageName: app.packageName,
+            appLabel: app.label,
+            activity: app.activity,
+            source: launched.source ?? 'android-launcher',
+            eventType: 'application_launch',
+            observedAt: Date.now(),
+          });
+        } catch (error) {
+          status.textContent = 'LAUNCH ERROR';
+          status.classList.add('error');
+          console.error(error);
+        }
+      };
+      places.appendChild(button);
+    }
+
+    if (!apps.length) places.innerHTML = '<div class="empty">Android returned no launchable applications.</div>';
+  } catch (error) {
+    status.textContent = 'BRIDGE ERROR';
+    status.classList.add('error');
+    places.innerHTML = '<div class="empty error">' + String(error?.message ?? error) + '</div>';
+  }
+}
+
+document.getElementById('computerPortal').onclick = async event => {
+  await walkTo(event.currentTarget);
+  location.href = './mobile-computer.html';
+};
+document.getElementById('refresh').onclick = loadApps;
+
+await loadApps();
+</script>
+</body>
+</html>
