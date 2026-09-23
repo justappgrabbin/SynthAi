@@ -32,7 +32,13 @@ public final class WorldNotificationListener extends NotificationListenerService
         } catch (Exception ignored) {}
 
         EventJournal journal = new EventJournal(this);
-        journal.append(envelope);
+        if (!journal.append(envelope)) {
+            getSharedPreferences("synthai-native", MODE_PRIVATE)
+                .edit()
+                .putString("notificationError", journal.lastError())
+                .putLong("notificationErrorAt", System.currentTimeMillis())
+                .apply();
+        }
         io.execute(() -> {
             NativeSeedClient client = new NativeSeedClient("http://127.0.0.1:17757");
             if (!client.health().ok) TermuxBridge.startNativeSeed(this);
