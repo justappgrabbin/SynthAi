@@ -53,6 +53,10 @@ export class StellarLabAdapter {
     return this.snapshot();
   }
 
+  async request({ operation, payload = {}, envelope = {} } = {}) {
+    return this.handle({ ...clone(envelope), operation, payload: clone(payload) });
+  }
+
   async handle(envelope = {}) {
     const p = envelope.payload ?? {};
     let result;
