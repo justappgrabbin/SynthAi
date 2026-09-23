@@ -5,7 +5,7 @@ import { NativeSeedRuntime } from '../native/NativeSeedRuntime.mjs';
 
 test('NATIVE SEED: boots mesh-first with state space, execution, compiler, resident host and world federation', async()=>{
   const runtime=await new NativeSeedRuntime({persistence:new MemoryPersistence(),namespace:'native-seed-test'}).boot();
-  for(const id of ['computer:self','system:state-space','system:execution','system:compiler','system:resident-host','system:indiverse']){
+  for(const id of ['computer:self','system:state-space','system:execution','system:compiler','system:resident-host','system:indiverse','system:purpose-guide']){
     assert.ok(runtime.meshKernel.participant(id),id+' missing');
   }
   assert.ok(runtime.worldFederation.layer('reality:consciousness-realm'));
@@ -72,4 +72,43 @@ test('NATIVE SEED: IndiVerse preserves canonical object while host grammar trans
   assert.equal(local.expression.orientation.roof,'floor');
   assert.ok(visitor.missingAffordances.includes('vertical.grapple'));
   assert.equal(visitor.suggestedAdaptations[0].capability,'hand:grapple');
+});
+
+
+test('NATIVE SEED: Pathways to Purpose persists roadmap and outcome across restart', async()=>{
+  const persistence=new MemoryPersistence();
+  const namespace='native-seed-purpose';
+  const first=await new NativeSeedRuntime({persistence,namespace}).boot();
+
+  const roadmap=await first.buildPurposeRoadmap({
+    userId:'user:purpose-native',
+    goal:'Turn the phone world into a useful daily environment',
+    profile:{strategy:'Respond',authority:'Emotional'},
+    currentState:{
+      strengths:['building'],
+      constraints:['phone-first'],
+      requiredCapabilities:['purpose-guide','world.qualia-contract'],
+      resources:['native phone world'],
+    },
+  });
+
+  assert.equal(roadmap.phases.map(p=>p.name).join('>'),'Discover>Map>Prepare>Activate>Optimize>Sustain');
+  assert.equal(first.meshKernel.participant('system:purpose-guide').residency,'active');
+
+  await first.recordPurposeOutcome({
+    userId:'user:purpose-native',
+    outcome:{
+      action:'install-native-world',
+      result:{installed:true},
+      observableEffect:'native phone world opened successfully',
+      evidence:{kind:'device-test',ref:'user-observed'},
+    },
+  });
+
+  const second=await new NativeSeedRuntime({persistence,namespace}).boot();
+  const restored=await second.getPurposeRoadmap('user:purpose-native');
+  assert.equal(restored.id,roadmap.id);
+  assert.equal(restored.outcomes.length,1);
+  assert.equal(restored.outcomes[0].result.installed,true);
+  assert.ok(second.state.get('events.log',[]).some(e=>e.observable_effect==='native phone world opened successfully'));
 });
