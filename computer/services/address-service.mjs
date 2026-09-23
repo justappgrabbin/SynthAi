@@ -107,12 +107,29 @@ export class AddressService {
    * Resolve a canonical 13-field address from real input only.
    * Accepted inputs (first match wins, rest recorded as unknown):
    *   { birthDate: 'YYYY-MM-DD', birthTime: 'HH:MM', planet? }  -> HD chart placement (default Sun)
+   *   { ephemeris: {sign,degree,minute,second} }                -> Foundry-Glyphs mandala resolver
+   *   { micro | macro | emergent }                              -> YNIV 13-dim engine
    *   { arcSecond | arc: int }                                  -> DMS wheel decode
    *   { address: {...} }                                        -> normalize/validate onto 13 fields
    */
-  async resolveAddress(entityOrEvent = {}) {
+  async resolveAddress(entityOrEvent = {}, options = {}) {
     const input = entityOrEvent?.input ?? entityOrEvent;
     if (input == null || typeof input !== 'object') throw new TypeError('resolveAddress: object input required');
+
+    // Strategy override (routing hint from caller; decision still recorded).
+    // 'auto' = input-shape routing. Others force a provider that actually
+    // implements the requested input shape — no duplicate implementations.
+    const strategy = options.strategy ?? 'auto';
+    if (strategy === 'canonical-validation') {
+      this._routingDecision('resolve_address', 'back-up-:execution-spine-canonical-address',
+        'strategy=canonical-validation -> canonical-address AUTHORITY validates the completed address (per selection_hints: spine is always the final validator)');
+      return this.validateCanonical(input);
+    }
+    if (strategy === 'micro-resolution' && (input.micro || input.macro || input.emergent)) {
+      this._routingDecision('resolve_address', YNIV_PROVIDER_ID, 'strategy=micro-resolution -> YNIV 13-dim resolution engine (selection_hints: encoding/decoding full 13-dim address arithmetic)');
+      return this._resolveViaYNIV(input);
+    }
+    if (strategy !== 'auto') throw new Error(`resolveAddress: strategy '${strategy}' not applicable to this input shape`);
 
     if (input.birthDate) {
       this._routingDecision('resolve_address', HD_PROVIDER_ID, 'birth datum present -> HD chart provider (kimi)');
@@ -321,6 +338,60 @@ export class AddressService {
     const result = resolver.resolve(s, t);
     this.bus?.emit('address-service:edge-resolved', { edgeType: result.edgeType, gates: [addressA.gate, addressB.gate] });
     return { ...result, provider: YNIV_EDGE_PROVIDER_ID };
+  }
+
+  /**
+   * Canonical validation by the AUTHORITY provider (execution-spine).
+   * Accepts a spine-form address (with arcAxis) directly, or YNIV coordinate
+   * parts ({micro, macro, emergent}) which are first resolved by the real YNIV
+   * engine and then translated into spine form for validation. Contract `arc`
+   * (kimi arc-seconds) is NOT translated into arcAxis — that mapping is a
+   * documented open reconciliation; only donor-native arcSecond (0-99) maps to
+   * arcAxis.arcUnit (1-99). Validation failures are REAL results, surfaced.
+   */
+  async validateCanonical(input = {}) {
+    const spine = await this.spine();
+    let spineAddress;
+    if (input.address?.arcAxis) {
+      spineAddress = input.address;
+    } else if (input.micro && input.macro && input.emergent) {
+      const resolved = await this._resolveViaYNIV(input); // REAL donor resolution first
+      const a = resolved.address;
+      const missing = [];
+      if (!input.macro) missing.push('macro');
+      spineAddress = {
+        planetary: input.macro.planet + 1,
+        dimension: spine.DIMENSIONS[input.macro.dimension],
+        gate: a.gate, line: a.line, color: a.color, tone: a.tone, base: a.base,
+        degree: input.emergent.degree ?? 0,
+        minute: input.emergent.minute ?? 0,
+        second: input.emergent.second ?? 0,
+        arcAxis: { arcUnit: (input.emergent.arcSecond ?? 0) + 1, ...(input.emergent.axis ? { axis: input.emergent.axis } : {}) },
+        zodiac: input.macro.zodiac + 1,
+        house: input.macro.house + 1,
+      };
+      if (missing.length) return { valid: false, provider: 'back-up-:execution-spine-canonical-address', reason: `missing parts: ${missing.join(',')}` };
+    } else {
+      return {
+        valid: null,
+        status: 'unknown',
+        provider: 'back-up-:execution-spine-canonical-address',
+        reason: 'no spine-form address (arcAxis) or YNIV coordinate parts supplied; contract-form addresses are not translated (arc<->arcAxis reconciliation pending)',
+      };
+    }
+    try {
+      spine.validateCanonicalAddress(spineAddress);
+      return {
+        valid: true,
+        provider: 'back-up-:execution-spine-canonical-address',
+        canonical_key: spine.canonicalAddressKey(spineAddress),
+        spine_address: spineAddress,
+      };
+    } catch (error) {
+      const result = { valid: false, provider: 'back-up-:execution-spine-canonical-address', error: String(error?.message ?? error), spine_address: spineAddress };
+      this.bus?.emit('address-service:validation-failed', result);
+      return result;
+    }
   }
 
   /** Normalize a partial/canonical address onto exactly the 13 contract fields. */
