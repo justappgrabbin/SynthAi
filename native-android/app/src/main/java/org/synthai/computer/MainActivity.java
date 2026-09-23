@@ -125,6 +125,7 @@ public final class MainActivity extends Activity {
                 }
             }
             boolean ready = health.ok;
+            boolean synthiaReady = ready && hasMountedSynthia(health);
             if (ready) {
                 JSONObject wake = new JSONObject();
                 try { wake.put("elapsedMs", elapsedMs); } catch (Exception ignored) {}
@@ -132,8 +133,30 @@ public final class MainActivity extends Activity {
                 flushJournalNow();
             }
             boolean finalReady = ready;
-            main.post(() -> world.setStatus(finalReady ? "MESH ACTIVE" : "MESH DORMANT · EVENTS HELD"));
+            boolean finalSynthiaReady = synthiaReady;
+            main.post(() -> {
+                world.setResidentName(finalSynthiaReady ? "SYNTHIA" : "YOU");
+                world.setStatus(finalReady
+                    ? (finalSynthiaReady ? "MESH ACTIVE · SYNTHIA HOME" : "MESH ACTIVE · RESIDENT PACKAGE NOT MOUNTED")
+                    : "MESH DORMANT · EVENTS HELD");
+            });
         });
+    }
+
+    private boolean hasMountedSynthia(NativeSeedClient.Result health) {
+        try {
+            JSONObject root = new JSONObject(health.body == null ? "{}" : health.body);
+            JSONObject mounts = root.optJSONObject("optionalMounts");
+            if (mounts == null || !mounts.has("synthia57")) return false;
+            Object value = mounts.opt("synthia57");
+            if (value instanceof JSONObject) {
+                JSONObject object = (JSONObject)value;
+                return !object.has("error");
+            }
+            return value != null && value != JSONObject.NULL;
+        } catch (Exception ignored) {
+            return false;
+        }
     }
 
     @Override
