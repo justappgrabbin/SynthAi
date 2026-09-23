@@ -14,6 +14,7 @@ import { EventEmitter } from './events/event-emitter.mjs';
 import { AutomataEngineGateway } from './services/automata-engine.mjs';
 import { WorldEngineGateway } from './services/world-engine.mjs';
 import { PentaEphemerisService } from './services/penta-ephemeris.mjs';
+import { ExperimentLoop } from './services/experiment-loop.mjs';
 
 export class ComputerRuntime {
   constructor({ persistence = new MemoryPersistence(), namespace = 'synthai-computer', github = null, eventLogPath = null } = {}) {
@@ -106,6 +107,9 @@ export class ComputerRuntime {
     this.services.register('world-engine', { provider: this.worldGateway, contract: 'worldEvent' });
     this.pentaEphemeris = new PentaEphemerisService({ bus: this.bus });
     this.services.register('penta-ephemeris', { provider: this.pentaEphemeris, contract: 'groupPenta' });
+    // Acceptance-7: experiment loop (donor HypothesisRegistry, wrap-only).
+    this.experiments = new ExperimentLoop({ bus: this.bus });
+    this.services.register('experiment-loop', { provider: this.experiments, contract: 'runExperiment' });
     for (const id of ['resolve_address', 'resolve_state', 'emit_event', 'query_capability', 'automata_activation']) {
       if (!this.capabilityRegistry.has(id)) this.capabilities.register(id, { providers: ['back-up-', 'computer'] });
     }
