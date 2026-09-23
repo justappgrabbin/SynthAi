@@ -15,7 +15,8 @@ import { AutomataEngineGateway } from './services/automata-engine.mjs';
 import { WorldEngineGateway } from './services/world-engine.mjs';
 import { PentaEphemerisService } from './services/penta-ephemeris.mjs';
 import { ExperimentLoop } from './services/experiment-loop.mjs';
-import { PurposeGuideService } from './services/purpose-guide.mjs';\nimport { TaskFitService } from './services/task-fit.mjs';
+import { PurposeGuideService } from './services/purpose-guide.mjs';
+import { TaskFitService } from './services/task-fit.mjs';
 
 export class ComputerRuntime {
   constructor({ persistence = new MemoryPersistence(), namespace = 'synthai-computer', github = null, eventLogPath = null } = {}) {
