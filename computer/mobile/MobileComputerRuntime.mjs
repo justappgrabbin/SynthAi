@@ -14,6 +14,7 @@ import { DormantCompilerBroker } from '../runtime/dormant-compiler.mjs';
 import { ResidentHost } from '../runtime/resident-host.mjs';
 import { IndiVerseRuntime } from '../worlds/indiverse.mjs';
 import { WorldFederation } from '../worlds/world-federation.mjs';
+import { AppExperienceRuntime } from './AppExperienceRuntime.mjs';
 
 export const ADDRESS_FIELDS = Object.freeze([
   'planetary', 'dimension', 'gate', 'line', 'color', 'tone', 'base',
@@ -219,6 +220,7 @@ export class MobileComputerRuntime {
     this.worldFederation = new WorldFederation({
       state: this.state, bus: this.bus, mesh: this.meshKernel, residents: this.residents,
     });
+    this.appExperiences = new AppExperienceRuntime({ state: this.state, bus: this.bus });
   }
 
   async boot() {
@@ -228,7 +230,7 @@ export class MobileComputerRuntime {
       await this.meshKernel.registerParticipant('computer:self', {
         kind: 'computer-host',
         publicState: { name: 'SynthAI Computer', flavor: 'mobile-synthimg' },
-        capabilities: ['mesh.host', 'state-space', 'execution', 'resident-host', 'indiverse'],
+        capabilities: ['mesh.host', 'state-space', 'execution', 'resident-host', 'indiverse', 'app-experience'],
         residency: 'active',
       });
     } else {
@@ -253,6 +255,7 @@ export class MobileComputerRuntime {
       'indiverse': 'Canonical shared reality plus host-specific qualia/world-grammar transforms',
       'on-demand-compiler': 'Dormant compiler broker with content-hash reuse; compiler adapter binds separately',
       'world-federation': 'Mesh roles for home, daily-life mechanics, diagnostic lab, research lab and profile worlds',
+      'app-experience': 'Observed Android application state compiled into persistent IndiVerse experience scenes',
     })) {
       if (!this.capabilityRegistry.has(id)) this.capabilities.register(id, { providers: ['mobile-computer'], description });
     }
@@ -266,6 +269,7 @@ export class MobileComputerRuntime {
     this.services.register('indiverse', { provider: this.indiverse, contract: 'createWorld/registerCanonicalObject/renderShared/renderInWorld/visitorContract' });
     this.services.register('compiler-broker', { provider: this.compiler, contract: 'attachCompiler/ensure/snapshot' });
     this.services.register('world-federation', { provider: this.worldFederation, contract: 'defineLayer/seedCanonicalLayers/bind/invoke/attachHome/registerProfileWorld' });
+    this.services.register('app-experience', { provider: this.appExperiences, contract: 'observe/compile/current/history/registerAdapter' });
 
     await this.state.set('computer.boot', {
       status: 'ready',
@@ -276,6 +280,25 @@ export class MobileComputerRuntime {
     this.bus.emit('computer:ready', this.snapshot());
     return this;
   }
+
+  async observeApplication(observation, context = {}) {
+    const experience = await this.appExperiences.observe(observation, context);
+    await this.events.emitEvent({
+      actor_id: `app:${experience.application.packageName ?? experience.application.label}`,
+      actor_type: 'application',
+      event_type: 'application_experience',
+      input: observation,
+      result_status: 'success',
+      result: experience,
+      observable_effect: `${experience.application.label} rendered as ${experience.environment.type}`,
+      evidence: experience.evidence,
+    });
+    return experience;
+  }
+
+  currentApplicationExperience() { return this.appExperiences.current(); }
+  applicationExperienceHistory() { return this.appExperiences.history(); }
+  registerApplicationExperienceAdapter(adapter) { return this.appExperiences.registerAdapter(adapter); }
 
   async setLaunchProfile(profile) {
     if (!['compact', 'full'].includes(profile)) throw new Error('profile must be compact or full');
@@ -545,6 +568,7 @@ export class MobileComputerRuntime {
       indiverse: this.indiverse.snapshot(),
       compiler: this.compiler.snapshot(),
       worlds: this.worldFederation.snapshot(),
+      experiences: this.appExperiences.snapshot(),
     };
   }
 }
