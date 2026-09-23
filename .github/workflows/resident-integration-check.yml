@@ -12,6 +12,7 @@ on:
       - 'computer/residents/**'
       - 'computer/worlds/**'
       - 'computer/labs/**'
+      - 'computer/services/purpose-guide.mjs'
       - 'computer/mobile/MobileComputerRuntime.mjs'
       - 'computer/native/**'
       - 'computer/adapters/termux-compiler.mjs'
@@ -27,6 +28,7 @@ on:
       - 'computer/tests/human-agent-mechanics.test.mjs'
       - 'computer/tests/phone-world.test.mjs'
       - 'computer/tests/triform-mesh.test.mjs'
+      - 'computer/tests/purpose-guide.test.mjs'
       - 'computer/tests/world-adapters.test.mjs'
       - '.github/workflows/resident-integration-check.yml'
 
@@ -56,6 +58,7 @@ jobs:
           computer/tests/human-agent-mechanics.test.mjs
           computer/tests/phone-world.test.mjs
           computer/tests/triform-mesh.test.mjs
+          computer/tests/purpose-guide.test.mjs
           computer/tests/world-adapters.test.mjs
           computer/tests/resident-mesh-indiverse.test.mjs
           computer/tests/synthia57-resident.test.mjs
