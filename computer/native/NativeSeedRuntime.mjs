@@ -11,6 +11,7 @@ import { StellarLabAdapter } from '../labs/stellar-lab-adapter.mjs';
 import { ConsciousnessRealmPackageLoader } from '../worlds/consciousness-realm-loader.mjs';
 import { HumanAgentMechanicsAdapter } from '../worlds/adapters/human-agent.mjs';
 import { TriformPackageLoader } from '../worlds/triform-loader.mjs';
+import { PhoneWorldBridge } from './phone-world.mjs';
 
 const clone = value => value === undefined ? undefined : structuredClone(value);
 
@@ -54,6 +55,7 @@ export class NativeSeedRuntime {
     this.consciousnessRealm = new ConsciousnessRealmPackageLoader({ computer: this, bus: this.bus });
     this.humanAgent = null;
     this.triform = new TriformPackageLoader({ computer: this, bus: this.bus });
+    this.phoneWorld = null;
   }
 
   async boot() {
@@ -207,6 +209,28 @@ export class NativeSeedRuntime {
   async mountTriform(options = {}) { return this.triform.mount(options); }
   async mountInstalledTriform(options = {}) { return this.triform.mountInstalledPackage(options); }
 
+  async bindPhoneHost(host) {
+    this.phoneWorld = new PhoneWorldBridge({
+      host,
+      mesh:this.meshKernel,
+      indiverse:this.indiverse,
+      state:this.state,
+      bus:this.bus,
+      clock:this.clock,
+    });
+    return this.phoneWorld.mount();
+  }
+
+  async phoneRequest(operation, payload = {}) {
+    if (!this.phoneWorld) throw new Error('Phone World host not bound');
+    const routed = await this.meshKernel.request('phone:world', {
+      operation,
+      payload:clone(payload),
+    });
+    if (!routed.delivered) return { queued:routed.queued, result:null };
+    return routed.result;
+  }
+
   async bindHumanAgentHost(host) {
     this.humanAgent = new HumanAgentMechanicsAdapter({ host, state:this.state, bus:this.bus, clock:this.clock });
     await this.worldFederation.bind('mechanics:human-agent', this.humanAgent);
@@ -262,6 +286,7 @@ export class NativeSeedRuntime {
       worlds: this.worldFederation.snapshot(),
       stellar: this.stellarLab.snapshot(),
       humanAgent: this.humanAgent?.snapshot?.() ?? null,
+      phoneWorld: this.phoneWorld?.snapshot?.() ?? null,
       triform: this.triform.get()?.adapter?.snapshot?.() ?? null,
       indiverse: this.indiverse.snapshot(),
       synthia57: this.synthia57.get('synthia')?.adapter?.snapshot?.() ?? null,
