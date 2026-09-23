@@ -1,4 +1,5 @@
 import { DeviceWorldResolver } from './device-world-resolver.mjs';
+import { InterfaceWorldBridge } from './interface-world-bridge.mjs';
 const clone = value => value === undefined ? undefined : structuredClone(value);
 const safe = value => String(value ?? 'unknown').replace(/[^A-Za-z0-9._-]/g, '_');
 
@@ -41,6 +42,7 @@ export class PhoneWorldBridge {
     this.documents=new Map();
     this.contacts=new Map();
     this.settings=new Map();
+    this.interfaceWorld=new InterfaceWorldBridge({indiverse:this.indiverse,state:this.state,bus:this.bus,clock:this.clock,sendResidentEvent:(residentId,event)=>this.#sendResidentEvent(residentId,event)});
   }
 
   registerExperience(experience){
@@ -57,7 +59,7 @@ export class PhoneWorldBridge {
     if(!this.mesh.participant(this.id)){
       await this.mesh.registerParticipant(this.id,{
         kind:'phone-world',residency:'active',
-        capabilities:['phone.apps.list','phone.app.launch','phone.notification.observe','phone.route.enter','phone.documents.list','phone.contacts.list','phone.settings.list','phone.snapshot'],
+        capabilities:['phone.apps.list','phone.app.launch','phone.notification.observe','phone.route.enter','phone.documents.list','phone.contacts.list','phone.settings.list','phone.interface.observe','phone.interface.action','phone.snapshot'],
         publicState:{name:'Phone World',runtime:'native-seed'},
       });
     }else await this.mesh.setResidency(this.id,'active');
@@ -268,6 +270,10 @@ export class PhoneWorldBridge {
     if(operation==='app.launch') return this.launch(payload.packageName,payload);
     if(operation==='route.enter') return this.enterRoute(payload.packageName,payload);
     if(operation==='notification.observe') return this.observeNotification(payload.notification??payload,payload);
+    if(operation==='interface.observe') return this.interfaceWorld.observe(payload.snapshot??payload,payload);
+    if(operation==='interface.action') return this.interfaceWorld.queueAction(payload);
+    if(operation==='interface.actions.pending') return this.interfaceWorld.pending(payload);
+    if(operation==='interface.actions.receipt') return this.interfaceWorld.receipt(payload);
     throw new Error('unsupported Phone World operation: '+operation);
   }
 
@@ -282,6 +288,7 @@ export class PhoneWorldBridge {
       experienceIds:[...new Set(this.apps.values().map(a=>a.experienceId))],
       authority:'canonical-phone-object-map',
       resolver:{id:this.resolver.id,version:this.resolver.version},
+      interfaceWorld:this.interfaceWorld.snapshot(),
     };
   }
 }
