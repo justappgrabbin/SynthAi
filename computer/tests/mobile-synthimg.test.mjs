@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createHash, webcrypto } from 'node:crypto';
 import { MemoryPersistence } from '../core/kernel.mjs';
-import { parseSynthImage } from '../mobile/SynthImageRuntime.mjs';
+import { parseSynthImage, SynthImageRuntime } from '../mobile/SynthImageRuntime.mjs';
 import { MobileComputerRuntime } from '../mobile/MobileComputerRuntime.mjs';
 
 globalThis.crypto ??= webcrypto;
@@ -59,6 +59,31 @@ function synthImage({ corrupt = false } = {}) {
   return Buffer.concat([header, manifest, payload]);
 }
 
+function residentSynthImage() {
+  const payload = Buffer.concat([
+    tarFile('src/federated-synthia.mjs', 'export class FederatedSynthia {}'),
+    tarFile('vendor/pure-synthia-v0.4.0/src/synthia/synthiaRuntime.mjs', 'export const embodiment = {}'),
+    Buffer.alloc(1024),
+  ]);
+  const manifest = Buffer.from(JSON.stringify({
+    id: 'synthia57-demo',
+    name: 'Synthia 5.7 Demo Resident',
+    version: '0.5.7',
+    arch: 'any',
+    resident_type: 'synthia57',
+    resident_entry: 'src/federated-synthia.mjs',
+    embodiment_entry: 'vendor/pure-synthia-v0.4.0/src/synthia/synthiaRuntime.mjs',
+  }));
+  const hash = createHash('sha256').update(payload).digest();
+  const header = Buffer.alloc(49);
+  header.write('SYNTHIMG', 0, 8, 'ascii');
+  header[8] = 1;
+  header.writeUInt32LE(0, 9);
+  header.writeUInt32LE(manifest.length, 13);
+  hash.copy(header, 17);
+  return Buffer.concat([header, manifest, payload]);
+}
+
 test('MOBILE SYNTHIMG: verifies synthctl-compatible image and exposes web payload', async () => {
   const image = await parseSynthImage(synthImage());
   assert.equal(image.manifest.id, 'phone-demo');
@@ -70,6 +95,26 @@ test('MOBILE SYNTHIMG: verifies synthctl-compatible image and exposes web payloa
 
 test('MOBILE SYNTHIMG: refuses a payload whose embedded digest is wrong', async () => {
   await assert.rejects(() => parseSynthImage(synthImage({ corrupt: true })), /sha256 mismatch/);
+});
+
+test('MOBILE SYNTHIMG: resident package installs without pretending it is an HTML app', async () => {
+  const previousCaches = globalThis.caches;
+  globalThis.caches = {
+    async open() {
+      return { async put() {} };
+    }
+  };
+  try {
+    const runtime = new SynthImageRuntime();
+    const record = await runtime.install(residentSynthImage());
+    assert.equal(record.kind, 'resident');
+    assert.equal(record.entry, null);
+    assert.equal(record.residentEntry, 'src/federated-synthia.mjs');
+    assert.equal(record.manifest.resident_type, 'synthia57');
+  } finally {
+    if (previousCaches === undefined) delete globalThis.caches;
+    else globalThis.caches = previousCaches;
+  }
 });
 
 test('MOBILE COMPUTER: full address activates real five-stage state-space and relocates checkpoint', async () => {
