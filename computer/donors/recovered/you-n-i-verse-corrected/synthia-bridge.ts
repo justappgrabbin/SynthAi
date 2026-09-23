@@ -343,11 +343,11 @@ export class WHExtractor {
   extract(input: string): WHEntry {
     const lower = input.toLowerCase();
 
-    if (lower.match(/\b(where|place|location|position|direction)\b/)) return WH_MAP.WHERE;
-    if (lower.match(/\b(what|thing|object|concept|idea)\b/)) return WH_MAP.WHAT;
-    if (lower.match(/\b(when|time|moment|period|date)\b/)) return WH_MAP.WHEN;
-    if (lower.match(/\b(why|reason|cause|purpose|motive)\b/)) return WH_MAP.WHY;
-    if (lower.match(/\b(who|person|identity|self|being)\b/)) return WH_MAP.WHO;
+    if (lower.match(/\\b(where|place|location|position|direction)\\b/)) return WH_MAP.WHERE;
+    if (lower.match(/\\b(what|thing|object|concept|idea)\\b/)) return WH_MAP.WHAT;
+    if (lower.match(/\\b(when|time|moment|period|date)\\b/)) return WH_MAP.WHEN;
+    if (lower.match(/\\b(why|reason|cause|purpose|motive)\\b/)) return WH_MAP.WHY;
+    if (lower.match(/\\b(who|person|identity|self|being)\\b/)) return WH_MAP.WHO;
 
     // Default: WHERE (most common entry point)
     return WH_MAP.WHERE;
