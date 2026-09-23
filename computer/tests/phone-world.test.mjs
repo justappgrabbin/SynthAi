@@ -15,6 +15,9 @@ function fakePhoneHost(){
         {packageName:'com.example.notes',label:'Notes',category:'productivity',launchable:true},
       ];
     },
+    async listDocuments(){return [{id:'doc-1',name:'Project Notes',mimeType:'text/plain',uri:'content://docs/1'}];},
+    async listContacts(){return [{id:'person-1',name:'Joe',lookupKey:'lookup-1'}];},
+    async listSettings(){return [{id:'theme',name:'Appearance',category:'display',valueType:'enum'}];},
     async launchApplication(packageName,context){
       launches.push({packageName,context});
       return {ok:true,packageName};
@@ -128,4 +131,27 @@ test('PHONE WORLD: notifications travel through mesh and persist as world events
   assert.equal(result.delivery.delivered,true);
   assert.equal(observed.at(-1).type,'phone:notification');
   assert.equal(runtime.state.get('phoneWorld.notifications.notif-1').payload.title,'New reply');
+});
+
+test('PHONE WORLD: files contacts and settings become private-by-default world objects when native host exposes them',async()=>{
+  const {runtime}=await rig('phone-world-device-surfaces');
+  const snapshot=await runtime.bindPhoneHost(fakePhoneHost());
+
+  assert.equal(snapshot.documents.length,1);
+  assert.equal(snapshot.contacts.length,1);
+  assert.equal(snapshot.settings.length,1);
+
+  const document=runtime.indiverse.canonicalObject('document:doc-1');
+  const contact=runtime.indiverse.canonicalObject('contact:person-1');
+  const setting=runtime.indiverse.canonicalObject('setting:theme');
+
+  assert.equal(document.kind,'document-object');
+  assert.equal(contact.kind,'person-presence');
+  assert.equal(setting.kind,'world-law');
+  assert.equal(document.metadata.privateByDefault,true);
+  assert.equal(contact.metadata.privateByDefault,true);
+  assert.equal(setting.metadata.privateByDefault,true);
+
+  assert.equal(runtime.meshKernel.participant('phone:contact:person-1').publicState.private,true);
+  assert.ok(runtime.meshKernel.participant('phone:contact:person-1').privateStateRef);
 });
