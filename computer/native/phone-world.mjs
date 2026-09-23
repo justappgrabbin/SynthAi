@@ -220,6 +220,7 @@ export class PhoneWorldBridge {
       at:new Date(this.clock()).toISOString(),
     };
     await this.#sendResidentEvent(residentId,event);
+    this.bus?.emit('phone-world:route-entered',clone(event));
     return {object,event};
   }
 
