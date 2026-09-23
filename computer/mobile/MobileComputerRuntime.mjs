@@ -249,7 +249,8 @@ export class MobileComputerRuntime {
     for (const core of [
       { id: 'system:state-space', kind: 'core-service', capabilities: ['state-space.activate','state-space.query'] },
       { id: 'system:execution', kind: 'core-service', capabilities: ['automata.run','process.execute','backend.request'] },
-      { id: 'system:purpose-guide', kind: 'core-service', capabilities: ['purpose.roadmap','purpose.outcome','purpose.read'] },\n      { id: 'system:task-fit', kind: 'core-service', capabilities: ['task-fit.score','task-fit.rank'] },
+      { id: 'system:purpose-guide', kind: 'core-service', capabilities: ['purpose.roadmap','purpose.outcome','purpose.read'] },
+      { id: 'system:task-fit', kind: 'core-service', capabilities: ['task-fit.score','task-fit.rank'] },
     ]) {
       if (!this.meshKernel.participant(core.id)) {
         await this.meshKernel.registerParticipant(core.id, {
@@ -310,7 +311,8 @@ export class MobileComputerRuntime {
       'on-demand-compiler': 'Dormant compiler broker with content-hash reuse; compiler adapter binds separately',
       'world-federation': 'Mesh roles for home, daily-life mechanics, diagnostic lab, research lab and profile worlds',
       'synthia57-resident': 'Mounts the canonical Synthia v0.5.7 package intact as a Computer resident',
-      'pathways-to-purpose': 'Persistent personal purpose roadmaps and real-world outcome feedback from live Computer state',\n      'task-fit-matchmaking': 'Deterministic donor-backed task/candidate fit scoring for role and capability routing',
+      'pathways-to-purpose': 'Persistent personal purpose roadmaps and real-world outcome feedback from live Computer state',
+      'task-fit-matchmaking': 'Deterministic donor-backed task/candidate fit scoring for role and capability routing',
     })) {
       if (!this.capabilityRegistry.has(id)) this.capabilities.register(id, { providers: ['mobile-computer'], description });
     }
@@ -325,7 +327,8 @@ export class MobileComputerRuntime {
     this.services.register('compiler-broker', { provider: this.compiler, contract: 'attachCompiler/ensure/snapshot' });
     this.services.register('world-federation', { provider: this.worldFederation, contract: 'defineLayer/seedCanonicalLayers/bind/invoke/attachHome/registerProfileWorld' });
     this.services.register('synthia57-loader', { provider: this.synthia57, contract: 'mount/get/unmount' });
-    this.services.register('purpose-guide', { provider: this.purposeGuide, contract: 'buildRoadmap/recordOutcome/getRoadmap' });\n    this.services.register('task-fit', { provider: this.taskFit, contract: 'scoreTask/rankCandidates' });
+    this.services.register('purpose-guide', { provider: this.purposeGuide, contract: 'buildRoadmap/recordOutcome/getRoadmap' });
+    this.services.register('task-fit', { provider: this.taskFit, contract: 'scoreTask/rankCandidates' });
 
     await this.state.set('computer.boot', {
       status: 'ready',
