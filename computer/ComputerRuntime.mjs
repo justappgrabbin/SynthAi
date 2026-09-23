@@ -110,12 +110,42 @@ export class ComputerRuntime {
   // ── Stage-4a contract surface (delegates to mounted services, not direct donor imports) ──
   queryCapability(name) { return this.capabilityRegistryService.queryCapability(name); }
   route(capability, ctx = {}) { return this.capabilityRegistryService.route(capability, ctx); }
-  resolveAddress(entityOrEvent) { return this.addressService.resolveAddress(entityOrEvent); }
+  resolveAddress(entityOrEvent, options) { return this.addressService.resolveAddress(entityOrEvent, options); }
   compareAddresses(a, b) { return this.addressService.compareAddresses(a, b); }
   resolveRelationship(a, b, context) { return this.addressService.resolveRelationship(a, b, context); }
   resolveState(entity, event, context) { return this.stateResolver.resolveState(entity, event, context); }
   emitEvent(event) { return this.eventEmitter.emitEvent(event); }
   executeOnSwarm(capability, input, ctx) { return this.automataGateway.execute(capability, input, ctx); }
+
+  /**
+   * Contract: mount(application, contract). Mounts a real artifact app through
+   * the existing intake -> mutation -> shell-manager pipeline and returns the
+   * mount contract: a RESTRICTED shared-services surface (the app consumes
+   * Computer services; it does NOT become a Computer). State is namespaced.
+   */
+  async mountApplication(appId, { artifactId = null, shell = 'workspace' } = {}) {
+    if (!this.artifacts.get(artifactId)) throw new Error(`mountApplication: unknown artifact ${artifactId} (ingest first)`);
+    const proposal = this.intake.proposeMount(artifactId, { appId, shell });
+    const applied = await this.mutations.apply(proposal.id);
+    const mount = applied.results[0].result;
+    const ns = `apps.${appId}`;
+    const runtime = this;
+    const contract = {
+      mountId: mount.mountId,
+      appId,
+      artifactId,
+      services: Object.freeze({
+        emitEvent: (event) => runtime.emitEvent({ ...event, actor_id: event.actor_id ?? `app:${appId}`, actor_type: event.actor_type ?? 'application' }),
+        resolveAddress: (input, options) => runtime.resolveAddress(input, options),
+        resolveState: (entity, event, context) => runtime.resolveState(entity, event, context),
+        getState: (path, fallback) => runtime.state.get(`${ns}.${path}`, fallback),
+        setState: (path, value) => runtime.state.set(`${ns}.${path}`, value, { source: `app:${appId}` }),
+        readArtifact: () => runtime.vfs.read(runtime.artifacts.get(artifactId).path),
+      }),
+    };
+    this.bus.emit('app:contract-issued', { appId, mountId: mount.mountId, services: Object.keys(contract.services) });
+    return contract;
+  }
 
   snapshot() {
     return {
