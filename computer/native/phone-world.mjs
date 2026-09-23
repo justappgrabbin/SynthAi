@@ -37,6 +37,9 @@ export class PhoneWorldBridge {
     Object.assign(this,{host,mesh,indiverse,state,bus,clock,id});
     this.experiences=[...DEFAULT_APP_EXPERIENCES];
     this.apps=new Map();
+    this.documents=new Map();
+    this.contacts=new Map();
+    this.settings=new Map();
   }
 
   registerExperience(experience){
@@ -53,13 +56,72 @@ export class PhoneWorldBridge {
     if(!this.mesh.participant(this.id)){
       await this.mesh.registerParticipant(this.id,{
         kind:'phone-world',residency:'active',
-        capabilities:['phone.apps.list','phone.app.launch','phone.notification.observe','phone.route.enter','phone.snapshot'],
+        capabilities:['phone.apps.list','phone.app.launch','phone.notification.observe','phone.route.enter','phone.documents.list','phone.contacts.list','phone.settings.list','phone.snapshot'],
         publicState:{name:'Phone World',runtime:'native-seed'},
       });
     }else await this.mesh.setResidency(this.id,'active');
 
     this.mesh.bindHandler(this.id,envelope=>this.request({operation:envelope.operation,payload:envelope.payload??{}}));
-    return this.syncApplications();
+    await this.syncApplications();
+    await this.syncDeviceSurfaces();
+    return this.snapshot();
+  }
+
+  async syncDeviceSurfaces(){
+    await this.#syncOptionalSurface({
+      hostMethod:'listDocuments', collection:this.documents, prefix:'phone:document:', objectPrefix:'document:',
+      kind:'document-object', functionName:item=>item.kind??item.mimeType??'document',
+      relation:'stored-in', presentation:item=>({label:item.label??item.name??'Document',symbol:'document',material:'shared-interface'}),
+      metadata:item=>({uri:item.uri??null,mimeType:item.mimeType??null,size:item.size??null}),
+      privateByDefault:true,
+    });
+    await this.#syncOptionalSurface({
+      hostMethod:'listContacts', collection:this.contacts, prefix:'phone:contact:', objectPrefix:'contact:',
+      kind:'person-presence', functionName:()=> 'contact',
+      relation:'known-by', presentation:item=>({label:item.label??item.name??'Contact',symbol:'person',material:'shared-interface'}),
+      metadata:item=>({lookupKey:item.lookupKey??null}),
+      privateByDefault:true,
+    });
+    await this.#syncOptionalSurface({
+      hostMethod:'listSettings', collection:this.settings, prefix:'phone:setting:', objectPrefix:'setting:',
+      kind:'world-law', functionName:item=>item.category??'setting',
+      relation:'governs', presentation:item=>({label:item.label??item.name??'Setting',symbol:'control',material:'shared-interface'}),
+      metadata:item=>({category:item.category??null,valueType:item.valueType??typeof item.value}),
+      privateByDefault:true,
+    });
+    return this.snapshot();
+  }
+
+  async #syncOptionalSurface({hostMethod,collection,prefix,objectPrefix,kind,functionName,relation,presentation,metadata,privateByDefault=false}){
+    const list=this.host?.[hostMethod];
+    if(typeof list!=='function') return {available:false,count:0};
+    const items=await list.call(this.host);
+    for(const raw of items??[]){
+      const key=String(raw.id??raw.uri??raw.lookupKey??raw.key??raw.name??'');
+      if(!key) continue;
+      const item={...clone(raw),id:key};
+      collection.set(key,item);
+      const participantId=prefix+safe(key);
+      const objectId=objectPrefix+key;
+      if(!this.mesh.participant(participantId)){
+        await this.mesh.registerParticipant(participantId,{
+          kind,residency:'warm',capabilities:[],
+          publicState:privateByDefault?{kind,private:true}:{label:item.label??item.name??key,kind},
+          privateStateRef:privateByDefault?`phone-private:${objectId}`:null,
+        });
+      }
+      if(!this.mesh.relationshipsFor(participantId).some(e=>e.type===relation&&e.to===this.id)){
+        await this.mesh.connect(participantId,this.id,{type:relation});
+      }
+      await this.indiverse.registerCanonicalObject({
+        id:objectId,kind,function:functionName(item),
+        affordances:[],entryPoints:[],
+        relations:[{type:'backed-by',target:participantId}],
+        presentation:presentation(item),
+        metadata:{...metadata(item),privateByDefault},
+      });
+    }
+    return {available:true,count:collection.size};
   }
 
   async syncApplications(){
@@ -194,7 +256,7 @@ export class PhoneWorldBridge {
   }
 
   async request({operation,payload={}}={}){
-    if(operation==='sync') return this.syncApplications();
+    if(operation==='sync') { await this.syncApplications(); await this.syncDeviceSurfaces(); return this.snapshot(); }
     if(operation==='snapshot') return this.snapshot();
     if(operation==='app.launch') return this.launch(payload.packageName,payload);
     if(operation==='route.enter') return this.enterRoute(payload.packageName,payload);
@@ -206,6 +268,9 @@ export class PhoneWorldBridge {
     return {
       id:this.id,
       apps:[...this.apps.values()].map(clone),
+      documents:[...this.documents.values()].map(clone),
+      contacts:[...this.contacts.values()].map(item=>({id:item.id,label:item.label??item.name??'Contact'})),
+      settings:[...this.settings.values()].map(item=>({id:item.id,label:item.label??item.name??'Setting',category:item.category??null})),
       activeApp:this.state.get('phoneWorld.activeApp',null),
       experienceIds:[...new Set(this.apps.values().map(a=>a.experienceId))],
       authority:'canonical-phone-object-map',
