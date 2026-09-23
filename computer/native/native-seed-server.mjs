@@ -37,6 +37,19 @@ await runtime.boot();
 const phoneHost = new NativePhoneHostProxy();
 await runtime.bindPhoneHost(phoneHost);
 
+const worldJournalConfig = {
+  projectUrl: process.env.SYNTHAI_WORLD_PROJECT_URL ?? 'https://leisphnjslcuepflefri.supabase.co',
+  runtimeToken: process.env.SYNTHAI_WORLD_RUNTIME_TOKEN ?? null,
+  workspaceId: process.env.SYNTHAI_WORLD_WORKSPACE_ID ?? '44bce193-f68b-4c07-9013-77b6429d0351',
+  syncPolicy: {
+    appEntries: process.env.SYNTHAI_WORLD_SYNC_APPS !== '0',
+    routes: process.env.SYNTHAI_WORLD_SYNC_ROUTES !== '0',
+    notifications: process.env.SYNTHAI_WORLD_SYNC_NOTIFICATIONS === '1',
+    includeRouteTitles: process.env.SYNTHAI_WORLD_SYNC_ROUTE_TITLES === '1',
+  },
+};
+await runtime.bindSupabaseWorldJournal(worldJournalConfig);
+
 async function mountOptionalResidents(){
   const results={};
   if(process.env.SYNTHIA57_BASE){
@@ -116,7 +129,7 @@ async function route(req,res){
   try{
     const url=new URL(req.url,'http://127.0.0.1');
     if(req.method==='GET' && url.pathname==='/health'){
-      return json(res,200,{ok:true,service:'synthai-native-seed',port:PORT,statePath,optionalMounts});
+      return json(res,200,{ok:true,service:'synthai-native-seed',port:PORT,statePath,optionalMounts,worldJournal:runtime.worldJournal?.snapshot?.()??null});
     }
     if(req.method==='GET' && url.pathname==='/snapshot'){
       return json(res,200,runtime.snapshot());
