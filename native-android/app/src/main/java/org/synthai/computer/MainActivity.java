@@ -84,7 +84,29 @@ public final class MainActivity extends Activity {
 
         JSONObject sync = new JSONObject();
         try { sync.put("applications", appsJson); } catch (Exception ignored) {}
-        io.execute(() -> client.post("/phone/sync", sync));
+        io.execute(() -> {
+            NativeSeedClient.Result result = client.post("/phone/sync", sync);
+            if (!result.ok || result.body == null || result.body.isEmpty()) return;
+            try {
+                JSONObject snapshot = new JSONObject(result.body);
+                JSONArray runtimeApps = snapshot.optJSONArray("apps");
+                if (runtimeApps == null) return;
+                java.util.HashMap<String, String> experienceByPackage = new java.util.HashMap<>();
+                for (int i = 0; i < runtimeApps.length(); i++) {
+                    JSONObject runtimeApp = runtimeApps.optJSONObject(i);
+                    if (runtimeApp == null) continue;
+                    String pkg = runtimeApp.optString("packageName", "");
+                    String experienceId = runtimeApp.optString("experienceId", "application-place");
+                    if (!pkg.isEmpty()) experienceByPackage.put(pkg, experienceId);
+                }
+                main.post(() -> {
+                    for (PhoneWorldView.AppPlace place : appPlaces) {
+                        place.experienceId = experienceByPackage.getOrDefault(place.packageName, "application-place");
+                    }
+                    world.invalidate();
+                });
+            } catch (Exception ignored) {}
+        });
     }
 
     private void enterApp(PhoneWorldView.AppPlace app) {
