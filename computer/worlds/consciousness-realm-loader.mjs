@@ -1,0 +1,64 @@
+import { ConsciousnessRealmAdapter } from './consciousness-realm-adapter.mjs';
+
+const defaultImporter = specifier => import(specifier);
+
+export class ConsciousnessRealmPackageLoader {
+  constructor({ computer, importModule = defaultImporter, bus = null } = {}) {
+    if (!computer?.worldFederation || !computer?.residents || !computer?.meshKernel) {
+      throw new TypeError('ConsciousnessRealmPackageLoader requires mesh-first Computer runtime');
+    }
+    Object.assign(this, { computer, importModule, bus: bus ?? computer.bus });
+    this.mountRecord = null;
+  }
+
+  async mount({
+    module = null,
+    moduleSpecifier = null,
+    compileSpec = null,
+    worldId = 'reality:consciousness-realm',
+  } = {}) {
+    let artifact = null;
+    if (!module && compileSpec) {
+      artifact = await this.computer.ensureCompiled(compileSpec);
+      moduleSpecifier = artifact.artifactRef;
+    }
+    if (!module) {
+      if (!moduleSpecifier) throw new Error('Consciousness Realm mount requires module, moduleSpecifier, or compileSpec');
+      module = await this.importModule(moduleSpecifier);
+    }
+    const AgentLifeEngine = module?.AgentLifeEngine;
+    if (typeof AgentLifeEngine !== 'function') throw new Error('Consciousness Realm package does not export AgentLifeEngine');
+
+    const engine = new AgentLifeEngine();
+    const adapter = new ConsciousnessRealmAdapter({ engine, bus:this.bus, id:worldId });
+    await this.computer.worldFederation.bind(worldId, adapter);
+    await this.computer.registerReality(worldId, adapter, {
+      kind:'home-reality',
+      capabilities:this.computer.worldFederation.layer(worldId)?.capabilities ?? [],
+      metadata:{
+        package:'ConsciousnessRealm',
+        donor:'attached_assets/AgentLifeEngine_1777724026235.ts',
+        canonicalIdentityRequired:true,
+        randomBirthChartBypassed:true,
+      },
+    });
+
+    this.mountRecord = { worldId, engine, adapter, artifact, moduleSpecifier };
+    this.bus?.emit('consciousness-realm:mounted', {
+      worldId,
+      moduleSpecifier,
+      compiled:Boolean(artifact),
+      randomBirthChartBypassed:true,
+    });
+    return this.mountRecord;
+  }
+
+  get() { return this.mountRecord; }
+
+  async attachResident(residentId = 'synthia') {
+    if (!this.mountRecord) throw new Error('Consciousness Realm not mounted');
+    return this.computer.enterReality(residentId, this.mountRecord.worldId);
+  }
+}
+
+export default ConsciousnessRealmPackageLoader;
