@@ -23,6 +23,7 @@ on:
       - 'computer/tests/termux-compiler.test.mjs'
       - 'computer/tests/stellar-lab-mesh.test.mjs'
       - 'computer/tests/consciousness-realm-adapter.test.mjs'
+      - 'computer/tests/human-agent-mechanics.test.mjs'
       - '.github/workflows/resident-integration-check.yml'
 
 permissions:
@@ -47,6 +48,7 @@ jobs:
           computer/tests/termux-compiler.test.mjs
           computer/tests/stellar-lab-mesh.test.mjs
           computer/tests/consciousness-realm-adapter.test.mjs
+          computer/tests/human-agent-mechanics.test.mjs
           computer/tests/resident-mesh-indiverse.test.mjs
           computer/tests/synthia57-resident.test.mjs
           computer/tests/synthia57-package-loader.test.mjs
