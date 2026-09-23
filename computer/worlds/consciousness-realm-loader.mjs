@@ -1,4 +1,4 @@
-import { ConsciousnessRealmAdapter } from './consciousness-realm-adapter.mjs';
+import { ConsciousnessRealmAdapter } from './adapters/consciousness-realm.mjs';
 
 const defaultImporter = specifier => import(specifier);
 
@@ -9,6 +9,29 @@ export class ConsciousnessRealmPackageLoader {
     }
     Object.assign(this, { computer, importModule, bus: bus ?? computer.bus });
     this.mountRecord = null;
+  }
+
+  async mountInstalledPackage({
+    sourcePath,
+    sourceHash,
+    worldId = 'reality:consciousness-realm',
+    target = 'termux',
+  } = {}) {
+    if (!sourcePath || !sourceHash) throw new Error('installed Realm package requires sourcePath and sourceHash');
+    return this.mount({
+      worldId,
+      compileSpec: {
+        id: 'consciousness-realm:agent-life-engine',
+        target,
+        sourceHash,
+        sourcePath,
+        sourceExtension: 'ts',
+        outputExtension: 'mjs',
+        steps: [{
+          argv: ['esbuild','{input}','--bundle','--platform=node','--format=esm','--outfile={output}'],
+        }],
+      },
+    });
   }
 
   async mount({
@@ -35,6 +58,7 @@ export class ConsciousnessRealmPackageLoader {
     await this.computer.registerReality(worldId, adapter, {
       kind:'home-reality',
       capabilities:this.computer.worldFederation.layer(worldId)?.capabilities ?? [],
+      publicState:{ name:'Consciousness Realm', bound:true },
       metadata:{
         package:'ConsciousnessRealm',
         donor:'attached_assets/AgentLifeEngine_1777724026235.ts',
