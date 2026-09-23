@@ -3,9 +3,11 @@ package org.synthai.computer;
 import android.accessibilityservice.AccessibilityService;
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.graphics.Rect;
+import android.graphics.PixelFormat;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.view.WindowManager;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 import org.json.JSONArray;
@@ -18,6 +20,9 @@ public final class WorldAccessibilityService extends AccessibilityService {
     private final ExecutorService io = Executors.newSingleThreadExecutor();
     private final Handler main = new Handler(Looper.getMainLooper());
     private NativeSeedClient client;
+    private WindowManager windowManager;
+    private InterfaceWorldOverlayView overlay;
+    private long rawModeUntil = 0L;
     private long lastCaptureAt = 0L;
     private static final long CAPTURE_DEBOUNCE_MS = 120L;
     private static final long ACTION_POLL_MS = 700L;
@@ -40,6 +45,7 @@ public final class WorldAccessibilityService extends AccessibilityService {
             info.flags |= AccessibilityServiceInfo.FLAG_INCLUDE_NOT_IMPORTANT_VIEWS;
             setServiceInfo(info);
         }
+        mountWorldOverlay();
         main.removeCallbacks(actionPoll);
         main.post(actionPoll);
         captureCurrentInterface();
@@ -49,8 +55,13 @@ public final class WorldAccessibilityService extends AccessibilityService {
     public void onAccessibilityEvent(AccessibilityEvent event) {
         if (event == null) return;
         CharSequence pkg = event.getPackageName();
-        if (pkg != null && getPackageName().contentEquals(pkg)) return;
+        if (pkg != null && getPackageName().contentEquals(pkg)) {
+            if (overlay != null) overlay.setVisibility(android.view.View.GONE);
+            return;
+        }
         long now = System.currentTimeMillis();
+        if (now < rawModeUntil) return;
+        if (overlay != null) overlay.setVisibility(android.view.View.VISIBLE);
         if (now - lastCaptureAt < CAPTURE_DEBOUNCE_MS) return;
         lastCaptureAt = now;
         captureCurrentInterface();
@@ -62,6 +73,10 @@ public final class WorldAccessibilityService extends AccessibilityService {
     @Override
     public void onDestroy() {
         main.removeCallbacks(actionPoll);
+        if (windowManager != null && overlay != null) {
+            try { windowManager.removeView(overlay); } catch (Exception ignored) {}
+        }
+        overlay = null;
         io.shutdownNow();
         super.onDestroy();
     }
@@ -81,8 +96,69 @@ public final class WorldAccessibilityService extends AccessibilityService {
             JSONObject body = new JSONObject();
             body.put("residentId", "synthia");
             body.put("snapshot", snapshot);
-            io.execute(() -> client.post("/phone/interface-tree", body));
+            io.execute(() -> {
+                NativeSeedClient.Result result = client.post("/phone/interface-tree", body);
+                if (!result.ok || result.body == null || result.body.isEmpty()) return;
+                try {
+                    JSONObject surface = new JSONObject(result.body);
+                    main.post(() -> {
+                        if (overlay != null && System.currentTimeMillis() >= rawModeUntil) {
+                            overlay.setSurface(surface);
+                        }
+                    });
+                } catch (Exception ignored) {}
+            });
         } catch (Exception ignored) {}
+    }
+
+    private void mountWorldOverlay() {
+        if (overlay != null) return;
+        windowManager = (WindowManager)getSystemService(WINDOW_SERVICE);
+        if (windowManager == null) return;
+
+        overlay = new InterfaceWorldOverlayView(this);
+        overlay.setListener(new InterfaceWorldOverlayView.Listener() {
+            @Override public void onBrickAction(String brickId, String affordance) {
+                requestBrickAction(brickId, affordance);
+            }
+            @Override public void onRawMode() {
+                rawModeUntil = System.currentTimeMillis() + 10_000L;
+                overlay.setVisibility(android.view.View.GONE);
+                main.postDelayed(() -> {
+                    if (System.currentTimeMillis() >= rawModeUntil) {
+                        captureCurrentInterface();
+                    }
+                }, 10_100L);
+            }
+        });
+
+        WindowManager.LayoutParams params = new WindowManager.LayoutParams(
+            WindowManager.LayoutParams.MATCH_PARENT,
+            WindowManager.LayoutParams.MATCH_PARENT,
+            WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY,
+            WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN |
+                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+            PixelFormat.TRANSLUCENT
+        );
+        params.setTitle("SynthAI IndiVerse Interface World");
+        try {
+            windowManager.addView(overlay, params);
+        } catch (Exception ignored) {
+            overlay = null;
+        }
+    }
+
+    private void requestBrickAction(String brickId, String affordance) {
+        if (client == null || brickId == null || affordance == null) return;
+        io.execute(() -> {
+            try {
+                JSONObject request = new JSONObject();
+                request.put("brickId", brickId);
+                request.put("action", affordance);
+                request.put("residentId", "synthia");
+                client.post("/phone/interface-action", request);
+            } catch (Exception ignored) {}
+        });
     }
 
     private JSONObject serializeNode(AccessibilityNodeInfo node, String path, int depth, int[] count) throws Exception {
