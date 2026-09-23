@@ -6,6 +6,7 @@ on:
     branches:
       - 'mobile/synthimg-computer'
       - 'integration/synthia-reality-resident'
+      - 'feature/indiverse-universal-world-shell'
     paths:
       - 'computer/mobile/**'
       - 'computer/runtime/**'
@@ -42,7 +43,7 @@ jobs:
         run: npm install --no-audit --no-fund
 
       - name: Run mobile acceptance tests
-        run: node --test computer/tests/mobile-synthimg.test.mjs computer/tests/resident-mesh-indiverse.test.mjs computer/tests/world-federation.test.mjs
+        run: node --test computer/tests/mobile-synthimg.test.mjs computer/tests/resident-mesh-indiverse.test.mjs computer/tests/world-federation.test.mjs computer/tests/app-experience.test.mjs
 
       - name: Stage mobile web bundle
         run: npm run build:mobile
@@ -52,6 +53,9 @@ jobs:
 
       - name: Sync SynthAI mobile bundle
         run: npx cap sync android
+
+      - name: Install IndiVerse HOME native bridge
+        run: npm run android:patch
 
       - name: Build debug APK
         working-directory: android
