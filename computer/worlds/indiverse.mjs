@@ -98,7 +98,15 @@ export class IndiVerseRuntime {
   async updateGrammar(worldId, patch = {}) {
     const world = this.world(worldId);
     if (!world) throw new Error(`unknown IndiVerse: ${worldId}`);
-    world.grammar = mergeGrammar(Object.fromEntries(Object.keys(DEFAULT_QUALIA_GRAMMAR).map(key => [key, { ...(world.grammar?.[key] ?? {}), ...(patch[key] ?? {}) }])));
+    const next=clone(world.grammar??{})??{};
+    for(const [key,value] of Object.entries(patch??{})){
+      if(value&&typeof value==='object'&&!Array.isArray(value)){
+        next[key]={...(next[key]??{}),...clone(value)};
+      }else{
+        next[key]=clone(value);
+      }
+    }
+    world.grammar = mergeGrammar(next);
     world.updatedAt = this.clock();
     await this.state.set(`indiverse.worlds.${safeKey(worldId)}`, world, { source: 'indiverse' });
     this.bus?.emit('indiverse:grammar-updated', { worldId, grammar: clone(world.grammar) });
@@ -164,6 +172,7 @@ export class IndiVerseRuntime {
       sound: clone(world.grammar?.sound?.world ?? {}),
       embodiment: clone(world.grammar?.embodiment ?? {}),
       metadata: clone(world.metadata ?? {}),
+      grammar: clone(world.grammar ?? {}),
     };
   }
 
