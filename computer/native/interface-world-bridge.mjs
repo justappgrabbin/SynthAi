@@ -13,6 +13,10 @@ export class InterfaceWorldBridge {
 
   async observe(snapshot={}, {residentId='synthia'}={}){
     const resolved=this.recognizer.recognize(snapshot);
+    const worldId=this.state.get('phoneWorld.activeIndiVerse',null);
+    const worldProfile=worldId&&this.indiverse.world(worldId)?this.indiverse.worldProfile(worldId):null;
+    resolved.worldId=worldId;
+    resolved.worldProfile=clone(worldProfile);
     this.current=clone(resolved);
     const appObjectId=resolved.packageName?'app:'+resolved.packageName:null;
     const surfaceObjectId='interface:'+safe(resolved.surfaceId);
@@ -41,8 +45,20 @@ export class InterfaceWorldBridge {
         presentation:{label:brick.label,...clone(brick.world.presentation),material:'resolved-interface'},
         metadata:{privateByDefault:true,surfaceId:resolved.surfaceId,sourceBrickId:brick.id,binding:clone(brick.binding),geometry:clone(brick.geometry),state:clone(brick.state)},
       });
+      brick.canonicalObjectId=id;
+      if(worldId&&this.indiverse.world(worldId)){
+        brick.expression=this.indiverse.renderInWorld(worldId,id).expression;
+      }else{
+        brick.expression={label:brick.label,...clone(brick.world.presentation),material:'resolved-interface'};
+      }
     }
 
+    if(worldId&&this.indiverse.world(worldId)){
+      resolved.surfaceExpression=this.indiverse.renderInWorld(worldId,surfaceObjectId).expression;
+    }else{
+      resolved.surfaceExpression={label:resolved.title,symbol:'building',material:'resolved-interface'};
+    }
+    this.current=clone(resolved);
     await this.state.set('phoneWorld.interface.current',resolved,{source:'interface-world'});
     const event={id:'phone-interface-'+this.clock(),type:'phone:interface-resolved',source:'phone:world',actor:residentId,target:resolved.packageName?'phone:app:'+safe(resolved.packageName):'phone:world',summary:'Resolved '+resolved.bricks.length+' interface bricks in '+resolved.title,payload:{surfaceId:resolved.surfaceId,packageName:resolved.packageName,brickCount:resolved.bricks.length,composition:clone(resolved.composition)},at:new Date(this.clock()).toISOString()};
     if(this.sendResidentEvent) await this.sendResidentEvent(residentId,event);
@@ -85,7 +101,14 @@ export class InterfaceWorldBridge {
   }
 
   snapshot(){
-    return {recognizer:{id:this.recognizer.id,version:this.recognizer.version},current:this.state.get('phoneWorld.interface.current',this.current),pending:this.pending({limit:100}).length};
+    const worldId=this.state.get('phoneWorld.activeIndiVerse',null);
+    return {
+      recognizer:{id:this.recognizer.id,version:this.recognizer.version},
+      activeWorldId:worldId,
+      worldProfile:worldId&&this.indiverse.world(worldId)?this.indiverse.worldProfile(worldId):null,
+      current:this.state.get('phoneWorld.interface.current',this.current),
+      pending:this.pending({limit:100}).length
+    };
   }
 }
 
