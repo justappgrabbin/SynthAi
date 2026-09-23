@@ -85,7 +85,7 @@ ADDED (registry only, status PRESENT with excavation probe evidence unless noted
 - back-up-:kimi-layer5-ssm (resolve_state) — SSM/attractor machinery (step/processMeshEvent/predict/recall/getMood, 64-hex Hamming-coupled state); nearest-attractor candidate; complements mesh-state-space. Probe: step([1,0,1,0,1,0])->out[0]=0.4714, recall self-sim=1.0.
 - back-up-:kimi-coordinate-engine (resolve_address) — 13-layer BigInt mixed-radix addressing + resonance; SPECIALIZED/PARALLEL scheme; execution-spine canonical-address.mjs REMAINS authority. Probe: toAddress=12023169149007581n, roundtrip true.
 - back-up-:kimi-phase-space-engine (resolve_state) — five-stage deterministic compose with trace + Who/What/Where/When/Why projections. Probe: compose complete=true, double-run deterministic.
-- back-up-:pure-synthia-emergent-state-space (new capability state_space_runtime) — v0.6.7 VERSIONED ANCESTOR of mounted kimi mesh-state-space; EmergentMesh 320 nodes/960 edges; runtime/task/recall layer unmounted. Caveat: runtime.mjs needs absent ../canonicalState.mjs — use core/mesh directly.
+- back-up-:pure-synthia-emergent-state-space (new capability state_space_runtime) — v0.6.7 VERSIONED ANCESTOR of mounted kimi mesh-state-space; EmergentMesh 320 nodes/960 edges; runtime/task/recall layer unmounted. Caveat: runtime.mjs needs absent ../canonicalState.mjs — use core/mesh directly, not runtime.mjs.
 - back-up-:pure-synthia-grammar-kernel (new capability linguistic_kernel) — five-projection linguistic kernel (resolve/step/replay). Probe: step accepted, eventId ling-fa1db543.
 - back-up-:trainable-assembly-state-space (new capability state_space_enumeration) — 20/22 files byte-identical to kimi tree + index.mjs estimator (1920n probe) + govinda-structure.js.
 
@@ -168,3 +168,35 @@ PROVIDER STATUSES: back-up-:execution-spine-canonical-address PRESENT -> WIRED (
 
 FAILED: none.
 BLOCKED: none (GitHub MCP push retried separately).
+
+# Change record — Stage 4e: glowing-winner world + Synthai2 penta ephemeris (integration/ecosystem-convergence)
+
+WHAT EXISTED BEFORE: acceptance 1+2 green (16/16); no world simulation mounted; penta_group_state NOT_FOUND.
+
+PRESERVED: all providers/tests (16/16 prior pass, 17/17 now); donors vendored verbatim; no donor logic rewritten.
+
+CHANGED:
+- computer/ComputerRuntime.mjs: boot() mounts world-engine gateway + penta-ephemeris service; new contract methods worldEvent/observeWorld/groupPenta.
+
+ADDED:
+- computer/donors/recovered/glowing-winner/ — EmbodiedWorldEngine.ts, HumanDesignSimulation.ts, InfluenceManager.ts, SharedSession.ts, SynthiaClient.ts, README.md (verbatim from justappgrabbin/glowing-winner@a9afc57) + PROVENANCE.md; EmbodiedWorldEngine.ported.mjs (esbuild type-erasure+bundle; 'uuid' npm -> documented crypto.randomUUID shim); HumanDesignSimulation/InfluenceManager/SharedSession NOT ported (onnxruntime-node/react/network env unmet — PRESENT).
+- computer/donors/recovered/synthai2-ephemeris/ephemeris.py (verbatim 822L from justappgrabbin/Synthai2@cfbe3ee) + PROVENANCE.md; ENV: pyephem 4.2.1 pip-installed locally (documented).
+- computer/services/world-engine.mjs — gateway: spawn/intent/move/tick/consolidate -> real donor methods; honest records; failures surfaced.
+- computer/services/penta-ephemeris.mjs + penta-runner.py — child_process boundary to the python donor (lazy; provider-failure events if pyephem missing).
+- computer/tests/acceptance-3-world-event.test.mjs — handoff §33 world event chain + backward trace + penta bonus.
+
+MOUNTED: recovered:glowing-winner-world-engine (world_simulation), recovered:synthai2-penta-ephemeris (penta_group_state).
+
+CONNECTED: grammar-v1 event -> resolveAddress (gate 64) -> worldEvent -> donor createAgent/processIntent(store)/moveAgent/real ticks (moved 53.3->51.1)/consolidateMemory (longTerm=1) -> observeWorld -> StateStore receipt -> consequence event (parents=[origin]) persisted -> restart replay -> backward trace to origin.
+
+DISCONNECTED / NOT MOUNTED: glowing-winner HumanDesignSimulation/InfluenceManager/SharedSession (env unmet); ephemeris.py calc_wa/calc_nine_fields (need unvendored Synthai2 modules); Placement13 placeholder ephemeris -> future wiring to foundry-glyphs recorded as routing note.
+
+TESTED: node --test computer/tests/*.test.mjs
+EXACT TEST RESULT: tests 17, pass 17, fail 0. Evidence: ../../evidence/stage4e-world-penta.txt.
+  Acc3: origin evt-... addressed gate 64; agent moved 53.3->51.1 over real ticks; memory consolidated longTerm=1; 5W events=4; backward trace consequence->origin on fresh runtime; penta roles A=Provider(G44) B=Foundation(G42) C=Director(G46) D=Director(G54) E=Foundation(G33), needed=Connector,Transmitter (position formula PLACEHOLDER flagged).
+
+PROVIDER STATUSES: recovered:glowing-winner-world-engine -> VERIFIED (consumption receipt + observable state change + restart replay); recovered:synthai2-penta-ephemeris -> WIRED (real executed I/O; placeholder formula in known_limitations).
+
+FAILED (then fixed): store intent needs quoted target per donor IntentClassifier — test uses 'store "arrival memory"' (donor semantics preserved).
+
+BLOCKED: none new. Prior authority-ZIP blocker still open.
