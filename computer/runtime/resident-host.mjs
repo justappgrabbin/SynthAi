@@ -71,6 +71,8 @@ export class ResidentHost {
     if (result.checkpoint?.worldPort && binding.worldPort?.hydrate) binding.worldPort.hydrate(result.checkpoint.worldPort);
     if (restoreWorld && result.checkpoint?.activeWorld) {
       const adapter = this.worldAdapters.get(String(result.checkpoint.activeWorld));
+      const externalSnapshot = result.checkpoint?.worldPort?.externalSnapshot ?? null;
+      if (adapter?.hydrate && externalSnapshot) adapter.hydrate(externalSnapshot);
       if (adapter) binding.worldPort.attach(adapter);
     }
     this.bus?.emit('resident:woke', { residentId, elapsedMs: result.elapsedMs, replayed: result.receipts.length });
