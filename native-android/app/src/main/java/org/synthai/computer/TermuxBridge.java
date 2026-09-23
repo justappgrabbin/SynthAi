@@ -8,6 +8,7 @@ final class TermuxBridge {
     private static final String TERMUX_PACKAGE = "com.termux";
     private static final String TERMUX_SERVICE = "com.termux.app.RunCommandService";
     private static final String ACTION = "com.termux.RUN_COMMAND";
+    static final String RUN_PERMISSION = "com.termux.permission.RUN_COMMAND";
 
     static boolean isInstalled(Context context) {
         try {
