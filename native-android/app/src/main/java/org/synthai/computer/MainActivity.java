@@ -17,6 +17,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public final class MainActivity extends Activity {
+    private static final int REQUEST_TERMUX_RUN = 7001;
     private final ExecutorService io = Executors.newSingleThreadExecutor();
     private final Handler main = new Handler(Looper.getMainLooper());
     private NativeSeedClient client;
@@ -106,6 +107,13 @@ public final class MainActivity extends Activity {
     }
 
     private void wakeRuntimeAndFlush(long elapsedMs) {
+        if (TermuxBridge.isInstalled(this) &&
+            android.os.Build.VERSION.SDK_INT >= 23 &&
+            checkSelfPermission(TermuxBridge.RUN_PERMISSION) != PackageManager.PERMISSION_GRANTED) {
+            world.setStatus("GRANT TERMUX RUN PERMISSION");
+            requestPermissions(new String[]{TermuxBridge.RUN_PERMISSION}, REQUEST_TERMUX_RUN);
+            return;
+        }
         world.setStatus("MESH WAKING");
         io.execute(() -> {
             NativeSeedClient.Result health = client.health();
@@ -126,6 +134,18 @@ public final class MainActivity extends Activity {
             boolean finalReady = ready;
             main.post(() -> world.setStatus(finalReady ? "MESH ACTIVE" : "MESH DORMANT · EVENTS HELD"));
         });
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == REQUEST_TERMUX_RUN) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                wakeRuntimeAndFlush(0);
+            } else {
+                world.setStatus("MESH HELD · TERMUX PERMISSION NEEDED");
+            }
+        }
     }
 
     private void flushJournal() {
