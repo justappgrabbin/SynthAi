@@ -1,4 +1,5 @@
 import { Synthia57ResidentAdapter } from './synthia57-resident.mjs';
+import { Synthia57OrganBridge } from './synthia57-organ-bridge.mjs';
 
 const defaultImporter = specifier => import(specifier);
 
@@ -64,6 +65,8 @@ export class Synthia57PackageLoader {
       },
     });
     await adapter.start();
+    const organs = new Synthia57OrganBridge({ runtime, mesh: this.computer.meshKernel, bus: this.bus, residentId });
+    await organs.mount();
 
     if (this.computer.meshKernel.participant('computer:self')) {
       await this.computer.meshKernel.connect(residentId, 'computer:self', {
@@ -72,7 +75,7 @@ export class Synthia57PackageLoader {
       });
     }
 
-    const record = { residentId, runtime, embodiment, adapter, federatedSpec, runtimeSpec };
+    const record = { residentId, runtime, embodiment, adapter, organs, federatedSpec, runtimeSpec };
     this.mounts.set(String(residentId), record);
     this.bus?.emit('synthia57:mounted', { residentId, federatedSpec, runtimeSpec });
     return record;
@@ -84,6 +87,7 @@ export class Synthia57PackageLoader {
     const mounted = this.get(residentId);
     if (!mounted) return false;
     mounted.adapter.stop();
+    await mounted.organs?.unmount?.();
     await this.computer.residents.leaveWorld(residentId).catch(() => {});
     await this.computer.meshKernel.setResidency(residentId, 'offline');
     this.mounts.delete(String(residentId));
