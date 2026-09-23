@@ -7,6 +7,7 @@ export class RelationalMeshKernel {
   constructor({ state, bus = null, clock = () => Date.now() } = {}) {
     if (!state?.get || !state?.set) throw new TypeError('RelationalMeshKernel requires a StateStore-like state service');
     Object.assign(this, { state, bus, clock });
+    this.handlers = new Map();
   }
 
   async boot() {
@@ -94,6 +95,43 @@ export class RelationalMeshKernel {
   }
 
   async relate(from, to, options = {}) { return this.connect(from, to, options); }
+
+  bindHandler(id, handler) {
+    if (!id || typeof handler !== 'function') throw new TypeError('mesh handler id and function required');
+    this.handlers.set(String(id), handler);
+    this.bus?.emit('mesh:handler-bound', { id: String(id) });
+    return () => {
+      this.handlers.delete(String(id));
+      this.bus?.emit('mesh:handler-unbound', { id: String(id) });
+    };
+  }
+
+  async request(targetId, request = {}, { sourceId = 'computer:self', queueIfDormant = true } = {}) {
+    const target = this.participant(targetId);
+    if (!target) throw new Error(`unknown mesh participant: ${targetId}`);
+    const envelope = {
+      id: request.id ?? `mesh-request-${this.clock()}-${Math.random().toString(36).slice(2, 7)}`,
+      sourceId: String(sourceId),
+      targetId: String(targetId),
+      type: String(request.type ?? request.operation ?? 'request'),
+      operation: request.operation ?? null,
+      payload: clone(request.payload ?? request.input ?? null),
+      address: clone(request.address ?? null),
+      evidence: clone(request.evidence ?? null),
+      createdAt: this.clock(),
+    };
+    const handler = this.handlers.get(String(targetId));
+    if (!handler || target.residency === MESH_RESIDENCY.DORMANT || target.residency === MESH_RESIDENCY.OFFLINE) {
+      if (!queueIfDormant) return { delivered: false, queued: false, reason: handler ? target.residency : 'no-handler', envelope };
+      const queued = await this.queueEvent(targetId, envelope);
+      return { delivered: false, queued: true, envelope: queued };
+    }
+    this.bus?.emit('mesh:request', clone(envelope));
+    const result = await handler(clone(envelope));
+    const receipt = { requestId: envelope.id, targetId: String(targetId), sourceId: String(sourceId), result: clone(result), at: this.clock() };
+    this.bus?.emit('mesh:response', clone(receipt));
+    return { delivered: true, queued: false, envelope, receipt, result: clone(result) };
+  }
 
   relationshipsFor(id) {
     return Object.values(this.state.get('mesh.relationships', {}) ?? {}).filter(edge => edge && (edge.from === id || edge.to === id));
