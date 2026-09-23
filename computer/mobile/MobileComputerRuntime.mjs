@@ -9,6 +9,10 @@ import { StateSpaceEngine } from '../donors/recovered/you-n-i-verse-corrected/st
 import { encodeMicro, decodeMicro, encodeMacro, decodeMacro } from '../donors/recovered/you-n-i-verse-corrected/synthia-bridge.ported.mjs';
 import { SynthImageRuntime } from './SynthImageRuntime.mjs';
 import { createMobilePersistence } from './IndexedDBPersistence.mjs';
+import { RelationalMeshKernel } from '../runtime/mesh-kernel.mjs';
+import { DormantCompilerBroker } from '../runtime/dormant-compiler.mjs';
+import { ResidentHost } from '../runtime/resident-host.mjs';
+import { IndiVerseRuntime } from '../worlds/indiverse.mjs';
 
 export const ADDRESS_FIELDS = Object.freeze([
   'planetary', 'dimension', 'gate', 'line', 'color', 'tone', 'base',
@@ -184,10 +188,31 @@ export class MobileComputerRuntime {
     this.addresses = new PortableAddressService({ state: this.state, bus: this.bus, mesh });
     this.stateSpace = new StateSpaceEngine();
     this.images = new SynthImageRuntime({ state: this.state, bus: this.bus });
+    // Mesh is the Computer's connective substrate. The optional constructor
+    // mesh above remains the remote address transport; meshKernel is local,
+    // persistent, and owns resident/world/event continuity.
+    this.meshKernel = new RelationalMeshKernel({ state: this.state, bus: this.bus });
+    this.compiler = new DormantCompilerBroker({ state: this.state, bus: this.bus });
+    this.indiverse = new IndiVerseRuntime({ state: this.state, bus: this.bus, mesh: this.meshKernel });
+    this.residents = new ResidentHost({
+      state: this.state, bus: this.bus, mesh: this.meshKernel,
+      compiler: this.compiler, indiverse: this.indiverse,
+    });
   }
 
   async boot() {
     await this.state.restore();
+    await this.meshKernel.boot();
+    if (!this.meshKernel.participant('computer:self')) {
+      await this.meshKernel.registerParticipant('computer:self', {
+        kind: 'computer-host',
+        publicState: { name: 'SynthAI Computer', flavor: 'mobile-synthimg' },
+        capabilities: ['mesh.host', 'state-space', 'execution', 'resident-host', 'indiverse'],
+        residency: 'active',
+      });
+    } else {
+      await this.meshKernel.setResidency('computer:self', 'active');
+    }
     if (!this.shells.has('workspace')) this.shells.register('workspace', { name: 'Mobile Workspace', kind: 'mobile' });
     if (!this.shells.has('compact')) this.shells.register('compact', { name: 'Compact Phone Shell', kind: 'mobile-lazy' });
     registerCanonicalMicros(this.micros);
@@ -201,6 +226,10 @@ export class MobileComputerRuntime {
       'automata': 'Portable automata execution',
       'morph-expression': 'State-linked morph expression',
       'checkpoint-restore': 'ASLEEP/WARM/ACTIVE checkpoint lifecycle',
+      'relational-mesh': 'Persistent mesh participants, relationships, presence, queued events and dormancy',
+      'resident-host': '5.7-compatible resident world-port host with sleep/wake continuity',
+      'indiverse': 'Canonical shared reality plus host-specific qualia/world-grammar transforms',
+      'on-demand-compiler': 'Dormant compiler broker with content-hash reuse; compiler adapter binds separately',
     })) {
       if (!this.capabilityRegistry.has(id)) this.capabilities.register(id, { providers: ['mobile-computer'], description });
     }
@@ -209,6 +238,10 @@ export class MobileComputerRuntime {
     this.services.register('address-service', { provider: this.addresses, contract: 'resolveAddress/relocate' });
     this.services.register('state-space', { provider: this.stateSpace, contract: 'applyPipeline/step/query' });
     this.services.register('synthimg-runtime', { provider: this.images, contract: 'install/wake/checkpoint' });
+    this.services.register('relational-mesh', { provider: this.meshKernel, contract: 'registerParticipant/connect/queueEvent/sleepParticipant/wakeParticipant' });
+    this.services.register('resident-host', { provider: this.residents, contract: 'registerResident/bindRuntime/registerWorld/enterWorld/sleep/wake' });
+    this.services.register('indiverse', { provider: this.indiverse, contract: 'createWorld/registerCanonicalObject/renderShared/renderInWorld/visitorContract' });
+    this.services.register('compiler-broker', { provider: this.compiler, contract: 'attachCompiler/ensure/snapshot' });
 
     await this.state.set('computer.boot', {
       status: 'ready',
@@ -340,6 +373,50 @@ export class MobileComputerRuntime {
     return this.state.get(path ? `apps.${appId}.${path}` : `apps.${appId}`, null);
   }
 
+  async createIndiVerse(ownerId, options = {}) {
+    return this.indiverse.createWorld(ownerId, options);
+  }
+
+  async registerCanonicalWorldObject(object) {
+    return this.indiverse.registerCanonicalObject(object);
+  }
+
+  viewSharedWorldObject(objectId) {
+    return this.indiverse.renderShared(objectId);
+  }
+
+  viewIndiVerseObject(worldId, objectId) {
+    return this.indiverse.renderInWorld(worldId, objectId);
+  }
+
+  visitorMorphContract(options) {
+    return this.indiverse.visitorContract(options);
+  }
+
+  async registerResident(id, options = {}) {
+    return this.residents.registerResident(id, options);
+  }
+
+  bindResidentRuntime(id, runtime) {
+    return this.residents.bindRuntime(id, runtime);
+  }
+
+  async registerReality(id, adapter, options = {}) {
+    return this.residents.registerWorld(id, adapter, options);
+  }
+
+  async enterReality(residentId, worldId) {
+    return this.residents.enterWorld(residentId, worldId);
+  }
+
+  async sleepResident(residentId, checkpoint = {}) {
+    return this.residents.sleep(residentId, checkpoint);
+  }
+
+  async wakeResident(residentId, options = {}) {
+    return this.residents.wake(residentId, options);
+  }
+
   stateSpaceSnapshot() {
     const s = this.stateSpace.getState();
     return {
@@ -362,6 +439,10 @@ export class MobileComputerRuntime {
       mounted: this.shellManager.listMounted(),
       projects: this.projects.list(),
       stateSpace: this.stateSpaceSnapshot(),
+      mesh: this.meshKernel.snapshot(),
+      residents: this.residents.snapshot(),
+      indiverse: this.indiverse.snapshot(),
+      compiler: this.compiler.snapshot(),
     };
   }
 }
