@@ -14,6 +14,7 @@ import { DormantCompilerBroker } from '../runtime/dormant-compiler.mjs';
 import { ResidentHost } from '../runtime/resident-host.mjs';
 import { IndiVerseRuntime } from '../worlds/indiverse.mjs';
 import { WorldFederation } from '../worlds/world-federation.mjs';
+import { Synthia57PackageLoader } from '../residents/synthia57-package-loader.mjs';
 
 export const ADDRESS_FIELDS = Object.freeze([
   'planetary', 'dimension', 'gate', 'line', 'color', 'tone', 'base',
@@ -219,6 +220,7 @@ export class MobileComputerRuntime {
     this.worldFederation = new WorldFederation({
       state: this.state, bus: this.bus, mesh: this.meshKernel, residents: this.residents,
     });
+    this.synthia57 = new Synthia57PackageLoader({ computer: this, bus: this.bus });
   }
 
   async boot() {
@@ -253,6 +255,7 @@ export class MobileComputerRuntime {
       'indiverse': 'Canonical shared reality plus host-specific qualia/world-grammar transforms',
       'on-demand-compiler': 'Dormant compiler broker with content-hash reuse; compiler adapter binds separately',
       'world-federation': 'Mesh roles for home, daily-life mechanics, diagnostic lab, research lab and profile worlds',
+      'synthia57-resident': 'Mounts the canonical Synthia v0.5.7 package intact as a Computer resident',
     })) {
       if (!this.capabilityRegistry.has(id)) this.capabilities.register(id, { providers: ['mobile-computer'], description });
     }
@@ -266,6 +269,7 @@ export class MobileComputerRuntime {
     this.services.register('indiverse', { provider: this.indiverse, contract: 'createWorld/registerCanonicalObject/renderShared/renderInWorld/visitorContract' });
     this.services.register('compiler-broker', { provider: this.compiler, contract: 'attachCompiler/ensure/snapshot' });
     this.services.register('world-federation', { provider: this.worldFederation, contract: 'defineLayer/seedCanonicalLayers/bind/invoke/attachHome/registerProfileWorld' });
+    this.services.register('synthia57-loader', { provider: this.synthia57, contract: 'mount/get/unmount' });
 
     await this.state.set('computer.boot', {
       status: 'ready',
@@ -474,6 +478,10 @@ export class MobileComputerRuntime {
     return this.state.get(path ? `apps.${appId}.${path}` : `apps.${appId}`, null);
   }
 
+  async mountSynthia57(options = {}) {
+    return this.synthia57.mount(options);
+  }
+
   async createIndiVerse(ownerId, options = {}) {
     return this.indiverse.createWorld(ownerId, options);
   }
@@ -545,6 +553,7 @@ export class MobileComputerRuntime {
       indiverse: this.indiverse.snapshot(),
       compiler: this.compiler.snapshot(),
       worlds: this.worldFederation.snapshot(),
+      synthia57: this.synthia57.get('synthia')?.adapter?.snapshot?.() ?? null,
     };
   }
 }
