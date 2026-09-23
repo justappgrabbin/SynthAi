@@ -7,6 +7,7 @@ import { ResidentHost } from '../runtime/resident-host.mjs';
 import { IndiVerseRuntime } from '../worlds/indiverse.mjs';
 import { WorldFederation } from '../worlds/world-federation.mjs';
 import { Synthia57PackageLoader } from '../residents/synthia57-package-loader.mjs';
+import { Synthia57PackageStore } from '../residents/synthia57-package-store.mjs';
 import { Synthia57MirrorSurfaceStore } from '../residents/synthia57-mirror-surface.mjs';
 import { StellarLabAdapter } from '../labs/stellar-lab-adapter.mjs';
 import { ConsciousnessRealmPackageLoader } from '../worlds/consciousness-realm-loader.mjs';
@@ -76,6 +77,7 @@ export class NativeSeedRuntime {
     this.residents = new ResidentHost({ state: this.state, bus: this.bus, mesh: this.meshKernel, compiler: this.compiler, indiverse: this.indiverse, clock });
     this.worldFederation = new WorldFederation({ state: this.state, bus: this.bus, mesh: this.meshKernel, residents: this.residents, clock });
     this.synthia57 = new Synthia57PackageLoader({ computer: this, bus: this.bus });
+    this.synthia57Packages = new Synthia57PackageStore({ state:this.state, bus:this.bus });
     this.synthiaMirror = new Synthia57MirrorSurfaceStore({ state:this.state, bus:this.bus });
     this.stellarLab = new StellarLabAdapter({ mesh: this.meshKernel, state: this.state, bus: this.bus, clock });
     this.consciousnessRealm = new ConsciousnessRealmPackageLoader({ computer: this, bus: this.bus });
@@ -345,6 +347,28 @@ export class NativeSeedRuntime {
   async registerResident(id, options = {}) { return this.residents.registerResident(id, options); }
   bindResidentRuntime(id, runtime) { return this.residents.bindRuntime(id, runtime); }
   async mountSynthia57(options = {}) { return this.synthia57.mount(options); }
+
+  async mountInstalledSynthia57() {
+    const verified = await this.synthia57Packages.verify();
+    if (!verified.installed) return { mounted:false, reason:verified.reason ?? 'NO_PACKAGE' };
+    const current = this.synthia57.get('synthia');
+    if (current) return { mounted:true, reused:true, package:this.synthia57Packages.snapshot(), resident:current.adapter.snapshot() };
+    const mounted = await this.mountSynthia57({ base:verified.base });
+    return { mounted:true, reused:false, package:this.synthia57Packages.snapshot(), resident:mounted.adapter.snapshot() };
+  }
+
+  async installSynthia57Package(readable, options = {}) {
+    const record = await this.synthia57Packages.installZipStream(readable, options);
+    const existing = this.synthia57.get('synthia');
+    if (existing) await this.synthia57.unmount('synthia');
+    const mounted = await this.mountSynthia57({ base:record.base });
+    return {
+      installed:true,
+      mounted:true,
+      package:this.synthia57Packages.snapshot(),
+      resident:mounted.adapter.snapshot(),
+    };
+  }
   async setSynthiaMirrorImage(payload = {}) { return this.synthiaMirror.ingest(payload); }
   synthiaMirrorSnapshot() { return this.synthiaMirror.snapshot(); }
   async registerReality(id, adapter, options = {}) { return this.residents.registerWorld(id, adapter, options); }
@@ -389,6 +413,7 @@ export class NativeSeedRuntime {
       triform: this.triform.get()?.adapter?.snapshot?.() ?? null,
       indiverse: this.indiverse.snapshot(),
       synthia57: this.synthia57.get('synthia')?.adapter?.snapshot?.() ?? null,
+      synthia57Package: this.synthia57Packages.snapshot(),
       synthiaMirror: this.synthiaMirror.snapshot(),
     };
   }
