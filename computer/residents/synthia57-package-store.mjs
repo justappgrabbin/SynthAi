@@ -41,9 +41,10 @@ async function findRuntimeRoot(root,depth=0){
 }
 
 export class Synthia57PackageStore {
-  constructor({state,bus=null,root=path.join(os.homedir(),'.synthai','packages','synthia57'),maxBytes=256*1024*1024}={}){
+  constructor({state,bus=null,root=path.join(os.homedir(),'.synthai','packages','synthia57'),maxBytes=256*1024*1024,extract=null}={}){
     if(!state?.get||!state?.set) throw new TypeError('Synthia57PackageStore requires StateStore');
     Object.assign(this,{state,bus,root,maxBytes});
+    this.extract=extract ?? (async (archive,destination)=>run(['unzip','-q',archive,'-d',destination]));
   }
 
   current(){ return this.state.get('synthia57.package',null); }
@@ -55,11 +56,12 @@ export class Synthia57PackageStore {
 
     const provisional=path.join(this.root,'archives','incoming-'+Date.now()+'.zip');
     const hash=createHash('sha256');
+    const maxBytes=this.maxBytes;
     let bytes=0;
     const meter=new Transform({
       transform(chunk,enc,cb){
         bytes+=chunk.length;
-        if(bytes>256*1024*1024) return cb(new Error('Synthia 5.7 package exceeds 256 MB'));
+        if(bytes>maxBytes) return cb(new Error('Synthia 5.7 package exceeds '+maxBytes+' bytes'));
         hash.update(chunk); cb(null,chunk);
       }
     });
@@ -67,15 +69,17 @@ export class Synthia57PackageStore {
     const sha256=hash.digest('hex');
     const archive=path.join(this.root,'archives',sha256+'.zip');
 
+    const { rename } = await import('node:fs/promises');
     if(!(await exists(archive))){
-      const { rename } = await import('node:fs/promises');
       await rename(provisional,archive);
+    } else {
+      const duplicate=path.join(this.root,'archives',sha256+'-duplicate-'+Date.now()+'.zip');
+      await rename(provisional,duplicate);
     }
-    // Never delete an incoming duplicate. Preserve it as a receipt when rename is skipped.
     const installDir=path.join(this.root,'installed',sha256);
     if(!(await exists(installDir))){
       await mkdir(installDir,{recursive:true});
-      await run(['unzip','-q',archive,'-d',installDir]);
+      await this.extract(archive,installDir);
     }
 
     const base=await findRuntimeRoot(installDir);
