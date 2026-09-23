@@ -141,6 +141,16 @@ async function route(req,res){
       });
     }
 
+    if(req.method==='POST' && url.pathname==='/purpose/roadmap'){
+      return json(res,200,await runtime.buildPurposeRoadmap(body));
+    }
+    if(req.method==='POST' && url.pathname==='/purpose/outcome'){
+      return json(res,200,await runtime.recordPurposeOutcome(body));
+    }
+    if(req.method==='POST' && url.pathname==='/purpose/read'){
+      return json(res,200,await runtime.getPurposeRoadmap(body.userId,body.roadmapId??null));
+    }
+
     if(req.method==='POST' && url.pathname==='/phone/sync'){
       phoneHost.replace(body);
       return json(res,200,await runtime.phoneRequest('sync',{}));
