@@ -236,6 +236,36 @@ export class MobileComputerRuntime {
     } else {
       await this.meshKernel.setResidency('computer:self', 'active');
     }
+    for (const core of [
+      { id: 'system:state-space', kind: 'core-service', capabilities: ['state-space.activate','state-space.query'] },
+      { id: 'system:execution', kind: 'core-service', capabilities: ['automata.run','process.execute','backend.request'] },
+    ]) {
+      if (!this.meshKernel.participant(core.id)) {
+        await this.meshKernel.registerParticipant(core.id, {
+          kind: core.kind, capabilities: core.capabilities, residency: 'active',
+          publicState: { name: core.id.split(':')[1], wired: true },
+        });
+      } else {
+        await this.meshKernel.setResidency(core.id, 'active');
+      }
+      const hosted = this.meshKernel.relationshipsFor(core.id).some(edge => edge.type === 'hosted-by' && edge.to === 'computer:self');
+      if (!hosted) await this.meshKernel.connect(core.id, 'computer:self', { type: 'hosted-by' });
+    }
+    if (!this.meshKernel.relationshipsFor('system:execution').some(edge => edge.type === 'contextualized-by' && edge.to === 'system:state-space')) {
+      await this.meshKernel.connect('system:execution', 'system:state-space', { type: 'contextualized-by' });
+    }
+    this.meshKernel.bindHandler('system:state-space', async envelope => {
+      if (envelope.operation === 'activate') return this._activateAddressLocal(envelope.payload ?? {});
+      if (envelope.operation === 'snapshot') return this.stateSpaceSnapshot();
+      throw new Error(`unsupported state-space mesh operation: ${envelope.operation}`);
+    });
+    this.meshKernel.bindHandler('system:execution', async envelope => {
+      const payload = envelope.payload ?? {};
+      if (envelope.operation === 'automata.run') return this.automata.run(payload.id, payload.input, payload.context ?? {});
+      if (envelope.operation === 'process.execute') return this.processes.execute(payload.id, payload.input, payload.context ?? {});
+      if (envelope.operation === 'backend.request') return this.backends.request(payload.id, payload.request);
+      throw new Error(`unsupported execution mesh operation: ${envelope.operation}`);
+    });
     await this.worldFederation.seedCanonicalLayers();
     if (!this.shells.has('workspace')) this.shells.register('workspace', { name: 'Mobile Workspace', kind: 'mobile' });
     if (!this.shells.has('compact')) this.shells.register('compact', { name: 'Compact Phone Shell', kind: 'mobile-lazy' });
@@ -368,7 +398,42 @@ export class MobileComputerRuntime {
   async resolveAddress(input) { return this.addresses.resolveAddress(input); }
   async relocateAddress(input) { return this.addresses.relocate(input); }
 
-  async activateAddress(input, { remember = true, meshState = null, privateStateRef = null } = {}) {
+  async runAutomaton(id, input, context = {}) {
+    const routed = await this.meshKernel.request('system:execution', {
+      operation: 'automata.run', payload: { id, input: clone(input), context: clone(context) },
+    });
+    if (!routed.delivered) throw new Error('execution mesh service unavailable');
+    return routed.result;
+  }
+
+  async runProcess(id, input, context = {}) {
+    const routed = await this.meshKernel.request('system:execution', {
+      operation: 'process.execute', payload: { id, input: clone(input), context: clone(context) },
+    });
+    if (!routed.delivered) throw new Error('execution mesh service unavailable');
+    return routed.result;
+  }
+
+  async requestBackend(id, request) {
+    const routed = await this.meshKernel.request('system:execution', {
+      operation: 'backend.request', payload: { id, request: clone(request) },
+    });
+    if (!routed.delivered) throw new Error('execution mesh service unavailable');
+    return routed.result;
+  }
+
+  async activateAddress(input, options = {}) {
+    const routed = await this.meshKernel.request('system:state-space', {
+      operation: 'activate',
+      payload: { input: clone(input), options: clone(options) },
+    });
+    if (!routed.delivered) throw new Error('state-space mesh service unavailable');
+    return routed.result;
+  }
+
+  async _activateAddressLocal(packet = {}) {
+    const input = packet?.input ?? packet;
+    const { remember = true, meshState = null, privateStateRef = null } = packet?.options ?? {};
     const resolved = await this.addresses.resolveAddress(input);
     const a = resolved.address;
     for (const field of ['gate', 'line', 'color', 'tone', 'base']) {
