@@ -9,6 +9,9 @@ on:
     paths:
       - 'native-android/**'
       - 'computer/native/**'
+      - 'computer/tests/phone-world.test.mjs'
+      - 'computer/tests/mobile-phone-world-integration.test.mjs'
+      - 'computer/tests/native-seed-server.test.mjs'
       - '.github/workflows/build-native-seed-apk.yml'
 
 permissions:
