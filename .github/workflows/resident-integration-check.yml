@@ -1,0 +1,40 @@
+name: Resident Mesh Integration
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - 'integration/synthia-reality-resident'
+    paths:
+      - 'computer/runtime/mesh-kernel.mjs'
+      - 'computer/runtime/dormant-compiler.mjs'
+      - 'computer/runtime/resident-host.mjs'
+      - 'computer/residents/**'
+      - 'computer/worlds/**'
+      - 'computer/mobile/MobileComputerRuntime.mjs'
+      - 'computer/tests/resident-*.test.mjs'
+      - 'computer/tests/synthia57-*.test.mjs'
+      - 'computer/tests/world-federation.test.mjs'
+      - 'computer/tests/mesh-core-routing.test.mjs'
+      - '.github/workflows/resident-integration-check.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  resident-integration:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Run resident stack contract tests
+        run: >
+          node --test
+          computer/tests/mesh-core-routing.test.mjs
+          computer/tests/resident-mesh-indiverse.test.mjs
+          computer/tests/synthia57-resident.test.mjs
+          computer/tests/synthia57-package-loader.test.mjs
+          computer/tests/world-federation.test.mjs
