@@ -134,15 +134,11 @@ public final class MainActivity extends Activity {
         world.setStatus("INSTALLING SYNTHIA 5.7");
         io.execute(() -> {
             try {
-                NativeSeedClient.Result health = client.health();
-                if (!health.ok) {
-                    TermuxBridge.startNativeSeed(this);
-                    for (int i = 0; i < 7 && !health.ok; i++) {
-                        try { Thread.sleep(700L * (i + 1)); } catch (InterruptedException ignored) {}
-                        health = client.health();
-                    }
-                }
+                NativeSeedClient.Result health = ensureCurrentNativeSeed();
                 if (!health.ok) throw new IllegalStateException("Native Seed is not available");
+                if (runtimeApiVersion(health) < 2) {
+                    throw new IllegalStateException("Native Seed update required before Synthia package install");
+                }
 
                 long length = -1L;
                 try (android.content.res.AssetFileDescriptor afd = getContentResolver().openAssetFileDescriptor(uri, "r")) {
@@ -249,6 +245,38 @@ public final class MainActivity extends Activity {
         }
     }
 
+    private int runtimeApiVersion(NativeSeedClient.Result health) {
+        try {
+            JSONObject root = new JSONObject(health.body == null ? "{}" : health.body);
+            return root.optInt("apiVersion", 0);
+        } catch (Exception ignored) {
+            return 0;
+        }
+    }
+
+    private NativeSeedClient.Result ensureCurrentNativeSeed() {
+        NativeSeedClient.Result health = client.health();
+        if (!health.ok) {
+            TermuxBridge.startNativeSeed(this);
+            for (int i = 0; i < 6 && !health.ok; i++) {
+                try { Thread.sleep(700L * (i + 1)); } catch (InterruptedException ignored) {}
+                health = client.health();
+            }
+        }
+
+        if (health.ok && runtimeApiVersion(health) < 2) {
+            main.post(() -> world.setStatus("UPDATING NATIVE SEED"));
+            try { client.post("/sleep", new JSONObject()); } catch (Exception ignored) {}
+            TermuxBridge.updateAndStartNativeSeed(this);
+            for (int i = 0; i < 9; i++) {
+                try { Thread.sleep(800L * (i + 1)); } catch (InterruptedException ignored) {}
+                health = client.health();
+                if (health.ok && runtimeApiVersion(health) >= 2) break;
+            }
+        }
+        return health;
+    }
+
     private void wakeRuntimeAndFlush(long elapsedMs) {
         if (TermuxBridge.isInstalled(this) &&
             android.os.Build.VERSION.SDK_INT >= 23 &&
@@ -259,14 +287,7 @@ public final class MainActivity extends Activity {
         }
         world.setStatus("MESH WAKING");
         io.execute(() -> {
-            NativeSeedClient.Result health = client.health();
-            if (!health.ok) {
-                TermuxBridge.startNativeSeed(this);
-                for (int i = 0; i < 5 && !health.ok; i++) {
-                    try { Thread.sleep(700L * (i + 1)); } catch (InterruptedException ignored) {}
-                    health = client.health();
-                }
-            }
+            NativeSeedClient.Result health = ensureCurrentNativeSeed();
             boolean ready = health.ok;
             boolean synthiaReady = ready && hasMountedSynthia(health);
             if (ready) {
