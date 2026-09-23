@@ -212,6 +212,12 @@ async function route(req,res){
     if(req.method==='POST' && url.pathname==='/indiverse/grammar'){
       return json(res,200,await runtime.indiverse.updateGrammar(String(body.worldId),body.patch??{}));
     }
+    if(req.method==='POST' && url.pathname==='/indiverse/activate'){
+      return json(res,200,await runtime.activateIndiVerse(String(body.worldId)));
+    }
+    if(req.method==='GET' && url.pathname==='/indiverse/active'){
+      return json(res,200,runtime.activeIndiVerse());
+    }
     return json(res,404,{ok:false,error:'NOT_FOUND',path:url.pathname});
   }catch(error){
     return json(res,500,{ok:false,error:String(error?.message??error),stack:process.env.NODE_ENV==='development'?String(error?.stack??''):undefined});
