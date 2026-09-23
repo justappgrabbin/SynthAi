@@ -7,6 +7,7 @@ import { ResidentHost } from '../runtime/resident-host.mjs';
 import { IndiVerseRuntime } from '../worlds/indiverse.mjs';
 import { WorldFederation } from '../worlds/world-federation.mjs';
 import { Synthia57PackageLoader } from '../residents/synthia57-package-loader.mjs';
+import { StellarLabAdapter } from '../labs/stellar-lab-adapter.mjs';
 
 const clone = value => value === undefined ? undefined : structuredClone(value);
 
@@ -46,6 +47,7 @@ export class NativeSeedRuntime {
     this.residents = new ResidentHost({ state: this.state, bus: this.bus, mesh: this.meshKernel, compiler: this.compiler, indiverse: this.indiverse, clock });
     this.worldFederation = new WorldFederation({ state: this.state, bus: this.bus, mesh: this.meshKernel, residents: this.residents, clock });
     this.synthia57 = new Synthia57PackageLoader({ computer: this, bus: this.bus });
+    this.stellarLab = new StellarLabAdapter({ mesh: this.meshKernel, state: this.state, bus: this.bus, clock });
   }
 
   async boot() {
@@ -111,6 +113,8 @@ export class NativeSeedRuntime {
     });
 
     await this.worldFederation.seedCanonicalLayers();
+    await this.stellarLab.mount();
+    await this.worldFederation.bind('lab:stellar', this.stellarLab);
     await this.state.set('computer.boot', { status: 'ready', flavor: 'native-seed', at: this.clock() }, { source: 'native-seed' });
     this.bus.emit('computer:ready', this.snapshot());
     return this;
@@ -201,6 +205,14 @@ export class NativeSeedRuntime {
   async enterReality(residentId, worldId) { return this.residents.enterWorld(residentId, worldId); }
   async sleepResident(id, checkpoint = {}) { return this.residents.sleep(id, checkpoint); }
   async wakeResident(id, options = {}) { return this.residents.wake(id, options); }
+  registerStellarExecutor(id, executor) { return this.stellarLab.registerExecutor(id, executor); }
+  registerStellarMeasure(id, measure) { return this.stellarLab.registerMeasure(id, measure); }
+  async stellarRequest(operation, payload = {}) {
+    const routed = await this.meshKernel.request('lab:stellar', { operation, payload: clone(payload) });
+    if (!routed.delivered) return { queued: routed.queued, result: null };
+    return routed.result;
+  }
+
   async createIndiVerse(ownerId, options = {}) { return this.indiverse.createWorld(ownerId, options); }
   async registerCanonicalWorldObject(object) { return this.indiverse.registerCanonicalObject(object); }
   viewSharedWorldObject(objectId) { return this.indiverse.renderShared(objectId); }
@@ -224,6 +236,7 @@ export class NativeSeedRuntime {
       compiler: this.compiler.snapshot(),
       residents: this.residents.snapshot(),
       worlds: this.worldFederation.snapshot(),
+      stellar: this.stellarLab.snapshot(),
       indiverse: this.indiverse.snapshot(),
       synthia57: this.synthia57.get('synthia')?.adapter?.snapshot?.() ?? null,
     };
