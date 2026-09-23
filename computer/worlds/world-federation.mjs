@@ -22,6 +22,7 @@ export class WorldFederation {
     if (!mesh) throw new TypeError('WorldFederation requires the relational mesh kernel');
     Object.assign(this, { state, bus, mesh, residents, clock });
     this.adapters = new Map();
+    this.handlerUnbind = new Map();
   }
 
   _path(id) { return `worldFederation.layers.${safeKey(id)}`; }
@@ -65,6 +66,19 @@ export class WorldFederation {
     if (!layer) throw new Error(`unknown world layer: ${id}`);
     if (!adapter || typeof adapter !== 'object') throw new TypeError('world layer adapter object required');
     this.adapters.set(String(id), adapter);
+
+    this.handlerUnbind.get(String(id))?.();
+    const unbind = this.mesh.bindHandler(String(id), async envelope => {
+      const operation = envelope.operation;
+      const payload = clone(envelope.payload ?? {});
+      if (operation && typeof adapter[operation] === 'function') return adapter[operation](payload);
+      if (typeof adapter.request === 'function') return adapter.request({ operation, payload, envelope: clone(envelope) });
+      if (typeof adapter.process === 'function') return adapter.process({ operation, input: payload, envelope: clone(envelope) });
+      if (typeof adapter.run === 'function') return adapter.run({ operation, input: payload, envelope: clone(envelope) });
+      throw new Error(`adapter for ${id} cannot perform ${operation}`);
+    });
+    this.handlerUnbind.set(String(id), unbind);
+
     const next = { ...layer, bound: true, adapterId: adapter.id ?? null, updatedAt: this.clock() };
     await this.state.set(this._path(id), next, { source: 'world-federation' });
     await this.mesh.publishPresence(id, { bound: true, adapterId: adapter.id ?? null });
@@ -74,17 +88,16 @@ export class WorldFederation {
 
   adapter(id) { return this.adapters.get(String(id)) ?? null; }
 
-  async invoke(id, operation, payload = {}) {
-    const adapter = this.adapter(id);
-    if (!adapter) throw new Error(`world layer adapter not bound: ${id}`);
-    let result;
-    if (typeof adapter[operation] === 'function') result = await adapter[operation](clone(payload));
-    else if (typeof adapter.request === 'function') result = await adapter.request({ operation, payload: clone(payload) });
-    else if (typeof adapter.process === 'function') result = await adapter.process({ operation, input: clone(payload) });
-    else if (typeof adapter.run === 'function') result = await adapter.run({ operation, input: clone(payload) });
-    else throw new Error(`adapter for ${id} cannot perform ${operation}`);
+  async invoke(id, operation, payload = {}, { sourceId = 'computer:self' } = {}) {
+    if (!this.adapter(id)) throw new Error(`world layer adapter not bound: ${id}`);
+    const routed = await this.mesh.request(String(id), {
+      operation,
+      payload: clone(payload),
+    }, { sourceId });
+    if (!routed.delivered) return { queued: routed.queued, envelope: clone(routed.envelope), result: null };
+    const result = routed.result;
     await this.state.set(`worldFederation.last.${safeKey(id)}`, { operation, result: clone(result), at: this.clock() }, { source: 'world-federation' });
-    this.bus?.emit('world-federation:invoked', { id, operation });
+    this.bus?.emit('world-federation:invoked', { id, operation, via: 'relational-mesh' });
     return clone(result);
   }
 
