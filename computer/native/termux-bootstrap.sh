@@ -9,7 +9,7 @@ echo "SynthAI Native Seed bootstrap"
 echo "============================"
 
 pkg update -y
-pkg install -y git nodejs-lts python clang make curl
+pkg install -y git nodejs-lts python clang make curl unzip
 
 if [ ! -d "$APP_DIR/.git" ]; then
   git clone --branch "$REPO_BRANCH" --single-branch "$REPO_URL" "$APP_DIR"
