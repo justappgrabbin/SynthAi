@@ -8,7 +8,6 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 
 final class EventJournal {
     static final class Batch {
@@ -53,11 +52,26 @@ final class EventJournal {
     synchronized void rollback(Batch batch) {
         if (batch == null || batch.file == null || !batch.file.exists()) return;
         try {
-            String old = Files.readString(batch.file.toPath(), StandardCharsets.UTF_8);
-            String newer = pending.exists() ? Files.readString(pending.toPath(), StandardCharsets.UTF_8) : "";
-            Files.writeString(pending.toPath(), old + newer, StandardCharsets.UTF_8);
+            String old = readText(batch.file);
+            String newer = pending.exists() ? readText(pending) : "";
+            try (FileWriter writer = new FileWriter(pending, StandardCharsets.UTF_8, false)) {
+                writer.write(old);
+                writer.write(newer);
+            }
             batch.file.delete();
         } catch (Exception ignored) {}
+    }
+
+    private String readText(File file) {
+        StringBuilder text = new StringBuilder();
+        if (file == null || !file.exists()) return "";
+        try (BufferedReader reader = new BufferedReader(new FileReader(file, StandardCharsets.UTF_8))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                text.append(line).append("\n");
+            }
+        } catch (Exception ignored) {}
+        return text.toString();
     }
 
     private JSONArray read(File file) {
