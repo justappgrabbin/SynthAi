@@ -15,6 +15,7 @@ on:
       - 'computer/build-mobile-web.mjs'
       - 'computer/build-web.mjs'
       - 'public/mobile-computer.html'
+      - 'public/indiverse-shell.html'
       - 'public/synthimg-sw.js'
       - 'package.json'
       - 'capacitor.config.json'
@@ -47,6 +48,13 @@ jobs:
 
       - name: Stage mobile web bundle
         run: npm run build:mobile
+
+      - name: Verify IndiVerse mobile bundle
+        run: |
+          test -s mobile-web/indiverse-shell.html
+          test -s mobile-web/computer-runtime/worlds/indiverse.mjs
+          test -s mobile-web/computer-runtime/worlds/experience-compiler.mjs
+          grep -q "indiverse-shell.html" mobile-web/index.html
 
       - name: Generate Android wrapper
         run: npx cap add android
