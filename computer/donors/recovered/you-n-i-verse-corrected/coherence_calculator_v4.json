@@ -1,0 +1,260 @@
+{
+  "algorithm": "C = mean * (1 - CV) = mean - std_dev",
+  "interpretation": "High activation + Low variance = Flow State",
+  "tests": {
+    "flow": {
+      "coherence": 0.9,
+      "mean_activation": 0.9,
+      "std_dev": 0.0,
+      "balance": 1.0,
+      "resonance_hz": 14.88,
+      "entropy": 1.0,
+      "state": "Flow State",
+      "state_color": "#00FF88",
+      "amplitudes": {
+        "Movement": 0.9,
+        "Evolution": 0.9,
+        "Being": 0.9,
+        "Design": 0.9,
+        "Space": 0.9
+      },
+      "dominant_dimension": "Movement",
+      "weakest_dimension": "Movement",
+      "dimensional_variance": 0.0
+    },
+    "dormant": {
+      "coherence": 0.1,
+      "mean_activation": 0.1,
+      "std_dev": 0.0,
+      "balance": 1.0,
+      "resonance_hz": 8.61,
+      "entropy": 1.0,
+      "state": "Dormant",
+      "state_color": "#FF8800",
+      "amplitudes": {
+        "Movement": 0.1,
+        "Evolution": 0.1,
+        "Being": 0.1,
+        "Design": 0.1,
+        "Space": 0.1
+      },
+      "dominant_dimension": "Movement",
+      "weakest_dimension": "Movement",
+      "dimensional_variance": 0.0
+    },
+    "fragmented": {
+      "coherence": 0,
+      "mean_activation": 0.2,
+      "std_dev": 0.4,
+      "balance": -1.0,
+      "resonance_hz": 7.83,
+      "entropy": -0.0,
+      "state": "Fragmented",
+      "state_color": "#FF0044",
+      "amplitudes": {
+        "Movement": 1.0,
+        "Evolution": 0.0,
+        "Being": 0.0,
+        "Design": 0.0,
+        "Space": 0.0
+      },
+      "dominant_dimension": "Movement",
+      "weakest_dimension": "Evolution",
+      "dimensional_variance": 0.16
+    },
+    "discordant": {
+      "coherence": 0.0281,
+      "mean_activation": 0.42,
+      "std_dev": 0.3919,
+      "balance": 0.0669,
+      "resonance_hz": 8.05,
+      "entropy": 0.4917,
+      "state": "Fragmented",
+      "state_color": "#FF0044",
+      "amplitudes": {
+        "Movement": 0.9,
+        "Evolution": 0.9,
+        "Being": 0.1,
+        "Design": 0.1,
+        "Space": 0.1
+      },
+      "dominant_dimension": "Movement",
+      "weakest_dimension": "Being",
+      "dimensional_variance": 0.1536
+    },
+    "realistic": {
+      "coherence": 0.3745,
+      "mean_activation": 0.56,
+      "std_dev": 0.1855,
+      "balance": 0.6688,
+      "resonance_hz": 10.76,
+      "entropy": 0.8844,
+      "state": "Awakening",
+      "state_color": "#FFAA00",
+      "amplitudes": {
+        "Movement": 0.7,
+        "Evolution": 0.4,
+        "Being": 0.8,
+        "Design": 0.3,
+        "Space": 0.6
+      },
+      "dominant_dimension": "Being",
+      "weakest_dimension": "Design",
+      "dimensional_variance": 0.0344
+    },
+    "aligned": {
+      "coherence": 0.5634,
+      "mean_activation": 0.68,
+      "std_dev": 0.1166,
+      "balance": 0.8285,
+      "resonance_hz": 12.24,
+      "entropy": 0.9656,
+      "state": "Coherent",
+      "state_color": "#FFFF00",
+      "amplitudes": {
+        "Movement": 0.8,
+        "Evolution": 0.7,
+        "Being": 0.8,
+        "Design": 0.5,
+        "Space": 0.6
+      },
+      "dominant_dimension": "Movement",
+      "weakest_dimension": "Design",
+      "dimensional_variance": 0.0136
+    },
+    "morph": [
+      {
+        "coherence": 0.1,
+        "mean_activation": 0.1,
+        "std_dev": 0.0,
+        "balance": 1.0,
+        "resonance_hz": 8.61,
+        "entropy": 1.0,
+        "state": "Dormant",
+        "state_color": "#FF8800",
+        "amplitudes": {
+          "Movement": 0.1,
+          "Evolution": 0.1,
+          "Being": 0.1,
+          "Design": 0.1,
+          "Space": 0.1
+        },
+        "dominant_dimension": "Movement",
+        "weakest_dimension": "Movement",
+        "dimensional_variance": 0.0,
+        "step": 0,
+        "progress": 0.0
+      },
+      {
+        "coherence": 0.2522,
+        "mean_activation": 0.256,
+        "std_dev": 0.0038,
+        "balance": 0.9852,
+        "resonance_hz": 9.8,
+        "entropy": 0.9997,
+        "state": "Awakening",
+        "state_color": "#FFAA00",
+        "amplitudes": {
+          "Movement": 0.26,
+          "Evolution": 0.25,
+          "Being": 0.26,
+          "Design": 0.256,
+          "Space": 0.254
+        },
+        "dominant_dimension": "Movement",
+        "weakest_dimension": "Evolution",
+        "dimensional_variance": 0.0,
+        "step": 1,
+        "progress": 20.0
+      },
+      {
+        "coherence": 0.4044,
+        "mean_activation": 0.412,
+        "std_dev": 0.0076,
+        "balance": 0.9816,
+        "resonance_hz": 11.0,
+        "entropy": 0.9996,
+        "state": "Coherent",
+        "state_color": "#FFFF00",
+        "amplitudes": {
+          "Movement": 0.42,
+          "Evolution": 0.4,
+          "Being": 0.42,
+          "Design": 0.412,
+          "Space": 0.408
+        },
+        "dominant_dimension": "Movement",
+        "weakest_dimension": "Evolution",
+        "dimensional_variance": 0.0001,
+        "step": 2,
+        "progress": 40.0
+      },
+      {
+        "coherence": 0.5566,
+        "mean_activation": 0.568,
+        "std_dev": 0.0114,
+        "balance": 0.98,
+        "resonance_hz": 12.19,
+        "entropy": 0.9995,
+        "state": "Coherent",
+        "state_color": "#FFFF00",
+        "amplitudes": {
+          "Movement": 0.58,
+          "Evolution": 0.55,
+          "Being": 0.58,
+          "Design": 0.568,
+          "Space": 0.562
+        },
+        "dominant_dimension": "Movement",
+        "weakest_dimension": "Evolution",
+        "dimensional_variance": 0.0001,
+        "step": 3,
+        "progress": 60.0
+      },
+      {
+        "coherence": 0.7088,
+        "mean_activation": 0.724,
+        "std_dev": 0.0152,
+        "balance": 0.979,
+        "resonance_hz": 13.38,
+        "entropy": 0.9995,
+        "state": "Aligned",
+        "state_color": "#88FF00",
+        "amplitudes": {
+          "Movement": 0.74,
+          "Evolution": 0.7,
+          "Being": 0.74,
+          "Design": 0.724,
+          "Space": 0.716
+        },
+        "dominant_dimension": "Movement",
+        "weakest_dimension": "Evolution",
+        "dimensional_variance": 0.0002,
+        "step": 4,
+        "progress": 80.0
+      },
+      {
+        "coherence": 0.861,
+        "mean_activation": 0.88,
+        "std_dev": 0.019,
+        "balance": 0.9784,
+        "resonance_hz": 14.57,
+        "entropy": 0.9994,
+        "state": "Flow State",
+        "state_color": "#00FF88",
+        "amplitudes": {
+          "Movement": 0.9,
+          "Evolution": 0.85,
+          "Being": 0.9,
+          "Design": 0.88,
+          "Space": 0.87
+        },
+        "dominant_dimension": "Movement",
+        "weakest_dimension": "Evolution",
+        "dimensional_variance": 0.0004,
+        "step": 5,
+        "progress": 100.0
+      }
+    ]
+  }
+}
