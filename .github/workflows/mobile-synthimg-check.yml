@@ -30,7 +30,7 @@ jobs:
         with:
           node-version: '22'
       - name: Mobile SynthIMG acceptance
-        run: node --test computer/tests/device-world-resolver.test.mjs computer/tests/phone-world.test.mjs computer/tests/purpose-guide.test.mjs computer/tests/task-fit.test.mjs computer/tests/mobile-synthimg.test.mjs computer/tests/resident-mesh-indiverse.test.mjs computer/tests/world-federation.test.mjs computer/tests/synthia57-resident.test.mjs computer/tests/synthia57-package-loader.test.mjs computer/tests/consciousness-realm-adapter.test.mjs computer/tests/world-adapters.test.mjs computer/tests/termux-compiler.test.mjs
+        run: node --test computer/tests/device-world-resolver.test.mjs computer/tests/interface-brick-recognizer.test.mjs computer/tests/phone-world.test.mjs computer/tests/purpose-guide.test.mjs computer/tests/task-fit.test.mjs computer/tests/mobile-synthimg.test.mjs computer/tests/resident-mesh-indiverse.test.mjs computer/tests/world-federation.test.mjs computer/tests/synthia57-resident.test.mjs computer/tests/synthia57-package-loader.test.mjs computer/tests/consciousness-realm-adapter.test.mjs computer/tests/world-adapters.test.mjs computer/tests/termux-compiler.test.mjs
       - name: Stage browser runtime
         run: node computer/build-web.mjs
       - name: Verify staged launcher dependencies
