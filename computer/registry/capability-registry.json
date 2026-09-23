@@ -1292,6 +1292,56 @@
           }
         }
       ]
+    },
+    {
+      "capability": "experiment_loop",
+      "description": "Hypothesis -> experiment -> real execution -> observation -> explicit evidence classification (never auto-upgraded) -> replication.",
+      "providers": [
+        {
+          "provider_id": "back-up-:kimi-hypothesis-registry",
+          "capability": "experiment_loop",
+          "repository": "donors/Back-up-",
+          "branch_ref": "1c45318",
+          "source_artifact": "vendor/kimi-agent-automata-state-space-merge/pure-synthia-automata/src/experiments/hypothesis-registry.js",
+          "status": "VERIFIED",
+          "environment_requirements": [
+            "node-esm"
+          ],
+          "inputs": {
+            "hypothesis": "H=(claim,nullHypothesis,metric,test,threshold)",
+            "method": "real provider callable"
+          },
+          "outputs": {
+            "classification": "hypothesis|observation|correlation|candidate_mechanism|supported_result|rejected_result|unknown"
+          },
+          "dependencies": [],
+          "persistence_behavior": "none",
+          "verification_evidence": [
+            {
+              "kind": "test_run",
+              "ref": "computer/tests/acceptance-7-experiment-loop.test.mjs",
+              "summary": "REAL experiment loop: hypothesis 'ephemeris determinism' -> experiment (conditions/variables) -> run1 real foundry execution gate 38 -> NEGATIVE: classify stays 'observation' (no replication, no auto-upgrade) -> run2 replicated -> explicit classify -> donor evaluate(1.0>=0.99) -> supported_result, hypothesis supported -> events persisted (observation then supported_result) -> restart replay. Amendment-C VERIFIED: consumption receipt + observable state change (hypothesis status) + restart replay.",
+              "timestamp": "2026-09-23T00:00:00.000Z"
+            }
+          ],
+          "last_verified": "2026-09-23T00:00:00.000Z",
+          "known_limitations": [
+            "donor rule preserved: execution never classifies; Hypothesis.evaluate() is a separate explicit step",
+            "alternative donor candidates registered but not wrapped: synthia-core-v1.0.0 learning/scientist-loop.mjs (question/evidence loop), pure-synthia-v0.4.0 orchestrator/experimentEngine.mjs"
+          ],
+          "lineage": {
+            "derived_from": [
+              "pure-synthia-automata experiments"
+            ],
+            "supersedes_for_scope": []
+          },
+          "selection_hints": {
+            "locality": "local",
+            "performance_notes": "zero-dep, in-memory registry",
+            "preferred_when": "any experiment/evidence classification loop"
+          }
+        }
+      ]
     }
   ],
   "notes": [
