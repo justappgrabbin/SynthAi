@@ -39,5 +39,29 @@ final class TermuxBridge {
         }
     }
 
+    static boolean updateAndStartNativeSeed(Context context) {
+        if (!isInstalled(context)) return false;
+        Intent intent = new Intent(ACTION);
+        intent.setClassName(TERMUX_PACKAGE, TERMUX_SERVICE);
+        intent.putExtra("com.termux.RUN_COMMAND_PATH", "/data/data/com.termux/files/usr/bin/bash");
+        intent.putExtra("com.termux.RUN_COMMAND_ARGUMENTS", new String[]{
+            "-lc",
+            "cd ~/SynthAi; pkill -f 'node computer/native/native-seed-server.mjs' >/dev/null 2>&1 || true; " +
+            "(git fetch origin integration/synthia-reality-resident && " +
+            "git checkout integration/synthia-reality-resident && " +
+            "git pull --ff-only origin integration/synthia-reality-resident) || true; " +
+            "exec node computer/native/native-seed-server.mjs"
+        });
+        intent.putExtra("com.termux.RUN_COMMAND_WORKDIR", "/data/data/com.termux/files/home/SynthAi");
+        intent.putExtra("com.termux.RUN_COMMAND_BACKGROUND", true);
+        intent.putExtra("com.termux.RUN_COMMAND_COMMAND_LABEL", "Update + Start SynthAI Native Seed");
+        try {
+            context.startService(intent);
+            return true;
+        } catch (Exception error) {
+            return false;
+        }
+    }
+
     private TermuxBridge() {}
 }
