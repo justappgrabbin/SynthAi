@@ -85,10 +85,27 @@ test('NATIVE SEED SERVER: phone world survives checkpointed process restart',asy
       method:'POST',
       headers:{'content-type':'application/json'},
       body:JSON.stringify({events:[
-        {id:'evt-1',type:'notification',residentId:'synthia',notification:{id:'n1',packageName:'com.openai.chatgpt',title:'Reply',text:'hello'}}
+        {id:'evt-1',type:'notification',residentId:'synthia',notification:{id:'n1',packageName:'com.openai.chatgpt',title:'Reply',text:'hello'}},
+        {id:'evt-2',type:'app.observe',residentId:'synthia',observation:{
+          packageName:'com.openai.chatgpt',
+          appLabel:'ChatGPT',
+          eventType:'TYPE_VIEW_CLICKED',
+          eventText:'New chat',
+          observedAt:123456789,
+          source:'android-accessibility',
+          ui:[{id:'new-chat',text:'New chat',clickable:true,sensitive:false}]
+        }}
       ]})
     });
     assert.equal(replay.ok,true);
+    const replayBody=await replay.json();
+    assert.equal(replayBody.receipts.length,2);
+    assert.equal(replayBody.receipts[1].status,'replayed');
+
+    const afterObservation=await (await fetch(base+'/snapshot')).json();
+    const door=afterObservation.indiverse.canonicalObjects.find(o=>o.kind==='door'&&o.function==='new-conversation');
+    assert.ok(door,'ChatGPT accessibility observation must create a canonical new-conversation door');
+    assert.equal(door.relations[0].target,'app:com.openai.chatgpt');
 
     await fetch(base+'/sleep',{method:'POST',headers:{'content-type':'application/json'},body:'{}'});
     await stop(child);
@@ -98,6 +115,7 @@ test('NATIVE SEED SERVER: phone world survives checkpointed process restart',asy
     const snapshot2=await (await fetch(base+'/snapshot')).json();
 
     assert.ok(snapshot2.indiverse.canonicalObjects.some(o=>o.id==='app:com.openai.chatgpt'));
+    assert.ok(snapshot2.indiverse.canonicalObjects.some(o=>o.kind==='door'&&o.function==='new-conversation'));
     assert.ok(snapshot2.mesh.participants.some(p=>p.id==='phone:app:com.openai.chatgpt'));
   }finally{
     await stop(child);
