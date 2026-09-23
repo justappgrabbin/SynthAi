@@ -15,7 +15,8 @@ import { ResidentHost } from '../runtime/resident-host.mjs';
 import { IndiVerseRuntime } from '../worlds/indiverse.mjs';
 import { WorldFederation } from '../worlds/world-federation.mjs';
 import { Synthia57PackageLoader } from '../residents/synthia57-package-loader.mjs';
-import { PurposeGuideService } from '../services/purpose-guide.mjs';\nimport { TaskFitService } from '../services/task-fit.mjs';
+import { PurposeGuideService } from '../services/purpose-guide.mjs';
+import { TaskFitService } from '../services/task-fit.mjs';
 
 export const ADDRESS_FIELDS = Object.freeze([
   'planetary', 'dimension', 'gate', 'line', 'color', 'tone', 'base',
