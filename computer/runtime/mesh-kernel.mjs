@@ -174,7 +174,7 @@ export class RelationalMeshKernel {
 }
 
 // Compatibility surface retained for the first resident-spine cut and its tests.
-const clone=v=>v===undefined?undefined:structuredClone(v);
+const cloneCompat=v=>v===undefined?undefined:structuredClone(v);
 
 export class MeshKernel {
   constructor({bus,state}={}) {
@@ -189,33 +189,33 @@ export class MeshKernel {
     return this.snapshot();
   }
   async join(id,{kind='participant',residency='warm',publicState={},privateRef=null,capabilities=[]}={}){
-    const node={id,kind,residency,publicState:clone(publicState),privateRef,capabilities:[...capabilities],joinedAt:Date.now(),updatedAt:Date.now()};
+    const node={id,kind,residency,publicState:cloneCompat(publicState),privateRef,capabilities:[...capabilities],joinedAt:Date.now(),updatedAt:Date.now()};
     this.nodes.set(id,node); await this.#persist();
-    this.bus?.emit('mesh:joined',{id,kind,residency}); return clone(node);
+    this.bus?.emit('mesh:joined',{id,kind,residency}); return cloneCompat(node);
   }
   async setResidency(id,residency){
     const n=this.nodes.get(id); if(!n) throw new Error('unknown mesh node: '+id);
     n.residency=residency; n.updatedAt=Date.now(); await this.#persist();
-    this.bus?.emit('mesh:residency',{id,residency}); return clone(n);
+    this.bus?.emit('mesh:residency',{id,residency}); return cloneCompat(n);
   }
   async relate(from,to,{type='related',weight=1,context={}}={}){
     if(!this.nodes.has(from)||!this.nodes.has(to)) throw new Error('mesh relation endpoints must exist');
     const id=from+'→'+type+'→'+to;
-    const edge={id,from,to,type,weight,context:clone(context),updatedAt:Date.now()};
-    this.edges.set(id,edge); await this.#persist(); this.bus?.emit('mesh:related',edge); return clone(edge);
+    const edge={id,from,to,type,weight,context:cloneCompat(context),updatedAt:Date.now()};
+    this.edges.set(id,edge); await this.#persist(); this.bus?.emit('mesh:related',edge); return cloneCompat(edge);
   }
   on(id,handler){ this.handlers.set(id,handler); return ()=>this.handlers.delete(id); }
   async route(packet){
     if(!packet?.to) throw new Error('mesh packet.to required');
     const target=this.nodes.get(packet.to); if(!target) throw new Error('mesh target unavailable: '+packet.to);
-    const envelope=Object.freeze({id:packet.id??'packet-'+Date.now()+'-'+Math.random().toString(36).slice(2,7),from:packet.from??'computer',to:packet.to,type:packet.type??'message',payload:clone(packet.payload),at:Date.now()});
+    const envelope=Object.freeze({id:packet.id??'packet-'+Date.now()+'-'+Math.random().toString(36).slice(2,7),from:packet.from??'computer',to:packet.to,type:packet.type??'message',payload:cloneCompat(packet.payload),at:Date.now()});
     await this.state?.set('mesh.lastPacket',envelope,{source:'mesh-kernel'});
     this.bus?.emit('mesh:packet',envelope);
     const handler=this.handlers.get(packet.to);
     return handler ? handler(envelope) : {queued:true,envelope};
   }
-  get(id){return clone(this.nodes.get(id)??null)}
-  snapshot(){return {nodes:[...this.nodes.values()].map(clone),edges:[...this.edges.values()].map(clone)}}
+  get(id){return cloneCompat(this.nodes.get(id)??null)}
+  snapshot(){return {nodes:[...this.nodes.values()].map(cloneCompat),edges:[...this.edges.values()].map(cloneCompat)}}
   async #persist(){await this.state?.set('mesh',this.snapshot(),{source:'mesh-kernel'})}
 }
 
@@ -234,7 +234,7 @@ export class MeshContinuity {
   }
   async queue(event){
     const q=this.state.get('continuity.pending',[]);
-    q.push({id:event.id??'event-'+Date.now()+'-'+Math.random().toString(36).slice(2,7),at:event.at??this.clock(),...clone(event)});
+    q.push({id:event.id??'event-'+Date.now()+'-'+Math.random().toString(36).slice(2,7),at:event.at??this.clock(),...cloneCompat(event)});
     q.sort((a,b)=>a.at-b.at); await this.state.set('continuity.pending',q,{source:'mesh-continuity'}); return q.at(-1);
   }
   async wake({resolveEvent}={}){
