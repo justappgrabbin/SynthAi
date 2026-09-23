@@ -14,6 +14,7 @@ import { TriformPackageLoader } from '../worlds/triform-loader.mjs';
 import { PhoneWorldBridge } from './phone-world.mjs';
 import { NativeTerminalService } from './terminal-service.mjs';
 import { TermuxCompilerAdapter } from '../adapters/termux-compiler.mjs';
+import { SupabaseWorldJournal } from '../adapters/supabase-world-journal.mjs';
 
 const clone = value => value === undefined ? undefined : structuredClone(value);
 
@@ -58,6 +59,7 @@ export class NativeSeedRuntime {
     this.humanAgent = null;
     this.triform = new TriformPackageLoader({ computer: this, bus: this.bus });
     this.phoneWorld = null;
+    this.worldJournal = null;
     this.terminal = null;
   }
 
@@ -257,6 +259,18 @@ export class NativeSeedRuntime {
     return this.phoneWorld.mount();
   }
 
+  async bindSupabaseWorldJournal(options = {}) {
+    this.worldJournal?.unmount?.();
+    this.worldJournal = new SupabaseWorldJournal({
+      ...options,
+      state:this.state,
+      bus:this.bus,
+      clock:this.clock,
+    });
+    await this.worldJournal.mount();
+    return this.worldJournal.snapshot();
+  }
+
   async phoneRequest(operation, payload = {}) {
     if (!this.phoneWorld) throw new Error('Phone World host not bound');
     const routed = await this.meshKernel.request('phone:world', {
@@ -323,6 +337,7 @@ export class NativeSeedRuntime {
       stellar: this.stellarLab.snapshot(),
       humanAgent: this.humanAgent?.snapshot?.() ?? null,
       phoneWorld: this.phoneWorld?.snapshot?.() ?? null,
+      worldJournal: this.worldJournal?.snapshot?.() ?? null,
       terminal: this.terminal?.snapshot?.() ?? null,
       triform: this.triform.get()?.adapter?.snapshot?.() ?? null,
       indiverse: this.indiverse.snapshot(),
