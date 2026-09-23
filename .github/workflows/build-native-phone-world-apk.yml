@@ -1,0 +1,67 @@
+name: Build Native Phone World APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - 'integration/indiverse-phone-world-convergence-*'
+      - 'integration/synthia-reality-resident'
+    paths:
+      - 'native-android/**'
+      - 'computer/native/**'
+      - 'computer/adapters/supabase-world-journal.mjs'
+      - 'computer/tests/phone-world.test.mjs'
+      - 'computer/tests/supabase-world-journal.test.mjs'
+      - '.github/workflows/build-native-phone-world-apk.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  native-phone-world:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+
+      - name: Verify Phone World contracts
+        run: >
+          node --test
+          computer/tests/phone-world.test.mjs
+          computer/tests/supabase-world-journal.test.mjs
+          computer/tests/native-seed-server.test.mjs
+          computer/tests/resident-mesh-indiverse.test.mjs
+          computer/tests/consciousness-realm-adapter.test.mjs
+          computer/tests/world-federation.test.mjs
+
+      - name: Build native Phone World debug APK
+        working-directory: native-android
+        run: gradle :app:assembleDebug --stacktrace
+
+      - name: Verify native APK contains Phone World package
+        run: |
+          test -s native-android/app/build/outputs/apk/debug/app-debug.apk
+          unzip -l native-android/app/build/outputs/apk/debug/app-debug.apk | grep -q 'classes.dex'
+
+      - name: Upload native Phone World APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: SynthAI-IndiVerse-PhoneWorld-debug
+          path: native-android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+          retention-days: 30
