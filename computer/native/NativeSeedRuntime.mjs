@@ -202,6 +202,10 @@ export class NativeSeedRuntime {
   async sleepResident(id, checkpoint = {}) { return this.residents.sleep(id, checkpoint); }
   async wakeResident(id, options = {}) { return this.residents.wake(id, options); }
   async createIndiVerse(ownerId, options = {}) { return this.indiverse.createWorld(ownerId, options); }
+  async registerCanonicalWorldObject(object) { return this.indiverse.registerCanonicalObject(object); }
+  viewSharedWorldObject(objectId) { return this.indiverse.renderShared(objectId); }
+  viewIndiVerseObject(worldId, objectId) { return this.indiverse.renderInWorld(worldId, objectId); }
+  visitorMorphContract(options) { return this.indiverse.visitorContract(options); }
 
   async sleep() {
     const checkpoint = { stateSpace: this.stateSpaceSnapshot(), worlds: this.worldFederation.snapshot(), at: this.clock() };
