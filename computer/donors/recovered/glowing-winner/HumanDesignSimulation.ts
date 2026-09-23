@@ -919,7 +919,6 @@ export class BiologicalSimulator {
 // MAIN SIMULATION ENGINE
 // ============================================================================
 
-
 export class HumanDesignSimulation extends EventEmitter {
   agents: Map<string, AgentState> = new Map();
   places: Map<string, WorldPlace> = new Map();
