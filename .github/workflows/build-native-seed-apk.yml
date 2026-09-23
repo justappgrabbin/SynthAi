@@ -2,6 +2,11 @@ name: Build SynthAI Native Seed APK
 
 on:
   workflow_dispatch:
+  pull_request:
+    paths:
+      - 'native-android/**'
+      - 'computer/native/**'
+      - '.github/workflows/build-native-seed-apk.yml'
   push:
     branches:
       - 'integration/synthia-reality-resident'
