@@ -49,7 +49,10 @@ final class EventJournal {
         try {
             if (!pending.exists() || pending.length() == 0) return new Batch(null, new JSONArray());
             File inflight = new File(pending.getParentFile(), "mesh-events-" + System.currentTimeMillis() + ".inflight");
-            if (!pending.renameTo(inflight)) return new Batch(null, new JSONArray());
+            if (!pending.renameTo(inflight)) {
+                lastError = "Unable to move pending event journal into an inflight batch";
+                return new Batch(null, new JSONArray());
+            }
             JSONArray events = read(inflight);
             return new Batch(inflight, events);
         } catch (Exception error) {
@@ -59,7 +62,12 @@ final class EventJournal {
     }
 
     synchronized void commit(Batch batch) {
-        if (batch != null && batch.file != null) batch.file.delete();
+        if (batch == null || batch.file == null) return;
+        if (batch.file.exists() && !batch.file.delete()) {
+            lastError = "Unable to delete committed event journal batch: " + batch.file.getName();
+        } else {
+            lastError = null;
+        }
     }
 
     synchronized void rollback(Batch batch) {
@@ -85,7 +93,9 @@ final class EventJournal {
             while ((line = reader.readLine()) != null) {
                 text.append(line).append("\n");
             }
-        } catch (Exception ignored) {}
+        } catch (Exception error) {
+            lastError = error.getClass().getSimpleName() + ": " + String.valueOf(error.getMessage());
+        }
         return text.toString();
     }
 
@@ -96,9 +106,15 @@ final class EventJournal {
             String line;
             while ((line = reader.readLine()) != null) {
                 if (line.trim().isEmpty()) continue;
-                try { array.put(new JSONObject(line)); } catch (Exception ignored) {}
+                try {
+                    array.put(new JSONObject(line));
+                } catch (Exception error) {
+                    lastError = "Invalid journal event JSON: " + String.valueOf(error.getMessage());
+                }
             }
-        } catch (Exception ignored) {}
+        } catch (Exception error) {
+            lastError = error.getClass().getSimpleName() + ": " + String.valueOf(error.getMessage());
+        }
         return array;
     }
 }
