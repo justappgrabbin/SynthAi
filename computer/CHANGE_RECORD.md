@@ -227,3 +227,30 @@ PROVIDER STATUSES: computer:runtime/morph-engine -> WIRED (real execution + obse
 FAILED (then fixed): queryCapability omitted lineage (acc-9 failure); pyephem wiped by environment reset between sessions — reinstalled 4.2.1, volatility noted (penta provider correctly emits provider-failure + stays WIRED-only-with-real-run semantics when env absent).
 
 BLOCKED: none new. pyephem env volatility is an operational note; authority-ZIP blocker still open.
+
+# Change record — Acceptance Test 7: experiment loop (integration/ecosystem-convergence)
+
+WHAT EXISTED BEFORE: acceptance 1-6,8,9 green (22/22); no experiment/science machinery mounted. Recovery-first inventory found existing donor candidates: Back-up- src/science/scientist-loop.mjs, vendor/synthia-core-v1.0.0/learning/scientist-loop.mjs, vendor/pure-synthia-v0.4.0/.../experimentEngine.mjs, vendor/kimi-agent-automata-state-space-merge/.../experiments/hypothesis-registry.js (+ byte-identical copy in execution-spine-v0.4.0/pure-synthia). STRONGEST = kimi HypothesisRegistry (formal H lifecycle with explicit evaluate(); classification separate from execution by design).
+
+PRESERVED: all prior tests (22/22 prior pass, 23/23 now); donor wrapped, not rewritten; no donor file modified.
+
+ADDED:
+- computer/services/experiment-loop.mjs — ExperimentLoop wrapping donor HypothesisRegistry: createHypothesis/createExperiment(conditions,variables,method)/run(real executor)/classify (EXPLICIT step; replication required before donor evaluate() promotes). Grammar classification mapping: hypothesized->hypothesis, no-replication->observation, supported->supported_result, rejected->rejected_result, else unknown.
+- computer/tests/acceptance-7-experiment-loop.test.mjs — full loop + NEGATIVE case (single successful execution stays 'observation'; no auto-upgrade) + replication -> supported_result + persistence + restart replay.
+- ComputerRuntime: mounts experiment-loop service (contract runExperiment).
+
+MOUNTED: experiment_loop capability (back-up-:kimi-hypothesis-registry).
+
+CONNECTED: hypothesis -> experiment -> real foundry-glyphs execution (gate 38) -> observation -> explicit classify (replication) -> donor evaluate -> supported_result -> grammar-v1 events -> restart replay.
+
+DISCONNECTED / NOT MOUNTED: scientist-loop variants (registered as alternative candidates in known_limitations), experimentEngine.mjs.
+
+TESTED: node --test computer/tests/*.test.mjs
+EXACT TEST RESULT: tests 23, pass 23, fail 0. Evidence: ../../evidence/acceptance-7-experiment.txt.
+  Acc7: run1 gate 38 -> classification observation (no replication); run2 replicated -> donor evaluate(1.0>=0.99) -> supported_result; hypothesis status supported; 2 events persisted+replayed.
+
+PROVIDER STATUSES: back-up-:kimi-hypothesis-registry -> VERIFIED (consumption receipt + observable state change + restart replay).
+
+FAILED (then fixed): donor initial status is 'hypothesized' (assert corrected); pyephem wiped again by env reset — reinstalled.
+
+BLOCKED: none new. pyephem env volatility recurs (operational note); authority-ZIP blocker still open.
