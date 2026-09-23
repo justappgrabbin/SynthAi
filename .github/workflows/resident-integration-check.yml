@@ -63,4 +63,5 @@ jobs:
           computer/tests/resident-mesh-indiverse.test.mjs
           computer/tests/synthia57-resident.test.mjs
           computer/tests/synthia57-package-loader.test.mjs
+          computer/tests/synthia57-package-store.test.mjs
           computer/tests/world-federation.test.mjs
