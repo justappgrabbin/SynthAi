@@ -46,6 +46,7 @@ button{font:inherit}.shell{min-height:100vh;display:flex;flex-direction:column}.
     <div class="shadow"></div><div class="head"></div><div class="body"></div><div class="legs"></div>
   </div>
   <nav class="dock">
+    <button id="perception">App perception</button>
     <button id="refresh">Refresh places</button>
     <a href="./mobile-computer.html">Computer</a>
   </nav>
@@ -59,6 +60,8 @@ const shell = window.Capacitor?.Plugins?.WorldShell ?? null;
 const places = document.getElementById('places');
 const status = document.getElementById('status');
 const synthia = document.getElementById('synthia');
+const perception = document.getElementById('perception');
+let lastObservationJson = null;
 
 function destinationFor(app) {
   return computer.appExperiences.compile({
@@ -148,7 +151,55 @@ document.getElementById('computerPortal').onclick = async event => {
 };
 document.getElementById('refresh').onclick = loadApps;
 
+async function refreshPerceptionControl() {
+  if (!shell) {
+    perception.textContent = 'Perception unavailable';
+    perception.disabled = true;
+    return;
+  }
+  try {
+    const result = await shell.accessibilityStatus();
+    perception.textContent = result.enabled ? 'Perception ON' : 'Enable perception';
+  } catch (error) {
+    perception.textContent = 'Perception error';
+  }
+}
+
+async function ingestLatestObservation() {
+  if (!shell) return;
+  try {
+    const latest = await shell.latestObservation();
+    if (!latest.enabled || !latest.available || !latest.observationJson) return;
+    if (latest.observationJson === lastObservationJson) return;
+    const observation = JSON.parse(latest.observationJson);
+    await computer.observeApplication(observation);
+    lastObservationJson = latest.observationJson;
+  } catch (error) {
+    console.error('Unable to ingest app observation', error);
+  }
+}
+
+perception.onclick = async () => {
+  if (!shell) return;
+  const result = await shell.accessibilityStatus();
+  if (!result.enabled) await shell.openAccessibilitySettings();
+  else await ingestLatestObservation();
+};
+
+window.addEventListener('focus', async () => {
+  await refreshPerceptionControl();
+  await ingestLatestObservation();
+});
+document.addEventListener('visibilitychange', async () => {
+  if (!document.hidden) {
+    await refreshPerceptionControl();
+    await ingestLatestObservation();
+  }
+});
+
 await loadApps();
+await refreshPerceptionControl();
+await ingestLatestObservation();
 </script>
 </body>
 </html>
