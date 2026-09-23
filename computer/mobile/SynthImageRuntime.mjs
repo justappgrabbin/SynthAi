@@ -160,7 +160,7 @@ export class SynthImageRuntime {
     Object.assign(this, { state, bus, cacheName, routePrefix });
   }
 
-  async registerServiceWorker(url = './synthimg-service-worker.js') {
+  async registerServiceWorker(url = '/synthimg-sw.js') {
     if (!globalThis.navigator?.serviceWorker) return { supported: false };
     const registration = await navigator.serviceWorker.register(url, { type: 'classic' });
     await navigator.serviceWorker.ready;
