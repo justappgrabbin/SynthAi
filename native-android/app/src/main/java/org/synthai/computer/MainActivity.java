@@ -3,6 +3,10 @@ package org.synthai.computer;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
+import android.util.Base64;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.os.Bundle;
@@ -10,6 +14,11 @@ import android.os.Handler;
 import android.os.Looper;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -18,6 +27,7 @@ import java.util.concurrent.Executors;
 
 public final class MainActivity extends Activity {
     private static final int REQUEST_TERMUX_RUN = 7001;
+    private static final int REQUEST_MIRROR_IMAGE = 7002;
     private final ExecutorService io = Executors.newSingleThreadExecutor();
     private final Handler main = new Handler(Looper.getMainLooper());
     private NativeSeedClient client;
@@ -25,6 +35,7 @@ public final class MainActivity extends Activity {
     private PhoneWorldView world;
     private SharedPreferences prefs;
     private List<PhoneWorldView.AppPlace> appPlaces = new ArrayList<>();
+    private File mirrorFile;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,6 +45,9 @@ public final class MainActivity extends Activity {
         prefs = getSharedPreferences("synthai-native", MODE_PRIVATE);
         world = new PhoneWorldView(this);
         world.setListener(this::enterApp);
+        world.setMirrorListener(this::pickMirrorImage);
+        mirrorFile = new File(getFilesDir(), "synthia-mirror-face.jpg");
+        loadMirrorFace();
         setContentView(world);
         refreshApps();
         wakeRuntimeAndFlush(0);
@@ -103,6 +117,74 @@ public final class MainActivity extends Activity {
         if (launch != null) {
             world.setStatus("SYNTHIA ENTERING " + app.label.toUpperCase());
             startActivity(launch);
+        }
+    }
+
+    private void pickMirrorImage() {
+        Intent pick = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+        pick.addCategory(Intent.CATEGORY_OPENABLE);
+        pick.setType("image/*");
+        startActivityForResult(pick, REQUEST_MIRROR_IMAGE);
+    }
+
+    private void loadMirrorFace() {
+        try {
+            if (mirrorFile != null && mirrorFile.exists()) {
+                Bitmap bitmap = BitmapFactory.decodeFile(mirrorFile.getAbsolutePath());
+                if (bitmap != null) world.setMirrorFace(bitmap);
+            }
+        } catch (Exception ignored) {}
+    }
+
+    private void acceptMirrorImage(Uri uri) {
+        io.execute(() -> {
+            try (InputStream in = getContentResolver().openInputStream(uri)) {
+                if (in == null) return;
+                ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+                byte[] buffer = new byte[8192];
+                int read;
+                while ((read = in.read(buffer)) >= 0) {
+                    bytes.write(buffer, 0, read);
+                    if (bytes.size() > 8 * 1024 * 1024) throw new IllegalStateException("Mirror image exceeds 8 MB");
+                }
+                byte[] original = bytes.toByteArray();
+                Bitmap decoded = BitmapFactory.decodeByteArray(original, 0, original.length);
+                if (decoded == null) throw new IllegalStateException("Could not decode mirror image");
+
+                ByteArrayOutputStream jpeg = new ByteArrayOutputStream();
+                decoded.compress(Bitmap.CompressFormat.JPEG, 90, jpeg);
+                byte[] normalized = jpeg.toByteArray();
+                try (FileOutputStream out = new FileOutputStream(mirrorFile)) {
+                    out.write(normalized);
+                }
+
+                String dataUrl = "data:image/jpeg;base64," + Base64.encodeToString(normalized, Base64.NO_WRAP);
+                JSONObject payload = new JSONObject();
+                payload.put("dataUrl", dataUrl);
+                payload.put("label", "user-face");
+                payload.put("source", "android-photo-picker");
+                NativeSeedClient.Result result = client.post("/synthia/mirror-image", payload);
+
+                Bitmap display = BitmapFactory.decodeByteArray(normalized, 0, normalized.length);
+                main.post(() -> {
+                    world.setMirrorFace(display);
+                    world.setStatus(result.ok ? "SYNTHIA 5.7 · MIRROR SOURCE READY" : "MIRROR SAVED · RUNTIME WILL SYNC ON WAKE");
+                });
+            } catch (Exception error) {
+                main.post(() -> world.setStatus("MIRROR IMAGE ERROR"));
+            }
+        });
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQUEST_MIRROR_IMAGE && resultCode == RESULT_OK && data != null && data.getData() != null) {
+            Uri uri = data.getData();
+            try {
+                getContentResolver().takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            } catch (Exception ignored) {}
+            acceptMirrorImage(uri);
         }
     }
 
