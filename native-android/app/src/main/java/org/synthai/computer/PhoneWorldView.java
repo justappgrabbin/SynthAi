@@ -17,6 +17,7 @@ final class PhoneWorldView extends View {
         final String packageName;
         final String label;
         final Drawable icon;
+        String experienceId = "application-place";
         final RectF bounds = new RectF();
         float worldLeft;
         float worldTop;
@@ -200,11 +201,39 @@ final class PhoneWorldView extends View {
         paint.setColor(Color.argb(90, 0, 0, 0));
         canvas.drawRoundRect(new RectF(left + 5f*density, top + 7f*density, right + 5f*density, bottom + 7f*density), 18f*density, 18f*density, paint);
 
-        // Main building.
-        paint.setColor(Color.rgb(54, 35, 75));
+        // Main building. Its expression comes from the runtime's canonical experienceId.
+        boolean conversation = "chat-space".equals(app.experienceId);
+        boolean artStudio = "art-studio".equals(app.experienceId);
+        if (conversation) {
+            paint.setColor(Color.rgb(48, 39, 88));
+            stroke.setColor(Color.rgb(113, 104, 177));
+        } else if (artStudio) {
+            paint.setColor(Color.rgb(72, 38, 75));
+            stroke.setColor(Color.rgb(156, 91, 148));
+        } else {
+            paint.setColor(Color.rgb(54, 35, 75));
+            stroke.setColor(Color.rgb(102, 67, 132));
+        }
         canvas.drawRoundRect(new RectF(left, top, right, bottom), 18f*density, 18f*density, paint);
-        stroke.setColor(Color.rgb(102, 67, 132));
         canvas.drawRoundRect(new RectF(left, top, right, bottom), 18f*density, 18f*density, stroke);
+
+        // Semantic facade: the OS/runtime tells the renderer what kind of place this is.
+        if (conversation) {
+            paint.setColor(Color.rgb(108, 95, 163));
+            float bubbleY = top + 18f*density;
+            canvas.drawRoundRect(new RectF(left + 10f*density, bubbleY, right - 10f*density, bubbleY + 34f*density), 12f*density, 12f*density, paint);
+            paint.setColor(Color.rgb(200, 193, 238));
+            canvas.drawCircle(left + 24f*density, bubbleY + 17f*density, 2.5f*density, paint);
+            canvas.drawCircle(left + 34f*density, bubbleY + 17f*density, 2.5f*density, paint);
+            canvas.drawCircle(left + 44f*density, bubbleY + 17f*density, 2.5f*density, paint);
+        } else if (artStudio) {
+            paint.setColor(Color.rgb(39, 23, 45));
+            canvas.drawRoundRect(new RectF(left + 12f*density, top + 14f*density, right - 12f*density, top + 57f*density), 7f*density, 7f*density, paint);
+            paint.setColor(Color.rgb(184, 125, 184));
+            canvas.drawCircle(left + 29f*density, top + 34f*density, 8f*density, paint);
+            paint.setColor(Color.rgb(226, 189, 217));
+            canvas.drawRect(left + 47f*density, top + 27f*density, right - 25f*density, top + 41f*density, paint);
+        }
 
         // "Roof on the floor" world grammar. The shared object is still a building;
         // this is only its local IndiVerse expression.
@@ -243,7 +272,8 @@ final class PhoneWorldView extends View {
 
         paint.setColor(Color.rgb(167, 141, 190));
         paint.setTextSize(8.5f*density);
-        canvas.drawText("ENTER", left + 10f*density, top + 102f*density, paint);
+        String experienceLabel = conversation ? "CONVERSATION HOUSE" : artStudio ? "ART STUDIO" : "ENTER";
+        canvas.drawText(experienceLabel, left + 10f*density, top + 102f*density, paint);
     }
 
     private void drawResident(Canvas canvas) {
