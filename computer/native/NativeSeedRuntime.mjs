@@ -9,6 +9,7 @@ import { WorldFederation } from '../worlds/world-federation.mjs';
 import { Synthia57PackageLoader } from '../residents/synthia57-package-loader.mjs';
 import { StellarLabAdapter } from '../labs/stellar-lab-adapter.mjs';
 import { ConsciousnessRealmPackageLoader } from '../worlds/consciousness-realm-loader.mjs';
+import { HumanAgentMechanicsAdapter } from '../worlds/adapters/human-agent.mjs';
 
 const clone = value => value === undefined ? undefined : structuredClone(value);
 
@@ -50,6 +51,7 @@ export class NativeSeedRuntime {
     this.synthia57 = new Synthia57PackageLoader({ computer: this, bus: this.bus });
     this.stellarLab = new StellarLabAdapter({ mesh: this.meshKernel, state: this.state, bus: this.bus, clock });
     this.consciousnessRealm = new ConsciousnessRealmPackageLoader({ computer: this, bus: this.bus });
+    this.humanAgent = null;
   }
 
   async boot() {
@@ -200,6 +202,17 @@ export class NativeSeedRuntime {
     return r.result;
   }
 
+  async bindHumanAgentHost(host) {
+    this.humanAgent = new HumanAgentMechanicsAdapter({ host, state:this.state, bus:this.bus, clock:this.clock });
+    await this.worldFederation.bind('mechanics:human-agent', this.humanAgent);
+    return this.humanAgent.snapshot();
+  }
+
+  async humanAgentRequest(operation, payload = {}) {
+    if (!this.humanAgent) throw new Error('Human Agent mechanics host not bound');
+    return this.worldFederation.invoke('mechanics:human-agent', operation, payload);
+  }
+
   async mountConsciousnessRealm(options = {}) { return this.consciousnessRealm.mount(options); }
   async mountInstalledConsciousnessRealm(options = {}) { return this.consciousnessRealm.mountInstalledPackage(options); }
   async sendResidentHome(residentId = 'synthia') { return this.consciousnessRealm.attachResident(residentId); }
@@ -243,6 +256,7 @@ export class NativeSeedRuntime {
       residents: this.residents.snapshot(),
       worlds: this.worldFederation.snapshot(),
       stellar: this.stellarLab.snapshot(),
+      humanAgent: this.humanAgent?.snapshot?.() ?? null,
       indiverse: this.indiverse.snapshot(),
       synthia57: this.synthia57.get('synthia')?.adapter?.snapshot?.() ?? null,
     };
