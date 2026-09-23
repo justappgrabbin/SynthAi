@@ -45,6 +45,7 @@ function observationText(observation = {}) {
 function meaningfulRoute(experience, observation = {}) {
   const text = observationText(observation);
   const eventText = String(observation.eventText ?? '').toLowerCase();
+  const eventDescription = String(observation.eventContentDescription ?? '').toLowerCase();
   const eventType = String(observation.eventType ?? '').toLowerCase();
   const clicked = eventType.includes('clicked') || eventType.includes('click');
   const screenType = String(observation.screenType ?? '').toLowerCase();
@@ -52,7 +53,7 @@ function meaningfulRoute(experience, observation = {}) {
   if (experience.id === 'chat-space') {
     if (
       screenType === 'new_conversation' ||
-      (clicked && /new chat|new conversation/.test(eventText))
+      (clicked && /new chat|new conversation/.test(eventText + ' ' + eventDescription))
     ) {
       return {
         routeType: 'new-conversation',
