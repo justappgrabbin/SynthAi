@@ -1,112 +1,112 @@
-import { Card } from "@/components/ui/card";
+import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { QualityBadge } from "./quality-badge";
-import { GlyphId } from "./glyph-id";
-import { GlyphTypeIcon } from "./glyph-type-icon";
-import { formatDistanceToNow } from "date-fns";
-import { Eye, ArrowUpRight } from "lucide-react";
+import { QualityBadge } from "@/components/quality-badge";
+import { GlyphId } from "@/components/glyph-id";
+import { GlyphTypeIcon } from "@/components/glyph-type-icon";
+import { ArrowUpRight, Download, Shield } from "lucide-react";
 import type { Glyph } from "@shared/schema";
-import { cn } from "@/lib/utils";
+import { formatDistanceToNow } from "date-fns";
 
 interface GlyphCardProps {
   glyph: Glyph;
   onView?: () => void;
+  onExport?: () => void;
   onPromote?: () => void;
-  compact?: boolean;
-  className?: string;
 }
 
-export function GlyphCard({ glyph, onView, onPromote, compact, className }: GlyphCardProps) {
-  if (compact) {
-    return (
-      <div 
-        className={cn(
-          "flex items-center gap-3 p-2 rounded-md hover-elevate cursor-pointer",
-          className
-        )}
-        onClick={onView}
-        data-testid={`glyph-card-${glyph.id}`}
-      >
-        <GlyphTypeIcon type={glyph.type} kind={glyph.kind} />
-        <div className="flex-1 min-w-0">
-          <p className="text-sm font-medium truncate">{glyph.name}</p>
-          <p className="text-caption text-muted-foreground">
-            {formatDistanceToNow(new Date(glyph.producedAt), { addSuffix: true })}
-          </p>
-        </div>
-        <QualityBadge quality={glyph.quality} />
-      </div>
-    );
-  }
+export function GlyphCard({ glyph, onView, onExport, onPromote }: GlyphCardProps) {
+  const formatBytes = (bytes: number) => {
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  };
 
   return (
-    <Card 
-      className={cn("p-4 hover-elevate", className)}
-      data-testid={`glyph-card-${glyph.id}`}
-    >
-      <div className="flex items-start gap-3">
-        <GlyphTypeIcon type={glyph.type} kind={glyph.kind} className="mt-0.5" />
-        
-        <div className="flex-1 min-w-0 space-y-2">
-          <div>
-            <h3 className="font-medium text-base truncate" title={glyph.name}>
+    <Card className="group" data-testid={`card-glyph-${glyph.id}`}>
+      <CardHeader className="flex flex-row items-start justify-between gap-2 pb-3">
+        <div className="flex items-center gap-2 min-w-0 flex-1">
+          <GlyphTypeIcon type={glyph.type} kind={glyph.kind} className="shrink-0" />
+          <div className="min-w-0">
+            <h3 className="font-semibold text-sm truncate" data-testid="text-glyph-name">
               {glyph.name}
             </h3>
-            <GlyphId id={glyph.id} truncate className="mt-0.5" />
+            <GlyphId id={glyph.id} className="mt-0.5" />
           </div>
+        </div>
+        <QualityBadge quality={glyph.quality} />
+      </CardHeader>
 
-          <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-caption">
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Type:</span>
-              <span className="capitalize">{glyph.type}</span>
-            </div>
-            {glyph.kind && (
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Kind:</span>
-                <span className="capitalize">{glyph.kind}</span>
-              </div>
-            )}
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Size:</span>
-              <span>{(glyph.sizeBytes / 1024).toFixed(1)} KB</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Language:</span>
-              <span>{glyph.language}</span>
-            </div>
+      <CardContent className="pb-3">
+        <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-caption">
+          <div>
+            <span className="text-muted-foreground">Type</span>
+            <p className="font-medium capitalize">{glyph.type}</p>
           </div>
-
-          <p className="text-caption text-muted-foreground">
-            Produced {formatDistanceToNow(new Date(glyph.producedAt), { addSuffix: true })}
-            {glyph.producer && ` by ${glyph.producer.tool}`}
-          </p>
+          <div>
+            <span className="text-muted-foreground">Size</span>
+            <p className="font-medium">{formatBytes(glyph.sizeBytes)}</p>
+          </div>
+          <div>
+            <span className="text-muted-foreground">Language</span>
+            <p className="font-medium uppercase">{glyph.language || "—"}</p>
+          </div>
+          <div>
+            <span className="text-muted-foreground">Created</span>
+            <p className="font-medium">
+              {formatDistanceToNow(new Date(glyph.producedAt), { addSuffix: true })}
+            </p>
+          </div>
         </div>
 
-        <QualityBadge quality={glyph.quality} />
-      </div>
+        {glyph.exports && glyph.exports.length > 0 && (
+          <div className="mt-3 pt-3 border-t">
+            <span className="text-caption text-muted-foreground">Exports</span>
+            <div className="flex flex-wrap gap-1 mt-1">
+              {glyph.exports.slice(0, 3).map((exp) => (
+                <code key={exp} className="text-[10px] px-1.5 py-0.5 bg-muted rounded font-mono">
+                  {exp}
+                </code>
+              ))}
+              {glyph.exports.length > 3 && (
+                <span className="text-[10px] text-muted-foreground">
+                  +{glyph.exports.length - 3} more
+                </span>
+              )}
+            </div>
+          </div>
+        )}
+      </CardContent>
 
-      <div className="flex items-center justify-end gap-2 mt-3 pt-3 border-t">
-        <Button 
-          variant="ghost" 
-          size="sm" 
+      <CardFooter className="pt-0 gap-2">
+        <Button
+          variant="ghost"
+          size="sm"
           onClick={onView}
-          data-testid={`button-view-${glyph.id}`}
+          className="flex-1"
+          data-testid="button-view-glyph"
         >
-          <Eye className="h-3 w-3 mr-1" />
+          <ArrowUpRight className="h-3 w-3 mr-1" />
           View
         </Button>
-        {glyph.quality !== "production" && onPromote && (
-          <Button 
-            variant="outline" 
-            size="sm" 
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={onExport}
+          data-testid="button-export-glyph"
+        >
+          <Download className="h-3 w-3" />
+        </Button>
+        {glyph.quality !== "production" && (
+          <Button
+            variant="ghost"
+            size="sm"
             onClick={onPromote}
-            data-testid={`button-promote-${glyph.id}`}
+            data-testid="button-promote-glyph"
           >
-            <ArrowUpRight className="h-3 w-3 mr-1" />
-            Promote
+            <Shield className="h-3 w-3" />
           </Button>
         )}
-      </div>
+      </CardFooter>
     </Card>
   );
 }
