@@ -123,6 +123,7 @@ async function route(req,res){
       return json(res,200,{
         ok:true,
         service:'synthai-native-seed',
+        apiVersion:2,
         port:PORT,
         statePath,
         optionalMounts,
