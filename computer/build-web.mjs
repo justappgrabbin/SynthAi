@@ -4,7 +4,7 @@ const to = new URL('../public/computer-runtime/', import.meta.url);
 await rm(to, { recursive: true, force: true });
 await mkdir(to, { recursive: true });
 
-for (const d of ['core', 'runtime', 'adapters', 'micros', 'mobile']) {
+for (const d of ['core', 'runtime', 'adapters', 'micros', 'mobile', 'worlds']) {
   await cp(new URL(`./${d}/`, import.meta.url), new URL(`./${d}/`, to), { recursive: true });
 }
 
