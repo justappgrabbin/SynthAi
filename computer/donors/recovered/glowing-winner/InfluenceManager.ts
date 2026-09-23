@@ -749,7 +749,6 @@ export class InfluenceManager extends EventEmitter {
     }
   }
 
-
   private generateGreeting(agent: AgentState, human: HumanPlayer): string {
     const trust = agent.memory.people.get(human.id)?.relationship || 0;
 
