@@ -54,7 +54,9 @@ test('PHONE WORLD: installed apps become canonical mesh-backed places',async()=>
   assert.equal(chat.kind,'conversation-house');
   assert.equal(chat.function,'conversation');
   assert.equal(art.kind,'art-studio');
-  assert.equal(notes.kind,'application-place');
+  assert.equal(notes.kind,'workshop-place');
+  assert.equal(notes.metadata.resolvedCategory,'INTERFACE');
+  assert.equal(notes.presentation.glyph,'◯');
   assert.ok(runtime.meshKernel.relationshipsFor('phone:app:com.openai.chatgpt').some(e=>e.type==='place-in'&&e.to==='phone:world'));
 });
 
@@ -146,8 +148,14 @@ test('PHONE WORLD: files contacts and settings become private-by-default world o
   const setting=runtime.indiverse.canonicalObject('setting:theme');
 
   assert.equal(document.kind,'document-object');
+  assert.equal(document.metadata.resolvedCategory,'KNOWLEDGE');
+  assert.equal(document.presentation.glyph,'◉');
   assert.equal(contact.kind,'person-presence');
+  assert.equal(contact.metadata.resolvedCategory,'AGENT');
+  assert.equal(contact.presentation.glyph,'◆');
   assert.equal(setting.kind,'world-law');
+  assert.equal(setting.metadata.resolvedCategory,'ENGINE');
+  assert.equal(setting.presentation.glyph,'◈');
   assert.equal(document.metadata.privateByDefault,true);
   assert.equal(contact.metadata.privateByDefault,true);
   assert.equal(setting.metadata.privateByDefault,true);
