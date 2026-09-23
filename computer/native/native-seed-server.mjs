@@ -25,6 +25,8 @@ const PORT = Number(process.env.SYNTHAI_NATIVE_PORT ?? 17757);
 const HOST = process.env.SYNTHAI_NATIVE_HOST ?? '127.0.0.1';
 const statePath = process.env.SYNTHAI_NATIVE_STATE
   ?? path.join(os.homedir(), '.synthai', 'native-seed-state.json');
+const idleExitMs = Math.max(0, Number(process.env.SYNTHAI_IDLE_EXIT_MS ?? 600000));
+let idleTimer = null;
 
 const runtime = new NativeSeedRuntime({
   persistence:new JsonFilePersistence(statePath),
@@ -67,7 +69,50 @@ async function readJson(req){
   return text ? JSON.parse(text) : {};
 }
 
+function armIdleExit(){
+  if(!idleExitMs) return;
+  if(idleTimer) clearTimeout(idleTimer);
+  idleTimer=setTimeout(async()=>{
+    try { await runtime.sleep(); } catch {}
+    server.close(()=>process.exit(0));
+  },idleExitMs);
+  idleTimer.unref?.();
+}
+
+async function replayNativeEvents(events=[]){
+  const receipts=[];
+  for(const event of events){
+    try{
+      let result;
+      if(event.type==='app.launch'){
+        result=await runtime.phoneRequest('app.launch',{
+          packageName:event.packageName,
+          residentId:event.residentId??'synthia',
+          context:event.context??{replayed:true},
+        });
+      }else if(event.type==='route.enter'){
+        result=await runtime.phoneRequest('route.enter',event);
+      }else if(event.type==='notification'){
+        result=await runtime.phoneRequest('notification.observe',{
+          residentId:event.residentId??'synthia',
+          notification:event.notification??event,
+        });
+      }else{
+        const target=runtime.meshKernel.participant('synthia:world-port')?'synthia:world-port':runtime.meshKernel.participant('synthia')?'synthia':null;
+        result=target
+          ? await runtime.meshKernel.request(target,{operation:'observe',payload:{event}},{sourceId:'phone:native'})
+          : {delivered:false,queued:false,reason:'synthia-unavailable'};
+      }
+      receipts.push({id:event.id??null,status:'replayed',result});
+    }catch(error){
+      receipts.push({id:event.id??null,status:'failed',error:String(error?.message??error)});
+    }
+  }
+  return receipts;
+}
+
 async function route(req,res){
+  armIdleExit();
   try{
     const url=new URL(req.url,'http://127.0.0.1');
     if(req.method==='GET' && url.pathname==='/health'){
@@ -98,6 +143,9 @@ async function route(req,res){
         residentId:body.residentId??'synthia',
         notification:body.notification??body,
       }));
+    }
+    if(req.method==='POST' && url.pathname==='/phone/native-events'){
+      return json(res,200,{receipts:await replayNativeEvents(Array.isArray(body.events)?body.events:[])});
     }
     if(req.method==='POST' && url.pathname==='/sleep'){
       return json(res,200,await runtime.sleep());
@@ -132,6 +180,8 @@ const server=http.createServer((req,res)=>{ void route(req,res); });
 server.listen(PORT,HOST,()=>{
   console.log('SynthAI Native Seed listening on http://'+HOST+':'+PORT);
   console.log('Persistent state: '+statePath);
+  console.log('Idle checkpoint/exit: '+(idleExitMs?idleExitMs+'ms':'disabled'));
+  armIdleExit();
 });
 
 async function shutdown(signal){
