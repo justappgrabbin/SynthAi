@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - 'integration/synthia-reality-resident'
+      - 'integration/indiverse-phone-world-convergence-*'
     paths:
       - 'computer/runtime/mesh-kernel.mjs'
       - 'computer/runtime/dormant-compiler.mjs'
@@ -26,6 +27,7 @@ on:
       - 'computer/tests/consciousness-realm-adapter.test.mjs'
       - 'computer/tests/human-agent-mechanics.test.mjs'
       - 'computer/tests/phone-world.test.mjs'
+      - 'computer/tests/supabase-world-journal.test.mjs'
       - 'computer/tests/triform-mesh.test.mjs'
       - 'computer/tests/world-adapters.test.mjs'
       - '.github/workflows/resident-integration-check.yml'
@@ -55,6 +57,7 @@ jobs:
           computer/tests/consciousness-realm-adapter.test.mjs
           computer/tests/human-agent-mechanics.test.mjs
           computer/tests/phone-world.test.mjs
+          computer/tests/supabase-world-journal.test.mjs
           computer/tests/triform-mesh.test.mjs
           computer/tests/world-adapters.test.mjs
           computer/tests/resident-mesh-indiverse.test.mjs
