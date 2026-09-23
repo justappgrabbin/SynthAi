@@ -20,6 +20,7 @@ on:
       - 'computer/tests/world-federation.test.mjs'
       - 'computer/tests/mesh-core-routing.test.mjs'
       - 'computer/tests/native-seed.test.mjs'
+      - 'computer/tests/native-seed-server.test.mjs'
       - 'computer/tests/termux-compiler.test.mjs'
       - 'computer/tests/stellar-lab-mesh.test.mjs'
       - 'computer/tests/consciousness-realm-adapter.test.mjs'
@@ -48,6 +49,7 @@ jobs:
           node --test
           computer/tests/mesh-core-routing.test.mjs
           computer/tests/native-seed.test.mjs
+          computer/tests/native-seed-server.test.mjs
           computer/tests/termux-compiler.test.mjs
           computer/tests/stellar-lab-mesh.test.mjs
           computer/tests/consciousness-realm-adapter.test.mjs
