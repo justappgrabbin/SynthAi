@@ -137,3 +137,34 @@ PROVIDER STATUSES: WIRED — recovered:yniv-addressing-engine, recovered:yniv-em
 FAILED (then fixed): frozen emptyAddress() mutation bug in address-service (latent since 4a); recovery probe index 45088 requires donor-native (1-based-passed) input — documented convention.
 
 BLOCKED: none new. authority-ZIP recovery blocker from excavation registration still open.
+
+# Change record — Acceptance tests 1+2 (integration/ecosystem-convergence)
+
+WHAT EXISTED BEFORE: multi-provider resolve_address registry (4 providers) with shape-only routing; execution-spine authority PRESENT (never executed); no application mount contract on the runtime; no Node file-backed StateStore persistence.
+
+PRESERVED: all providers and tests (14/14 prior pass); routing remains multi-provider, no collapse, no duplicate implementations (asserted in test).
+
+CHANGED:
+- computer/services/address-service.mjs: resolveAddress(input, {strategy}) — 'auto' (shape routing, default), 'micro-resolution' (YNIV), 'canonical-validation' (NEW: validateCanonical() — resolves YNIV parts, translates to spine form, executes the REAL execution-spine validateCanonicalAddress + canonicalAddressKey; validation failures returned as real results, contract arc<->spine arcAxis still NOT translated — documented).
+- computer/ComputerRuntime.mjs: resolveAddress passes options; NEW mountApplication(appId,{artifactId}) — intake -> mutation -> shell-manager pipeline, returns restricted mount contract {emitEvent, resolveAddress, resolveState, getState, setState (namespaced apps.*), readArtifact}.
+
+ADDED:
+- computer/runtime/json-file-persistence.mjs — file-backed implementation of the existing kernel persistence interface (load/save); enables Node restart recovery.
+- computer/tests/acceptance-1-routing.test.mjs — full §31 chain incl. hint-switch to a DIFFERENT provider (spine authority) with recorded routing_decision and stable provider set.
+- computer/tests/acceptance-2-application-mounting.test.mjs — mounts real public/computer.html; app uses shared emitter/addressing/state; restart recovery via JsonFilePersistence + events.jsonl.
+
+MOUNTED: application_mounting capability (computer:runtime/mountApplication). execution-spine canonical-address now actually executes (validation).
+
+CONNECTED: request -> queryCapability (all providers + provenance) -> recorded routing_decision -> real provider execution -> state-resolver consumption receipt -> StateStore change -> grammar-v1 persistence -> restart replay; app -> mount contract -> shared services -> persisted app state.
+
+DISCONNECTED / NOT MOUNTED: spine arcAxis<->contract-arc translation (open reconciliation, documented); browser shells (public/*.mjs) still not wired to a live runtime.
+
+TESTED: node --test computer/tests/*.test.mjs
+EXACT TEST RESULT: tests 16, pass 16, fail 0. Evidence: ../../evidence/acceptance-1-2.txt.
+  Acc1: auto route -> recovered:yniv-addressing-engine (micro 45088 -> gate 42); hint=canonical-validation -> back-up-:execution-spine-canonical-address valid=true canonical_key planetary=4|dimension=Being|gate=42|...|arcUnit=11|zodiac=6|house=8.
+  Acc2: mounted diagnostic-shell from real public/computer.html; app event evt-... persisted; address gate 64 resolved on app's behalf; restart recovered app state + mount record + event.
+
+PROVIDER STATUSES: back-up-:execution-spine-canonical-address PRESENT -> WIRED (real validation executed through contract). computer:runtime/mountApplication -> VERIFIED (consumption receipt + observable state change + restart replay).
+
+FAILED: none.
+BLOCKED: none (GitHub MCP push retried separately).
