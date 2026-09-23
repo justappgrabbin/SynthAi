@@ -16,6 +16,7 @@ import { IndiVerseRuntime } from '../worlds/indiverse.mjs';
 import { WorldFederation } from '../worlds/world-federation.mjs';
 import { Synthia57PackageLoader } from '../residents/synthia57-package-loader.mjs';
 import { PhoneWorldBridge } from '../native/phone-world.mjs';
+import { PurposeGuideService } from '../services/purpose-guide.mjs';
 
 export const ADDRESS_FIELDS = Object.freeze([
   'planetary', 'dimension', 'gate', 'line', 'color', 'tone', 'base',
@@ -189,6 +190,13 @@ export class MobileComputerRuntime {
 
     this.events = new MobileEventLog({ state: this.state, bus: this.bus });
     this.addresses = new PortableAddressService({ state: this.state, bus: this.bus, mesh });
+    this.purposeGuide = new PurposeGuideService({
+      bus: this.bus,
+      state: this.state,
+      projects: this.projects,
+      listCapabilities: () => this.capabilityRegistry.list(),
+      emitEvent: event => this.events.emitEvent(event),
+    });
     this.stateSpace = new StateSpaceEngine();
     this.images = new SynthImageRuntime({ state: this.state, bus: this.bus });
     // Mesh is the Computer's connective substrate. The optional constructor
@@ -232,7 +240,7 @@ export class MobileComputerRuntime {
       await this.meshKernel.registerParticipant('computer:self', {
         kind: 'computer-host',
         publicState: { name: 'SynthAI Computer', flavor: 'mobile-synthimg' },
-        capabilities: ['mesh.host', 'state-space', 'execution', 'resident-host', 'indiverse'],
+        capabilities: ['mesh.host', 'state-space', 'execution', 'resident-host', 'indiverse', 'purpose-guide'],
         residency: 'active',
       });
     } else {
@@ -241,6 +249,7 @@ export class MobileComputerRuntime {
     for (const core of [
       { id: 'system:state-space', kind: 'core-service', capabilities: ['state-space.activate','state-space.query'] },
       { id: 'system:execution', kind: 'core-service', capabilities: ['automata.run','process.execute','backend.request'] },
+      { id: 'system:purpose-guide', kind: 'core-service', capabilities: ['purpose.roadmap','purpose.outcome','purpose.read'] },
     ]) {
       if (!this.meshKernel.participant(core.id)) {
         await this.meshKernel.registerParticipant(core.id, {
@@ -268,6 +277,13 @@ export class MobileComputerRuntime {
       if (envelope.operation === 'backend.request') return this.backends.request(payload.id, payload.request);
       throw new Error(`unsupported execution mesh operation: ${envelope.operation}`);
     });
+    this.meshKernel.bindHandler('system:purpose-guide', async envelope => {
+      const payload = envelope.payload ?? {};
+      if (envelope.operation === 'roadmap') return this.purposeGuide.buildRoadmap(payload);
+      if (envelope.operation === 'outcome') return this.purposeGuide.recordOutcome(payload);
+      if (envelope.operation === 'read') return this.purposeGuide.getRoadmap(payload.userId, payload.roadmapId ?? null);
+      throw new Error(`unsupported purpose-guide mesh operation: ${envelope.operation}`);
+    });
     await this.worldFederation.seedCanonicalLayers();
     if (!this.shells.has('workspace')) this.shells.register('workspace', { name: 'Mobile Workspace', kind: 'mobile' });
     if (!this.shells.has('compact')) this.shells.register('compact', { name: 'Compact Phone Shell', kind: 'mobile-lazy' });
@@ -289,6 +305,7 @@ export class MobileComputerRuntime {
       'world-federation': 'Mesh roles for home, daily-life mechanics, diagnostic lab, research lab and profile worlds',
       'synthia57-resident': 'Mounts the canonical Synthia v0.5.7 package intact as a Computer resident',
       'phone-world': 'Maps real Android applications and observed app state into canonical IndiVerse places and events',
+      'pathways-to-purpose': 'Persistent personal purpose roadmaps and real-world outcome feedback from live Computer state',
     })) {
       if (!this.capabilityRegistry.has(id)) this.capabilities.register(id, { providers: ['mobile-computer'], description });
     }
@@ -304,6 +321,7 @@ export class MobileComputerRuntime {
     this.services.register('world-federation', { provider: this.worldFederation, contract: 'defineLayer/seedCanonicalLayers/bind/invoke/attachHome/registerProfileWorld' });
     this.services.register('synthia57-loader', { provider: this.synthia57, contract: 'mount/get/unmount' });
     this.services.register('phone-world-gateway', { provider: this, contract: 'bindPhoneHost/phoneRequest/observePhoneApplication' });
+    this.services.register('purpose-guide', { provider: this.purposeGuide, contract: 'buildRoadmap/recordOutcome/getRoadmap' });
 
     await this.state.set('computer.boot', {
       status: 'ready',
@@ -423,6 +441,30 @@ export class MobileComputerRuntime {
       operation: 'backend.request', payload: { id, request: clone(request) },
     });
     if (!routed.delivered) throw new Error('execution mesh service unavailable');
+    return routed.result;
+  }
+
+  async buildPurposeRoadmap(input) {
+    const routed = await this.meshKernel.request('system:purpose-guide', {
+      operation: 'roadmap', payload: clone(input),
+    });
+    if (!routed.delivered) throw new Error('purpose-guide mesh service unavailable');
+    return routed.result;
+  }
+
+  async recordPurposeOutcome(input) {
+    const routed = await this.meshKernel.request('system:purpose-guide', {
+      operation: 'outcome', payload: clone(input),
+    });
+    if (!routed.delivered) throw new Error('purpose-guide mesh service unavailable');
+    return routed.result;
+  }
+
+  async getPurposeRoadmap(userId, roadmapId = null) {
+    const routed = await this.meshKernel.request('system:purpose-guide', {
+      operation: 'read', payload: { userId, roadmapId },
+    });
+    if (!routed.delivered) throw new Error('purpose-guide mesh service unavailable');
     return routed.result;
   }
 
