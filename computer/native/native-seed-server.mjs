@@ -39,10 +39,14 @@ await runtime.bindPhoneHost(phoneHost);
 
 async function mountOptionalResidents(){
   const results={};
-  if(process.env.SYNTHIA57_BASE){
-    try { results.synthia57=await runtime.mountSynthia57({base:process.env.SYNTHIA57_BASE}); }
-    catch(error){ results.synthia57={error:String(error?.message??error)}; }
-  }
+  try {
+    if(process.env.SYNTHIA57_BASE){
+      const mounted=await runtime.mountSynthia57({base:process.env.SYNTHIA57_BASE});
+      results.synthia57={mounted:true,source:'environment',resident:mounted.adapter.snapshot()};
+    } else {
+      results.synthia57=await runtime.mountInstalledSynthia57();
+    }
+  } catch(error){ results.synthia57={mounted:false,error:String(error?.message??error)}; }
   if(process.env.CONSCIOUSNESS_REALM_MODULE){
     try { results.realm=await runtime.mountConsciousnessRealm({moduleSpecifier:process.env.CONSCIOUSNESS_REALM_MODULE}); }
     catch(error){ results.realm={error:String(error?.message??error)}; }
@@ -116,10 +120,39 @@ async function route(req,res){
   try{
     const url=new URL(req.url,'http://127.0.0.1');
     if(req.method==='GET' && url.pathname==='/health'){
-      return json(res,200,{ok:true,service:'synthai-native-seed',port:PORT,statePath,optionalMounts,synthiaMirror:runtime.synthiaMirrorSnapshot()});
+      return json(res,200,{
+        ok:true,
+        service:'synthai-native-seed',
+        port:PORT,
+        statePath,
+        optionalMounts,
+        synthia57Package:runtime.synthia57Packages.snapshot(),
+        synthiaMirror:runtime.synthiaMirrorSnapshot()
+      });
     }
     if(req.method==='GET' && url.pathname==='/snapshot'){
       return json(res,200,runtime.snapshot());
+    }
+
+    if(req.method==='POST' && url.pathname==='/packages/synthia57/install'){
+      const contentLength=req.headers['content-length']==null ? null : Number(req.headers['content-length']);
+      const result=await runtime.installSynthia57Package(req,{
+        contentLength,
+        source:String(req.headers['x-synthai-source']??'android-document-picker'),
+      });
+      optionalMounts.synthia57={
+        mounted:true,
+        source:'installed-package',
+        package:result.package,
+        resident:result.resident,
+      };
+      return json(res,200,result);
+    }
+    if(req.method==='GET' && url.pathname==='/packages/synthia57'){
+      return json(res,200,{
+        package:runtime.synthia57Packages.snapshot(),
+        mounted:Boolean(runtime.synthia57.get('synthia')),
+      });
     }
 
     const body=req.method==='POST' ? await readJson(req) : {};
