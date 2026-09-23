@@ -171,6 +171,21 @@ async function route(req,res){
         notification:body.notification??body,
       }));
     }
+    if(req.method==='POST' && url.pathname==='/phone/interface-tree'){
+      return json(res,200,await runtime.phoneRequest('interface.observe',{
+        residentId:body.residentId??'synthia',
+        snapshot:body.snapshot??body,
+      }));
+    }
+    if(req.method==='POST' && url.pathname==='/phone/interface-action'){
+      return json(res,200,await runtime.phoneRequest('interface.action',body));
+    }
+    if(req.method==='POST' && url.pathname==='/phone/interface-actions/pending'){
+      return json(res,200,{actions:await runtime.phoneRequest('interface.actions.pending',body)});
+    }
+    if(req.method==='POST' && url.pathname==='/phone/interface-actions/receipt'){
+      return json(res,200,await runtime.phoneRequest('interface.actions.receipt',body));
+    }
     if(req.method==='POST' && url.pathname==='/phone/native-events'){
       return json(res,200,{receipts:await replayNativeEvents(Array.isArray(body.events)?body.events:[])});
     }
