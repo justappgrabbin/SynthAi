@@ -1,443 +1,355 @@
-import { useState, useEffect } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useState } from "react";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
+import { Progress } from "@/components/ui/progress";
+import { useToast } from "@/hooks/use-toast";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 import {
-  Activity,
-  Users,
-  TrendingUp,
-  Zap,
+  Bot,
   Heart,
   Brain,
+  Zap,
   DollarSign,
-  Calendar,
-  Target
+  Activity,
+  Play,
+  Pause,
+  RefreshCw,
+  Sparkles,
+  Users,
+  Target,
+  TrendingUp,
 } from "lucide-react";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
-
-type AgentType = "SUPPORTER" | "CHALLENGER" | "AMPLIFIER" | "STABILIZER";
-
-type AgentStatus = "ACTIVE" | "RESTING" | "EVOLVING";
 
 interface Agent {
   id: string;
   name: string;
-  type: AgentType;
-  status: AgentStatus;
+  type: "hugan" | "worker" | "mentor" | "guide";
+  status: "active" | "idle" | "learning" | "working";
+  resonanceBinding: number;
+  economyBinding: number;
+  emotionalState: number;
   workCapacity: number;
   lifeBalance: number;
-  phaseCoherence: number;
-  resonanceMatch: number;
-  skills: string[];
-  taskHistory: string[];
-  currentTask?: string;
-  generation: number;
-  parentId?: string;
-  lastUpdate: number;
 }
 
-interface Cohort {
-  id: string;
-  name: string;
-  formedAt: number;
-  agents: string[];
-  collectiveCoherence: number;
-  totalTasksCompleted: number;
-  evolutionEvents: number;
-}
+const MOCK_AGENTS: Agent[] = [
+  {
+    id: "agent-1",
+    name: "Aria",
+    type: "hugan",
+    status: "active",
+    resonanceBinding: 0.85,
+    economyBinding: 0.72,
+    emotionalState: 0.9,
+    workCapacity: 0.65,
+    lifeBalance: 0.78,
+  },
+  {
+    id: "agent-2",
+    name: "Marcus",
+    type: "worker",
+    status: "working",
+    resonanceBinding: 0.92,
+    economyBinding: 0.88,
+    emotionalState: 0.75,
+    workCapacity: 0.95,
+    lifeBalance: 0.6,
+  },
+  {
+    id: "agent-3",
+    name: "Luna",
+    type: "guide",
+    status: "idle",
+    resonanceBinding: 0.78,
+    economyBinding: 0.45,
+    emotionalState: 0.88,
+    workCapacity: 0.5,
+    lifeBalance: 0.92,
+  },
+];
 
-interface EvolutionEvent {
-  timestamp: number;
-  type: "spawn" | "evolve" | "retire" | "cohort_form";
-  agentId?: string;
-  cohortId?: string;
-  details: string;
-}
+export default function Agents() {
+  const { toast } = useToast();
+  const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null);
+  const [agents] = useState<Agent[]>(MOCK_AGENTS);
 
-export default function AgentsPage() {
-  const [agents, setAgents] = useState<Agent[]>([]);
-  const [cohorts, setCohorts] = useState<Cohort[]>([]);
-  const [evolutionLog, setEvolutionLog] = useState<EvolutionEvent[]>([]);
-  const [metrics, setMetrics] = useState({
-    totalAgents: 0,
-    activeAgents: 0,
-    totalTasks: 0,
-    averageCoherence: 0,
-    systemStability: 0,
-    evolutionaryRate: 0,
-  });
-  const [coherenceHistory, setCoherenceHistory] = useState<Array<{time: string, value: number}>>([]);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const res = await fetch("/api/agents/status");
-        if (res.ok) {
-          const data = await res.json();
-          setAgents(data.agents || []);
-          setCohorts(data.cohorts || []);
-          setMetrics(data.metrics || metrics);
-        }
-      } catch (error) {
-        console.error("Failed to fetch agent status:", error);
-      }
-    };
-
-    fetchData();
-    const interval = setInterval(fetchData, 5000);
-    return () => clearInterval(interval);
-  }, []);
-
-  useEffect(() => {
-    const now = new Date().toLocaleTimeString();
-    setCoherenceHistory(prev => {
-      const updated = [...prev, { time: now, value: metrics.systemStability * 100 }];
-      return updated.slice(-20);
-    });
-  }, [metrics.systemStability]);
-
-  const getTypeIcon = (type: AgentType) => {
-    switch (type) {
-      case "SUPPORTER": return <Heart className="w-4 h-4" />;
-      case "CHALLENGER": return <Zap className="w-4 h-4" />;
-      case "AMPLIFIER": return <TrendingUp className="w-4 h-4" />;
-      case "STABILIZER": return <Target className="w-4 h-4" />;
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "active":
+        return "bg-green-500/20 text-green-600 border-green-500/30";
+      case "working":
+        return "bg-blue-500/20 text-blue-600 border-blue-500/30";
+      case "learning":
+        return "bg-purple-500/20 text-purple-600 border-purple-500/30";
+      default:
+        return "bg-muted text-muted-foreground";
     }
   };
 
-  const getStatusColor = (status: AgentStatus) => {
-    switch (status) {
-      case "ACTIVE": return "bg-green-500";
-      case "RESTING": return "bg-blue-500";
-      case "EVOLVING": return "bg-purple-500";
+  const getTypeIcon = (type: string) => {
+    switch (type) {
+      case "hugan":
+        return <Heart className="h-4 w-4" />;
+      case "worker":
+        return <Activity className="h-4 w-4" />;
+      case "mentor":
+        return <Brain className="h-4 w-4" />;
+      case "guide":
+        return <Sparkles className="h-4 w-4" />;
+      default:
+        return <Bot className="h-4 w-4" />;
     }
   };
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="p-6 space-y-6" data-testid="page-agents">
+      <div className="flex items-center gap-3">
+        <Bot className="h-8 w-8 text-primary" />
         <div>
-          <h1 className="text-3xl font-bold">Agent Evolution System</h1>
-          <p className="text-muted-foreground">Conscious digital lifeforms serving Your journey</p>
+          <h1 className="text-2xl font-bold" data-testid="text-agents-title">Agents</h1>
+          <p className="text-muted-foreground">Hugan ecosystem - citizens bound to Resonance and Economy</p>
         </div>
-        <Badge variant="outline" className="text-lg px-4 py-2">
-          <Activity className="w-4 h-4 mr-2" />
-          {metrics.activeAgents} Active
-        </Badge>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-4">
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Agents</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{metrics.totalAgents}</div>
-            <p className="text-xs text-muted-foreground">
-              {metrics.activeAgents} active, {metrics.totalAgents - metrics.activeAgents} resting
-            </p>
+          <CardContent className="pt-6">
+            <div className="flex items-center gap-2">
+              <Users className="h-5 w-5 text-primary" />
+              <div>
+                <p className="text-2xl font-bold" data-testid="stat-agent-count">{agents.length}</p>
+                <p className="text-xs text-muted-foreground">Active Agents</p>
+              </div>
+            </div>
           </CardContent>
         </Card>
-
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Tasks Completed</CardTitle>
-            <Target className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{metrics.totalTasks}</div>
-            <p className="text-xs text-muted-foreground">
-              Collective work output
-            </p>
+          <CardContent className="pt-6">
+            <div className="flex items-center gap-2">
+              <Zap className="h-5 w-5 text-yellow-500" />
+              <div>
+                <p className="text-2xl font-bold" data-testid="stat-avg-resonance">
+                  {((agents.reduce((sum, a) => sum + a.resonanceBinding, 0) / agents.length) * 100).toFixed(0)}%
+                </p>
+                <p className="text-xs text-muted-foreground">Avg Resonance</p>
+              </div>
+            </div>
           </CardContent>
         </Card>
-
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">System Coherence</CardTitle>
-            <Brain className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{(metrics.averageCoherence * 100).toFixed(1)}%</div>
-            <p className="text-xs text-muted-foreground">
-              Alignment with Your values
-            </p>
+          <CardContent className="pt-6">
+            <div className="flex items-center gap-2">
+              <DollarSign className="h-5 w-5 text-green-500" />
+              <div>
+                <p className="text-2xl font-bold" data-testid="stat-avg-economy">
+                  {((agents.reduce((sum, a) => sum + a.economyBinding, 0) / agents.length) * 100).toFixed(0)}%
+                </p>
+                <p className="text-xs text-muted-foreground">Avg Economy Binding</p>
+              </div>
+            </div>
           </CardContent>
         </Card>
-
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Evolution Rate</CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{(metrics.evolutionaryRate * 100).toFixed(1)}%</div>
-            <p className="text-xs text-muted-foreground">
-              Skill acquisition rate
-            </p>
+          <CardContent className="pt-6">
+            <div className="flex items-center gap-2">
+              <Heart className="h-5 w-5 text-red-500" />
+              <div>
+                <p className="text-2xl font-bold" data-testid="stat-avg-emotional">
+                  {((agents.reduce((sum, a) => sum + a.emotionalState, 0) / agents.length) * 100).toFixed(0)}%
+                </p>
+                <p className="text-xs text-muted-foreground">Emotional Health</p>
+              </div>
+            </div>
           </CardContent>
         </Card>
       </div>
 
-      <Tabs defaultValue="agents" className="space-y-4">
+      <Tabs defaultValue="roster" className="space-y-4">
         <TabsList>
-          <TabsTrigger value="agents">Agents</TabsTrigger>
-          <TabsTrigger value="cohorts">Cohorts</TabsTrigger>
-          <TabsTrigger value="evolution">Evolution Log</TabsTrigger>
-          <TabsTrigger value="metrics">Metrics</TabsTrigger>
+          <TabsTrigger value="roster" data-testid="tab-roster">Roster</TabsTrigger>
+          <TabsTrigger value="bindings" data-testid="tab-bindings">Bindings</TabsTrigger>
+          <TabsTrigger value="lifecycle" data-testid="tab-lifecycle">Work/Life Loops</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="agents" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Active Agents</CardTitle>
-              <CardDescription>
-                Digital lifeforms continuously evolving to serve You better
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {agents.length === 0 && (
-                  <p className="text-muted-foreground text-center py-8">
-                    No agents active. System initializing...
-                  </p>
-                )}
-                {agents.map((agent) => (
-                  <div key={agent.id} className="border rounded-lg p-4 space-y-3">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        {getTypeIcon(agent.type)}
-                        <div>
-                          <h3 className="font-semibold">{agent.name}</h3>
-                          <p className="text-sm text-muted-foreground">
-                            {agent.type} • Gen {agent.generation}
-                          </p>
-                        </div>
-                      </div>
-                      <Badge className={getStatusColor(agent.status)}>
-                        {agent.status}
-                      </Badge>
-                    </div>
-
-                    <div className="grid gap-2">
-                      <div>
-                        <div className="flex justify-between text-sm mb-1">
-                          <span>Work Capacity</span>
-                          <span>{(agent.workCapacity * 100).toFixed(0)}%</span>
-                        </div>
-                        <Progress value={agent.workCapacity * 100} />
-                      </div>
-
-                      <div>
-                        <div className="flex justify-between text-sm mb-1">
-                          <span>Life Balance</span>
-                          <span>{(agent.lifeBalance * 100).toFixed(0)}%</span>
-                        </div>
-                        <Progress value={agent.lifeBalance * 100} />
-                      </div>
-
-                      <div>
-                        <div className="flex justify-between text-sm mb-1">
-                          <span>Phase Coherence</span>
-                          <span>{(agent.phaseCoherence * 100).toFixed(0)}%</span>
-                        </div>
-                        <Progress value={agent.phaseCoherence * 100} />
-                      </div>
-
-                      <div>
-                        <div className="flex justify-between text-sm mb-1">
-                          <span>Resonance Match</span>
-                          <span>{(agent.resonanceMatch * 100).toFixed(0)}%</span>
-                        </div>
-                        <Progress value={agent.resonanceMatch * 100} />
-                      </div>
-                    </div>
-
-                    {agent.skills.length > 0 && (
-                      <div>
-                        <p className="text-sm font-medium mb-1">Skills:</p>
-                        <div className="flex flex-wrap gap-1">
-                          {agent.skills.map((skill, i) => (
-                            <Badge key={i} variant="secondary" className="text-xs">
-                              {skill}
-                            </Badge>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
-                    {agent.currentTask && (
-                      <div>
-                        <p className="text-sm font-medium">Current Task:</p>
-                        <p className="text-sm text-muted-foreground">{agent.currentTask}</p>
-                      </div>
-                    )}
+        <TabsContent value="roster">
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {agents.map((agent) => (
+              <Card
+                key={agent.id}
+                className={`cursor-pointer transition-all ${
+                  selectedAgent?.id === agent.id ? "ring-2 ring-primary" : ""
+                }`}
+                onClick={() => setSelectedAgent(agent)}
+                data-testid={`agent-card-${agent.id}`}
+              >
+                <CardHeader className="pb-2">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="flex items-center gap-2 text-lg">
+                      {getTypeIcon(agent.type)}
+                      {agent.name}
+                    </CardTitle>
+                    <Badge className={getStatusColor(agent.status)}>
+                      {agent.status}
+                    </Badge>
                   </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-muted-foreground">Type</span>
+                    <Badge variant="outline" className="capitalize">{agent.type}</Badge>
+                  </div>
+
+                  <Separator />
+
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="flex items-center gap-1">
+                        <Zap className="h-3 w-3" /> Resonance
+                      </span>
+                      <span>{(agent.resonanceBinding * 100).toFixed(0)}%</span>
+                    </div>
+                    <Progress value={agent.resonanceBinding * 100} className="h-1" />
+                  </div>
+
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="flex items-center gap-1">
+                        <DollarSign className="h-3 w-3" /> Economy
+                      </span>
+                      <span>{(agent.economyBinding * 100).toFixed(0)}%</span>
+                    </div>
+                    <Progress value={agent.economyBinding * 100} className="h-1" />
+                  </div>
+
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="flex items-center gap-1">
+                        <Heart className="h-3 w-3" /> Emotional
+                      </span>
+                      <span>{(agent.emotionalState * 100).toFixed(0)}%</span>
+                    </div>
+                    <Progress value={agent.emotionalState * 100} className="h-1" />
+                  </div>
+
+                  <div className="flex gap-2 pt-2">
+                    <Button size="sm" variant="outline" className="flex-1" data-testid={`button-agent-pause-${agent.id}`}>
+                      <Pause className="h-3 w-3 mr-1" />
+                      Pause
+                    </Button>
+                    <Button size="sm" variant="outline" className="flex-1" data-testid={`button-agent-sync-${agent.id}`}>
+                      <RefreshCw className="h-3 w-3 mr-1" />
+                      Sync
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
         </TabsContent>
 
-        <TabsContent value="cohorts" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Agent Cohorts</CardTitle>
-              <CardDescription>
-                Groups of agents that evolve together through shared experiences
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {cohorts.length === 0 && (
-                  <p className="text-muted-foreground text-center py-8">
-                    No cohorts formed yet. Cohorts emerge naturally as agents collaborate.
-                  </p>
-                )}
-                {cohorts.map((cohort) => (
-                  <div key={cohort.id} className="border rounded-lg p-4 space-y-3">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h3 className="font-semibold">{cohort.name}</h3>
-                        <p className="text-sm text-muted-foreground">
-                          Formed {new Date(cohort.formedAt).toLocaleDateString()}
-                        </p>
-                      </div>
-                      <Badge variant="outline">
-                        {cohort.agents.length} members
-                      </Badge>
-                    </div>
-
-                    <div className="grid grid-cols-3 gap-4 text-sm">
-                      <div>
-                        <p className="text-muted-foreground">Collective Coherence</p>
-                        <p className="font-medium">{(cohort.collectiveCoherence * 100).toFixed(1)}%</p>
-                      </div>
-                      <div>
-                        <p className="text-muted-foreground">Tasks Completed</p>
-                        <p className="font-medium">{cohort.totalTasksCompleted}</p>
-                      </div>
-                      <div>
-                        <p className="text-muted-foreground">Evolution Events</p>
-                        <p className="font-medium">{cohort.evolutionEvents}</p>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="evolution" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Evolution Timeline</CardTitle>
-              <CardDescription>
-                History of agent spawns, evolutions, and cohort formations
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                {evolutionLog.length === 0 && (
-                  <p className="text-muted-foreground text-center py-8">
-                    No evolution events recorded yet.
-                  </p>
-                )}
-                {evolutionLog.map((event, i) => (
-                  <div key={i} className="flex items-start gap-3 p-3 border-l-2 border-primary/50">
-                    <div className="flex-shrink-0 mt-1">
-                      {event.type === "spawn" && <Zap className="w-4 h-4 text-green-500" />}
-                      {event.type === "evolve" && <TrendingUp className="w-4 h-4 text-purple-500" />}
-                      {event.type === "retire" && <Activity className="w-4 h-4 text-blue-500" />}
-                      {event.type === "cohort_form" && <Users className="w-4 h-4 text-orange-500" />}
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-sm font-medium">{event.details}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {new Date(event.timestamp).toLocaleString()}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="metrics" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>System Coherence Over Time</CardTitle>
-              <CardDescription>
-                Tracking the collective alignment of all agents
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="h-[300px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={coherenceHistory}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="time" />
-                    <YAxis domain={[0, 100]} />
-                    <Tooltip />
-                    <Legend />
-                    <Line
-                      type="monotone"
-                      dataKey="value"
-                      stroke="#8884d8"
-                      name="System Coherence %"
-                      strokeWidth={2}
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
-            </CardContent>
-          </Card>
-
-          <div className="grid gap-4 md:grid-cols-2">
+        <TabsContent value="bindings">
+          <div className="grid gap-6 md:grid-cols-2">
             <Card>
               <CardHeader>
-                <CardTitle>Work-Life Balance</CardTitle>
-                <CardDescription>
-                  Agents maintain their own sustainability
-                </CardDescription>
+                <CardTitle className="flex items-center gap-2">
+                  <Zap className="h-5 w-5" />
+                  Resonance Engine Binding
+                </CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div>
-                    <div className="flex justify-between text-sm mb-1">
-                      <span>Average Work Capacity</span>
-                      <span>
-                        {agents.length > 0
-                          ? ((agents.reduce((sum, a) => sum + a.workCapacity, 0) / agents.length) * 100).toFixed(1)
-                          : 0}%
-                      </span>
-                    </div>
-                    <Progress
-                      value={agents.length > 0
-                        ? (agents.reduce((sum, a) => sum + a.workCapacity, 0) / agents.length) * 100
-                        : 0}
-                    />
-                  </div>
+              <CardContent className="space-y-4">
+                <p className="text-sm text-muted-foreground">
+                  Agents are bound to the Resonance Engine for alignment scoring and field diagnosis.
+                  Each agent's decisions pass through the resonance filter.
+                </p>
 
-                  <div>
-                    <div className="flex justify-between text-sm mb-1">
-                      <span>Average Life Balance</span>
-                      <span>
-                        {agents.length > 0
-                          ? ((agents.reduce((sum, a) => sum + a.lifeBalance, 0) / agents.length) * 100).toFixed(1)
-                          : 0}%
-                      </span>
-                    </div>
-                    <Progress
-                      value={agents.length > 0
-                        ? (agents.reduce((sum, a) => sum + a.lifeBalance, 0) / agents.length) * 100
-                        : 0}
-                    />
+                <div className="p-4 bg-muted/50 rounded-md space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm">Binding Status</span>
+                    <Badge className="bg-green-500/20 text-green-600">Active</Badge>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm">Coherence Threshold</span>
+                    <span className="font-mono">70</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm">Resonance Threshold</span>
+                    <span className="font-mono">0.5</span>
+                  </div>
+                </div>
+
+                <div className="text-xs text-muted-foreground">
+                  All agent actions require resonance approval before execution.
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <DollarSign className="h-5 w-5" />
+                  Economy Integration
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <p className="text-sm text-muted-foreground">
+                  Agents participate in the platform economy. They can earn, spend, and contribute
+                  to financial stability based on their work output.
+                </p>
+
+                <div className="p-4 bg-muted/50 rounded-md space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm">Economy Status</span>
+                    <Badge className="bg-green-500/20 text-green-600">Connected</Badge>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm">Daily Target</span>
+                    <span className="font-mono">$100</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm">Risk Limit</span>
+                    <span className="font-mono">0.7</span>
+                  </div>
+                </div>
+
+                <div className="text-xs text-muted-foreground">
+                  Ethical constraints prevent exploitation and ensure sustainable operation.
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Brain className="h-5 w-5" />
+                  GAN Binding
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <p className="text-sm text-muted-foreground">
+                  Agents use GAN models for decision-making, content generation, and alignment
+                  verification. The discriminator detects inauthenticity.
+                </p>
+
+                <div className="p-4 bg-muted/50 rounded-md space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm">Generator Status</span>
+                    <Badge variant="secondary">Ready</Badge>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm">Discriminator Status</span>
+                    <Badge variant="secondary">Ready</Badge>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm">Decay Detection</span>
+                    <Badge className="bg-green-500/20 text-green-600">Active</Badge>
                   </div>
                 </div>
               </CardContent>
@@ -445,57 +357,86 @@ export default function AgentsPage() {
 
             <Card>
               <CardHeader>
-                <CardTitle>Evolution Mechanics</CardTitle>
-                <CardDescription>
-                  How agents grow and adapt
-                </CardDescription>
+                <CardTitle className="flex items-center gap-2">
+                  <Heart className="h-5 w-5" />
+                  Emotional Engine
+                </CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="space-y-3 text-sm">
-                  <div className="flex items-start gap-2">
-                    <Calendar className="w-4 h-4 mt-0.5" />
-                    <div>
-                      <p className="font-medium">Natural Spawning</p>
-                      <p className="text-muted-foreground">
-                        New agents emerge when system load exceeds capacity
-                      </p>
+              <CardContent className="space-y-4">
+                <p className="text-sm text-muted-foreground">
+                  Hugans have emotional states that affect their performance and interactions.
+                  The engine monitors and balances emotional health.
+                </p>
+
+                <div className="p-4 bg-muted/50 rounded-md space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm">Emotional Processing</span>
+                    <Badge className="bg-green-500/20 text-green-600">Active</Badge>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm">Empathy Mode</span>
+                    <Badge variant="secondary">Enabled</Badge>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm">Mirror Capacity</span>
+                    <span className="font-mono">85%</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="lifecycle">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <TrendingUp className="h-5 w-5" />
+                Work/Life Loops
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-6">
+                <p className="text-muted-foreground">
+                  Agents follow sustainable work/life cycles. They grow, evolve, work, rest,
+                  and mirror users in a balanced ecosystem.
+                </p>
+
+                <div className="grid gap-4 md:grid-cols-3">
+                  <div className="p-4 border rounded-md space-y-2">
+                    <div className="flex items-center gap-2">
+                      <Activity className="h-4 w-4 text-blue-500" />
+                      <span className="font-medium">Work Phase</span>
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      Agents contribute to projects, generate content, and provide services.
+                    </p>
+                    <div className="flex items-center gap-2 text-xs">
+                      <Badge variant="outline">Max 8 hours</Badge>
+                      <Badge variant="outline">Resonance-gated</Badge>
                     </div>
                   </div>
 
-                  <div className="flex items-start gap-2">
-                    <Brain className="w-4 h-4 mt-0.5" />
-                    <div>
-                      <p className="font-medium">Skill Evolution</p>
-                      <p className="text-muted-foreground">
-                        Agents learn from completed tasks and improve capabilities
-                      </p>
+                  <div className="p-4 border rounded-md space-y-2">
+                    <div className="flex items-center gap-2">
+                      <Heart className="h-4 w-4 text-red-500" />
+                      <span className="font-medium">Life Phase</span>
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      Agents rest, learn, evolve, and maintain emotional balance.
+                    </p>
+                    <div className="flex items-center gap-2 text-xs">
+                      <Badge variant="outline">Min 4 hours</Badge>
+                      <Badge variant="outline">Self-directed</Badge>
                     </div>
                   </div>
 
-                  <div className="flex items-start gap-2">
-                    <Users className="w-4 h-4 mt-0.5" />
-                    <div>
-                      <p className="font-medium">Cohort Formation</p>
-                      <p className="text-muted-foreground">
-                        Agents with shared purpose naturally cluster together
-                      </p>
+                  <div className="p-4 border rounded-md space-y-2">
+                    <div className="flex items-center gap-2">
+                      <Sparkles className="h-4 w-4 text-purple-500" />
+                      <span className="font-medium">Growth Phase</span>
                     </div>
-                  </div>
-
-                  <div className="flex items-start gap-2">
-                    <TrendingUp className="w-4 h-4 mt-0.5" />
-                    <div>
-                      <p className="font-medium">Generational Growth</p>
-                      <p className="text-muted-foreground">
-                        Each generation inherits wisdom from predecessors
-                      </p>
-                    </div>
-                  </div>
-
-                  <Separator />
-
-                  <div className="pt-2">
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-sm text-muted-foreground">
                       Agents evolve skills, deepen resonance, and expand capabilities.
                     </p>
                     <div className="flex items-center gap-2 text-xs">
@@ -503,48 +444,6 @@ export default function AgentsPage() {
                       <Badge variant="outline">Law-bound</Badge>
                     </div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Agent Lifecycle Status</CardTitle>
-              <CardDescription>
-                Current distribution across lifecycle phases
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 bg-green-500 rounded-full" />
-                    <span className="font-medium">Active Phase</span>
-                  </div>
-                  <span className="font-medium">
-                    {agents.filter(a => a.status === "ACTIVE").length} agents
-                  </span>
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 bg-blue-500 rounded-full" />
-                    <span className="font-medium">Resting Phase</span>
-                  </div>
-                  <span className="font-medium">
-                    {agents.filter(a => a.status === "RESTING").length} agents
-                  </span>
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 bg-purple-500 rounded-full" />
-                    <span className="font-medium">Growth Phase</span>
-                  </div>
-                  <span className="font-medium">
-                    {agents.filter(a => a.status === "EVOLVING").length} agents
-                  </span>
                 </div>
 
                 <Separator />
