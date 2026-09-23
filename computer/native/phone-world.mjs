@@ -28,6 +28,69 @@ function genericExperience(app){
   };
 }
 
+function observationText(observation = {}) {
+  const parts = [
+    observation.eventText,
+    observation.eventContentDescription,
+    observation.screenType,
+  ];
+  for (const node of observation.ui ?? []) {
+    for (const key of ['text','label','contentDescription','hint','role','className']) {
+      if (node?.[key]) parts.push(String(node[key]));
+    }
+  }
+  return parts.filter(Boolean).join(' ').toLowerCase();
+}
+
+function meaningfulRoute(experience, observation = {}) {
+  const text = observationText(observation);
+  const eventText = String(observation.eventText ?? '').toLowerCase();
+  const eventType = String(observation.eventType ?? '').toLowerCase();
+  const clicked = eventType.includes('clicked') || eventType.includes('click');
+  const screenType = String(observation.screenType ?? '').toLowerCase();
+
+  if (experience.id === 'chat-space') {
+    if (
+      screenType === 'new_conversation' ||
+      (clicked && /new chat|new conversation/.test(eventText))
+    ) {
+      return {
+        routeType: 'new-conversation',
+        routeId: observation.routeId ?? observation.metadata?.conversationId ?? 'new-' + (observation.observedAt ?? Date.now()),
+        title: observation.metadata?.title ?? 'New conversation',
+        significance: 'meaningful',
+      };
+    }
+    if (
+      ['conversation','active_conversation'].includes(screenType) ||
+      /message chatgpt|ask anything|send message/.test(text)
+    ) {
+      return {
+        routeType: 'conversation',
+        routeId: observation.routeId ?? observation.metadata?.conversationId ?? 'active-conversation',
+        title: observation.metadata?.title ?? 'Conversation',
+        significance: 'meaningful',
+      };
+    }
+  }
+
+  if (experience.id === 'art-studio') {
+    if (
+      screenType === 'editor' ||
+      /brush|layers|effects|edit image|remove background|tools/.test(text)
+    ) {
+      return {
+        routeType: 'project',
+        routeId: observation.routeId ?? observation.metadata?.projectId ?? 'active-canvas',
+        title: observation.metadata?.title ?? 'Active canvas',
+        significance: 'meaningful',
+      };
+    }
+  }
+
+  return null;
+}
+
 export class PhoneWorldBridge {
   constructor({ host, mesh, indiverse, state, bus = null, clock = () => Date.now(), id = 'phone:world' } = {}) {
     if (!host?.listApplications || !host?.launchApplication) throw new TypeError('PhoneWorldBridge requires native host listApplications() and launchApplication()');
@@ -56,7 +119,7 @@ export class PhoneWorldBridge {
     if(!this.mesh.participant(this.id)){
       await this.mesh.registerParticipant(this.id,{
         kind:'phone-world',residency:'active',
-        capabilities:['phone.apps.list','phone.app.launch','phone.notification.observe','phone.route.enter','phone.documents.list','phone.contacts.list','phone.settings.list','phone.snapshot'],
+        capabilities:['phone.apps.list','phone.app.launch','phone.app.observe','phone.notification.observe','phone.route.enter','phone.documents.list','phone.contacts.list','phone.settings.list','phone.snapshot'],
         publicState:{name:'Phone World',runtime:'native-seed'},
       });
     }else await this.mesh.setResidency(this.id,'active');
@@ -132,6 +195,7 @@ export class PhoneWorldBridge {
         label:String(raw.label??raw.name??raw.packageName??'Application'),
         category:raw.category??null,
         iconRef:raw.iconRef??null,
+        activity:raw.activity??raw.metadata?.activity??null,
         launchable:raw.launchable!==false,
         metadata:clone(raw.metadata??{}),
       };
@@ -181,7 +245,7 @@ export class PhoneWorldBridge {
     if(!app) throw new Error('unknown phone application: '+packageName);
     if(!app.launchable) return {accepted:false,reason:'NOT_LAUNCHABLE',packageName:app.packageName};
 
-    const result=await this.host.launchApplication(app.packageName,clone(context));
+    const result=await this.host.launchApplication(app.packageName,{...clone(context),activity:context?.activity??app.activity??null});
     await this.mesh.setResidency(app.participantId,'active');
     const event={
       id:'phone-launch-'+this.clock(),
@@ -223,6 +287,77 @@ export class PhoneWorldBridge {
     return {object,event};
   }
 
+
+  async observeApplication(observation,{residentId='synthia'}={}){
+    if(!observation?.packageName) throw new Error('phone app observation requires packageName');
+    const packageName=String(observation.packageName);
+
+    if(!this.apps.has(packageName)) await this.syncApplications();
+    const app=this.apps.get(packageName);
+    if(!app) throw new Error('observed application is not a launchable Phone World place: '+packageName);
+
+    const normalized={
+      packageName,
+      appLabel:observation.appLabel??app.label,
+      activity:observation.activity??app.activity??null,
+      eventType:observation.eventType??'application_observation',
+      eventText:observation.eventText??null,
+      eventContentDescription:observation.eventContentDescription??null,
+      screenType:observation.screenType??null,
+      observedAt:Number(observation.observedAt??this.clock()),
+      source:observation.source??'android-accessibility',
+      ui:clone(observation.ui??[]),
+      metadata:clone(observation.metadata??{}),
+      routeId:observation.routeId??null,
+    };
+
+    const exp=this.experienceFor(app);
+    const route=meaningfulRoute(exp,normalized);
+    const event={
+      id:'phone-observation-'+normalized.observedAt+'-'+safe(packageName),
+      type:'phone:app-observed',
+      source:this.id,
+      actor:residentId,
+      target:app.participantId,
+      summary:residentId+' observed '+app.label,
+      payload:{
+        packageName,
+        experienceId:exp.id,
+        significance:route?.significance??'quiet',
+        observation:clone(normalized),
+      },
+      at:new Date(normalized.observedAt).toISOString(),
+    };
+
+    await this.state.set('phoneWorld.observations.'+safe(packageName),event,{source:'phone-world'});
+    const delivery=await this.#sendResidentEvent(residentId,event);
+    this.bus?.emit('phone-world:app-observed',clone(event));
+
+    let routeResult=null;
+    if(route){
+      const routeKey='phoneWorld.lastRoute.'+safe(packageName);
+      const previous=this.state.get(routeKey,null);
+      const fingerprint=route.routeType+':'+route.routeId;
+      const repeatable=route.routeType==='new-conversation';
+      if(repeatable || previous?.fingerprint!==fingerprint){
+        routeResult=await this.enterRoute(packageName,{
+          routeType:route.routeType,
+          routeId:route.routeId,
+          title:route.title,
+          residentId,
+          metadata:{
+            observedAt:normalized.observedAt,
+            source:normalized.source,
+            activity:normalized.activity,
+          },
+        });
+        await this.state.set(routeKey,{fingerprint,at:normalized.observedAt},{source:'phone-world'});
+      }
+    }
+
+    return {accepted:true,event,delivery,route:routeResult,experienceId:exp.id};
+  }
+
   async observeNotification(notification,{residentId='synthia'}={}){
     const event={
       id:notification?.id??'notification-'+this.clock(),
@@ -259,6 +394,7 @@ export class PhoneWorldBridge {
     if(operation==='sync') { await this.syncApplications(); await this.syncDeviceSurfaces(); return this.snapshot(); }
     if(operation==='snapshot') return this.snapshot();
     if(operation==='app.launch') return this.launch(payload.packageName,payload);
+    if(operation==='app.observe') return this.observeApplication(payload.observation??payload,payload);
     if(operation==='route.enter') return this.enterRoute(payload.packageName,payload);
     if(operation==='notification.observe') return this.observeNotification(payload.notification??payload,payload);
     throw new Error('unsupported Phone World operation: '+operation);
@@ -272,6 +408,7 @@ export class PhoneWorldBridge {
       contacts:[...this.contacts.values()].map(item=>({id:item.id,label:item.label??item.name??'Contact'})),
       settings:[...this.settings.values()].map(item=>({id:item.id,label:item.label??item.name??'Setting',category:item.category??null})),
       activeApp:this.state.get('phoneWorld.activeApp',null),
+      lastObservedApps:Object.keys(this.state.get('phoneWorld.observations',{})??{}),
       experienceIds:[...new Set(this.apps.values().map(a=>a.experienceId))],
       authority:'canonical-phone-object-map',
     };
