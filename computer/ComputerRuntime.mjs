@@ -12,6 +12,8 @@ import { StateResolver } from './services/state-resolver.mjs';
 import { CapabilityRegistryService } from './registry/capability-registry.mjs';
 import { EventEmitter } from './events/event-emitter.mjs';
 import { AutomataEngineGateway } from './services/automata-engine.mjs';
+import { WorldEngineGateway } from './services/world-engine.mjs';
+import { PentaEphemerisService } from './services/penta-ephemeris.mjs';
 
 export class ComputerRuntime {
   constructor({ persistence = new MemoryPersistence(), namespace = 'synthai-computer', github = null, eventLogPath = null } = {}) {
@@ -98,6 +100,12 @@ export class ComputerRuntime {
     // v0.4.0 swarm behind execute/route; gateway only, donor stays sovereign).
     this.automataGateway = new AutomataEngineGateway({ bus: this.bus, state: this.state });
     this.services.register('automata-engine', { provider: this.automataGateway, contract: 'execute' });
+    // Stage-4e: glowing-winner embodied world (donor EmbodiedWorldEngine) +
+    // Synthai2 penta ephemeris (python child_process donor boundary).
+    this.worldGateway = new WorldEngineGateway({ bus: this.bus });
+    this.services.register('world-engine', { provider: this.worldGateway, contract: 'worldEvent' });
+    this.pentaEphemeris = new PentaEphemerisService({ bus: this.bus });
+    this.services.register('penta-ephemeris', { provider: this.pentaEphemeris, contract: 'groupPenta' });
     for (const id of ['resolve_address', 'resolve_state', 'emit_event', 'query_capability', 'automata_activation']) {
       if (!this.capabilityRegistry.has(id)) this.capabilities.register(id, { providers: ['back-up-', 'computer'] });
     }
@@ -116,6 +124,9 @@ export class ComputerRuntime {
   resolveState(entity, event, context) { return this.stateResolver.resolveState(entity, event, context); }
   emitEvent(event) { return this.eventEmitter.emitEvent(event); }
   executeOnSwarm(capability, input, ctx) { return this.automataGateway.execute(capability, input, ctx); }
+  worldEvent(event) { return this.worldGateway.process(event); }
+  observeWorld() { return this.worldGateway.snapshot(); }
+  groupPenta(members) { return this.pentaEphemeris.groupPenta(members); }
 
   /**
    * Contract: mount(application, contract). Mounts a real artifact app through
