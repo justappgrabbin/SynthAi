@@ -1,0 +1,1 @@
+{"name":"synthai-computer-modular-monolith","private":true,"type":"module","scripts":{"test:computer":"node --test computer/tests/*.test.mjs","build:computer":"node computer/build-web.mjs","test":"npm run test:computer && npm run build:computer"}}

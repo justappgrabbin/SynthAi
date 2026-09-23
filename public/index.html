@@ -1,95 +1,145 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SynthAI</title>
-  <style>
-    body {
-      margin: 0;
-      font-family: Inter, Arial, sans-serif;
-      background: #0b1020;
-      color: #f4f7fb;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-      overflow: hidden;
-    }
-    .card {
-      width: min(92vw, 760px);
-      padding: 48px;
-      border-radius: 28px;
-      background: rgba(255,255,255,0.06);
-      backdrop-filter: blur(18px);
-      box-shadow: 0 10px 40px rgba(0,0,0,0.4);
-      position: relative;
-    }
-    .badge {
-      display: inline-block;
-      padding: 8px 14px;
-      border-radius: 999px;
-      background: rgba(98, 0, 255, 0.25);
-      font-size: 12px;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-    }
-    h1 {
-      font-size: clamp(3rem, 10vw, 5rem);
-      margin: 18px 0 10px;
-      line-height: 0.9;
-    }
-    p {
-      font-size: 1.15rem;
-      opacity: 0.84;
-      line-height: 1.6;
-      max-width: 640px;
-    }
-    .buttons {
-      margin-top: 28px;
-      display: flex;
-      gap: 16px;
-      flex-wrap: wrap;
-    }
-    a {
-      text-decoration: none;
-      color: white;
-      padding: 14px 22px;
-      border-radius: 14px;
-      background: linear-gradient(135deg, #6a5cff, #8f44ff);
-      transition: transform 0.2s ease;
-    }
-    a.secondary {
-      background: rgba(255,255,255,0.12);
-    }
-    a:hover {
-      transform: translateY(-2px);
-    }
-    .glow {
-      position: absolute;
-      width: 500px;
-      height: 500px;
-      border-radius: 50%;
-      background: radial-gradient(circle, rgba(111,0,255,0.45), transparent 70%);
-      top: -180px;
-      right: -180px;
-      z-index: -1;
-    }
-  </style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#12091f">
+  <title>SynthAI Computer</title>
+  <link rel="stylesheet" href="/computer.css">
 </head>
 <body>
-  <div class="card">
-    <div class="glow"></div>
-    <span class="badge">SynthAI Demo</span>
-    <h1>Build Faster.<br/>Think Stranger.</h1>
-    <p>
-      Experimental AI tooling, adaptive systems, and synthetic workflows wrapped in a deployable shell.
-      The original repo survived long enough to become archaeology. Now it has a homepage. Nature is healing.
-    </p>
-    <div class="buttons">
-      <a href="https://github.com/justappgrabbin/SynthAi" target="_blank">View GitHub</a>
-      <a class="secondary" href="#">Demo Active</a>
-    </div>
+  <div class="computer">
+    <aside class="rail">
+      <div class="brand">
+        <div class="orb">S</div>
+        <div><strong>SynthAI</strong><small>Computer</small></div>
+      </div>
+      <nav id="nav">
+        <button class="nav active" data-view="home">⌂ <span>Home</span></button>
+        <button class="nav" data-view="build">✦ <span>Build</span></button>
+        <button class="nav" data-view="files">▤ <span>Files</span></button>
+        <button class="nav" data-view="github">⌁ <span>GitHub</span></button>
+        <button class="nav" data-view="systems">◫ <span>Systems</span></button>
+        <button class="nav" data-view="activity">↯ <span>Activity</span></button>
+      </nav>
+      <a class="diagnostic" href="/computer.html">Diagnostic</a>
+    </aside>
+
+    <main>
+      <header class="topbar">
+        <div>
+          <small class="eyebrow">PRIMARY OPERATING SURFACE</small>
+          <h1 id="viewTitle">Computer Home</h1>
+        </div>
+        <div class="statusline">
+          <span class="dot" id="bootDot"></span>
+          <span id="bootLabel">booting</span>
+        </div>
+      </header>
+
+      <section class="view active" id="home">
+        <div class="hero">
+          <div>
+            <span class="pill">SynthAI Computer</span>
+            <h2>Your work lives here first.</h2>
+            <p>Build projects, keep their files in the Computer, publish through GitHub, and mount the rest of the SynthAI family into one operating home as each runtime becomes available.</p>
+          </div>
+          <button class="primary big" data-go="build">Create something</button>
+        </div>
+
+        <div class="status-grid">
+          <article><small>Computer runtime</small><strong id="runtimeStatus">PRESENT</strong><span id="runtimeDetail">booting</span></article>
+          <article><small>Project workspace</small><strong id="projectStatus">WIRED</strong><span id="projectCount">0 projects</span></article>
+          <article><small>GitHub creation</small><strong id="githubStatus">PRESENT</strong><span id="githubDetail">not connected</span></article>
+          <article><small>Mounted apps</small><strong id="mountStatus">WIRED</strong><span id="mountCount">0 mounted</span></article>
+        </div>
+
+        <div class="two">
+          <article class="panel">
+            <div class="panel-head"><div><small>RECENT PROJECTS</small><h3>Workspace</h3></div><button class="quiet" data-go="build">Open builder</button></div>
+            <div id="recentProjects" class="empty">No local projects yet.</div>
+          </article>
+          <article class="panel">
+            <div class="panel-head"><div><small>REGISTERED FAMILY</small><h3>Computer occupants</h3></div></div>
+            <div id="homeSystems" class="system-list"></div>
+          </article>
+        </div>
+      </section>
+
+      <section class="view" id="build">
+        <div class="builder-grid">
+          <article class="panel project-panel">
+            <div class="panel-head"><div><small>PROJECT</small><h3>Build workspace</h3></div><span class="pill" id="projectState">no project</span></div>
+            <label>Project name<input id="projectName" placeholder="My app"></label>
+            <label>Description<input id="projectDescription" placeholder="What this project is for"></label>
+            <div class="row">
+              <button class="primary" id="createProject">New project</button>
+              <select id="projectPicker"><option value="">Choose project</option></select>
+            </div>
+          </article>
+
+          <article class="panel editor-panel">
+            <div class="editor-head">
+              <input id="filePath" value="index.html" aria-label="File path">
+              <div class="row">
+                <button class="quiet" id="saveFile">Save file</button>
+                <button class="quiet" id="previewFile">Preview</button>
+                <button class="primary" id="publishProject">Publish to GitHub</button>
+              </div>
+            </div>
+            <textarea id="editor" spellcheck="false" aria-label="Project file editor"></textarea>
+            <div id="builderMessage" class="message">Create or choose a project.</div>
+          </article>
+
+          <article class="panel preview-panel">
+            <div class="panel-head"><div><small>LIVE LOCAL OUTPUT</small><h3>Preview</h3></div></div>
+            <iframe id="preview" sandbox="allow-scripts"></iframe>
+          </article>
+        </div>
+      </section>
+
+      <section class="view" id="files">
+        <article class="panel">
+          <div class="panel-head"><div><small>COMPUTER VFS</small><h3>Project files</h3></div><span id="fileProjectName" class="pill">choose a project</span></div>
+          <div id="fileList" class="file-list empty">No project selected.</div>
+        </article>
+      </section>
+
+      <section class="view" id="github">
+        <div class="two">
+          <article class="panel">
+            <div class="panel-head"><div><small>SERVER BRIDGE</small><h3>GitHub connection</h3></div><strong id="githubPanelState">PRESENT</strong></div>
+            <p class="muted">The GitHub credential stays on Synthia Server. This Computer stores only the server URL and your Computer access token on this device.</p>
+            <label>Synthia Server URL<input id="serverUrl" value="https://synthia-server.onrender.com"></label>
+            <label>Computer access token<input id="computerToken" type="password" placeholder="TERMINAL_TOKEN"></label>
+            <div class="row">
+              <button class="primary" id="connectGitHub">Connect and verify</button>
+              <button class="quiet" id="refreshRepos">Refresh repos</button>
+            </div>
+            <div id="githubMessage" class="message">Not verified yet.</div>
+          </article>
+          <article class="panel">
+            <div class="panel-head"><div><small>REPOSITORIES</small><h3>GitHub workspace</h3></div><span id="repoCount" class="pill">0</span></div>
+            <div id="repoList" class="repo-list empty">Connect to load repositories.</div>
+          </article>
+        </div>
+      </section>
+
+      <section class="view" id="systems">
+        <article class="panel">
+          <div class="panel-head"><div><small>MACRO REGISTRY</small><h3>SynthAI family</h3></div></div>
+          <div id="systemsList" class="cards"></div>
+        </article>
+      </section>
+
+      <section class="view" id="activity">
+        <article class="panel">
+          <div class="panel-head"><div><small>EVENT BUS</small><h3>Runtime activity</h3></div><button class="quiet" id="clearActivity">Clear view</button></div>
+          <div id="activityList" class="activity-list"></div>
+        </article>
+      </section>
+    </main>
   </div>
+  <script type="module" src="/computer-app.mjs"></script>
 </body>
 </html>

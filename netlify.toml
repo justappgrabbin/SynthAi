@@ -1,5 +1,5 @@
 [build]
-  command = "echo 'Static demo build complete'"
+  command = "node computer/build-web.mjs"
   publish = "public"
 
 [dev]
