@@ -6,8 +6,9 @@
   "scripts": {
     "test:computer": "node --test computer/tests/*.test.mjs",
     "build:computer": "node computer/build-web.mjs",
-    "android:init": "npm run build:computer && npx cap add android",
-    "android:sync": "npm run build:computer && npx cap sync android",
+    "build:mobile": "node computer/build-mobile-web.mjs",
+    "android:init": "npm run build:mobile && npx cap add android",
+    "android:sync": "npm run build:mobile && npx cap sync android",
     "android:debug": "npm run android:sync && cd android && ./gradlew assembleDebug",
     "test": "npm run test:computer && npm run build:computer"
   },
