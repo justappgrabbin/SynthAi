@@ -15,6 +15,7 @@ import { TriformPackageLoader } from '../worlds/triform-loader.mjs';
 import { PhoneWorldBridge } from './phone-world.mjs';
 import { NativeTerminalService } from './terminal-service.mjs';
 import { TermuxCompilerAdapter } from '../adapters/termux-compiler.mjs';
+import { PurposeGuideService } from '../services/purpose-guide.mjs';
 
 const clone = value => value === undefined ? undefined : structuredClone(value);
 
@@ -37,6 +38,27 @@ export class NativeSeedRuntime {
     this.processes = new ProcessFabric({ bus: this.bus, processes: this.processRegistry, state: this.state });
     this.backends = new BackendBroker({ bus: this.bus, backends: this.backendsRegistry });
     this.stateSpace = new StateSpaceEngine();
+    this.purposeGuide = new PurposeGuideService({
+      bus: this.bus,
+      state: this.state,
+      projects: null,
+      listCapabilities: () => this.meshKernel?.listParticipants?.()
+        ?.flatMap(participant => participant.capabilities ?? []) ?? [],
+      emitEvent: async event => {
+        const events = this.state.get('events.log', []);
+        const record = {
+          event_id: event.event_id ?? `native-purpose-${this.clock()}-${Math.random().toString(36).slice(2,7)}`,
+          timestamp: event.timestamp ?? new Date(this.clock()).toISOString(),
+          provider: event.provider ?? 'native-seed',
+          ...clone(event),
+        };
+        events.push(record);
+        await this.state.set('events.log', events, { source:'native-seed-purpose' });
+        this.bus.emit('event:emitted', clone(record));
+        return record;
+      },
+      clock,
+    });
 
     this.meshKernel = new RelationalMeshKernel({ state: this.state, bus: this.bus, clock });
     this.compiler = new DormantCompilerBroker({ state: this.state, bus: this.bus, clock });
@@ -70,7 +92,7 @@ export class NativeSeedRuntime {
     await this.#ensureParticipant('computer:self', {
       kind: 'native-seed',
       residency: 'active',
-      capabilities: ['mesh.host','state-space','execution','resident-host','compiler.dormant','terminal','app.host','indiverse','world-federation'],
+      capabilities: ['mesh.host','state-space','execution','resident-host','compiler.dormant','terminal','app.host','indiverse','world-federation','purpose-guide'],
       publicState: { name: 'SynthAI Native Seed', runtime: 'native-seed' },
     });
     await this.#ensureParticipant('system:state-space', {
@@ -96,8 +118,13 @@ export class NativeSeedRuntime {
       kind: 'core-service', residency: 'active',
       capabilities: ['world.qualia-contract','world.visitor-morph'],
     });
+    await this.#ensureParticipant('system:purpose-guide', {
+      kind: 'core-service', residency: 'active',
+      capabilities: ['purpose.roadmap','purpose.outcome','purpose.read'],
+      publicState: { name:'purpose-guide', wired:true },
+    });
 
-    for (const id of ['system:state-space','system:execution','system:compiler','system:resident-host','system:indiverse']) {
+    for (const id of ['system:state-space','system:execution','system:compiler','system:resident-host','system:indiverse','system:purpose-guide']) {
       if (!this.meshKernel.relationshipsFor(id).some(e => e.type === 'hosted-by' && e.to === 'computer:self')) {
         await this.meshKernel.connect(id, 'computer:self', { type: 'hosted-by' });
       }
@@ -124,6 +151,13 @@ export class NativeSeedRuntime {
       await this.meshKernel.publishPresence('system:compiler', { lifecycle: this.compiler.lifecycle, lastModule: result.id });
       return result;
     });
+    this.meshKernel.bindHandler('system:purpose-guide', async envelope => {
+      const p = envelope.payload ?? {};
+      if (envelope.operation === 'roadmap') return this.purposeGuide.buildRoadmap(p);
+      if (envelope.operation === 'outcome') return this.purposeGuide.recordOutcome(p);
+      if (envelope.operation === 'read') return this.purposeGuide.getRoadmap(p.userId, p.roadmapId ?? null);
+      throw new Error(`unsupported purpose-guide operation: ${envelope.operation}`);
+    });
 
     await this.worldFederation.seedCanonicalLayers();
     await this.stellarLab.mount();
@@ -138,6 +172,30 @@ export class NativeSeedRuntime {
     await this.meshKernel.setResidency(id, options.residency ?? 'active');
     if (options.publicState) await this.meshKernel.publishPresence(id, options.publicState);
     return this.meshKernel.participant(id);
+  }
+
+  async buildPurposeRoadmap(input) {
+    const routed = await this.meshKernel.request('system:purpose-guide', {
+      operation:'roadmap', payload:clone(input),
+    });
+    if (!routed.delivered) throw new Error('purpose-guide mesh service unavailable');
+    return routed.result;
+  }
+
+  async recordPurposeOutcome(input) {
+    const routed = await this.meshKernel.request('system:purpose-guide', {
+      operation:'outcome', payload:clone(input),
+    });
+    if (!routed.delivered) throw new Error('purpose-guide mesh service unavailable');
+    return routed.result;
+  }
+
+  async getPurposeRoadmap(userId, roadmapId = null) {
+    const routed = await this.meshKernel.request('system:purpose-guide', {
+      operation:'read', payload:{userId,roadmapId},
+    });
+    if (!routed.delivered) throw new Error('purpose-guide mesh service unavailable');
+    return routed.result;
   }
 
   async activateAddress(input, options = {}) {
