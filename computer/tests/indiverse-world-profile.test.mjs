@@ -92,3 +92,48 @@ test('INDIVERSE PROFILE: active world is applied to recognized phone-interface b
   assert.equal(surface.bricks[0].expression.material,'bubblegum');
   assert.equal(surface.bricks[0].binding.nativeActions.includes('click'),true);
 });
+
+
+test('INDIVERSE PROFILE: mesh can mutate and activate a user world without changing canonical function', async () => {
+  const runtime=await new NativeSeedRuntime({persistence:new MemoryPersistence(),namespace:'mesh-world-style'}).boot();
+
+  const created=await runtime.meshKernel.request('system:indiverse',{
+    operation:'create',
+    payload:{
+      ownerId:'owner',
+      options:{
+        id:'indiverse:owner',
+        name:'Starter World',
+        grammar:{archetypes:{'door':{form:'stone-arch'}}}
+      }
+    }
+  },{sourceId:'synthia'});
+  assert.equal(created.delivered,true);
+
+  const updated=await runtime.meshKernel.request('system:indiverse',{
+    operation:'grammar.update',
+    payload:{
+      worldId:'indiverse:owner',
+      patch:{
+        environment:{skyTop:'#ffeeff'},
+        archetypes:{'door':{form:'cotton-candy-arch'}},
+        customLore:{weather:'sprinkles'}
+      }
+    }
+  },{sourceId:'synthia'});
+  assert.equal(updated.delivered,true);
+
+  const activated=await runtime.meshKernel.request('system:indiverse',{
+    operation:'activate',
+    payload:{worldId:'indiverse:owner'}
+  },{sourceId:'synthia'});
+  assert.equal(activated.delivered,true);
+  assert.equal(activated.result.profile.environment.skyTop,'#ffeeff');
+
+  const profile=await runtime.meshKernel.request('system:indiverse',{
+    operation:'profile',
+    payload:{}
+  },{sourceId:'synthia'});
+  assert.equal(profile.result.profile.grammar.customLore.weather,'sprinkles');
+  assert.equal(profile.result.profile.grammar.archetypes.door.form,'cotton-candy-arch');
+});
