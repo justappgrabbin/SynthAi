@@ -7,10 +7,11 @@
     "test:computer": "node --test computer/tests/*.test.mjs",
     "build:computer": "node computer/build-web.mjs",
     "build:mobile": "node computer/build-mobile-web.mjs",
-    "android:init": "npm run build:mobile && npx cap add android",
-    "android:sync": "npm run build:mobile && npx cap sync android",
+    "android:init": "npm run build:mobile && npx cap add android && npx cap sync android && npm run android:patch",
+    "android:sync": "npm run build:mobile && npx cap sync android && npm run android:patch",
     "android:debug": "npm run android:sync && cd android && ./gradlew assembleDebug",
-    "test": "npm run test:computer && npm run build:computer"
+    "test": "npm run test:computer && npm run build:computer",
+    "android:patch": "node computer/mobile/patch-android-world-shell.mjs"
   },
   "dependencies": {
     "@capacitor/android": "8.5.2",
