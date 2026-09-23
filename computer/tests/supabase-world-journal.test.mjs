@@ -68,7 +68,11 @@ test('WORLD JOURNAL: ChatGPT route becomes a redacted door/room event', async ()
 
   assert.equal(rows.event.place_kind, 'door');
   assert.equal(rows.event.place_name, 'door', 'private route title must not leave the device by default');
+  assert.equal(rows.event.source_key, 'app-route:com.openai.chatgpt:new-conversation');
   assert.equal(rows.event.payload.route.presentation.label, '[private]');
+  assert.equal(rows.event.payload.route.metadata.routeId, '[private]');
+  assert.equal(JSON.stringify(rows.event).includes('thread-42'), false);
+  assert.equal(JSON.stringify(rows.event).includes('Private conversation title'), false);
 });
 
 test('WORLD JOURNAL: notification bodies stay local unless explicitly enabled', async () => {
