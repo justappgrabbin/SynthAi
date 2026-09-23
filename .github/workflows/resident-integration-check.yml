@@ -11,6 +11,7 @@ on:
       - 'computer/runtime/resident-host.mjs'
       - 'computer/residents/**'
       - 'computer/worlds/**'
+      - 'computer/labs/**'
       - 'computer/mobile/MobileComputerRuntime.mjs'
       - 'computer/native/**'
       - 'computer/adapters/termux-compiler.mjs'
@@ -20,6 +21,7 @@ on:
       - 'computer/tests/mesh-core-routing.test.mjs'
       - 'computer/tests/native-seed.test.mjs'
       - 'computer/tests/termux-compiler.test.mjs'
+      - 'computer/tests/stellar-lab-mesh.test.mjs'
       - '.github/workflows/resident-integration-check.yml'
 
 permissions:
@@ -40,6 +42,7 @@ jobs:
           computer/tests/mesh-core-routing.test.mjs
           computer/tests/native-seed.test.mjs
           computer/tests/termux-compiler.test.mjs
+          computer/tests/stellar-lab-mesh.test.mjs
           computer/tests/resident-mesh-indiverse.test.mjs
           computer/tests/synthia57-resident.test.mjs
           computer/tests/synthia57-package-loader.test.mjs
