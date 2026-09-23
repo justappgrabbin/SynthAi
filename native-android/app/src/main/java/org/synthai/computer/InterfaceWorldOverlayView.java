@@ -26,6 +26,10 @@ final class InterfaceWorldOverlayView extends View {
         String label;
         String kind;
         String affordance;
+        String form;
+        String material;
+        int fillColor;
+        int accentColor;
         boolean interactive;
         final RectF bounds = new RectF();
     }
@@ -38,6 +42,13 @@ final class InterfaceWorldOverlayView extends View {
     private Listener listener;
     private String title = "INDIVERSE";
     private String packageName = "";
+    private String worldName = "INDIVERSE";
+    private String topology = "street";
+    private int skyTop = Color.rgb(20,12,38);
+    private int skyBottom = Color.rgb(52,34,72);
+    private int groundColor = Color.rgb(31,24,43);
+    private int horizonColor = Color.rgb(73,52,91);
+    private int pathColor = Color.rgb(71,51,86);
     private int brickCount = 0;
 
     InterfaceWorldOverlayView(Context context) {
@@ -61,6 +72,20 @@ final class InterfaceWorldOverlayView extends View {
         }
         title = surface.optString("title", "INDIVERSE");
         packageName = surface.optString("packageName", "");
+        JSONObject profile = surface.optJSONObject("worldProfile");
+        if (profile != null) {
+            worldName = profile.optString("name", "INDIVERSE");
+            JSONObject environment = profile.optJSONObject("environment");
+            JSONObject layout = profile.optJSONObject("layout");
+            if (layout != null) topology = layout.optString("topology", topology);
+            if (environment != null) {
+                skyTop = parseColor(environment.optString("skyTop", null), skyTop);
+                skyBottom = parseColor(environment.optString("skyBottom", null), skyBottom);
+                groundColor = parseColor(environment.optString("ground", null), groundColor);
+                horizonColor = parseColor(environment.optString("horizon", null), horizonColor);
+                pathColor = parseColor(environment.optString("path", null), pathColor);
+            }
+        }
         JSONArray source = surface.optJSONArray("bricks");
         brickCount = source == null ? 0 : source.length();
 
@@ -80,6 +105,13 @@ final class InterfaceWorldOverlayView extends View {
                 brick.id = item.optString("id", "");
                 brick.label = label.isEmpty() ? kind : label;
                 brick.kind = kind;
+                JSONObject expression = item.optJSONObject("expression");
+                JSONObject archetype = expression == null ? null : expression.optJSONObject("archetype");
+                JSONObject effects = expression == null ? null : expression.optJSONObject("effects");
+                brick.form = archetype == null ? kind : archetype.optString("form", archetype.optString("shape", kind));
+                brick.material = expression == null ? "resolved-interface" : expression.optString("material", "resolved-interface");
+                brick.fillColor = parseColor(expression == null ? null : expression.optString("color", null), defaultBrickColor(kind, true));
+                brick.accentColor = parseColor(archetype == null ? null : archetype.optString("accent", null), effects == null ? Color.rgb(174,132,207) : parseColor(effects.optString("glowColor", null), Color.rgb(174,132,207)));
 
                 JSONArray affordances = item.optJSONArray("affordances");
                 brick.affordance = chooseAffordance(kind, affordances);
@@ -145,13 +177,13 @@ final class InterfaceWorldOverlayView extends View {
         float h = getHeight();
 
         LinearGradient sky = new LinearGradient(0,0,0,h,
-            Color.rgb(20,12,38), Color.rgb(52,34,72), Shader.TileMode.CLAMP);
+            skyTop, skyBottom, Shader.TileMode.CLAMP);
         paint.setShader(sky);
         canvas.drawRect(0,0,w,h,paint);
         paint.setShader(null);
 
         // Distant wall / horizon.
-        paint.setColor(Color.rgb(73,52,91));
+        paint.setColor(horizonColor);
         canvas.drawRect(0, 72f*density, w, 150f*density, paint);
 
         // Perspective floor.
@@ -161,7 +193,7 @@ final class InterfaceWorldOverlayView extends View {
         floor.lineTo(w*0.58f,145f*density);
         floor.lineTo(w*0.81f,h);
         floor.close();
-        paint.setColor(Color.rgb(31,24,43));
+        paint.setColor(groundColor);
         canvas.drawPath(floor,paint);
 
         // Central path.
@@ -171,7 +203,7 @@ final class InterfaceWorldOverlayView extends View {
         path.lineTo(w*0.515f,145f*density);
         path.lineTo(w*0.58f,h);
         path.close();
-        paint.setColor(Color.rgb(71,51,86));
+        paint.setColor(pathColor);
         canvas.drawPath(path,paint);
 
         // Horizon portal identifying the current interface/building.
@@ -189,7 +221,7 @@ final class InterfaceWorldOverlayView extends View {
         paint.setColor(Color.rgb(232,211,248));
         paint.setTextSize(15f*density);
         paint.setFakeBoldText(true);
-        canvas.drawText(trim(title,28),24f*density,35f*density,paint);
+        canvas.drawText(trim(worldName+" · "+title,28),24f*density,35f*density,paint);
         paint.setFakeBoldText(false);
         paint.setColor(Color.rgb(166,139,188));
         paint.setTextSize(8.5f*density);
@@ -215,11 +247,28 @@ final class InterfaceWorldOverlayView extends View {
 
     private void drawBrick(Canvas canvas, Brick brick) {
         RectF b = brick.bounds;
-        int base = brick.interactive ? Color.rgb(79,54,101) : Color.rgb(56,43,70);
+        int base = brick.fillColor != 0 ? brick.fillColor : defaultBrickColor(brick.kind, brick.interactive);
         paint.setColor(Color.argb(100,0,0,0));
         canvas.drawRoundRect(new RectF(b.left+4f*density,b.top+5f*density,b.right+4f*density,b.bottom+5f*density),10f*density,10f*density,paint);
 
-        switch (brick.kind) {
+        String visual = brick.form == null ? brick.kind : brick.form.toLowerCase();
+        if (visual.contains("gumdrop") || visual.contains("bubble") || visual.contains("orb")) {
+            paint.setColor(base);
+            canvas.drawOval(b,paint);
+            paint.setColor(withAlpha(brick.accentColor,90));
+            canvas.drawOval(new RectF(b.left+b.width()*0.18f,b.top+b.height()*0.12f,b.right-b.width()*0.18f,b.top+b.height()*0.38f),paint);
+        } else if (visual.contains("cloud")) {
+            paint.setColor(base);
+            float cy=b.centerY();
+            canvas.drawCircle(b.left+b.width()*0.28f,cy,Math.min(b.width(),b.height())*0.28f,paint);
+            canvas.drawCircle(b.centerX(),cy-b.height()*0.12f,Math.min(b.width(),b.height())*0.35f,paint);
+            canvas.drawCircle(b.right-b.width()*0.28f,cy,Math.min(b.width(),b.height())*0.28f,paint);
+        } else if (visual.contains("tree") || visual.contains("flower")) {
+            paint.setColor(brick.accentColor);
+            canvas.drawRect(b.centerX()-3f*density,b.centerY(),b.centerX()+3f*density,b.bottom,paint);
+            paint.setColor(base);
+            canvas.drawCircle(b.centerX(),b.centerY()-b.height()*0.12f,Math.min(b.width(),b.height())*0.34f,paint);
+        } else switch (brick.kind) {
             case "door":
             case "room":
             case "district":
@@ -275,7 +324,7 @@ final class InterfaceWorldOverlayView extends View {
                 canvas.drawRoundRect(b,10f*density,10f*density,paint);
         }
 
-        stroke.setColor(brick.interactive?Color.rgb(174,132,207):Color.rgb(104,82,119));
+        stroke.setColor(brick.interactive?brick.accentColor:withAlpha(brick.accentColor,150));
         canvas.drawRoundRect(b,10f*density,10f*density,stroke);
         paint.setColor(Color.rgb(239,224,248));
         paint.setTextSize(Math.max(7f*density,Math.min(10f*density,b.width()/11f)));
@@ -309,6 +358,23 @@ final class InterfaceWorldOverlayView extends View {
     public boolean performClick(){
         super.performClick();
         return true;
+    }
+
+    private static int defaultBrickColor(String kind, boolean interactive) {
+        if ("mural".equals(kind)) return Color.rgb(118,87,139);
+        if ("sign".equals(kind)) return Color.rgb(92,68,108);
+        if ("corridor".equals(kind)) return Color.rgb(48,37,61);
+        return interactive ? Color.rgb(79,54,101) : Color.rgb(56,43,70);
+    }
+
+    private static int parseColor(String value, int fallback) {
+        if (value == null || value.trim().isEmpty()) return fallback;
+        try { return Color.parseColor(value.trim()); }
+        catch (Exception ignored) { return fallback; }
+    }
+
+    private static int withAlpha(int color, int alpha) {
+        return Color.argb(Math.max(0,Math.min(255,alpha)),Color.red(color),Color.green(color),Color.blue(color));
     }
 
     private static String trim(String value,int max){
