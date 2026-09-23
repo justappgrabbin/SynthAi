@@ -7,6 +7,7 @@ import { ResidentHost } from '../runtime/resident-host.mjs';
 import { IndiVerseRuntime } from '../worlds/indiverse.mjs';
 import { WorldFederation } from '../worlds/world-federation.mjs';
 import { Synthia57PackageLoader } from '../residents/synthia57-package-loader.mjs';
+import { Synthia57MirrorSurfaceStore } from '../residents/synthia57-mirror-surface.mjs';
 import { StellarLabAdapter } from '../labs/stellar-lab-adapter.mjs';
 import { ConsciousnessRealmPackageLoader } from '../worlds/consciousness-realm-loader.mjs';
 import { HumanAgentMechanicsAdapter } from '../worlds/adapters/human-agent.mjs';
@@ -53,6 +54,7 @@ export class NativeSeedRuntime {
     this.residents = new ResidentHost({ state: this.state, bus: this.bus, mesh: this.meshKernel, compiler: this.compiler, indiverse: this.indiverse, clock });
     this.worldFederation = new WorldFederation({ state: this.state, bus: this.bus, mesh: this.meshKernel, residents: this.residents, clock });
     this.synthia57 = new Synthia57PackageLoader({ computer: this, bus: this.bus });
+    this.synthiaMirror = new Synthia57MirrorSurfaceStore({ state:this.state, bus:this.bus });
     this.stellarLab = new StellarLabAdapter({ mesh: this.meshKernel, state: this.state, bus: this.bus, clock });
     this.consciousnessRealm = new ConsciousnessRealmPackageLoader({ computer: this, bus: this.bus });
     this.humanAgent = null;
@@ -285,6 +287,8 @@ export class NativeSeedRuntime {
   async registerResident(id, options = {}) { return this.residents.registerResident(id, options); }
   bindResidentRuntime(id, runtime) { return this.residents.bindRuntime(id, runtime); }
   async mountSynthia57(options = {}) { return this.synthia57.mount(options); }
+  async setSynthiaMirrorImage(payload = {}) { return this.synthiaMirror.ingest(payload); }
+  synthiaMirrorSnapshot() { return this.synthiaMirror.snapshot(); }
   async registerReality(id, adapter, options = {}) { return this.residents.registerWorld(id, adapter, options); }
   async enterReality(residentId, worldId) { return this.residents.enterWorld(residentId, worldId); }
   async sleepResident(id, checkpoint = {}) { return this.residents.sleep(id, checkpoint); }
@@ -327,6 +331,7 @@ export class NativeSeedRuntime {
       triform: this.triform.get()?.adapter?.snapshot?.() ?? null,
       indiverse: this.indiverse.snapshot(),
       synthia57: this.synthia57.get('synthia')?.adapter?.snapshot?.() ?? null,
+      synthiaMirror: this.synthiaMirror.snapshot(),
     };
   }
 }
