@@ -85,7 +85,7 @@ ADDED (registry only, status PRESENT with excavation probe evidence unless noted
 - back-up-:kimi-layer5-ssm (resolve_state) — SSM/attractor machinery (step/processMeshEvent/predict/recall/getMood, 64-hex Hamming-coupled state); nearest-attractor candidate; complements mesh-state-space. Probe: step([1,0,1,0,1,0])->out[0]=0.4714, recall self-sim=1.0.
 - back-up-:kimi-coordinate-engine (resolve_address) — 13-layer BigInt mixed-radix addressing + resonance; SPECIALIZED/PARALLEL scheme; execution-spine canonical-address.mjs REMAINS authority. Probe: toAddress=12023169149007581n, roundtrip true.
 - back-up-:kimi-phase-space-engine (resolve_state) — five-stage deterministic compose with trace + Who/What/Where/When/Why projections. Probe: compose complete=true, double-run deterministic.
-- back-up-:pure-synthia-emergent-state-space (new capability state_space_runtime) — v0.6.7 VERSIONED ANCESTOR of mounted kimi mesh-state-space; EmergentMesh 320 nodes/960 edges; runtime/task/recall layer unmounted. Caveat: runtime.mjs needs absent ../canonicalState.mjs — use core/mesh directly.
+- back-up-:pure-synthia-emergent-state-space (new capability state_space_runtime) — v0.6.7 VERSIONED ANCESTOR of mounted kimi mesh-state-space; EmergentMesh 320 nodes/960 edges; runtime/task/recall layer unmounted. Caveat: runtime.mjs needs absent ../canonicalState.mjs — use core/mesh directly, not runtime.mjs.
 - back-up-:pure-synthia-grammar-kernel (new capability linguistic_kernel) — five-projection linguistic kernel (resolve/step/replay). Probe: step accepted, eventId ling-fa1db543.
 - back-up-:trainable-assembly-state-space (new capability state_space_enumeration) — 20/22 files byte-identical to kimi tree + index.mjs estimator (1920n probe) + govinda-structure.js.
 
@@ -200,3 +200,30 @@ PROVIDER STATUSES: recovered:glowing-winner-world-engine -> VERIFIED (consumptio
 FAILED (then fixed): store intent needs quoted target per donor IntentClassifier — test uses 'store "arrival memory"' (donor semantics preserved).
 
 BLOCKED: none new. Prior authority-ZIP blocker still open.
+
+# Change record — Acceptance batch 3 (tests 4,5,6,8,9) (integration/ecosystem-convergence)
+
+WHAT EXISTED BEFORE: acceptance 1-3 green (17/17); morph-expression capability present but unexercised; no consolidated restart-recovery proof; recovered providers proven piecemeal.
+
+PRESERVED: all prior tests (17/17 prior pass, 22/22 now); no architecture changes.
+
+CHANGED:
+- computer/registry/capability-registry.mjs: queryCapability now also returns provider lineage (required by acceptance-9 lineage proof).
+
+ADDED:
+- computer/tests/acceptance-4-skynthia-effect.test.mjs — real world-engine movement (2.74 units over real ticks) -> MorphEngine.express -> observable morph.targets state + bus event -> persisted + replayed. Renderer honestly labeled NOT FOUND (new registry capability skynthia_rendering with path forward).
+- computer/tests/acceptance-5-persistence.test.mjs — consolidated restart recovery: identity records, services registry (7 services), StateStore state, events.jsonl memory, lineage (parents), capability registry + verification history, mounted application + app state, trajectory; operation continued after restart (gate 7 resolution; append-only trajectory extended).
+- computer/tests/acceptance-6-resonance-loop.test.mjs — project created -> need identified (calculate_human_design) -> tool discovered (services registry) -> AWAKENING channel recorded via real edge resolver -> REAL work (foundry ephemeris gate 38) -> artifact written/read back -> participant state updated -> trajectory explanation assembled.
+- computer/tests/acceptance-8-state-space-e2e.test.mjs — entity -> identity/address/state (kimi HD + mesh-state-space named) -> context attached -> edge resolved (yniv) -> routing decision recorded -> foundry execution (gate 38) -> state recorded -> 2 chained events -> explanation from events on fresh runtime.
+- computer/tests/acceptance-9-historical-recovery.test.mjs — formal Amendment-A §14 proof: 4 PROVENANCE.md records with archive SHA-256/commit SHAs, vendored originals on disk, 5 recovered providers registered with lineage + evidence, one real execution each (YNIV 45088, AWAKENING, gate 38, world spawn, penta G44).
+
+MOUNTED: morph_expression capability (computer:runtime/morph-engine). CONNECTED: world movement -> morph-expression -> StateStore + events.
+
+TESTED: node --test computer/tests/*.test.mjs
+EXACT TEST RESULT: tests 22, pass 22, fail 0. Evidence: ../../evidence/acceptance-4-5-6-8-9.txt.
+
+PROVIDER STATUSES: computer:runtime/morph-engine -> WIRED (real execution + observable state). skynthia_rendering -> NOT_FOUND (path forward recorded). All other statuses unchanged.
+
+FAILED (then fixed): queryCapability omitted lineage (acc-9 failure); pyephem wiped by environment reset between sessions — reinstalled 4.2.1, volatility noted (penta provider correctly emits provider-failure + stays WIRED-only-with-real-run semantics when env absent).
+
+BLOCKED: none new. pyephem env volatility is an operational note; authority-ZIP blocker still open.
