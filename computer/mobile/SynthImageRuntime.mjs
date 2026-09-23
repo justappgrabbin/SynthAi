@@ -155,6 +155,13 @@ function mobileEntry(manifest, files) {
   return null;
 }
 
+function residentEntry(manifest, files) {
+  const explicit = manifest.resident_entry ?? manifest.residentEntry ?? manifest.runtime_entry ?? manifest.runtimeEntry;
+  if (!explicit) return null;
+  const p = safePath(String(explicit).replace(/^\//, ''));
+  return p && files.has(p) ? p : null;
+}
+
 export class SynthImageRuntime {
   constructor({ state, bus, cacheName = 'synthimg-v1', routePrefix = '/__synthimg/' } = {}) {
     Object.assign(this, { state, bus, cacheName, routePrefix });
@@ -172,8 +179,9 @@ export class SynthImageRuntime {
     const id = appId ?? image.manifest.id ?? image.manifest.name ?? `synthimg-${image.payloadSha256.slice(0, 12)}`;
     const key = encodeURIComponent(id);
     const entry = mobileEntry(image.manifest, image.files);
-    if (!entry) {
-      throw new Error('image verified, but no mobile/web HTML entrypoint was found');
+    const resident = residentEntry(image.manifest, image.files);
+    if (!entry && !resident) {
+      throw new Error('image verified, but no mobile/web HTML or resident runtime entrypoint was found');
     }
 
     if (!globalThis.caches) throw new Error('Cache Storage unavailable on this device');
@@ -197,6 +205,8 @@ export class SynthImageRuntime {
       manifest: image.manifest,
       payloadSha256: image.payloadSha256,
       entry,
+      residentEntry: resident,
+      kind: resident && !entry ? 'resident' : entry && resident ? 'hybrid' : 'app',
       base,
       fileCount: image.files.size,
       storedPayloadBytes: image.storedPayloadBytes,
@@ -244,7 +254,8 @@ export class SynthImageRuntime {
     return {
       record,
       checkpoint: record.lastCheckpoint,
-      launchUrl: new URL(record.base + record.entry, globalThis.location?.origin ?? 'https://synth.local').href,
+      launchUrl: record.entry ? new URL(record.base + record.entry, globalThis.location?.origin ?? 'https://synth.local').href : null,
+      residentModuleUrl: record.residentEntry ? new URL(record.base + record.residentEntry, globalThis.location?.origin ?? 'https://synth.local').href : null,
     };
   }
 }
