@@ -10,6 +10,7 @@ import { Synthia57PackageLoader } from '../residents/synthia57-package-loader.mj
 import { StellarLabAdapter } from '../labs/stellar-lab-adapter.mjs';
 import { ConsciousnessRealmPackageLoader } from '../worlds/consciousness-realm-loader.mjs';
 import { HumanAgentMechanicsAdapter } from '../worlds/adapters/human-agent.mjs';
+import { TriformPackageLoader } from '../worlds/triform-loader.mjs';
 
 const clone = value => value === undefined ? undefined : structuredClone(value);
 
@@ -52,6 +53,7 @@ export class NativeSeedRuntime {
     this.stellarLab = new StellarLabAdapter({ mesh: this.meshKernel, state: this.state, bus: this.bus, clock });
     this.consciousnessRealm = new ConsciousnessRealmPackageLoader({ computer: this, bus: this.bus });
     this.humanAgent = null;
+    this.triform = new TriformPackageLoader({ computer: this, bus: this.bus });
   }
 
   async boot() {
@@ -202,6 +204,9 @@ export class NativeSeedRuntime {
     return r.result;
   }
 
+  async mountTriform(options = {}) { return this.triform.mount(options); }
+  async mountInstalledTriform(options = {}) { return this.triform.mountInstalledPackage(options); }
+
   async bindHumanAgentHost(host) {
     this.humanAgent = new HumanAgentMechanicsAdapter({ host, state:this.state, bus:this.bus, clock:this.clock });
     await this.worldFederation.bind('mechanics:human-agent', this.humanAgent);
@@ -257,6 +262,7 @@ export class NativeSeedRuntime {
       worlds: this.worldFederation.snapshot(),
       stellar: this.stellarLab.snapshot(),
       humanAgent: this.humanAgent?.snapshot?.() ?? null,
+      triform: this.triform.get()?.adapter?.snapshot?.() ?? null,
       indiverse: this.indiverse.snapshot(),
       synthia57: this.synthia57.get('synthia')?.adapter?.snapshot?.() ?? null,
     };
