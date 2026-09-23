@@ -116,7 +116,7 @@ export class NativeSeedRuntime {
     });
     await this.#ensureParticipant('system:indiverse', {
       kind: 'core-service', residency: 'active',
-      capabilities: ['world.qualia-contract','world.visitor-morph'],
+      capabilities: ['world.qualia-contract','world.visitor-morph','world.create','world.grammar.update','world.activate','world.profile'],
     });
     await this.#ensureParticipant('system:purpose-guide', {
       kind: 'core-service', residency: 'active',
@@ -157,6 +157,18 @@ export class NativeSeedRuntime {
       if (envelope.operation === 'outcome') return this.purposeGuide.recordOutcome(p);
       if (envelope.operation === 'read') return this.purposeGuide.getRoadmap(p.userId, p.roadmapId ?? null);
       throw new Error(`unsupported purpose-guide operation: ${envelope.operation}`);
+    });
+    this.meshKernel.bindHandler('system:indiverse', async envelope => {
+      const p=envelope.payload??{};
+      if(envelope.operation==='create') return this.createIndiVerse(String(p.ownerId),p.options??{});
+      if(envelope.operation==='grammar.update') return this.indiverse.updateGrammar(String(p.worldId),p.patch??{});
+      if(envelope.operation==='activate') return this.activateIndiVerse(String(p.worldId));
+      if(envelope.operation==='profile') {
+        const worldId=String(p.worldId??this.state.get('phoneWorld.activeIndiVerse',''));
+        if(!worldId) return {worldId:null,profile:null};
+        return {worldId,profile:this.indiverse.worldProfile(worldId)};
+      }
+      throw new Error('unsupported indiverse operation: '+envelope.operation);
     });
 
     await this.worldFederation.seedCanonicalLayers();
