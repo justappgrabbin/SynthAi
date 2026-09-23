@@ -62,7 +62,8 @@ function worldRows(event = {}, { workspaceId, includeRouteTitles = false } = {})
   } else if (event.type === 'phone:route-entered') {
     actionKind = 'enter-route';
     const route = payload.route ?? {};
-    sourceKey = route.id ?? appKey;
+    const routeType = route.function ?? route.metadata?.routeType ?? 'route';
+    sourceKey = pkg ? `app-route:${pkg}:${routeType}` : `app-route:${routeType}`;
     placeKind = route.kind ?? 'room';
     placeName = includeRouteTitles ? route.presentation?.label ?? placeKind : placeKind;
     resourceType = 'application-route';
@@ -95,7 +96,22 @@ function worldRows(event = {}, { workspaceId, includeRouteTitles = false } = {})
       summary: event.summary ?? null,
       packageName: pkg,
       experienceId,
-      route: event.type === 'phone:route-entered' ? payload.route ?? null : null,
+      route: event.type === 'phone:route-entered'
+        ? {
+            kind: payload.route?.kind ?? 'room',
+            function: payload.route?.function ?? payload.route?.metadata?.routeType ?? 'route',
+            presentation: {
+              label: includeRouteTitles ? payload.route?.presentation?.label ?? null : '[private]',
+              symbol: payload.route?.presentation?.symbol ?? payload.route?.kind ?? 'room',
+              material: payload.route?.presentation?.material ?? 'shared-interface',
+            },
+            metadata: {
+              packageName: pkg,
+              routeType: payload.route?.metadata?.routeType ?? payload.route?.function ?? null,
+              routeId: '[private]',
+            },
+          }
+        : null,
       notification: event.type === 'phone:notification'
         ? {
             packageName: payload.packageName ?? null,
