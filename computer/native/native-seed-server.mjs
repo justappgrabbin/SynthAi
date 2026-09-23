@@ -116,13 +116,30 @@ async function route(req,res){
   try{
     const url=new URL(req.url,'http://127.0.0.1');
     if(req.method==='GET' && url.pathname==='/health'){
-      return json(res,200,{ok:true,service:'synthai-native-seed',port:PORT,statePath,optionalMounts});
+      return json(res,200,{ok:true,service:'synthai-native-seed',port:PORT,statePath,optionalMounts,synthiaMirror:runtime.synthiaMirrorSnapshot()});
     }
     if(req.method==='GET' && url.pathname==='/snapshot'){
       return json(res,200,runtime.snapshot());
     }
 
     const body=req.method==='POST' ? await readJson(req) : {};
+
+    if(req.method==='POST' && url.pathname==='/synthia/mirror-image'){
+      const result=await runtime.setSynthiaMirrorImage({
+        dataUrl:body.dataUrl,
+        label:body.label??'user-face',
+        source:body.source??'android-photo-picker',
+      });
+      return json(res,200,result);
+    }
+    if(req.method==='GET' && url.pathname==='/synthia/visual-state'){
+      return json(res,200,{
+        mounted:Boolean(runtime.synthia57.get('synthia')),
+        mirror:runtime.synthiaMirrorSnapshot(),
+        resident:runtime.synthia57.get('synthia')?.adapter?.snapshot?.()??null,
+        morph:runtime.meshKernel.resolvePresence('synthia:morph')??null,
+      });
+    }
 
     if(req.method==='POST' && url.pathname==='/phone/sync'){
       phoneHost.replace(body);
