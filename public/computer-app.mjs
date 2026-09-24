@@ -223,7 +223,7 @@ function renderSystems() {
   ).join('');
   const services = computer.localBackendHealth?.services || [];
   $('#localServiceList').innerHTML = services.length ? services.map(id =>
-    `<div class="system-row"><strong>${escapeHtml(id)}</strong><span class="state">ON DEVICE</span></div>`
+    `<div class="system-row"><strong>${escapeHtml(id)}</strong><span class="state">REGISTERED</span></div>`
   ).join('') : '<div class="empty">Local Computer services have not been verified on this device.</div>';
 }
 
@@ -311,7 +311,7 @@ function runtimeState(status, detail) {
 computer.bus.on('local-backend:verified', async event => {
   try {
     await projects.attach();
-    runtimeState('VERIFIED', `${event.payload.environment} · ${event.payload.services.length} services · ${event.payload.version}`);
+    runtimeState('VERIFIED', `${event.payload.environment} · ${event.payload.services.length} registered services · ${event.payload.version}`);
     renderProjects();
     renderSystems();
     if (currentProjectId && projects.get(currentProjectId)) await loadCurrentFile();
