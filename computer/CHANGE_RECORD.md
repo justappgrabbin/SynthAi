@@ -254,3 +254,74 @@ PROVIDER STATUSES: back-up-:kimi-hypothesis-registry -> VERIFIED (consumption re
 FAILED (then fixed): donor initial status is 'hypothesized' (assert corrected); pyephem wiped again by env reset — reinstalled.
 
 BLOCKED: none new. pyephem env volatility recurs (operational note); authority-ZIP blocker still open.
+
+
+# Change record — GitHub-only installable app (integration/github-only-app-20260923, 2026-09-23)
+
+WHAT EXISTED BEFORE:
+- Canonical full Node ComputerRuntime and 23 passing acceptance/runtime tests.
+- public/ Computer workspace UI and diagnostic shell.
+- Browser-safe kernel/runtime/adapters/micros modules.
+- No Android project, AndroidManifest.xml, MainActivity, Gradle application module, Capacitor shell, or Cordova shell.
+- Existing browser entry imported full ComputerRuntime even though that runtime imports Node-only services (node:fs, node:crypto, node:child_process, node:url); the web build also failed to stage services/registry/events. Therefore the existing browser path could not honestly boot the full runtime as written.
+
+PRESERVED:
+- computer/ComputerRuntime.mjs remains the canonical full Node host and was not replaced or reduced.
+- Existing donor/service architecture, C#/HumanDesign/GeneKeys/YiJing projects, public UI, tests, registries, event grammar, state-space, swarm, world, experiment and persistence work remain intact.
+- Node-only providers remain visible with explicit status/blockers rather than being deleted or falsely emulated in the browser.
+
+CHANGED:
+- computer/build-web.mjs now stages only browser-safe runtime directories plus BrowserComputerRuntime.mjs.
+- public/computer-app.mjs and public/computer-diagnostic.mjs now boot the browser host instead of importing Node-only ComputerRuntime.
+- public/index.html now includes installable-app manifest/icon metadata.
+- GitHub Actions workflow validates the Computer before copying the staged public app into the Android package.
+
+ADDED:
+- computer/BrowserComputerRuntime.mjs: browser host that instantiates the existing EventBus, StateStore, registries, VFS/intake, shell manager, automata, process fabric, backend broker, capability graph, morph engine, cultivation, policy, mutation dispatcher, project workspace, micros and system adapters.
+- Browser host capability truth table: browser-safe paths are registered WIRED; Node-only address/state/event/world/penta/experiment services are registered PRESENT with explicit environment blockers.
+- computer/tests/browser-runtime.test.mjs: project create/write/read -> artifact intake -> mount contract -> artifact read -> persisted restart recovery.
+- PWA files: public/manifest.webmanifest, public/synthai-icon.svg, public/sw.js.
+- Native Android shell under android-app/ (package app.synthai.computer, minSdk 26, target/compileSdk 35) using a WebView asset host to load the exact staged public Computer app.
+- .github/workflows/github-only-app.yml: checkout including repository-declared donor submodule, install ephem, run npm test, install Android SDK 35 + Gradle 8.7, copy public assets, assemble debug APK, record SHA-256, upload artifact.
+- .github/GITHUB_ONLY_APP.md build note.
+
+CONNECTED:
+- Browser launch -> BrowserComputerRuntime.boot -> existing browser-safe runtime components.
+- Project workspace -> real VFS -> persisted StateStore.
+- Artifact intake -> VFS -> mutation dispatcher -> shell mount -> app contract -> artifact read.
+- Web build -> public/computer-runtime staged modules.
+- Android MainActivity -> WebView synthetic HTTPS origin -> packaged public/index.html -> packaged computer-app.mjs -> packaged BrowserComputerRuntime and existing runtime modules.
+- GitHub Actions -> repository tests -> browser staging -> Android packaging -> APK artifact upload.
+
+STATUS:
+- Full Node ComputerRuntime: VERIFIED (existing acceptance/runtime path re-executed in final workflow).
+- BrowserComputerRuntime project/artifact/mount/restart path: VERIFIED by computer/tests/browser-runtime.test.mjs.
+- Browser application assembly: WIRED. Static staging is verified; a real external browser/PWA install was not executed in this workflow.
+- Android APK build/package path: VERIFIED. Gradle :app:assembleDebug completed and artifact was uploaded.
+- Android on-device launch/touch interaction: WIRED, NOT VERIFIED. The APK was built and inspected for required assets/classes, but no physical device/emulator launch was executed in this change.
+- GitHub publication bridge from inside the app: PARTIALLY WIRED. Adapter/UI are real; successful live publication still requires reachable Synthia Server + valid Computer access token.
+- Node-only services inside browser host (resolve_address, resolve_state, emit_event, automata_activation gateway, world_engine, penta_ephemeris, experiment_loop): PRESENT in the repository/full Node host, intentionally not claimed as browser-wired.
+- Skynthia visual renderer: PRESENT/NOT CONNECTED. Existing acceptance output still reports "renderer NOT FOUND"; this change does not disguise that gap.
+
+TESTED:
+- Final GitHub Actions run: https://github.com/justappgrabbin/SynthAi/actions/runs/35947167590
+- npm test exact result: tests 24, pass 24, fail 0, skipped 0.
+- Browser host subtest: "browser host executes project + mount path and survives restart" -> PASS.
+- Existing one-real-event milestone still PASS: EVENT->ADDRESS->STATE-SPACE->AUTOMATA->ROUTE->ACTION->RESULT->CONSUMPTION->VERIFY->STATE TRANSITION->TRAJECTORY->REPLAY.
+- Android build exact result: BUILD SUCCESSFUL; 32 actionable tasks, 32 executed; :app:assembleDebug PASS.
+- GitHub Actions artifact: SynthAI-Computer-debug, artifact id 10787212505, workflow artifact digest sha256:a2654f5b7b9c32cfe6a5bcc10b62941d6789e8c0b1da0188eadbcb3a9cc727f4.
+- Extracted APK size: 34,642 bytes.
+- APK SHA-256: 36ac75b5dbffaf96e3efccabb0d0089c25dd48d3dbe748e391b13d1cebc1eadb.
+- APK content inspection confirmed AndroidManifest.xml, classes.dex, assets/index.html, assets/computer-app.mjs, assets/computer.css, assets/computer-runtime/BrowserComputerRuntime.mjs, kernel, storage and projects modules are packaged.
+
+FAILED / REPAIRED DURING THIS CHANGE:
+- Run #1: new browser test called contract.readArtifact instead of contract.services.readArtifact. Test error only; corrected. Existing 23 tests all passed.
+- Run #2: android-actions/setup-android default package list requested obsolete SDK package "tools". Browser/runtime verification passed; Android step failed before compilation.
+- Runs #3/#4: temporary runner-SDK path assumption did not hold. No app compile occurred.
+- Run #5: Android action configured with explicit non-obsolete packages (platform-tools, platforms;android-35, build-tools;35.0.0) -> all verification/build/upload steps PASS.
+
+REMAINS DISCONNECTED / BLOCKED:
+- No claim of physical Android device execution until the APK is installed/launched and observable UI behavior is checked.
+- No claim of live GitHub push from inside the app without Synthia Server/token.
+- No claim that Node-only donor services run inside the browser host.
+- Existing renderer gap and penta position-formula placeholder remain preserved and explicitly reported.
