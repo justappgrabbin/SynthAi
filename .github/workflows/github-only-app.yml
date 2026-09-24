@@ -70,20 +70,7 @@ jobs:
           arch: x86_64
           profile: pixel_6
           disable-animations: true
-          script: |
-            adb install -r android-app/app/build/outputs/apk/debug/app-debug.apk
-            adb logcat -c
-            adb shell am start -W -n app.synthai.computer/.MainActivity
-            for attempt in $(seq 1 30); do
-              if adb logcat -d -s SynthAIComputer:I '*:S' | grep -q 'RUNTIME_READY=true'; then
-                echo "Android runtime verification: RUNTIME_READY=true"
-                exit 0
-              fi
-              sleep 1
-            done
-            echo "Android runtime verification failed"
-            adb logcat -d -s SynthAIComputer:I '*:S'
-            exit 1
+          script: bash .github/scripts/android-smoke.sh
 
       - name: Record APK checksum
         run: |
