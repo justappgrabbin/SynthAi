@@ -45,15 +45,16 @@
           <div>
             <span class="pill">SynthAI Computer</span>
             <h2>Your work lives here first.</h2>
-            <p>Build projects, keep their files in the Computer, publish through GitHub, and mount the rest of the SynthAI family into one operating home as each runtime becomes available.</p>
+            <p>Create projects and edit their files on this device. The Computer connects to its embedded Linux runtime automatically when available; GitHub publishing is optional.</p>
           </div>
           <button class="primary big" data-go="build">Create something</button>
         </div>
+        <p id="runtimeEvidence" class="muted" role="status">Starting the Computer…</p>
 
         <div class="status-grid">
-          <article><small>Computer runtime</small><strong id="runtimeStatus">PRESENT</strong><span id="runtimeDetail">booting</span></article>
-          <article><small>Project workspace</small><strong id="projectStatus">WIRED</strong><span id="projectCount">0 projects</span></article>
-          <article><small>GitHub creation</small><strong id="githubStatus">PRESENT</strong><span id="githubDetail">not connected</span></article>
+          <article><small>On-device Computer</small><strong id="runtimeStatus">STARTING</strong><span id="runtimeDetail">booting</span></article>
+          <article><small>Project workspace</small><strong id="projectStatus">WAITING</strong><span id="projectCount">0 projects</span></article>
+          <article><small>GitHub publishing (optional)</small><strong id="githubStatus">NOT CONNECTED</strong><span id="githubDetail">connect when you want to publish</span></article>
           <article><small>Mounted apps</small><strong id="mountStatus">WIRED</strong><span id="mountCount">0 mounted</span></article>
         </div>
 
@@ -63,7 +64,7 @@
             <div id="recentProjects" class="empty">No local projects yet.</div>
           </article>
           <article class="panel">
-            <div class="panel-head"><div><small>REGISTERED FAMILY</small><h3>Computer occupants</h3></div></div>
+            <div class="panel-head"><div><small>REGISTERED COMPONENTS</small><h3>Computer registry</h3></div></div>
             <div id="homeSystems" class="system-list"></div>
           </article>
         </div>
@@ -73,6 +74,7 @@
         <div class="builder-grid">
           <article class="panel project-panel">
             <div class="panel-head"><div><small>PROJECT</small><h3>Build workspace</h3></div><span class="pill" id="projectState">no project</span></div>
+            <p id="workspaceNotice" class="muted" role="status">Waiting for the on-device Computer to start.</p>
             <label>Project name<input id="projectName" placeholder="My app"></label>
             <label>Description<input id="projectDescription" placeholder="What this project is for"></label>
             <div class="row">
@@ -111,26 +113,35 @@
       <section class="view" id="github">
         <div class="two">
           <article class="panel">
-            <div class="panel-head"><div><small>SERVER BRIDGE</small><h3>GitHub connection</h3></div><strong id="githubPanelState">PRESENT</strong></div>
-            <p class="muted">The GitHub credential stays on Synthia Server. This Computer stores only the server URL and your Computer access token on this device.</p>
-            <label>Synthia Server URL<input id="serverUrl" value="https://synthia-server.onrender.com"></label>
-            <label>Computer access token<input id="computerToken" type="password" placeholder="TERMINAL_TOKEN"></label>
-            <div class="row">
-              <button class="primary" id="connectGitHub">Connect and verify</button>
-              <button class="quiet" id="refreshRepos">Refresh repos</button>
-            </div>
-            <div id="githubMessage" class="message">Not verified yet.</div>
+            <div class="panel-head"><div><small>OPTIONAL PUBLISHING</small><h3>GitHub connection</h3></div><strong id="githubPanelState">NOT CONNECTED</strong></div>
+            <p class="muted">The on-device Computer starts without a server URL. Publishing to GitHub requires an authorized GitHub connection. If you use the separate Synthia Server bridge, configure it here.</p>
+            <details>
+              <summary>Configure Synthia Server for GitHub publishing</summary>
+              <p class="muted">The GitHub credential stays on Synthia Server. This device keeps only the bridge URL and its access token.</p>
+              <label>Synthia Server URL<input id="serverUrl" placeholder="https://synthia-server.onrender.com"></label>
+              <label>Computer access token<input id="computerToken" type="password" placeholder="Access token for your server"></label>
+              <div class="row">
+                <button class="primary" id="connectGitHub">Connect and verify</button>
+                <button class="quiet" id="refreshRepos">Refresh repos</button>
+              </div>
+            </details>
+            <div id="githubMessage" class="message">GitHub publishing is optional. Your local projects work without it.</div>
           </article>
           <article class="panel">
             <div class="panel-head"><div><small>REPOSITORIES</small><h3>GitHub workspace</h3></div><span id="repoCount" class="pill">0</span></div>
-            <div id="repoList" class="repo-list empty">Connect to load repositories.</div>
+            <div id="repoList" class="repo-list empty">Configure GitHub publishing to load repositories.</div>
           </article>
         </div>
       </section>
 
       <section class="view" id="systems">
         <article class="panel">
-          <div class="panel-head"><div><small>MACRO REGISTRY</small><h3>SynthAI family</h3></div></div>
+          <div class="panel-head"><div><small>VERIFIED LOCAL RUNTIME</small><h3>Services running on this device</h3></div></div>
+          <div id="localServiceList" class="system-list"></div>
+        </article>
+        <article class="panel">
+          <div class="panel-head"><div><small>MACRO REGISTRY</small><h3>Registered components</h3></div></div>
+          <p class="muted">A registered component may be available for integration without running on this device.</p>
           <div id="systemsList" class="cards"></div>
         </article>
       </section>

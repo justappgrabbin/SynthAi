@@ -88,6 +88,7 @@ const calls = new Map([
   ['project.readFile', args => runtime.projects.readFile(...args)],
   ['project.listFiles', args => runtime.projects.listFiles(...args)],
   ['project.snapshot', args => runtime.projects.snapshot(...args)],
+  ['project.recordPublication', args => runtime.projects.recordPublication(...args)],
   ['mountApplication', args => runtime.mountApplication(...args)]
 ]);
 

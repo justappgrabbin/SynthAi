@@ -5,6 +5,9 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { spawn } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
+import { BrowserComputerRuntime } from '../BrowserComputerRuntime.mjs';
+import { DeviceProjectWorkspace } from '../adapters/DeviceProjectWorkspace.mjs';
+import { MemoryPersistence } from '../core/kernel.mjs';
 
 const SERVER = fileURLToPath(new URL('../backend/local-server.mjs', import.meta.url));
 
@@ -108,11 +111,36 @@ test('local Computer backend serves the canonical runtime and persists through r
     assert.ok(health.body.services.includes('address-service'));
     assert.ok(health.body.services.includes('penta-ephemeris'));
 
+    const preflight = await fetch(base1 + '/rpc', {
+      method: 'OPTIONS',
+      headers: { Origin: 'https://appassets.androidplatform.net', 'Access-Control-Request-Headers': 'authorization,content-type' }
+    });
+    assert.equal(preflight.status, 204);
+    assert.equal(preflight.headers.get('access-control-allow-origin'), 'https://appassets.androidplatform.net');
+
     const snapshot = await rpc(base1, token, 'snapshot');
     assert.match(snapshot.version, /^0\.2\.0/);
 
-    const project = await rpc(base1, token, 'project.create', { name: 'Inside the Computer' });
-    await rpc(base1, token, 'project.writeFile', project.id, 'index.html', '<h1>local</h1>', { type: 'text/html' });
+    const browser = await new BrowserComputerRuntime({ persistence: new MemoryPersistence() }).boot();
+    const oldProject = await browser.projects.create({ name: 'Existing browser project' });
+    await browser.projects.writeFile(oldProject.id, 'index.html', '<h1>older</h1>', { type: 'text/html' });
+    await browser.connectLocalBackend({ baseUrl: base1, token });
+    const workspace = new DeviceProjectWorkspace({ runtime: browser });
+    await workspace.attach();
+    assert.equal(workspace.source(oldProject.id), 'browser');
+
+    const project = await workspace.create({ name: 'Inside the Computer' });
+    await workspace.writeFile(project.id, 'index.html', '<h1>local</h1>', { type: 'text/html' });
+    assert.equal(workspace.source(project.id), 'device');
+    assert.equal((await workspace.readFile(project.id, 'index.html')).content, '<h1>local</h1>');
+
+    browser.configureGitHub({
+      baseUrl: 'https://example.invalid', token: 'test-token',
+      fetchImpl: async () => ({ ok: true, text: async () => JSON.stringify({ repo: { url: 'https://github.com/example/demo' } }) })
+    });
+    const published = await workspace.publish(project.id);
+    assert.equal(published.repo.url, 'https://github.com/example/demo');
+    assert.equal(workspace.get(project.id).status, 'published');
 
     const penta = await rpc(base1, token, 'groupPenta', [{
       label: 'probe',
@@ -137,6 +165,11 @@ test('local Computer backend serves the canonical runtime and persists through r
 
     const restoredFile = await rpc(base2, token, 'project.readFile', project.id, 'index.html');
     assert.equal(restoredFile.content, '<h1>local</h1>');
+    await browser.connectLocalBackend({ baseUrl: base2, token });
+    await workspace.attach();
+    assert.equal(workspace.get(project.id).status, 'published');
+    assert.equal((await workspace.readFile(oldProject.id, 'index.html')).content, '<h1>older</h1>');
+    assert.equal(workspace.list().length, 2);
   } finally {
     if (first) await stop(first.child);
     if (second) await stop(second.child);

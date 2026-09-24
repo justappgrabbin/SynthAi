@@ -34,6 +34,8 @@ public final class MainActivity extends Activity {
     private WebView webView;
     private boolean pageReady;
     private boolean backendAttached;
+    private boolean backendAttachInFlight;
+    private boolean backendErrorReported;
     private int attachAttempts;
 
     @Override
@@ -67,38 +69,67 @@ public final class MainActivity extends Activity {
     }
 
     private void attachLocalBackendWhenReady() {
-        if (!pageReady || backendAttached || webView == null) return;
+        if (!pageReady || backendAttached || backendAttachInFlight || webView == null) return;
+
+        String failure = ComputerBackendService.failure();
+        if (failure != null) {
+            reportBackendError(failure);
+            return;
+        }
 
         if (ComputerBackendService.isReady()) {
             String base = JSONObject.quote(LinuxContainer.BASE_URL);
             String secret = JSONObject.quote(ComputerBackendService.sessionSecret(this));
             String js =
-                    "(async()=>{try{" +
+                    "(()=>{" +
                     "const c=globalThis.SynthAIComputer;" +
-                    "if(!c||typeof c.connectLocalBackend!=='function') throw new Error('browser Computer bridge unavailable');" +
-                    "const e=await c.connectLocalBackend({baseUrl:" + base + ",token:" + secret + ",timeoutMs:3000});" +
-                    "return JSON.stringify({ok:true,environment:e.health.environment,version:e.health.version});" +
-                    "}catch(e){return JSON.stringify({ok:false,error:String(e&&e.message||e)});}})()";
+                    "if(!c||typeof c.connectLocalBackend!=='function')return 'not-ready';" +
+                    "c.connectLocalBackend({baseUrl:" + base + ",token:" + secret + ",timeoutMs:3000})" +
+                    ".catch(e=>window.dispatchEvent(new CustomEvent('synthai-local-backend-error'," +
+                    "{detail:{message:String(e&&e.message||e)}})));" +
+                    "return 'connecting';})()";
 
+            backendAttachInFlight = true;
             webView.evaluateJavascript(js, value -> {
-                Log.i(TAG, "LOCAL_BACKEND_JS_RESULT=" + value);
-                webView.evaluateJavascript(
-                        "Boolean(globalThis.SynthAIComputer && globalThis.SynthAIComputer.snapshot && globalThis.SynthAIComputer.snapshot().localBackend && globalThis.SynthAIComputer.snapshot().localBackend.status === 'VERIFIED')",
-                        verified -> {
-                            Log.i(TAG, "LOCAL_BACKEND_BROWSER_READY=" + verified);
-                            backendAttached = "true".equals(verified);
-                        }
-                );
+                if ("\"not-ready\"".equals(value)) {
+                    backendAttachInFlight = false;
+                    handler.postDelayed(this::attachLocalBackendWhenReady, 500);
+                    return;
+                }
+                handler.postDelayed(() -> {
+                    if (webView == null) return;
+                    webView.evaluateJavascript(
+                            "Boolean(globalThis.SynthAIComputer && globalThis.SynthAIComputer.snapshot && globalThis.SynthAIComputer.snapshot().localBackend?.status === 'VERIFIED')",
+                            verified -> {
+                                Log.i(TAG, "LOCAL_BACKEND_BROWSER_READY=" + verified);
+                                backendAttached = "true".equals(verified);
+                                backendAttachInFlight = false;
+                                if (!backendAttached) {
+                                    attachAttempts += 1;
+                                    handler.postDelayed(this::attachLocalBackendWhenReady, 1000);
+                                }
+                            }
+                    );
+                }, 7500);
             });
             return;
         }
 
         attachAttempts += 1;
-        if (attachAttempts < 360) {
+        if (attachAttempts < 600) {
             handler.postDelayed(this::attachLocalBackendWhenReady, 500);
         } else {
-            Log.e(TAG, "LOCAL_BACKEND_ATTACH_TIMEOUT failure=" + ComputerBackendService.failure());
+            Log.e(TAG, "LOCAL_BACKEND_ATTACH_TIMEOUT");
+            reportBackendError("The embedded Linux Computer did not start within five minutes.");
         }
+    }
+
+    private void reportBackendError(String message) {
+        if (backendErrorReported || webView == null) return;
+        backendErrorReported = true;
+        webView.evaluateJavascript("window.SynthAIAndroidBackendError=" + JSONObject.quote(message) + ";" +
+                "window.dispatchEvent(new CustomEvent('synthai-local-backend-error'," +
+                "{detail:{message:window.SynthAIAndroidBackendError}}))", null);
     }
 
     @Override
@@ -165,6 +196,9 @@ public final class MainActivity extends Activity {
         public void onPageFinished(WebView view, String url) {
             super.onPageFinished(view, url);
             pageReady = true;
+            backendAttached = false;
+            backendAttachInFlight = false;
+            backendErrorReported = false;
             attachAttempts = 0;
             Log.i(TAG, "PAGE_FINISHED " + url);
             view.postDelayed(() -> view.evaluateJavascript(

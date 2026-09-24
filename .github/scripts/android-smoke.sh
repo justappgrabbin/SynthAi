@@ -12,8 +12,8 @@ adb shell am start -n app.synthai.computer/.MainActivity || true
 for attempt in $(seq 1 120); do
   LOGS="$(adb logcat -d -s "$TAG:I" '*:S' 2>/dev/null || true)"
 
-  if grep -q 'RUNTIME_READY=true' <<<"$LOGS"; then
-    echo "Android runtime verification: RUNTIME_READY=true"
+  if grep -q 'RUNTIME_READY=true' <<<"$LOGS" && grep -q 'LOCAL_COMPUTER_UI_STATUS=UNAVAILABLE' <<<"$LOGS"; then
+    echo "Android x86_64 verification: browser boots and labels the ARM64 backend unavailable"
     echo "$LOGS"
     exit 0
   fi
@@ -31,7 +31,7 @@ for attempt in $(seq 1 120); do
   sleep 1
 done
 
-echo "Android runtime verification failed: no RUNTIME_READY=true marker"
+echo "Android runtime verification failed: no browser boot and unavailable status markers"
 adb logcat -d -s "$TAG:I" '*:S' || true
 adb shell dumpsys activity activities | grep -A 8 -B 3 'app.synthai.computer' || true
 exit 1
