@@ -24,7 +24,7 @@ android {
     }
 
     androidResources {
-        noCompress += ['tar.gz']
+        noCompress += ['bundle']
     }
 
     packaging {

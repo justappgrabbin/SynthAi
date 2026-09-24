@@ -22,7 +22,8 @@ import java.util.List;
 
 final class RootfsInstaller {
     private static final String TAG = "SynthAIComputer";
-    private static final String ROOTFS_ASSET = "linux-rootfs.tar.gz";
+    // Android's asset packager expands .gz assets and removes the suffix.
+    private static final String ROOTFS_ASSET = "linux-rootfs.bundle";
     private static final String VERSION_ASSET = "linux-rootfs.version";
 
     static final class Result {
