@@ -5,6 +5,7 @@ import { CapabilityGraph, MorphEngine, CultivationEngine, PolicyEngine } from '.
 import { ShellManager, MutationDispatcher } from './runtime/shells.mjs';
 import { ProjectWorkspace } from './runtime/projects.mjs';
 import { GitHubWorkspaceAdapter } from './adapters/GitHubWorkspaceAdapter.mjs';
+import { LocalComputerBackendAdapter } from './adapters/LocalComputerBackendAdapter.mjs';
 import { registerCanonicalMicros } from './micros/MicroRegistry.mjs';
 import { registerSystemAdapters } from './adapters/SystemAdapters.mjs';
 
@@ -20,6 +21,9 @@ import { registerSystemAdapters } from './adapters/SystemAdapters.mjs';
 export class BrowserComputerRuntime {
   constructor({ persistence = new MemoryPersistence(), namespace = 'synthai-computer-browser', github = null } = {}) {
     this.environment = 'browser';
+    this.localBackend = null;
+    this.localBackendVerified = false;
+    this.localBackendHealth = null;
     this.bus = new EventBus();
     this.state = new StateStore({ bus: this.bus, persistence, namespace });
     const registry = kind => new Registry({ kind, bus: this.bus });
@@ -128,6 +132,81 @@ export class BrowserComputerRuntime {
     }
   }
 
+  async connectLocalBackend(config = {}) {
+    const adapter = config instanceof LocalComputerBackendAdapter
+      ? config
+      : new LocalComputerBackendAdapter(config);
+
+    const evidence = await adapter.verify();
+    this.localBackend = adapter;
+    this.localBackendVerified = true;
+    this.localBackendHealth = evidence.health;
+    this.backends.register('local-computer', adapter, { replace: true });
+
+    const localCapabilities = [
+      ['resolve_address', 'Address resolution through the canonical ComputerRuntime inside the local Linux host.'],
+      ['resolve_state', 'State resolution through the canonical ComputerRuntime inside the local Linux host.'],
+      ['emit_event', 'Append-only Computer event emission through the local Linux host.'],
+      ['automata_activation', 'Recovered automata organism execution through the local Linux host.'],
+      ['world_engine', 'Embodied world engine through the local Linux host.'],
+      ['penta_ephemeris', 'Python/PyEphem penta service hosted inside the local Linux host.'],
+      ['experiment_loop', 'Experiment loop hosted inside the local Linux host.']
+    ];
+
+    for (const [id, description] of localCapabilities) {
+      this.capabilityRegistry.register(id, {
+        providers: ['local-linux-computer', 'full-computer-runtime'],
+        requires: [],
+        description,
+        status: 'WIRED',
+        blocker: null
+      }, { replace: true });
+
+      this.services.register(id, {
+        source: 'local ComputerRuntime RPC',
+        status: 'WIRED',
+        environment: 'linux-local',
+        endpoint: adapter.baseUrl
+      }, { replace: true });
+    }
+
+    await this.state.set('computer.localBackend', {
+      status: 'VERIFIED',
+      environment: evidence.health.environment,
+      version: evidence.health.version,
+      endpoint: adapter.baseUrl,
+      at: Date.now()
+    }, { source: 'local-backend' });
+
+    this.bus.emit('local-backend:verified', {
+      endpoint: adapter.baseUrl,
+      environment: evidence.health.environment,
+      version: evidence.health.version,
+      services: evidence.health.services
+    });
+
+    return evidence;
+  }
+
+  requireLocalBackend() {
+    if (!this.localBackendVerified || !this.localBackend) {
+      throw new Error('local Computer backend is not verified');
+    }
+    return this.localBackend;
+  }
+
+  queryCapability(name) { return this.requireLocalBackend().rpc('queryCapability', name); }
+  route(capability, ctx = {}) { return this.requireLocalBackend().rpc('route', capability, ctx); }
+  resolveAddress(input, options) { return this.requireLocalBackend().rpc('resolveAddress', input, options); }
+  compareAddresses(a, b) { return this.requireLocalBackend().rpc('compareAddresses', a, b); }
+  resolveRelationship(a, b, context) { return this.requireLocalBackend().rpc('resolveRelationship', a, b, context); }
+  resolveState(entity, event, context) { return this.requireLocalBackend().rpc('resolveState', entity, event, context); }
+  emitEvent(event) { return this.requireLocalBackend().rpc('emitEvent', event); }
+  executeOnSwarm(capability, input, ctx) { return this.requireLocalBackend().rpc('executeOnSwarm', capability, input, ctx); }
+  worldEvent(event) { return this.requireLocalBackend().rpc('worldEvent', event); }
+  observeWorld() { return this.requireLocalBackend().rpc('observeWorld'); }
+  groupPenta(members) { return this.requireLocalBackend().rpc('groupPenta', members); }
+
   async boot() {
     await this.state.restore();
 
@@ -204,7 +283,13 @@ export class BrowserComputerRuntime {
       backends: this.backendsRegistry.list().map(({ id, status }) => ({ id, status })),
       capabilities: this.capabilityRegistry.list(),
       services: this.services.list(),
-      mounted: this.shellManager.listMounted()
+      mounted: this.shellManager.listMounted(),
+      localBackend: this.localBackendVerified ? {
+        status: 'VERIFIED',
+        endpoint: this.localBackend?.baseUrl,
+        environment: this.localBackendHealth?.environment,
+        version: this.localBackendHealth?.version
+      } : { status: 'PRESENT' }
     };
   }
 }
