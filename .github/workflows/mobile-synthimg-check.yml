@@ -1,0 +1,47 @@
+name: Mobile SynthIMG Check
+
+on:
+  pull_request:
+    paths:
+      - 'computer/mobile/**'
+      - 'computer/native/**'
+      - 'computer/runtime/**'
+      - 'computer/worlds/**'
+      - 'computer/residents/**'
+      - 'computer/tests/**'
+      - 'computer/build-web.mjs'
+      - 'public/mobile-computer.html'
+      - 'public/synthimg-sw.js'
+      - '.github/workflows/mobile-synthimg-check.yml'
+  push:
+    branches:
+      - 'mobile/synthimg-computer'
+
+permissions:
+  contents: read
+
+jobs:
+  mobile-synthimg:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Mobile SynthIMG acceptance
+        run: node --test computer/tests/device-world-resolver.test.mjs computer/tests/interface-brick-recognizer.test.mjs computer/tests/indiverse-world-profile.test.mjs computer/tests/phone-world.test.mjs computer/tests/purpose-guide.test.mjs computer/tests/task-fit.test.mjs computer/tests/mobile-synthimg.test.mjs computer/tests/resident-mesh-indiverse.test.mjs computer/tests/world-federation.test.mjs computer/tests/synthia57-resident.test.mjs computer/tests/synthia57-package-loader.test.mjs computer/tests/consciousness-realm-adapter.test.mjs computer/tests/world-adapters.test.mjs computer/tests/termux-compiler.test.mjs
+      - name: Stage browser runtime
+        run: node computer/build-web.mjs
+      - name: Verify staged launcher dependencies
+        run: |
+          test -f public/computer-runtime/mobile/MobileComputerRuntime.mjs
+          test -f public/computer-runtime/mobile/SynthImageRuntime.mjs
+          test -f public/computer-runtime/runtime/mesh-kernel.mjs
+          test -f public/computer-runtime/worlds/indiverse.mjs
+          test -f public/computer-runtime/worlds/world-federation.mjs
+          test -f public/computer-runtime/residents/synthia57-resident.mjs
+          test -f public/computer-runtime/residents/synthia57-package-loader.mjs
+          test -f public/computer-runtime/donors/recovered/you-n-i-verse-corrected/state-space-engine-v2.ported.mjs
+          test -f public/mobile-computer.html
+          test -f public/synthimg-sw.js

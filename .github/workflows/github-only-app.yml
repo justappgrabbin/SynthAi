@@ -57,8 +57,14 @@ jobs:
           docker buildx build \
             --platform linux/arm64 \
             --file android-app/linux/Dockerfile \
-            --output type=local,dest=/tmp/synthai-linux-rootfs \
+            --tag "synthai-computer-arm64:$GITHUB_SHA" \
+            --load \
             .
+          node .github/scripts/arm64-backend-smoke.mjs "synthai-computer-arm64:$GITHUB_SHA"
+          mkdir -p /tmp/synthai-linux-rootfs
+          container="$(docker create --platform linux/arm64 "synthai-computer-arm64:$GITHUB_SHA")"
+          docker export "$container" | tar -C /tmp/synthai-linux-rootfs -xf -
+          docker rm "$container"
           test -f /tmp/synthai-linux-rootfs/opt/synthai/computer/backend/local-server.mjs
           test -x /tmp/synthai-linux-rootfs/usr/local/bin/node
           test -x /tmp/synthai-linux-rootfs/usr/bin/python3
@@ -143,6 +149,8 @@ jobs:
           grep -q 'lib/arm64-v8a/libproot-loader32.so' /tmp/apk-tree.txt
           grep -q 'assets/computer-runtime/BrowserComputerRuntime.mjs' /tmp/apk-tree.txt
           grep -q 'assets/licenses/linux-runtime-provenance.txt' /tmp/apk-tree.txt
+          grep -q 'assets/computer-runtime/services/task-fit.mjs' /tmp/apk-tree.txt
+          grep -q 'assets/computer-runtime/residents/synthia57-resident.mjs' /tmp/apk-tree.txt
 
       - name: Enable KVM for Android emulator
         run: |

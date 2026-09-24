@@ -1,0 +1,336 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#12091d">
+<title>SynthAI Mobile Computer</title>
+<style>
+:root{color-scheme:dark;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#0d0714;color:#f8f4ff}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(circle at 30% -10%,#4a236b 0,#1a0e29 35%,#0d0714 70%);padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
+button,input,textarea{font:inherit}.app{max-width:780px;margin:auto;padding:18px 14px 50px}.top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:4px 2px 18px}
+.brand{font-weight:900;font-size:20px;letter-spacing:-.03em}.sub{font-size:12px;color:#b8a9c8}.pill{border:1px solid #6e4e87;background:#1d1029;border-radius:999px;padding:7px 10px;color:#dec7ef;font-size:12px}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.card{border:1px solid #49315d;background:linear-gradient(180deg,#1c1028e8,#130b1de8);border-radius:20px;padding:15px;box-shadow:0 18px 45px #0004}
+.card h2,.card h3{margin:6px 0 7px}.card p{margin:0;color:#b9abc4;font-size:13px;line-height:1.45}.mode{cursor:pointer;min-height:124px}.mode.selected{border-color:#c290e9;box-shadow:0 0 0 1px #c290e955,0 18px 45px #0005}
+.section{margin-top:12px}.wide{grid-column:1/-1}.drop{border:1px dashed #815aa1;border-radius:17px;padding:18px;text-align:center;background:#150c20;position:relative}
+.drop input{position:absolute;inset:0;opacity:0;width:100%;height:100%;cursor:pointer}.primary,.secondary,.danger{border:0;border-radius:13px;padding:10px 13px;font-weight:800;cursor:pointer}.primary{background:#9a66c5;color:white}.secondary{background:#30203e;color:#e8daf3}.danger{background:#3a1e34;color:#ffcfe8}.actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:11px}
+.status{font-size:12px;color:#cbb8d8;margin-top:9px;min-height:18px}.apps{display:grid;gap:10px}.appcard{display:flex;flex-direction:column;gap:8px}.row{display:flex;align-items:center;justify-content:space-between;gap:10px}.life{font-size:11px;font-weight:900;letter-spacing:.1em;color:#d4b1ef}
+input[type=text],textarea{width:100%;border:1px solid #4e3860;border-radius:13px;background:#0e0815;color:#f9f4ff;padding:11px;outline:none}textarea{min-height:118px;resize:vertical;font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:12px}
+pre{white-space:pre-wrap;word-break:break-word;background:#0c0712;border-radius:13px;padding:11px;margin:10px 0 0;color:#d9cce2;font-size:11px;max-height:260px;overflow:auto}
+.viewer{width:100%;height:62vh;border:1px solid #513a63;border-radius:18px;background:white;margin-top:10px}.hidden{display:none}.metric{font-size:28px;font-weight:900;letter-spacing:-.04em}.tiny{font-size:11px;color:#9d8ca9}
+.indi-controls{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin-top:12px}.indi-control{display:grid;gap:5px}.indi-control label{font-size:10px;font-weight:900;letter-spacing:.08em;color:#bfa7d1}.indi-control select,.indi-control input{width:100%;border:1px solid #4e3860;border-radius:12px;background:#0e0815;color:#f9f4ff;padding:10px;min-height:42px}.indi-control input[type=color]{padding:4px;height:44px}
+.indi-stage{position:relative;margin-top:12px;min-height:250px;border:1px solid #513a63;border-radius:18px;overflow:hidden;background:radial-gradient(circle at 50% 20%,#362148,#130b1d 65%);display:grid;place-items:center}.indi-house{position:relative;width:190px;height:145px;transition:.25s transform}.indi-wall{position:absolute;left:20px;right:20px;top:42px;bottom:12px;border:2px solid #fff8;border-radius:8px;background:var(--house,#b46ee8);box-shadow:0 18px 45px #0008}.indi-roof{position:absolute;left:3px;top:0;width:0;height:0;border-left:92px solid transparent;border-right:92px solid transparent;border-bottom:55px solid var(--roof,#d9a8ff);filter:drop-shadow(0 8px 8px #0006);transition:.25s}.indi-roof.floor{top:auto;bottom:-20px;transform:rotate(180deg)}.indi-door{position:absolute;width:38px;height:64px;left:76px;bottom:12px;border:2px solid #fff8;background:#160b20;border-radius:7px 7px 0 0;transition:.25s}.indi-door.high{bottom:62px;border-radius:7px}.indi-grapple{position:absolute;right:18px;top:18px;font-size:32px;filter:drop-shadow(0 5px 7px #0008)}.indi-caption{position:absolute;left:12px;right:12px;bottom:8px;text-align:center;font-size:11px;color:#eee;background:#0b0710cc;border-radius:10px;padding:7px}.indi-tabs{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}.indi-tabs button.active{outline:1px solid #d8a9ff;background:#6c3d8d}
+@media(max-width:560px){.indi-controls{grid-template-columns:1fr}}
+@media(max-width:560px){.grid{grid-template-columns:1fr}.wide{grid-column:auto}.viewer{height:68vh}.app{padding-inline:11px}.top{align-items:flex-start;flex-direction:column}}
+</style>
+</head>
+<body>
+<main class="app">
+  <div class="top">
+    <div><div class="brand">SynthAI Computer</div><div class="sub">Mobile SynthIMG runtime · same brain, lighter substrate</div></div>
+    <div class="pill" id="boot">BOOTING</div>
+  </div>
+
+  <div class="grid">
+    <section class="card mode selected" data-mode="compact">
+      <div class="life">COMPACT</div><h2>Wake what I need</h2>
+      <p>Restore checkpoints first. Apps and heavy state wake only when summoned.</p>
+    </section>
+    <section class="card mode" data-mode="full">
+      <div class="life">FULL</div><h2>Wake the room</h2>
+      <p>Same Computer, but mounted apps start ACTIVE instead of WARM.</p>
+    </section>
+  </div>
+
+  <section class="card section">
+    <div class="row"><div><div class="life">SYNTH IMAGE</div><h2>Install an app</h2></div><div class="metric">📦</div></div>
+    <div class="drop">
+      <strong>Tap to choose a .synthimg</strong><br><span class="tiny">SHA-256 verified before install · files stay in device cache</span>
+      <input id="imageFile" type="file" accept=".synthimg,application/octet-stream">
+    </div>
+    <div class="status" id="imageStatus"></div>
+  </section>
+
+  <section class="card section">
+    <div class="row"><div><div class="life">INSTALLED</div><h2>Apps</h2></div><span class="pill" id="appCount">0</span></div>
+    <div class="apps" id="apps"><p>No Synth images installed yet.</p></div>
+  </section>
+
+  <section class="card section">
+    <div class="row"><div><div class="life">UNIVERSAL STATE-SPACE</div><h2>Relocate an address</h2></div><div class="metric">◉</div></div>
+    <p>Paste a full or partial canonical address. Gate/Line/Color/Tone/Base activate the recovered five-stage state-space locally.</p>
+    <textarea id="address">{
+  "planetary": "Sun",
+  "dimension": "Movement",
+  "gate": 25,
+  "line": 2,
+  "color": 4,
+  "tone": 4,
+  "base": 2,
+  "degree": 25,
+  "minute": 59,
+  "second": 31,
+  "arc": 93571,
+  "zodiac": "Virgo",
+  "house": 5
+}</textarea>
+    <div class="actions">
+      <button class="primary" id="activate">Activate state</button>
+      <button class="secondary" id="relocate">Find last state</button>
+    </div>
+    <pre id="stateResult">State-space ready.</pre>
+  </section>
+
+  <section class="card section">
+    <div class="row"><div><div class="life">INDIVERSE</div><h2>World grammar playground</h2></div><div class="metric">⌂</div></div>
+    <p>The house underneath stays the same canonical object. Change how your IndiVerse expresses it, then enter as a visitor and see what adaptation the world requires.</p>
+    <div class="indi-controls">
+      <div class="indi-control"><label>WORLD NAME</label><input id="indiName" type="text" value="My IndiVerse"></div>
+      <div class="indi-control"><label>HOUSE COLOR</label><input id="indiColor" type="color" value="#b46ee8"></div>
+      <div class="indi-control"><label>MATERIAL</label><select id="indiMaterial"><option>wood</option><option selected>bubblegum</option><option>glass</option><option>stone</option><option>cotton-candy</option></select></div>
+      <div class="indi-control"><label>ROOF</label><select id="indiRoof"><option value="up">normal top</option><option value="floor-plane" selected>on the ground</option></select></div>
+      <div class="indi-control"><label>ENTRY</label><select id="indiEntry"><option value="normal">normal door</option><option value="high" selected>door is hella high</option></select></div>
+      <div class="indi-control"><label>VISITOR HAS</label><select id="indiVisitor"><option value="">nothing useful</option><option value="vertical-access">vertical access</option><option value="grappling-hook">grappling hook</option></select></div>
+    </div>
+    <div class="indi-tabs">
+      <button class="secondary active" id="indiShared">Shared world</button>
+      <button class="secondary" id="indiHost">My IndiVerse</button>
+      <button class="secondary" id="indiVisit">Visit it</button>
+    </div>
+    <div class="indi-stage">
+      <div class="indi-house" id="indiHouse">
+        <div class="indi-roof" id="indiRoofShape"></div>
+        <div class="indi-wall" id="indiWall"></div>
+        <div class="indi-door" id="indiDoorShape"></div>
+      </div>
+      <div class="indi-grapple hidden" id="indiGrapple">🪝</div>
+      <div class="indi-caption" id="indiCaption">Shared world: canonical house.</div>
+    </div>
+    <pre id="indiResult">IndiVerse runtime ready.</pre>
+  </section>
+
+  <section class="section hidden" id="viewerWrap">
+    <div class="row"><div class="life" id="viewerTitle">ACTIVE APP</div><button class="secondary" id="closeViewer">Close view</button></div>
+    <iframe class="viewer" id="viewer" sandbox="allow-scripts allow-forms allow-same-origin allow-downloads"></iframe>
+  </section>
+</main>
+
+<script type="module">
+import { MobileComputerRuntime } from './computer-runtime/mobile/MobileComputerRuntime.mjs';
+
+const $ = id => document.getElementById(id);
+const computer = await new MobileComputerRuntime().boot();
+window.synthComputer = computer;
+
+try {
+  const sw = await computer.images.registerServiceWorker('/synthimg-sw.js');
+  $('boot').textContent = sw.supported ? 'READY' : 'READY · NO SW';
+} catch (error) {
+  $('boot').textContent = 'READY · SW ERROR';
+  console.warn(error);
+}
+
+let mode = computer.state.get('computer.launchProfile', 'compact');
+await computer.setLaunchProfile(mode);
+
+function setMode(next) {
+  mode = next;
+  computer.setLaunchProfile(next);
+  document.querySelectorAll('.mode').forEach(el => el.classList.toggle('selected', el.dataset.mode === next));
+}
+document.querySelectorAll('.mode').forEach(el => el.addEventListener('click', () => setMode(el.dataset.mode)));
+setMode(mode);
+
+function formatBytes(n=0) {
+  if (n < 1024) return n + ' B';
+  if (n < 1024*1024) return (n/1024).toFixed(1) + ' KB';
+  return (n/1024/1024).toFixed(1) + ' MB';
+}
+
+function renderApps() {
+  const images = computer.images.list();
+  $('appCount').textContent = String(images.length);
+  if (!images.length) {
+    $('apps').innerHTML = '<p>No Synth images installed yet.</p>';
+    return;
+  }
+  $('apps').innerHTML = '';
+  for (const app of images) {
+    const el = document.createElement('div');
+    el.className = 'card appcard';
+    el.innerHTML = `
+      <div class="row"><strong>${app.name}</strong><span class="life">${app.lifecycle.toUpperCase()}</span></div>
+      <div class="tiny">${app.version} · ${app.fileCount} files · ${formatBytes(app.storedPayloadBytes)} · ${app.payloadSha256.slice(0,12)}…</div>
+      <div class="tiny">${app.lastCheckpoint ? 'Checkpoint saved ' + new Date(app.lastCheckpoint.savedAt).toLocaleString() : 'No checkpoint yet'}</div>
+      <div class="actions">
+        <button class="primary" data-wake>Summon</button>
+        <button class="secondary" data-sleep>Sleep</button>
+      </div>`;
+    el.querySelector('[data-wake]').onclick = async () => {
+      try {
+        const result = await computer.launchSynthImage(app.id, { full: mode === 'full' });
+        $('viewer').src = result.launchUrl;
+        $('viewerTitle').textContent = `${app.name} · ${result.record.lifecycle.toUpperCase()}`;
+        $('viewerWrap').classList.remove('hidden');
+        renderApps();
+        $('viewerWrap').scrollIntoView({behavior:'smooth'});
+      } catch (error) { alert(error.message); }
+    };
+    el.querySelector('[data-sleep]').onclick = async () => {
+      await computer.sleepSynthImage(app.id);
+      if ($('viewerTitle').textContent.startsWith(app.name)) {
+        $('viewer').src = 'about:blank';
+        $('viewerWrap').classList.add('hidden');
+      }
+      renderApps();
+    };
+    $('apps').appendChild(el);
+  }
+}
+
+$('imageFile').addEventListener('change', async event => {
+  const file = event.target.files?.[0];
+  if (!file) return;
+  $('imageStatus').textContent = 'Verifying image…';
+  try {
+    const record = await computer.installSynthImage(file);
+    $('imageStatus').textContent = `Installed ${record.name}. SHA verified. ${record.fileCount} files cached.`;
+    renderApps();
+  } catch (error) {
+    $('imageStatus').textContent = 'Install failed: ' + error.message;
+  } finally {
+    event.target.value = '';
+  }
+});
+
+$('activate').onclick = async () => {
+  try {
+    const address = JSON.parse($('address').value);
+    const result = await computer.activateAddress(address);
+    $('stateResult').textContent = JSON.stringify({
+      addressKey: result.key,
+      dimension: result.state.node.dimension,
+      coherence: result.state.coherence,
+      node: result.state.node,
+      sentence: result.sentence,
+    }, null, 2);
+  } catch (error) {
+    $('stateResult').textContent = 'ERROR: ' + error.message;
+  }
+};
+
+$('relocate').onclick = async () => {
+  try {
+    const address = JSON.parse($('address').value);
+    const result = await computer.relocateAddress(address);
+    $('stateResult').textContent = JSON.stringify(result, null, 2);
+  } catch (error) {
+    $('stateResult').textContent = 'ERROR: ' + error.message;
+  }
+};
+
+const INDI_WORLD = 'indiverse:local-user';
+const INDI_OBJECT = 'house:canonical-demo';
+
+await computer.registerCanonicalWorldObject({
+  id: INDI_OBJECT,
+  kind: 'house',
+  function: 'residence',
+  topology: { rooms: 3, exteriorBoundary: true },
+  entryPoints: [{ id: 'front-door', function: 'entry-threshold' }],
+  relations: [],
+  presentation: { color: '#ded5e5', material: 'wood', orientation: { roof: 'up' }, scale: 1 }
+});
+
+async function writeIndiVerse() {
+  const highDoor = $('indiEntry').value === 'high';
+  return computer.createIndiVerse('local-user', {
+    id: INDI_WORLD,
+    name: $('indiName').value || 'My IndiVerse',
+    grammar: {
+      colors: { house: $('indiColor').value },
+      materials: { house: $('indiMaterial').value },
+      orientation: { house: { roof: $('indiRoof').value } },
+      thresholds: {
+        house: {
+          requires: highDoor ? ['vertical-access'] : [],
+          alternatives: highDoor ? { 'vertical-access': { capability: 'grappling-hook', mode: 'tool' } } : {}
+        }
+      },
+      embodiment: { default: { mode: 'host-relative', preserveIdentity: true } }
+    }
+  });
+}
+
+function setIndiTab(active) {
+  ['indiShared','indiHost','indiVisit'].forEach(id => $(id).classList.toggle('active', id === active));
+}
+
+function paintIndi(view, modeName) {
+  const expression = view?.expression ?? view?.hostExpression ?? view?.canonical?.presentation ?? {};
+  const grammar = view?.hostGrammar ?? view?.grammar ?? {};
+  const roof = expression?.orientation?.roof ?? 'up';
+  const highDoor = (grammar?.thresholds?.house?.requires ?? []).includes('vertical-access');
+  $('indiWall').style.setProperty('--house', expression.color || '#ded5e5');
+  $('indiRoofShape').style.setProperty('--roof', expression.color || '#ded5e5');
+  $('indiRoofShape').classList.toggle('floor', roof === 'floor-plane');
+  $('indiDoorShape').classList.toggle('high', highDoor);
+  $('indiCaption').textContent = modeName + ' · ' + (expression.material || 'material') + ' · roof ' + roof;
+}
+
+$('indiShared').onclick = async () => {
+  await writeIndiVerse();
+  const view = computer.viewSharedWorldObject(INDI_OBJECT);
+  setIndiTab('indiShared');
+  $('indiGrapple').classList.add('hidden');
+  paintIndi(view, 'Shared world');
+  $('indiResult').textContent = JSON.stringify({ canonicalId: view.objectId, mode: view.mode, expression: view.expression }, null, 2);
+};
+
+$('indiHost').onclick = async () => {
+  await writeIndiVerse();
+  const view = computer.viewIndiVerseObject(INDI_WORLD, INDI_OBJECT);
+  setIndiTab('indiHost');
+  $('indiGrapple').classList.add('hidden');
+  paintIndi(view, $('indiName').value || 'My IndiVerse');
+  $('indiResult').textContent = JSON.stringify({ canonicalId: view.objectId, mode: view.mode, difference: view.difference, expression: view.expression }, null, 2);
+};
+
+$('indiVisit').onclick = async () => {
+  await writeIndiVerse();
+  const visitorCapabilities = [$('indiVisitor').value].filter(Boolean);
+  if (visitorCapabilities.includes('grappling-hook')) visitorCapabilities.push('vertical-access');
+  const contract = computer.visitorMorphContract({
+    worldId: INDI_WORLD,
+    objectId: INDI_OBJECT,
+    visitor: { identity: { id: 'visitor', preserve: true }, capabilities: visitorCapabilities }
+  });
+  setIndiTab('indiVisit');
+  const needsHook = contract.missingAffordances.includes('vertical-access');
+  $('indiGrapple').classList.toggle('hidden', !needsHook);
+  paintIndi(contract, 'Visitor sees host world');
+  $('indiCaption').textContent = needsHook
+    ? 'Visitor: HOW DO I GET IN? · adaptation: grappling hook'
+    : 'Visitor can already satisfy this world\'s entry affordance.';
+  $('indiResult').textContent = JSON.stringify({
+    identityInvariant: contract.identityInvariant,
+    missingAffordances: contract.missingAffordances,
+    suggestedAdaptations: contract.suggestedAdaptations,
+    sceneMorph: contract.sceneMorph
+  }, null, 2);
+};
+
+for (const id of ['indiName','indiColor','indiMaterial','indiRoof','indiEntry','indiVisitor']) {
+  $(id).addEventListener('change', () => $('indiHost').click());
+}
+await $('indiHost').click();
+
+$('closeViewer').onclick = () => {
+  $('viewer').src = 'about:blank';
+  $('viewerWrap').classList.add('hidden');
+};
+
+renderApps();
+</script>
+</body>
+</html>
