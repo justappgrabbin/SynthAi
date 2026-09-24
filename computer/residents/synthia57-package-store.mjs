@@ -7,6 +7,11 @@ import { spawn } from 'node:child_process';
 import os from 'node:os';
 import path from 'node:path';
 
+export const SYNTHIA57_CANONICAL_MORPH_CHECKPOINT = Object.freeze({
+  filename:'Synthia-v0.5.7-CANONICAL-MORPH-INTEGRATION-FINAL-CHECKPOINT.zip',
+  sha256:'c3590351f7b1831ec131ce00d7890d75a3fac5c99a4ee6a2afed38d3a9adfea9',
+});
+
 async function exists(filePath){
   try { await access(filePath); return true; } catch { return false; }
 }
@@ -96,6 +101,7 @@ export class Synthia57PackageStore {
       source:String(source),
       installedAt:Date.now(),
       preservation:'archive-and-extracted-copy-retained',
+      canonicalMorphCheckpoint:sha256===SYNTHIA57_CANONICAL_MORPH_CHECKPOINT.sha256,
     };
     await this.state.set('synthia57.package',record,{source:'synthia57-package-store'});
     this.bus?.emit('synthia57:package-installed',{...record,archive:undefined,base:undefined});
@@ -107,7 +113,7 @@ export class Synthia57PackageStore {
     const base=record.base;
     const ok=await exists(path.join(base,'src','federated-synthia.mjs'))
       && await exists(path.join(base,'vendor','pure-synthia-v0.4.0','src','synthia','synthiaRuntime.mjs'));
-    return {installed:ok,version:record.version??'0.5.7',sha256:record.sha256??null,base:ok?base:null};
+    return {installed:ok,version:record.version??'0.5.7',sha256:record.sha256??null,base:ok?base:null,canonicalMorphCheckpoint:record.sha256===SYNTHIA57_CANONICAL_MORPH_CHECKPOINT.sha256};
   }
 
   snapshot(){
@@ -121,6 +127,7 @@ export class Synthia57PackageStore {
       source:record.source,
       installedAt:record.installedAt,
       preservation:record.preservation,
+      canonicalMorphCheckpoint:record.sha256===SYNTHIA57_CANONICAL_MORPH_CHECKPOINT.sha256,
     };
   }
 }

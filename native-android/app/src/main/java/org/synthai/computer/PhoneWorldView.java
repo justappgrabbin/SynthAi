@@ -39,10 +39,12 @@ final class PhoneWorldView extends View {
     private final Paint stroke = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Synthia57MirrorRenderer synthiaRenderer = new Synthia57MirrorRenderer();
     private final RectF mirrorButton = new RectF();
+    private final RectF fieldButton = new RectF();
     private final RectF packageButton = new RectF();
     private final List<AppPlace> apps = new ArrayList<>();
     private Listener listener;
     private Runnable mirrorListener;
+    private Runnable fieldListener;
     private Runnable packageListener;
     private Bitmap mirrorFace;
     private String status = "MESH WAKING";
@@ -78,6 +80,10 @@ final class PhoneWorldView extends View {
 
     void setMirrorListener(Runnable listener) {
         this.mirrorListener = listener;
+    }
+
+    void setFieldListener(Runnable listener) {
+        this.fieldListener = listener;
     }
 
     void setPackageListener(Runnable listener) {
@@ -174,6 +180,17 @@ final class PhoneWorldView extends View {
         if (residentName.equals("SYNTHIA")) {
             packageButton.setEmpty();
             paint.setColor(Color.rgb(61, 40, 79));
+            fieldButton.set(width - 160f*density, 15f*density, width - 92f*density, 50f*density);
+            canvas.drawRoundRect(fieldButton, 12f*density, 12f*density, paint);
+            stroke.setColor(Color.rgb(190, 76, 255));
+            canvas.drawRoundRect(fieldButton, 12f*density, 12f*density, stroke);
+            paint.setColor(Color.rgb(255, 190, 235));
+            paint.setTextSize(9f*density);
+            paint.setFakeBoldText(true);
+            canvas.drawText("FIELD", fieldButton.left + 17f*density, fieldButton.centerY() + 3f*density, paint);
+            paint.setFakeBoldText(false);
+
+            paint.setColor(Color.rgb(61, 40, 79));
             mirrorButton.set(width - 86f*density, 15f*density, width - 14f*density, 50f*density);
             canvas.drawRoundRect(mirrorButton, 12f*density, 12f*density, paint);
             stroke.setColor(Color.rgb(132, 92, 168));
@@ -185,6 +202,7 @@ final class PhoneWorldView extends View {
             paint.setFakeBoldText(false);
         } else {
             mirrorButton.setEmpty();
+            fieldButton.setEmpty();
             paint.setColor(Color.rgb(61, 40, 79));
             packageButton.set(width - 116f*density, 15f*density, width - 14f*density, 50f*density);
             canvas.drawRoundRect(packageButton, 12f*density, 12f*density, paint);
@@ -383,6 +401,11 @@ final class PhoneWorldView extends View {
                 }
                 return true;
             case MotionEvent.ACTION_UP:
+                if (!dragging && !fieldButton.isEmpty() && fieldButton.contains(event.getX(), event.getY())) {
+                    if (fieldListener != null) fieldListener.run();
+                    performClick();
+                    return true;
+                }
                 if (!dragging && !mirrorButton.isEmpty() && mirrorButton.contains(event.getX(), event.getY())) {
                     if (mirrorListener != null) mirrorListener.run();
                     performClick();
