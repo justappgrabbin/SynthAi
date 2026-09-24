@@ -4,7 +4,10 @@ on:
   pull_request:
     paths:
       - 'computer/mobile/**'
-      - 'computer/tests/mobile-synthimg.test.mjs'
+      - 'computer/runtime/**'
+      - 'computer/worlds/**'
+      - 'computer/residents/**'
+      - 'computer/tests/**'
       - 'computer/build-web.mjs'
       - 'public/mobile-computer.html'
       - 'public/synthimg-sw.js'
@@ -26,13 +29,18 @@ jobs:
         with:
           node-version: '22'
       - name: Mobile SynthIMG acceptance
-        run: node --test computer/tests/mobile-synthimg.test.mjs
+        run: node --test computer/tests/mobile-synthimg.test.mjs computer/tests/resident-mesh-indiverse.test.mjs computer/tests/world-federation.test.mjs computer/tests/synthia57-resident.test.mjs computer/tests/synthia57-package-loader.test.mjs computer/tests/consciousness-realm-adapter.test.mjs computer/tests/world-adapters.test.mjs computer/tests/termux-compiler.test.mjs
       - name: Stage browser runtime
         run: node computer/build-web.mjs
       - name: Verify staged launcher dependencies
         run: |
           test -f public/computer-runtime/mobile/MobileComputerRuntime.mjs
           test -f public/computer-runtime/mobile/SynthImageRuntime.mjs
+          test -f public/computer-runtime/runtime/mesh-kernel.mjs
+          test -f public/computer-runtime/worlds/indiverse.mjs
+          test -f public/computer-runtime/worlds/world-federation.mjs
+          test -f public/computer-runtime/residents/synthia57-resident.mjs
+          test -f public/computer-runtime/residents/synthia57-package-loader.mjs
           test -f public/computer-runtime/donors/recovered/you-n-i-verse-corrected/state-space-engine-v2.ported.mjs
           test -f public/mobile-computer.html
           test -f public/synthimg-sw.js
