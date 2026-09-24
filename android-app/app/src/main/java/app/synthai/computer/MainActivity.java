@@ -1,9 +1,12 @@
 package app.synthai.computer;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.webkit.ConsoleMessage;
 import android.webkit.WebChromeClient;
@@ -12,6 +15,8 @@ import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+
+import org.json.JSONObject;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -25,11 +30,17 @@ public final class MainActivity extends Activity {
     private static final String START_URL = "https://" + APP_HOST + "/assets/index.html";
     private static final String TAG = "SynthAIComputer";
 
+    private final Handler handler = new Handler(Looper.getMainLooper());
     private WebView webView;
+    private boolean pageReady;
+    private boolean backendAttached;
+    private int attachAttempts;
 
     @Override
     protected void onCreate(Bundle state) {
         super.onCreate(state);
+
+        startService(new Intent(this, ComputerBackendService.class));
 
         webView = new WebView(this);
         webView.setBackgroundColor(Color.rgb(18, 9, 31));
@@ -41,7 +52,8 @@ public final class MainActivity extends Activity {
         settings.setAllowFileAccess(false);
         settings.setAllowContentAccess(false);
         settings.setMediaPlaybackRequiresUserGesture(false);
-        settings.setUserAgentString(settings.getUserAgentString() + " SynthAIComputer/0.3.0");
+        settings.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
+        settings.setUserAgentString(settings.getUserAgentString() + " SynthAIComputer/0.4.0");
 
         webView.setWebChromeClient(new WebChromeClient() {
             @Override
@@ -54,6 +66,41 @@ public final class MainActivity extends Activity {
         webView.loadUrl(START_URL);
     }
 
+    private void attachLocalBackendWhenReady() {
+        if (!pageReady || backendAttached || webView == null) return;
+
+        if (ComputerBackendService.isReady()) {
+            String base = JSONObject.quote(LinuxContainer.BASE_URL);
+            String secret = JSONObject.quote(ComputerBackendService.sessionSecret(this));
+            String js =
+                    "(async()=>{try{" +
+                    "const c=globalThis.SynthAIComputer;" +
+                    "if(!c||typeof c.connectLocalBackend!=='function') throw new Error('browser Computer bridge unavailable');" +
+                    "const e=await c.connectLocalBackend({baseUrl:" + base + ",token:" + secret + ",timeoutMs:3000});" +
+                    "return JSON.stringify({ok:true,environment:e.health.environment,version:e.health.version});" +
+                    "}catch(e){return JSON.stringify({ok:false,error:String(e&&e.message||e)});}})()";
+
+            webView.evaluateJavascript(js, value -> {
+                Log.i(TAG, "LOCAL_BACKEND_JS_RESULT=" + value);
+                webView.evaluateJavascript(
+                        "Boolean(globalThis.SynthAIComputer && globalThis.SynthAIComputer.snapshot && globalThis.SynthAIComputer.snapshot().localBackend && globalThis.SynthAIComputer.snapshot().localBackend.status === 'VERIFIED')",
+                        verified -> {
+                            Log.i(TAG, "LOCAL_BACKEND_BROWSER_READY=" + verified);
+                            backendAttached = "true".equals(verified);
+                        }
+                );
+            });
+            return;
+        }
+
+        attachAttempts += 1;
+        if (attachAttempts < 360) {
+            handler.postDelayed(this::attachLocalBackendWhenReady, 500);
+        } else {
+            Log.e(TAG, "LOCAL_BACKEND_ATTACH_TIMEOUT failure=" + ComputerBackendService.failure());
+        }
+    }
+
     @Override
     public void onBackPressed() {
         if (webView != null && webView.canGoBack()) {
@@ -61,6 +108,16 @@ public final class MainActivity extends Activity {
             return;
         }
         super.onBackPressed();
+    }
+
+    @Override
+    protected void onDestroy() {
+        handler.removeCallbacksAndMessages(null);
+        if (webView != null) {
+            webView.destroy();
+            webView = null;
+        }
+        super.onDestroy();
     }
 
     private final class AssetClient extends WebViewClient {
@@ -89,13 +146,32 @@ public final class MainActivity extends Activity {
         }
 
         @Override
+        public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
+            Uri uri = request.getUrl();
+            if (APP_HOST.equals(uri.getHost())) return false;
+            String scheme = uri.getScheme();
+            if ("http".equals(scheme) || "https".equals(scheme)) {
+                try {
+                    startActivity(new Intent(Intent.ACTION_VIEW, uri));
+                    return true;
+                } catch (Throwable error) {
+                    Log.w(TAG, "external navigation failed: " + error.getMessage());
+                }
+            }
+            return true;
+        }
+
+        @Override
         public void onPageFinished(WebView view, String url) {
             super.onPageFinished(view, url);
+            pageReady = true;
+            attachAttempts = 0;
             Log.i(TAG, "PAGE_FINISHED " + url);
             view.postDelayed(() -> view.evaluateJavascript(
                     "Boolean(globalThis.SynthAIComputer && globalThis.SynthAIComputer.snapshot && globalThis.SynthAIComputer.snapshot().environment === 'browser')",
                     value -> Log.i(TAG, "RUNTIME_READY=" + value)
             ), 1500);
+            attachLocalBackendWhenReady();
         }
     }
 
