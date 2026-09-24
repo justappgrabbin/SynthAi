@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
+import android.webkit.ConsoleMessage;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceResponse;
@@ -21,6 +23,7 @@ import java.util.Map;
 public final class MainActivity extends Activity {
     private static final String APP_HOST = "appassets.androidplatform.net";
     private static final String START_URL = "https://" + APP_HOST + "/assets/index.html";
+    private static final String TAG = "SynthAIComputer";
 
     private WebView webView;
 
@@ -40,7 +43,13 @@ public final class MainActivity extends Activity {
         settings.setMediaPlaybackRequiresUserGesture(false);
         settings.setUserAgentString(settings.getUserAgentString() + " SynthAIComputer/0.3.0");
 
-        webView.setWebChromeClient(new WebChromeClient());
+        webView.setWebChromeClient(new WebChromeClient() {
+            @Override
+            public boolean onConsoleMessage(ConsoleMessage message) {
+                Log.i(TAG, "JS " + message.messageLevel() + " " + message.message());
+                return true;
+            }
+        });
         webView.setWebViewClient(new AssetClient());
         webView.loadUrl(START_URL);
     }
@@ -74,8 +83,19 @@ public final class MainActivity extends Activity {
                 InputStream input = getAssets().open(path);
                 return new WebResourceResponse(mime(path), "UTF-8", input);
             } catch (IOException error) {
+                Log.e(TAG, "ASSET_MISSING " + path, error);
                 return errorResponse(404, "Not Found", "Missing app asset: " + path);
             }
+        }
+
+        @Override
+        public void onPageFinished(WebView view, String url) {
+            super.onPageFinished(view, url);
+            Log.i(TAG, "PAGE_FINISHED " + url);
+            view.postDelayed(() -> view.evaluateJavascript(
+                    "Boolean(globalThis.SynthAIComputer && globalThis.SynthAIComputer.snapshot && globalThis.SynthAIComputer.snapshot().environment === 'browser')",
+                    value -> Log.i(TAG, "RUNTIME_READY=" + value)
+            ), 1500);
         }
     }
 
