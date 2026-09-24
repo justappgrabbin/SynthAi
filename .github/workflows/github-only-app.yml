@@ -19,6 +19,18 @@ jobs:
         with:
           submodules: recursive
 
+      - name: Inspect SynthAI Linux build donor
+        shell: bash
+        run: |
+          rm -rf /tmp/synthai-linux-donor
+          git clone --depth 1 https://github.com/justappgrabbin/Linux.git /tmp/synthai-linux-donor
+          mkdir -p /tmp/this-is-it
+          unzip -q "/tmp/synthai-linux-donor/This is it.zip" -d /tmp/this-is-it
+          echo "===== THIS IS IT TREE ====="
+          find /tmp/this-is-it -maxdepth 5 -type f | sed 's#^/tmp/this-is-it/##' | sort
+          echo "===== CONTAINER / ANDROID / SERVER CANDIDATES ====="
+          find /tmp/this-is-it -type f \( -iname '*proot*' -o -iname '*rootfs*' -o -iname '*linux*' -o -iname '*termux*' -o -iname '*android*' -o -iname '*manifest*' -o -iname '*mainactivity*' -o -iname '*server*' -o -iname '*docker*' -o -iname '*start*' \) -print | sed 's#^/tmp/this-is-it/##' | sort
+
       - name: Use Node 22
         uses: actions/setup-node@v4
         with:
