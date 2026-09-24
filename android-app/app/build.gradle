@@ -1,0 +1,25 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'app.synthai.computer'
+    compileSdk 35
+
+    defaultConfig {
+        applicationId 'app.synthai.computer'
+        minSdk 26
+        targetSdk 35
+        versionCode 1
+        versionName '0.3.0'
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+        }
+        debug {
+            debuggable true
+        }
+    }
+}
