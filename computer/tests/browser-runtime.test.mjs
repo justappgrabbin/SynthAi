@@ -24,7 +24,7 @@ test('browser host executes project + mount path and survives restart', async ()
     source: 'browser-host-test'
   });
   const contract = await first.mountApplication('proof-app', { artifactId: artifact.id });
-  assert.equal(contract.readArtifact().content, 'artifact runtime input');
+  assert.equal(contract.services.readArtifact().content, 'artifact runtime input');
   assert.equal(first.shellManager.listMounted().length, 1);
 
   const second = await new BrowserComputerRuntime({ persistence, namespace }).boot();
