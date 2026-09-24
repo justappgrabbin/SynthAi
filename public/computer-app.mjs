@@ -1,4 +1,4 @@
-import { ComputerRuntime } from '/computer-runtime/ComputerRuntime.mjs';
+import { BrowserComputerRuntime } from '/computer-runtime/BrowserComputerRuntime.mjs';
 import { LocalStoragePersistence } from '/computer-runtime/core/kernel.mjs';
 
 const $ = selector => document.querySelector(selector);
@@ -6,7 +6,7 @@ const $$ = selector => [...document.querySelectorAll(selector)];
 const escapeHtml = value => String(value ?? '').replace(/[&<>"']/g, char => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;' }[char]));
 const titleFor = id => ({ home:'Computer Home', build:'Build', files:'Files', github:'GitHub', systems:'Systems', activity:'Activity' }[id] || 'SynthAI Computer');
 
-const computer = await new ComputerRuntime({
+const computer = await new BrowserComputerRuntime({
   persistence: new LocalStoragePersistence(),
   namespace: 'synthai-computer-web'
 }).boot();
@@ -263,3 +263,7 @@ renderSystems();
 renderActivity();
 if (currentProjectId && computer.projects.get(currentProjectId)) loadCurrentFile();
 if (savedServer && savedToken) connectGitHub();
+
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js').catch(error => log('service-worker:failed', { error: String(error?.message ?? error) }));
+}
