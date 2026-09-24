@@ -325,3 +325,48 @@ REMAINS DISCONNECTED / BLOCKED:
 - No claim of live GitHub push from inside the app without Synthia Server/token.
 - No claim that Node-only donor services run inside the browser host.
 - Existing renderer gap and penta position-formula placeholder remain preserved and explicitly reported.
+
+
+# Change record — Android runtime verification amendment (integration/github-only-app-20260923, 2026-09-23)
+
+WHAT EXISTED BEFORE:
+- APK assembly/package path was VERIFIED.
+- Android launch path was WIRED but not yet executed on an Android runtime.
+- The first emulator-gate attempt installed the APK successfully but the verification script was split line-by-line by the emulator action, causing a shell syntax failure before the runtime marker could be evaluated. This was a test-harness failure, not evidence of an app failure.
+
+PRESERVED:
+- Canonical full Node ComputerRuntime and donor/service architecture.
+- BrowserComputerRuntime and existing public Computer UI.
+- All pre-existing tests and explicit PRESENT/PARTIALLY WIRED classifications.
+- Existing renderer gap, penta placeholder and browser Node-service blockers remain explicit.
+
+CHANGED:
+- MainActivity now emits diagnostic Android log markers for PAGE_FINISHED, JS console output, missing packaged assets, and the evaluated BrowserComputerRuntime readiness state.
+- Android smoke verification moved into .github/scripts/android-smoke.sh so it executes as one shell program.
+- Workflow enables KVM using the android-emulator-runner project's documented Linux setup.
+- Duplicate pull_request-triggered emulator builds were removed; branch push + manual workflow dispatch remain.
+
+CONNECTED:
+- GitHub Actions -> built APK -> Android 35 emulator -> adb install -> MainActivity -> WebView packaged asset host -> public/index.html -> computer-app.mjs -> BrowserComputerRuntime -> snapshot().environment -> native diagnostic marker -> workflow pass/fail gate.
+- APK checksum and artifact upload occur only after this Android runtime gate passes.
+
+STATUS:
+- Android emulator install + application launch + BrowserComputerRuntime boot: VERIFIED.
+- Android APK build/package path: VERIFIED.
+- Browser project/artifact/mount/restart path: VERIFIED.
+- Physical user-device installation/touch behavior: WIRED but not separately VERIFIED on the user's hardware.
+- Live in-app GitHub publication: PARTIALLY WIRED, still requires reachable Synthia Server + valid Computer access token.
+- Node-only providers inside the browser host: PRESENT with blockers, unchanged.
+- Skynthia visual renderer: PRESENT/NOT CONNECTED, unchanged.
+
+TESTED:
+- Evidence workflow run: https://github.com/justappgrabbin/SynthAi/actions/runs/35948322694
+- Repository verification before packaging: 24 tests, 24 pass, 0 fail.
+- Android SDK/Gradle build: PASS.
+- KVM enablement: PASS.
+- Android emulator verification step: PASS.
+- Runtime criterion: MainActivity evaluates Boolean(globalThis.SynthAIComputer && globalThis.SynthAIComputer.snapshot && globalThis.SynthAIComputer.snapshot().environment === 'browser'); workflow accepts only RUNTIME_READY=true.
+- Checksum and artifact-upload steps both PASS only after the runtime gate.
+
+FAILED / REPAIRED:
+- Prior emulator run 35947721980: emulator booted and adb install returned Success, but the action executed each inline script line separately and broke the for/done loop. Repaired by moving the smoke logic into one repository script.
