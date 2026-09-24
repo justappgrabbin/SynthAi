@@ -12,6 +12,8 @@ import android.content.pm.ResolveInfo;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import java.io.ByteArrayOutputStream;
@@ -37,6 +39,7 @@ public final class MainActivity extends Activity {
     private SharedPreferences prefs;
     private List<PhoneWorldView.AppPlace> appPlaces = new ArrayList<>();
     private File mirrorFile;
+    private WebView fieldView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,6 +50,7 @@ public final class MainActivity extends Activity {
         world = new PhoneWorldView(this);
         world.setListener(this::enterApp);
         world.setMirrorListener(this::pickMirrorImage);
+        world.setFieldListener(this::openSynthiaField);
         world.setPackageListener(this::pickSynthiaPackage);
         mirrorFile = new File(getFilesDir(), "synthia-mirror-face.jpg");
         loadMirrorFace();
@@ -120,6 +124,54 @@ public final class MainActivity extends Activity {
             world.setStatus("SYNTHIA ENTERING " + app.label.toUpperCase());
             startActivity(launch);
         }
+    }
+
+    private void openSynthiaField() {
+        world.setStatus("OPENING SYNTHIA 5.7 FIELD");
+        io.execute(() -> {
+            NativeSeedClient.Result health = ensureCurrentNativeSeed();
+            boolean available = false;
+            String fieldUrl = "http://127.0.0.1:17758/";
+            try {
+                JSONObject root = new JSONObject(health.body == null ? "{}" : health.body);
+                JSONObject front = root.optJSONObject("synthia57FrontScreen");
+                if (front != null) {
+                    available = front.optBoolean("mounted", false);
+                    fieldUrl = front.optString("url", fieldUrl);
+                }
+            } catch (Exception ignored) {}
+            boolean finalAvailable = available;
+            String finalUrl = fieldUrl;
+            main.post(() -> {
+                if (!finalAvailable) {
+                    world.setStatus("SYNTHIA 5.7 FIELD NOT READY");
+                    return;
+                }
+                WebView view = new WebView(this);
+                view.getSettings().setJavaScriptEnabled(true);
+                view.getSettings().setDomStorageEnabled(true);
+                view.setWebViewClient(new WebViewClient());
+                fieldView = view;
+                setContentView(view);
+                view.loadUrl(finalUrl);
+            });
+        });
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (fieldView != null) {
+            if (fieldView.canGoBack()) {
+                fieldView.goBack();
+                return;
+            }
+            fieldView.destroy();
+            fieldView = null;
+            setContentView(world);
+            world.setStatus("MESH ACTIVE · SYNTHIA HOME");
+            return;
+        }
+        super.onBackPressed();
     }
 
     private void pickSynthiaPackage() {

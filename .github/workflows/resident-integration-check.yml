@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - 'integration/synthia-reality-resident'
+      - 'integration/synthia57-realm-morph-reskin-2026-09-24'
     paths:
       - 'computer/runtime/mesh-kernel.mjs'
       - 'computer/runtime/dormant-compiler.mjs'

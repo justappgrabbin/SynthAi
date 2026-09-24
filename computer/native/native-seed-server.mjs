@@ -1,6 +1,7 @@
 import http from 'node:http';
 import os from 'node:os';
 import path from 'node:path';
+import { pathToFileURL } from 'node:url';
 import { NativeSeedRuntime } from './NativeSeedRuntime.mjs';
 import { JsonFilePersistence } from '../runtime/json-file-persistence.mjs';
 
@@ -27,6 +28,40 @@ const statePath = process.env.SYNTHAI_NATIVE_STATE
   ?? path.join(os.homedir(), '.synthai', 'native-seed-state.json');
 const idleExitMs = Math.max(0, Number(process.env.SYNTHAI_IDLE_EXIT_MS ?? 600000));
 let idleTimer = null;
+const frontScreenPort = Number(process.env.SYNTHIA57_UI_PORT ?? 17758);
+let frontScreen = null;
+
+function frontScreenSnapshot(){
+  return frontScreen?.server
+    ? {mounted:true,url:frontScreen.url,port:frontScreenPort,source:'installed-synthia-5.7-ui'}
+    : {mounted:false,port:frontScreenPort};
+}
+
+async function stopFrontScreen(){
+  if(!frontScreen?.server) { frontScreen=null; return; }
+  await new Promise(resolve=>frontScreen.server.close(()=>resolve()));
+  frontScreen=null;
+}
+
+async function ensureFrontScreen(){
+  const mounted=runtime.synthia57.get('synthia');
+  if(!mounted?.runtime) return frontScreenSnapshot();
+  if(frontScreen?.server) return frontScreenSnapshot();
+  const verified=await runtime.synthia57Packages.verify();
+  const base=process.env.SYNTHIA57_BASE ?? verified.base;
+  if(!base) return {mounted:false,port:frontScreenPort,reason:'SYNTHIA57_PACKAGE_BASE_UNAVAILABLE'};
+  const specifier=pathToFileURL(path.join(base,'src','ui','server.mjs')).href;
+  const uiModule=await import(specifier);
+  const start=uiModule.startSynthiaFrontScreen ?? uiModule.default;
+  if(typeof start!=='function') throw new Error('Synthia 5.7 package front screen server unavailable');
+  frontScreen=await start({port:frontScreenPort,host:'127.0.0.1',synthia:mounted.runtime});
+  return frontScreenSnapshot();
+}
+
+async function restartFrontScreen(){
+  await stopFrontScreen();
+  return ensureFrontScreen();
+}
 
 const runtime = new NativeSeedRuntime({
   persistence:new JsonFilePersistence(statePath),
@@ -42,9 +77,10 @@ async function mountOptionalResidents(){
   try {
     if(process.env.SYNTHIA57_BASE){
       const mounted=await runtime.mountSynthia57({base:process.env.SYNTHIA57_BASE});
-      results.synthia57={mounted:true,source:'environment',resident:mounted.adapter.snapshot()};
+      results.synthia57={mounted:true,source:'environment',resident:mounted.adapter.snapshot(),frontScreen:await ensureFrontScreen()};
     } else {
       results.synthia57=await runtime.mountInstalledSynthia57();
+      if(results.synthia57?.mounted) results.synthia57.frontScreen=await ensureFrontScreen();
     }
   } catch(error){ results.synthia57={mounted:false,error:String(error?.message??error)}; }
   if(process.env.CONSCIOUSNESS_REALM_MODULE){
@@ -129,7 +165,8 @@ async function route(req,res){
         statePath,
         optionalMounts,
         synthia57Package:runtime.synthia57Packages.snapshot(),
-        synthiaMirror:runtime.synthiaMirrorSnapshot()
+        synthiaMirror:runtime.synthiaMirrorSnapshot(),
+        synthia57FrontScreen:frontScreenSnapshot()
       });
     }
     if(req.method==='GET' && url.pathname==='/snapshot'){
@@ -142,11 +179,13 @@ async function route(req,res){
         contentLength,
         source:String(req.headers['x-synthai-source']??'android-document-picker'),
       });
+      const frontScreenState=await restartFrontScreen();
       optionalMounts.synthia57={
         mounted:true,
         source:'installed-package',
         package:result.package,
         resident:result.resident,
+        frontScreen:frontScreenState,
       };
       return json(res,200,result);
     }
@@ -173,6 +212,8 @@ async function route(req,res){
         mirror:runtime.synthiaMirrorSnapshot(),
         resident:runtime.synthia57.get('synthia')?.adapter?.snapshot?.()??null,
         morph:runtime.meshKernel.resolvePresence('synthia:morph')??null,
+        canonicalMorph:runtime.synthia57.get('synthia')?.runtime?.canonicalMorph?.snapshot?.()??null,
+        frontScreen:frontScreenSnapshot(),
       });
     }
 
@@ -247,6 +288,7 @@ server.listen(PORT,HOST,()=>{
 });
 
 async function shutdown(signal){
+  try { await stopFrontScreen(); } catch {}
   try { await runtime.sleep(); } catch {}
   server.close(()=>process.exit(0));
   setTimeout(()=>process.exit(1),3000).unref();
