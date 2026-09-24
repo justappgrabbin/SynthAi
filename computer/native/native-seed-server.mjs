@@ -124,6 +124,7 @@ async function route(req,res){
         ok:true,
         service:'synthai-native-seed',
         apiVersion:2,
+        serviceVersion:'native-seed-synthia57-resident-v1',
         port:PORT,
         statePath,
         optionalMounts,
