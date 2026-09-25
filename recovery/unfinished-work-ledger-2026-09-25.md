@@ -116,3 +116,9 @@ The project now carries a durable preservation protocol at `recovery/PRESERVATIO
 The active Supabase project **SynthAi Foundry Official** also has a private `synthia_preservation_ledger` containing durable records for the current first-drop candidate, this recovery ledger, the recovered self-cultivation donor, PurposeGuide, PR #7 TaskFit/device-world work, and PR #8 packaging work.
 
 Parallel swarms should use the named branch lanes in the first-drop accounting sheet. Capability convergence is recorded explicitly, so preserved work remains visible even while another branch is active.
+
+## September 25 continuation — delivery identity and acceptance order
+
+- [First-drop accounting](FIRST-DROP-ACCOUNTING-2026-09-25.md) now records the verified Actions host APK artifact versus the separately assembled Prime all-in-one candidate. The creator has reported retrieving an APK from GitHub; the exact retrieved file's hash has not yet been matched to the final Prime candidate. The physical-device acceptance gate remains open.
+- [PR #13](https://github.com/justappgrabbin/SynthAi/pull/13) adds bounded automata cartridge auto-assembly on the protected 5.8 resident lane. Its resident integration workflow [36154523433](https://github.com/justappgrabbin/SynthAi/actions/runs/36154523433) succeeded and published no APK artifact. Keep it as a separate additive source/test milestone.
+- **Creator-defined governance:** Supabase RLS findings remain open until a usable app is delivered and accepted; their closure is the creator's app-birth signal. Record findings privately and wait for that acceptance and explicit authorization before altering RLS. The RLS scan is not an instruction to close this milestone early.
