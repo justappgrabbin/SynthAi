@@ -528,11 +528,39 @@ public final class MainActivity extends Activity {
         }
     }
 
+    private boolean handsEnabled() {
+        try {
+            String enabled = Settings.Secure.getString(
+                getContentResolver(),
+                Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES
+            );
+            return enabled != null
+                && enabled.contains(getPackageName())
+                && enabled.contains("SynthiaAccessibilityService");
+        } catch (Exception ignored) {
+            return false;
+        }
+    }
+
+    private void ensureHandsSettings() {
+        if (handsEnabled()) return;
+        if (prefs.getBoolean("handsSettingsShown", false)) {
+            world.setStatus("ENABLE SYNTHIA HANDS IN ACCESSIBILITY");
+            return;
+        }
+        prefs.edit().putBoolean("handsSettingsShown", true).apply();
+        world.setStatus("ENABLE SYNTHIA HANDS");
+        try { startActivity(new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)); }
+        catch (Exception ignored) {}
+    }
+
     private void ensureVoicePermission() {
         if (Build.VERSION.SDK_INT >= 23 &&
             checkSelfPermission(Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
             requestPermissions(new String[]{Manifest.permission.RECORD_AUDIO}, REQUEST_AUDIO);
+            return;
         }
+        ensureHandsSettings();
     }
 
     @Override
@@ -541,6 +569,7 @@ public final class MainActivity extends Activity {
         if (requestCode == REQUEST_AUDIO) {
             boolean granted = grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED;
             world.setStatus(granted ? "VOICE READY · LOCAL LINUX ACTIVE" : "VOICE OFF · LOCAL LINUX ACTIVE");
+            ensureHandsSettings();
         }
     }
 
