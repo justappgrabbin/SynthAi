@@ -159,3 +159,43 @@ No workflow run or APK is claimed from PR #14 yet. Its full promotion job is blo
 
 Recover the exact protected Resident 3 `.synthimg` bytes from an extant device, temporary build cache, or unindexed durable source; hash-match them to `8d5874a11f0a73027be14119bc13f6a0efd1adeb2aa9ac877c2284fcd5ab2f72`; upload them as a private/controlled GitHub Actions artifact; then run PR #14's promotion workflow. Only after the resulting APK is downloaded by the creator and passes the physical-phone gate may its state move through **DELIVERED**, **USER-ACCESS VERIFIED**, and **PHONE ACCEPTED**. RLS remains open until that acceptance and explicit authorization.
 
+## September 25 continuation — ResearchReportAutomaton recovery (13:00 Pacific)
+
+### Concrete additive step
+
+[PR #15 — ResearchReportAutomaton v0.1.0 bounded cartridge](https://github.com/justappgrabbin/SynthAi/pull/15) reconstructs the interrupted report mechanism on top of PR #13's actual cartridge-magazine baseline. Head: `cf6956ca2cfbdb2915e1a3900cc9f2faf9244e20`; base: `integration/synthia58-automata-cartridge-loop`; mergeable draft; 6 changed files.
+
+The ordered bounded pipeline is:
+
+`ResearchScout → EvidenceMiner → ScientistLoop → ReportPlanner → ReportWriter → ReportVerifier → Publisher`
+
+Verified implementation:
+- consumes supplied local sources
+- optionally detects `globalThis.SynthiaResearchBridge` and uses its `research` or `search` adapter
+- preserves source identifiers, evidence excerpts, stage trace, and provenance
+- separates source-supported findings from unsupported claims
+- retains unsupported claims in Limitations rather than promoting them to Findings
+- refuses publication until verification passes
+- auto-registers `system:research-report` and installs the seven-Automata cartridge in the native runtime
+- labels output `statically-verified-not-user-accepted`
+
+Verification:
+- focused local suite: 4 passed / 0 failed
+- [Resident Mesh Integration run 36183046675](https://github.com/justappgrabbin/SynthAi/actions/runs/36183046675): 45 passed / 0 failed, including the native runtime auto-mount and full seven-stage magazine execution
+- [Mobile SynthIMG Check run 36183046677](https://github.com/justappgrabbin/SynthAi/actions/runs/36183046677): SUCCESS
+
+Protection boundary: the cartridge is additive. It does not modify protected Prime 5.8 source, Echo, Venom, or 5.7, and it does not repurpose Synthia's life-process swarm as software workers.
+
+### Cross-source refresh
+
+- **Library:** no exact ResearchReportAutomaton file was found. Related research material and older `automaton-loop.mjs` donors remain preserved as donors; PR #15 is the first verified named implementation found in the durable project record.
+- **Notion:** workspace search returned no ResearchReportAutomaton page.
+- **Drive:** search returned no ResearchReportAutomaton file.
+- **Supabase:** the active project remains SynthAi Foundry Official. Security advisors were refreshed read-only; no RLS, policy, view, function, or table remediation was applied.
+
+### State and next blocker
+
+ResearchReportAutomaton v0.1.0 is now **BUILT (source implementation) + PRESERVED ON GITHUB + STATICALLY/CI VERIFIED**. It is not an APK artifact, is not separately delivered to the creator, is not user-access verified through the app, and is not phone accepted.
+
+The highest app-delivery blocker remains recovery of the exact Prime Resident 3 image bytes (SHA-256 `8d5874a11f0a73027be14119bc13f6a0efd1adeb2aa9ac877c2284fcd5ab2f72`) so PR #14 can produce and publish a verified recovery APK. After that, the report cartridge must be included in the packaged runtime and exercised from the creator-visible app surface before its user-access/phone status changes. Supabase RLS remains open until the creator accepts a usable app and explicitly authorizes that birth milestone.
+
