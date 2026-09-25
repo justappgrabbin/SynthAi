@@ -1,0 +1,38 @@
+name: Export Android Signing Tools
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - 'integration/echo-prime-resident-loaders'
+    paths:
+      - '.github/workflows/export-android-signing-tools.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  export-signing-tools:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Locate Android build tools
+        run: |
+          set -euo pipefail
+          BUILD_TOOLS="$(find "$ANDROID_HOME/build-tools" -mindepth 1 -maxdepth 1 -type d | sort -V | tail -1)"
+          test -x "$BUILD_TOOLS/apksigner"
+          test -x "$BUILD_TOOLS/zipalign"
+          test -s "$BUILD_TOOLS/lib/apksigner.jar"
+          mkdir -p /tmp/android-signing-tools/lib
+          cp "$BUILD_TOOLS/apksigner" /tmp/android-signing-tools/
+          cp "$BUILD_TOOLS/zipalign" /tmp/android-signing-tools/
+          cp "$BUILD_TOOLS/lib/apksigner.jar" /tmp/android-signing-tools/lib/
+          chmod +x /tmp/android-signing-tools/apksigner /tmp/android-signing-tools/zipalign
+          "$BUILD_TOOLS/apksigner" version
+          "$BUILD_TOOLS/zipalign" -h >/dev/null 2>&1 || true
+
+      - name: Upload signing tools
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-signing-tools-linux
+          path: /tmp/android-signing-tools
+          if-no-files-found: error
