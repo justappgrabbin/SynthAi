@@ -122,3 +122,39 @@ Parallel swarms should use the named branch lanes in the first-drop accounting s
 - [First-drop accounting](FIRST-DROP-ACCOUNTING-2026-09-25.md) now records the verified Actions host APK artifact versus the separately assembled Prime all-in-one candidate. The creator has reported retrieving an APK from GitHub; the exact retrieved file's hash has not yet been matched to the final Prime candidate. The physical-device acceptance gate remains open.
 - [PR #13](https://github.com/justappgrabbin/SynthAi/pull/13) adds bounded automata cartridge auto-assembly on the protected 5.8 resident lane. Its resident integration workflow [36154523433](https://github.com/justappgrabbin/SynthAi/actions/runs/36154523433) succeeded and published no APK artifact. Keep it as a separate additive source/test milestone.
 - **Creator-defined governance:** Supabase RLS findings remain open until a usable app is delivered and accepted; their closure is the creator's app-birth signal. Record findings privately and wait for that acceptance and explicit authorization before altering RLS. The RLS scan is not an instruction to close this milestone early.
+
+## September 25 continuation — Prime delivery gate (11:33 Pacific)
+
+### Concrete additive step
+
+[PR #14 — Add verified Prime APK promotion and delivery gate](https://github.com/justappgrabbin/SynthAi/pull/14) is open as a draft from `recovery/prime-apk-delivery-gate-20260925` into the protected PR #10 lane. Head: `99daa2434fdbf07204daf8a87454449ebfd7725c`; 4 files, 256 additions, 0 deletions; GitHub currently reports it mergeable.
+
+The implementation:
+- rejects a host-only APK before publication
+- verifies the embedded Prime Resident 3 image, rebuilt APK-local Linux rootfs, and pinned Android PRoot byte identities
+- writes a machine-readable APK hash/size/identity manifest with `acceptance=not-phone-verified`
+- uploads the verified APK and manifest together as one 90-day GitHub Actions artifact
+- consumes the protected Prime image from a prior Actions artifact without changing its bytes
+- does not modify Prime 5.8 source, Synthia's life-process swarm, Echo, Venom, or 5.7
+
+Verification run against `scripts/test-verify-prime-apk-candidate.sh`:
+- workflow YAML parsed successfully
+- shell syntax checks passed
+- valid all-in-one fixture: PASS
+- host-only fixture: correctly rejected
+- wrong Prime hash fixture: correctly rejected
+
+No workflow run or APK is claimed from PR #14 yet. Its full promotion job is blocked on one external input: the exact Resident 3 image bytes, SHA-256 `8d5874a11f0a73027be14119bc13f6a0efd1adeb2aa9ac877c2284fcd5ab2f72`, must first be recovered and stored as a GitHub Actions artifact. The exact-title Library check found no copy of the Resident 3 image, protected source ZIP, or final Prime APK. The vanished APK remains **BUILT + PROVENANCE PRESERVED + FAILED DELIVERY**; PR #14 is delivery infrastructure, not delivery itself.
+
+### Refreshed cross-source evidence
+
+- **GitHub:** open implementation PRs remain [#10](https://github.com/justappgrabbin/SynthAi/pull/10), [#13](https://github.com/justappgrabbin/SynthAi/pull/13), and now [#14](https://github.com/justappgrabbin/SynthAi/pull/14). PR #13 remains source/test verified with no APK artifact.
+- **Library:** exact title searches for `SynthAI-Prime-Linux-Resident3-debug.apk`, `Synthia-Prime-v0.5.8-Android-Resident-3.synthimg`, and `Synthia-Solo-Hover-v0.5.8-ANDROID-HANDS-SOURCE.zip` returned no matches. A content search for ResearchReportAutomaton returned low-confidence unrelated files only; do not mark that cartridge preserved there.
+- **Notion:** the existing [current Android APK tracker](https://app.notion.com/p/3d5c7e080e3281b5bee1de746fc2ea06?pvs=204) still says there should be one tracked current APK path. Workspace search returned no ResearchReportAutomaton page.
+- **Drive:** [sYNTHai](https://drive.google.com/drive/folders/1NRYx6iRaQAufoeH5WSytKIDz2WS0nkJc) and [SynthAi_Mindlake](https://drive.google.com/drive/folders/16LWpy_BI-aXgNWIe-ZzszXgvxAlz1Aul) remain visible. A ResearchReportAutomaton search returned no result; no final Prime APK or Resident 3 image was identified.
+- **Supabase:** [SynthAi Foundry Official security advisors](https://supabase.com/dashboard/project/leisphnjslcuepflefri/advisors/security) were refreshed read-only at 2026-09-25 18:33 UTC: 168 public tables (163 RLS-enabled, 5 RLS-disabled), 133 `rls_enabled_no_policy` findings, 1 security-definer view finding, 2 mutable-search-path findings, and 4 executable security-definer-function exposure findings across anon/authenticated reporting. These are inventory only. Per the creator-defined app-birth rule, no RLS or security policy remediation was applied.
+
+### Next blocker
+
+Recover the exact protected Resident 3 `.synthimg` bytes from an extant device, temporary build cache, or unindexed durable source; hash-match them to `8d5874a11f0a73027be14119bc13f6a0efd1adeb2aa9ac877c2284fcd5ab2f72`; upload them as a private/controlled GitHub Actions artifact; then run PR #14's promotion workflow. Only after the resulting APK is downloaded by the creator and passes the physical-phone gate may its state move through **DELIVERED**, **USER-ACCESS VERIFIED**, and **PHONE ACCEPTED**. RLS remains open until that acceptance and explicit authorization.
+
