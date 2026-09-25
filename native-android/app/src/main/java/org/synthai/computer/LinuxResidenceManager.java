@@ -360,6 +360,6 @@ public final class LinuxResidenceManager {
     }
 
     private static long pidOf(Process process) {
-        try { return process.pid(); } catch (Throwable ignored) { return -1; }
+        return -1L;
     }
 }
