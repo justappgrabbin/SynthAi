@@ -88,6 +88,20 @@ These are a search result, not an exhaustive code audit. Keep existing issues as
 | Notion | Control panel and catalog were read. Control panel is dated September 10 and predates the APK candidate. | Reconcile with latest GitHub source and update the page with provenance. |
 | Drive | Found original Resonance Network and Pathways to Purpose source docs, plus older world and Paper HTML files. | Derive precise acceptance cases from source docs; do not treat generated speculative passages as implementation evidence. |
 
+## September 20 five-archive audit: specific carry-forward defects
+
+The Library audit `SYNTHIA_AUDIT_2026-09-20.md` was read in full. It examined five archives and explicitly judged the combined system **PARTIALLY WIRED**. These are independently actionable and must remain visible even if a newer PR addresses similar capabilities:
+
+| Archive/lineage | Verified part | Open defect / acceptance |
+| --- | --- | --- |
+| r21.22 chassis and r22 inherited core | `verify:packaged` and r22 `verify` passed; r22 self-cultivation test produced 78 placements, 20 gates, 26 nodes and four persisted outcomes. | r22's ordinary browser path instantiates `SynthiaUnit` while `UnifiedSynthiaOS` is only instantiated by an integration test. Trace an actual user gesture through the extension and record browser output. |
+| r22 resolution pipeline | Mocked contract/failure tests passed. | No demonstrated real Supabase round trip or ordinary app import. |
+| Hybrid residence | Server boot and `/dev/status` observed. | Browser and server create separate `SynthiaUnit` instances; heartbeat sender and Node file-backed memory shim are missing in normal server path. Establish shared authoritative state and verify restart. |
+| `src(1)` donor | 122 source files, 80 with no same-basename counterpart in r22. | PDF ingestor has invalid regex; `AutopoeticTriad` has vector shape defects; unique HD/PHS/sentence corpus is largely outside the app graph. Preserve originals and port selectively with tests. |
+| YOU-N-I-VERSE automaton | Deterministic automaton transitions executed. | Whole app typecheck/build failed on missing dependencies; runtime exports `MemStorage` despite a Postgres schema. Restore reproducible install/build and verify durable restart. |
+
+The same audit notes `.synthia/mcp-token` in archived material. Scan any donor import for credentials before GitHub publication. This historical audit does **not** establish that PR #10 inherits or resolves these defects; compare actual source graphs and execution paths.
+
 ## Continuation protocol
 
 At each session: (1) refresh this ledger's links/status; (2) pick the highest-priority blocked capability with a real baseline; (3) inspect code and donor provenance; (4) patch in its existing project on a branch; (5) run targeted tests and capture output/commit/CI; (6) update this ledger with verified result and next blocker. Preserve source and user data. No deletion outside the current project, and avoid deletions inside projects without explicit reconciliation. Use GitHub PRs for code changes. A stale or empty scratch folder is not the canonical baseline.
