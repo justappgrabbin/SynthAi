@@ -65,6 +65,16 @@
     "resident3_targeted_tests": {
       "passed": 9,
       "failed": 0
+    },
+    "resident4_targeted_tests": {
+      "passed": 8,
+      "failed": 0
+    },
+    "resident4_full_suite_observed": {
+      "passed_through": 29,
+      "failed": 0,
+      "complete": false,
+      "reason": "local command window timed out before suite completion"
     }
   },
   "remaining": [
@@ -99,6 +109,26 @@
       "python": true,
       "shell": true,
       "node_opt_in": true
+    }
+  },
+  "additive_android_resident_image_v4": {
+    "filename": "Synthia-Prime-v0.5.8-Android-Resident-4.synthimg",
+    "version": "0.5.8+android-resident.4",
+    "size_bytes": 81152196,
+    "sha256": "49c0c31e0fc4a977ebd2004bada58a3eca03361716d92fa07d463dafec35cf08",
+    "clone_files_verified": 1564,
+    "packaging_missing": 0,
+    "packaging_extra": 0,
+    "packaging_changed": 0,
+    "additions": {
+      "admin_mode": "session-scoped birth/design execution-gate override with identity preserved",
+      "talk": "native Android SynthiaVoice hooks plus browser fallback",
+      "hands_security": "private per-install x-synthia-hand-token",
+      "local_linux_runtime": [
+        "python3",
+        "/bin/sh",
+        "node opt-in"
+      ]
     }
   }
 }
