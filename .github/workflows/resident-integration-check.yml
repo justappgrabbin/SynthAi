@@ -36,6 +36,7 @@ on:
       - 'computer/tests/purpose-guide.test.mjs'
       - 'computer/tests/world-adapters.test.mjs'
       - 'computer/tests/research-report-automaton.test.mjs'
+      - 'computer/tests/research-report-cartridge-integration.test.mjs'
       - '.github/workflows/resident-integration-check.yml'
 
 permissions:
@@ -70,6 +71,7 @@ jobs:
           computer/tests/native-resident-images.test.mjs
           computer/tests/automata-cartridge-magazine.test.mjs
           computer/tests/research-report-automaton.test.mjs
+          computer/tests/research-report-cartridge-integration.test.mjs
           computer/tests/synthia57-resident.test.mjs
           computer/tests/synthia57-package-loader.test.mjs
           computer/tests/synthia57-package-store.test.mjs
