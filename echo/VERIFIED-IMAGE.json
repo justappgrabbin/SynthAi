@@ -1,0 +1,21 @@
+{
+  "echo_original": {
+    "filename": "StellarCPU-Rough-v0.1.0.zip",
+    "size_bytes": 154527059,
+    "sha256": "680c0b4b16dc8426ac5d48c9746a01ae6fd5fe17ad9c6af627cbf184017cc881"
+  },
+  "echo_synth_image": {
+    "filename": "Echo-v0.1.0.synthimg",
+    "size_bytes": 148824103,
+    "sha256": "5acec85b899e3206f44d0b9a6891de6c3b12aa8d2e75c468d0e55ea86b367d7b"
+  },
+  "tree_verification": {
+    "expected_files": 1756,
+    "actual_files": 1756,
+    "missing": 0,
+    "extra": 0,
+    "changed": 0,
+    "whole_tree_verified": true
+  },
+  "note": "Image packaging verification only. Native resident execution still requires an Echo-specific resident loader for resident_type=echo."
+}

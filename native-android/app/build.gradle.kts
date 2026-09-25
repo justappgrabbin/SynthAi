@@ -24,4 +24,13 @@ android {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
+
+    androidResources {
+        noCompress += listOf("bin", "tgz", "synthimg")
+    }
+}
+
+
+dependencies {
+    implementation("org.apache.commons:commons-compress:1.27.1")
 }

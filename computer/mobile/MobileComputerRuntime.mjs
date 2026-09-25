@@ -150,11 +150,13 @@ export class MobileComputerRuntime {
     namespace = 'synthai-mobile-computer',
     mesh = null,
     launchProfile = 'compact',
+    nativeResidents = null,
   } = {}) {
     this.bus = new EventBus();
     this.state = new StateStore({ bus: this.bus, persistence, namespace });
     this.launchProfile = launchProfile;
     this.mesh = mesh;
+    this.nativeResidents = nativeResidents;
     const registry = kind => new Registry({ kind, bus: this.bus });
 
     this.tools = registry('tool');
@@ -302,6 +304,7 @@ export class MobileComputerRuntime {
       'on-demand-compiler': 'Dormant compiler broker with content-hash reuse; compiler adapter binds separately',
       'world-federation': 'Mesh roles for home, daily-life mechanics, diagnostic lab, research lab and profile worlds',
       'synthia57-resident': 'Mounts the canonical Synthia v0.5.7 package intact as a Computer resident',
+      'native-resident-images': 'Installs and wakes native Echo and Synthia 5.8 resident images through the local residence bridge',
       'pathways-to-purpose': 'Persistent personal purpose roadmaps and real-world outcome feedback from live Computer state',
     })) {
       if (!this.capabilityRegistry.has(id)) this.capabilities.register(id, { providers: ['mobile-computer'], description });
@@ -317,6 +320,7 @@ export class MobileComputerRuntime {
     this.services.register('compiler-broker', { provider: this.compiler, contract: 'attachCompiler/ensure/snapshot' });
     this.services.register('world-federation', { provider: this.worldFederation, contract: 'defineLayer/seedCanonicalLayers/bind/invoke/attachHome/registerProfileWorld' });
     this.services.register('synthia57-loader', { provider: this.synthia57, contract: 'mount/get/unmount' });
+    if (this.nativeResidents) this.services.register('native-resident-bridge', { provider: this.nativeResidents, contract: 'install/mount/request/unmount' });
     this.services.register('purpose-guide', { provider: this.purposeGuide, contract: 'buildRoadmap/recordOutcome/getRoadmap' });
 
     await this.state.set('computer.boot', {
@@ -538,7 +542,20 @@ export class MobileComputerRuntime {
   }
 
   async installSynthImage(source, options = {}) {
-    const record = await this.images.install(source, options);
+    let record = await this.images.install(source, options);
+    if (record.residentEntry && this.nativeResidents?.install) {
+      try {
+        const nativeResidence = await this.nativeResidents.install(source, { sourceLabel: `mobile-synthimg:${record.id}` });
+        record = { ...record, nativeResidence };
+        await this.state.set(`images.${encodeURIComponent(record.id)}`, record, { source: 'native-resident-bridge' });
+      } catch (error) {
+        const nativeResidence = { installed: false, error: String(error?.message ?? error) };
+        record = { ...record, nativeResidence };
+        await this.state.set(`images.${encodeURIComponent(record.id)}`, record, { source: 'native-resident-bridge' });
+        this.bus.emit('resident-image:native-install-failed', { imageId: record.id, error: nativeResidence.error });
+        throw error;
+      }
+    }
     if (record.entry && !this.apps.has(record.id)) {
       this.apps.register(record.id, {
         kind: 'synthimg-app',
@@ -581,19 +598,31 @@ export class MobileComputerRuntime {
     if (!wake.residentModuleUrl) throw new Error(`${imageId} has no resident runtime entry`);
     const manifest = wake.record.manifest ?? {};
     const residentType = manifest.resident_type ?? manifest.residentType ?? null;
-    if (residentType !== 'synthia57') {
-      throw new Error(`No resident loader is registered for ${residentType ?? 'unknown resident type'}`);
+    if (residentType === 'synthia57') {
+      const base = new URL(wake.record.base, globalThis.location?.origin ?? 'https://synth.local').href;
+      const runtimeEntry = manifest.embodiment_entry ?? manifest.embodimentEntry
+        ?? 'vendor/pure-synthia-v0.4.0/src/synthia/synthiaRuntime.mjs';
+      return this.mountSynthia57({
+        ...options,
+        base,
+        federatedModule: wake.residentModuleUrl,
+        synthiaRuntimeModule: new URL(runtimeEntry, base).href,
+        residentId: options.residentId ?? manifest.resident_id ?? manifest.residentId ?? 'synthia',
+      });
     }
-    const base = new URL(wake.record.base, globalThis.location?.origin ?? 'https://synth.local').href;
-    const runtimeEntry = manifest.embodiment_entry ?? manifest.embodimentEntry
-      ?? 'vendor/pure-synthia-v0.4.0/src/synthia/synthiaRuntime.mjs';
-    return this.mountSynthia57({
-      ...options,
-      base,
-      federatedModule: wake.residentModuleUrl,
-      synthiaRuntimeModule: new URL(runtimeEntry, base).href,
-      residentId: options.residentId ?? manifest.resident_id ?? manifest.residentId ?? 'synthia',
-    });
+    if (residentType === 'echo' || residentType === 'synthia58') {
+      if (!this.nativeResidents?.mount) throw new Error(`${residentType} requires the local native resident bridge`);
+      const nativeResident = await this.nativeResidents.mount(imageId, {
+        residentId: options.residentId ?? manifest.resident_id ?? manifest.residentId ?? null,
+      });
+      return {
+        ...wake,
+        nativeResident,
+        residentType,
+        launchUrl: residentType === 'synthia58' ? nativeResident.url : (wake.launchUrl ?? nativeResident.url),
+      };
+    }
+    throw new Error(`No resident loader is registered for ${residentType ?? 'unknown resident type'}`);
   }
 
   async sleepSynthImage(appId, { address = null, previewRef = null, memoryRef = null } = {}) {
@@ -690,6 +719,7 @@ export class MobileComputerRuntime {
       compiler: this.compiler.snapshot(),
       worlds: this.worldFederation.snapshot(),
       synthia57: this.synthia57.get('synthia')?.adapter?.snapshot?.() ?? null,
+      nativeResidents: Boolean(this.nativeResidents),
     };
   }
 }

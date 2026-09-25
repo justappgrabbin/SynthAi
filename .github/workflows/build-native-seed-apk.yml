@@ -5,18 +5,26 @@ on:
   push:
     branches:
       - 'integration/synthia-reality-resident'
+      - 'integration/echo-prime-resident-loaders'
     paths:
       - 'native-android/**'
       - 'computer/native/**'
+      - 'computer/residents/**'
+      - 'computer/mobile/**'
+      - 'scripts/build-bundled-linux-residence.sh'
       - '.github/workflows/build-native-seed-apk.yml'
 
 permissions:
   contents: read
 
+concurrency:
+  group: native-seed-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build-native-seed:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 35
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -34,15 +42,62 @@ jobs:
         with:
           gradle-version: '8.9'
 
-      - name: Check native seed server syntax
-        run: node --check computer/native/native-seed-server.mjs
+      - name: Setup ARM64 emulation
+        uses: docker/setup-qemu-action@v3
+        with:
+          platforms: arm64
+
+      - name: Check resident server syntax
+        run: |
+          node --check computer/native/native-seed-server.mjs
+          node --check computer/native/NativeSeedRuntime.mjs
+          node --check computer/residents/native-synthimg-package-store.mjs
+          node --check computer/residents/native-image-resident-loader.mjs
+
+      - name: Build APK-local Linux residence
+        run: bash scripts/build-bundled-linux-residence.sh
+
+      - name: Verify residence assets before Android build
+        run: |
+          test -s native-android/app/src/main/assets/runtime/rootfs-arm64.bin
+          test -s native-android/app/src/main/assets/runtime/proot-android-aarch64.bin
+          test -s native-android/app/src/main/assets/runtime/residence-manifest.properties
+          cat native-android/app/src/main/assets/runtime/residence-manifest.properties
 
       - name: Build native debug APK
+        env:
+          GRADLE_OPTS: -Dorg.gradle.jvmargs="-Xmx5g -XX:MaxMetaspaceSize=1g"
         run: gradle -p native-android :app:assembleDebug --stacktrace
+
+      - name: Verify APK really contains the Linux residence
+        run: |
+          APK=native-android/app/build/outputs/apk/debug/app-debug.apk
+          test -s "$APK"
+          unzip -l "$APK" | tee /tmp/apk-files.txt
+          grep -q 'assets/runtime/rootfs-arm64.bin' /tmp/apk-files.txt
+          grep -q 'assets/runtime/proot-android-aarch64.bin' /tmp/apk-files.txt
+          grep -q 'assets/runtime/residence-manifest.properties' /tmp/apk-files.txt
+          unzip -p "$APK" assets/runtime/rootfs-arm64.bin > /tmp/apk-rootfs.bin
+          unzip -p "$APK" assets/runtime/proot-android-aarch64.bin > /tmp/apk-proot.bin
+          ROOTFS_EXPECTED="$(sed -n 's/^rootfs_sha256=//p' native-android/app/src/main/assets/runtime/residence-manifest.properties)"
+          PROOT_EXPECTED="$(sed -n 's/^proot_package_sha256=//p' native-android/app/src/main/assets/runtime/residence-manifest.properties)"
+          test "$(sha256sum /tmp/apk-rootfs.bin | awk '{print $1}')" = "$ROOTFS_EXPECTED"
+          test "$(sha256sum /tmp/apk-proot.bin | awk '{print $1}')" = "$PROOT_EXPECTED"
+          gzip -t /tmp/apk-rootfs.bin
+          gzip -t /tmp/apk-proot.bin
+          ls -lh "$APK"
+          sha256sum "$APK"
 
       - name: Upload native APK
         uses: actions/upload-artifact@v4
         with:
-          name: synthai-native-seed-debug-apk
+          name: synthai-native-seed-linux-residence-debug-apk
           path: native-android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+
+      - name: Upload residence manifest
+        uses: actions/upload-artifact@v4
+        with:
+          name: synthai-linux-residence-manifest
+          path: native-android/app/src/main/assets/runtime/residence-manifest.properties
           if-no-files-found: error

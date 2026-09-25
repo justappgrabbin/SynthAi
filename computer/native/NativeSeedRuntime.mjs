@@ -9,6 +9,8 @@ import { WorldFederation } from '../worlds/world-federation.mjs';
 import { Synthia57PackageLoader } from '../residents/synthia57-package-loader.mjs';
 import { Synthia57PackageStore } from '../residents/synthia57-package-store.mjs';
 import { Synthia57MirrorSurfaceStore } from '../residents/synthia57-mirror-surface.mjs';
+import { NativeSynthImagePackageStore } from '../residents/native-synthimg-package-store.mjs';
+import { NativeImageResidentLoader } from '../residents/native-image-resident-loader.mjs';
 import { StellarLabAdapter } from '../labs/stellar-lab-adapter.mjs';
 import { ConsciousnessRealmPackageLoader } from '../worlds/consciousness-realm-loader.mjs';
 import { HumanAgentMechanicsAdapter } from '../worlds/adapters/human-agent.mjs';
@@ -79,6 +81,8 @@ export class NativeSeedRuntime {
     this.synthia57 = new Synthia57PackageLoader({ computer: this, bus: this.bus });
     this.synthia57Packages = new Synthia57PackageStore({ state:this.state, bus:this.bus });
     this.synthiaMirror = new Synthia57MirrorSurfaceStore({ state:this.state, bus:this.bus });
+    this.residentImages = new NativeSynthImagePackageStore({ state:this.state, bus:this.bus, root:process.env.SYNTHAI_RESIDENT_IMAGE_ROOT || undefined });
+    this.imageResidents = new NativeImageResidentLoader({ computer:this, packageStore:this.residentImages, bus:this.bus, clock });
     this.stellarLab = new StellarLabAdapter({ mesh: this.meshKernel, state: this.state, bus: this.bus, clock });
     this.consciousnessRealm = new ConsciousnessRealmPackageLoader({ computer: this, bus: this.bus });
     this.humanAgent = null;
@@ -94,7 +98,7 @@ export class NativeSeedRuntime {
     await this.#ensureParticipant('computer:self', {
       kind: 'native-seed',
       residency: 'active',
-      capabilities: ['mesh.host','state-space','execution','resident-host','compiler.dormant','terminal','app.host','indiverse','world-federation','purpose-guide'],
+      capabilities: ['mesh.host','state-space','execution','resident-host','resident-image.install','resident-image.mount','compiler.dormant','terminal','app.host','indiverse','world-federation','purpose-guide'],
       publicState: { name: 'SynthAI Native Seed', runtime: 'native-seed' },
     });
     await this.#ensureParticipant('system:state-space', {
@@ -348,6 +352,27 @@ export class NativeSeedRuntime {
   bindResidentRuntime(id, runtime) { return this.residents.bindRuntime(id, runtime); }
   async mountSynthia57(options = {}) { return this.synthia57.mount(options); }
 
+  async installResidentImage(readable, options = {}) {
+    const record = await this.residentImages.installSynthImageStream(readable, options);
+    return {
+      installed: true,
+      mounted: false,
+      image: this.residentImages.list().find(image => image.id === record.id) ?? null,
+    };
+  }
+
+  async mountResidentImage(imageId, options = {}) {
+    return this.imageResidents.mount({ imageId, residentId: options.residentId ?? null, timeoutMs: options.timeoutMs ?? 15000 });
+  }
+
+  async residentImageRequest(residentId, operation, payload = {}) {
+    const routed = await this.meshKernel.request(String(residentId), { operation, payload: clone(payload) });
+    if (!routed.delivered) return { queued: routed.queued, result: null };
+    return routed.result;
+  }
+
+  async unmountResidentImage(residentId) { return this.imageResidents.unmount(residentId); }
+
   async mountInstalledSynthia57() {
     const verified = await this.synthia57Packages.verify();
     if (!verified.installed) return { mounted:false, reason:verified.reason ?? 'NO_PACKAGE' };
@@ -415,6 +440,8 @@ export class NativeSeedRuntime {
       synthia57: this.synthia57.get('synthia')?.adapter?.snapshot?.() ?? null,
       synthia57Package: this.synthia57Packages.snapshot(),
       synthiaMirror: this.synthiaMirror.snapshot(),
+      residentImages: this.residentImages.list(),
+      imageResidents: this.imageResidents.snapshot(),
     };
   }
 }

@@ -1,0 +1,28 @@
+name: Export APK Signer
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/export-apksig.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download Android apksig
+        run: |
+          curl --fail --location --retry 4 \
+            https://dl.google.com/dl/android/maven2/com/android/tools/build/apksig/8.7.3/apksig-8.7.3.jar \
+            --output apksig-8.7.3.jar
+          test -s apksig-8.7.3.jar
+          sha256sum apksig-8.7.3.jar
+      - name: Upload signer
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-apksig-8.7.3
+          path: apksig-8.7.3.jar
+          if-no-files-found: error

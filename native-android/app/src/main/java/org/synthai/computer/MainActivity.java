@@ -1,16 +1,21 @@
 package org.synthai.computer;
 
 import android.app.Activity;
+import android.Manifest;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.database.Cursor;
 import android.net.Uri;
 import android.util.Base64;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.os.Bundle;
+import android.os.Build;
 import android.os.Handler;
+import android.provider.Settings;
+import android.provider.OpenableColumns;
 import android.os.Looper;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -28,9 +33,10 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public final class MainActivity extends Activity {
-    private static final int REQUEST_TERMUX_RUN = 7001;
+    private static final int REQUEST_AUDIO = 7004;
     private static final int REQUEST_MIRROR_IMAGE = 7002;
     private static final int REQUEST_SYNTHIA_PACKAGE = 7003;
+    private static final String BUNDLED_PRIME_ASSET = "residents/Synthia-Prime-v0.5.8-Android-Resident-3.synthimg";
     private final ExecutorService io = Executors.newSingleThreadExecutor();
     private final Handler main = new Handler(Looper.getMainLooper());
     private NativeSeedClient client;
@@ -44,6 +50,8 @@ public final class MainActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        LinuxResidenceService.start(this);
+        SynthiaHoverService.start(this);
         client = new NativeSeedClient("http://127.0.0.1:17757");
         journal = new EventJournal(this);
         prefs = getSharedPreferences("synthai-native", MODE_PRIVATE);
@@ -55,6 +63,15 @@ public final class MainActivity extends Activity {
         mirrorFile = new File(getFilesDir(), "synthia-mirror-face.jpg");
         loadMirrorFace();
         setContentView(world);
+        if (Build.VERSION.SDK_INT >= 23 && !Settings.canDrawOverlays(this)) {
+            world.setStatus("ENABLE SYNTHIA HOVER");
+            try {
+                Intent overlay = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:" + getPackageName()));
+                startActivity(overlay);
+            } catch (Exception ignored) {}
+        } else {
+            ensureVoicePermission();
+        }
         refreshApps();
         wakeRuntimeAndFlush(0);
     }
@@ -65,6 +82,9 @@ public final class MainActivity extends Activity {
         long last = prefs.getLong("backgroundAt", 0L);
         long elapsed = last > 0 ? Math.max(0, System.currentTimeMillis() - last) : 0;
         prefs.edit().remove("backgroundAt").apply();
+        LinuxResidenceService.start(this);
+        SynthiaHoverService.start(this);
+        if (Build.VERSION.SDK_INT < 23 || Settings.canDrawOverlays(this)) ensureVoicePermission();
         refreshApps();
         wakeRuntimeAndFlush(elapsed);
     }
@@ -127,24 +147,37 @@ public final class MainActivity extends Activity {
     }
 
     private void openSynthiaField() {
-        world.setStatus("OPENING SYNTHIA 5.7 FIELD");
+        world.setStatus("OPENING SYNTHIA");
         io.execute(() -> {
             NativeSeedClient.Result health = ensureCurrentNativeSeed();
             boolean available = false;
             String fieldUrl = "http://127.0.0.1:17758/";
             try {
                 JSONObject root = new JSONObject(health.body == null ? "{}" : health.body);
-                JSONObject front = root.optJSONObject("synthia57FrontScreen");
-                if (front != null) {
-                    available = front.optBoolean("mounted", false);
-                    fieldUrl = front.optString("url", fieldUrl);
+                JSONArray residents = root.optJSONArray("imageResidents");
+                if (residents != null) {
+                    for (int i = 0; i < residents.length(); i++) {
+                        JSONObject resident = residents.optJSONObject(i);
+                        if (resident != null && "synthia58".equals(resident.optString("residentType"))) {
+                            available = true;
+                            fieldUrl = resident.optString("url", "http://127.0.0.1:17759/");
+                            break;
+                        }
+                    }
+                }
+                if (!available) {
+                    JSONObject front = root.optJSONObject("synthia57FrontScreen");
+                    if (front != null) {
+                        available = front.optBoolean("mounted", false);
+                        fieldUrl = front.optString("url", fieldUrl);
+                    }
                 }
             } catch (Exception ignored) {}
             boolean finalAvailable = available;
             String finalUrl = fieldUrl;
             main.post(() -> {
                 if (!finalAvailable) {
-                    world.setStatus("SYNTHIA 5.7 FIELD NOT READY");
+                    world.setStatus("SYNTHIA RESIDENT NOT READY");
                     return;
                 }
                 WebView view = new WebView(this);
@@ -182,7 +215,23 @@ public final class MainActivity extends Activity {
         startActivityForResult(pick, REQUEST_SYNTHIA_PACKAGE);
     }
 
+    private String displayName(Uri uri) {
+        try (Cursor cursor = getContentResolver().query(uri, new String[]{OpenableColumns.DISPLAY_NAME}, null, null, null)) {
+            if (cursor != null && cursor.moveToFirst()) {
+                int index = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
+                if (index >= 0) return cursor.getString(index);
+            }
+        } catch (Exception ignored) {}
+        String fallback = uri.getLastPathSegment();
+        return fallback == null ? "" : fallback;
+    }
+
     private void acceptSynthiaPackage(Uri uri) {
+        String name = displayName(uri);
+        if (name.toLowerCase().endsWith(".synthimg")) {
+            acceptResidentImage(uri, name);
+            return;
+        }
         world.setStatus("INSTALLING SYNTHIA 5.7");
         io.execute(() -> {
             try {
@@ -218,6 +267,61 @@ public final class MainActivity extends Activity {
                 });
             } catch (Exception error) {
                 main.post(() -> world.setStatus("SYNTHIA 5.7 INSTALL ERROR"));
+            }
+        });
+    }
+
+    private void acceptResidentImage(Uri uri, String label) {
+        world.setStatus("INSTALLING RESIDENT IMAGE");
+        io.execute(() -> {
+            try {
+                NativeSeedClient.Result health = ensureCurrentNativeSeed();
+                if (!health.ok) throw new IllegalStateException("Native Seed is not available");
+
+                long length = -1L;
+                try (android.content.res.AssetFileDescriptor afd = getContentResolver().openAssetFileDescriptor(uri, "r")) {
+                    if (afd != null) length = afd.getLength();
+                } catch (Exception ignored) {}
+
+                NativeSeedClient.Result installed;
+                try (InputStream in = getContentResolver().openInputStream(uri)) {
+                    if (in == null) throw new IllegalStateException("Could not open resident image");
+                    installed = client.upload(
+                        "/packages/resident-image/install",
+                        in,
+                        length,
+                        "application/octet-stream",
+                        "android-document-picker:" + label
+                    );
+                }
+                if (!installed.ok) throw new IllegalStateException("Resident image install failed");
+
+                JSONObject root = new JSONObject(installed.body == null ? "{}" : installed.body);
+                JSONObject image = root.optJSONObject("image");
+                String imageId = image == null ? "" : image.optString("id", "");
+                String residentType = image == null ? "" : image.optString("residentType", "");
+                if (imageId.isEmpty()) throw new IllegalStateException("Resident image id missing");
+
+                NativeSeedClient.Result mounted = client.post(
+                    "/resident-image/mount",
+                    new JSONObject().put("imageId", imageId)
+                );
+                if (!mounted.ok) throw new IllegalStateException("Resident image mount failed");
+
+                main.post(() -> {
+                    if ("synthia58".equals(residentType)) {
+                        world.setResidentName("SYNTHIA");
+                        world.setStatus("MESH ACTIVE · SYNTHIA PRIME MOUNTED");
+                        SynthiaHoverService.start(this);
+                    } else if ("echo".equals(residentType)) {
+                        world.setResidentName("ECHO");
+                        world.setStatus("MESH ACTIVE · ECHO MOUNTED");
+                    } else {
+                        world.setStatus("MESH ACTIVE · RESIDENT MOUNTED");
+                    }
+                });
+            } catch (Exception error) {
+                main.post(() -> world.setStatus("RESIDENT IMAGE INSTALL ERROR"));
             }
         });
     }
@@ -309,37 +413,78 @@ public final class MainActivity extends Activity {
     private NativeSeedClient.Result ensureCurrentNativeSeed() {
         NativeSeedClient.Result health = client.health();
         if (!health.ok) {
-            TermuxBridge.startNativeSeed(this);
-            for (int i = 0; i < 6 && !health.ok; i++) {
-                try { Thread.sleep(700L * (i + 1)); } catch (InterruptedException ignored) {}
+            LinuxResidenceService.start(this);
+            for (int i = 0; i < 12 && !health.ok; i++) {
+                try { Thread.sleep(450L * (i + 1)); } catch (InterruptedException ignored) {}
                 health = client.health();
             }
         }
-
         if (health.ok && runtimeApiVersion(health) < 2) {
-            main.post(() -> world.setStatus("UPDATING NATIVE SEED"));
-            try { client.post("/sleep", new JSONObject()); } catch (Exception ignored) {}
-            TermuxBridge.updateAndStartNativeSeed(this);
-            for (int i = 0; i < 9; i++) {
-                try { Thread.sleep(800L * (i + 1)); } catch (InterruptedException ignored) {}
-                health = client.health();
-                if (health.ok && runtimeApiVersion(health) >= 2) break;
-            }
+            main.post(() -> world.setStatus("LOCAL RESIDENCE API NEEDS APK UPDATE"));
         }
         return health;
     }
 
+    private String installedPrimeId(NativeSeedClient.Result health) {
+        try {
+            JSONObject root = new JSONObject(health.body == null ? "{}" : health.body);
+            JSONArray images = root.optJSONArray("residentImages");
+            if (images == null) return null;
+            for (int i = 0; i < images.length(); i++) {
+                JSONObject image = images.optJSONObject(i);
+                if (image != null && "synthia58".equals(image.optString("residentType"))) {
+                    return image.optString("id", null);
+                }
+            }
+        } catch (Exception ignored) {}
+        return null;
+    }
+
+    private boolean assetExists(String name) {
+        try (InputStream ignored = getAssets().open(name)) { return true; }
+        catch (Exception missing) { return false; }
+    }
+
+    private NativeSeedClient.Result ensurePrimeResident(NativeSeedClient.Result health) {
+        if (!health.ok || hasMountedPrime(health)) return health;
+        try {
+            String imageId = installedPrimeId(health);
+            if (imageId == null && assetExists(BUNDLED_PRIME_ASSET)) {
+                long length = -1L;
+                try (android.content.res.AssetFileDescriptor afd = getAssets().openFd(BUNDLED_PRIME_ASSET)) {
+                    length = afd.getLength();
+                } catch (Exception ignored) {}
+                try (InputStream in = getAssets().open(BUNDLED_PRIME_ASSET)) {
+                    NativeSeedClient.Result installed = client.upload(
+                        "/packages/resident-image/install",
+                        in,
+                        length,
+                        "application/octet-stream",
+                        "apk-bundled-prime"
+                    );
+                    if (!installed.ok) return health;
+                    JSONObject root = new JSONObject(installed.body == null ? "{}" : installed.body);
+                    JSONObject image = root.optJSONObject("image");
+                    imageId = image == null ? null : image.optString("id", null);
+                }
+            }
+            if (imageId != null && !imageId.isEmpty()) {
+                NativeSeedClient.Result mounted = client.post(
+                    "/resident-image/mount",
+                    new JSONObject().put("imageId", imageId)
+                );
+                if (mounted.ok) return client.health();
+            }
+        } catch (Exception ignored) {}
+        return health;
+    }
+
     private void wakeRuntimeAndFlush(long elapsedMs) {
-        if (TermuxBridge.isInstalled(this) &&
-            android.os.Build.VERSION.SDK_INT >= 23 &&
-            checkSelfPermission(TermuxBridge.RUN_PERMISSION) != PackageManager.PERMISSION_GRANTED) {
-            world.setStatus("GRANT TERMUX RUN PERMISSION");
-            requestPermissions(new String[]{TermuxBridge.RUN_PERMISSION}, REQUEST_TERMUX_RUN);
-            return;
-        }
-        world.setStatus("MESH WAKING");
+        LinuxResidenceService.start(this);
+        world.setStatus("LOCAL LINUX · MESH WAKING");
         io.execute(() -> {
             NativeSeedClient.Result health = ensureCurrentNativeSeed();
+            if (health.ok) health = ensurePrimeResident(health);
             boolean ready = health.ok;
             boolean synthiaReady = ready && hasMountedSynthia(health);
             if (ready) {
@@ -359,9 +504,29 @@ public final class MainActivity extends Activity {
         });
     }
 
+    private boolean hasMountedPrime(NativeSeedClient.Result health) {
+        try {
+            JSONObject root = new JSONObject(health.body == null ? "{}" : health.body);
+            JSONArray residents = root.optJSONArray("imageResidents");
+            if (residents == null) return false;
+            for (int i = 0; i < residents.length(); i++) {
+                JSONObject resident = residents.optJSONObject(i);
+                if (resident != null && "synthia58".equals(resident.optString("residentType"))) return true;
+            }
+        } catch (Exception ignored) {}
+        return false;
+    }
+
     private boolean hasMountedSynthia(NativeSeedClient.Result health) {
         try {
             JSONObject root = new JSONObject(health.body == null ? "{}" : health.body);
+            JSONArray residents = root.optJSONArray("imageResidents");
+            if (residents != null) {
+                for (int i = 0; i < residents.length(); i++) {
+                    JSONObject resident = residents.optJSONObject(i);
+                    if (resident != null && "synthia58".equals(resident.optString("residentType"))) return true;
+                }
+            }
             JSONObject mounts = root.optJSONObject("optionalMounts");
             if (mounts == null || !mounts.has("synthia57")) return false;
             Object value = mounts.opt("synthia57");
@@ -376,15 +541,48 @@ public final class MainActivity extends Activity {
         }
     }
 
+    private boolean handsEnabled() {
+        try {
+            String enabled = Settings.Secure.getString(
+                getContentResolver(),
+                Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES
+            );
+            return enabled != null
+                && enabled.contains(getPackageName())
+                && enabled.contains("SynthiaAccessibilityService");
+        } catch (Exception ignored) {
+            return false;
+        }
+    }
+
+    private void ensureHandsSettings() {
+        if (handsEnabled()) return;
+        if (prefs.getBoolean("handsSettingsShown", false)) {
+            world.setStatus("ENABLE SYNTHIA HANDS IN ACCESSIBILITY");
+            return;
+        }
+        prefs.edit().putBoolean("handsSettingsShown", true).apply();
+        world.setStatus("ENABLE SYNTHIA HANDS");
+        try { startActivity(new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)); }
+        catch (Exception ignored) {}
+    }
+
+    private void ensureVoicePermission() {
+        if (Build.VERSION.SDK_INT >= 23 &&
+            checkSelfPermission(Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(new String[]{Manifest.permission.RECORD_AUDIO}, REQUEST_AUDIO);
+            return;
+        }
+        ensureHandsSettings();
+    }
+
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == REQUEST_TERMUX_RUN) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                wakeRuntimeAndFlush(0);
-            } else {
-                world.setStatus("MESH HELD · TERMUX PERMISSION NEEDED");
-            }
+        if (requestCode == REQUEST_AUDIO) {
+            boolean granted = grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED;
+            world.setStatus(granted ? "VOICE READY · LOCAL LINUX ACTIVE" : "VOICE OFF · LOCAL LINUX ACTIVE");
+            ensureHandsSettings();
         }
     }
 

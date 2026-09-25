@@ -1,0 +1,134 @@
+{
+  "protected_original": {
+    "filename": "Synthia-Solo-Hover-v0.5.8-ANDROID-HANDS-SOURCE.zip",
+    "size_bytes": 83184881,
+    "sha256": "c73d2bf2c688fc954cb3ac2e273662308a23577c6d29b08509eff85b6983a143",
+    "untouched": true
+  },
+  "original_image": {
+    "filename": "Synthia-Prime-v0.5.8.synthimg",
+    "size_bytes": 81149942,
+    "sha256": "550d2de8ccef3bb3237a2fe6fac7c52577b386c4ba9e2438c7abb0881429a243",
+    "whole_tree_verified_files": 1560
+  },
+  "additive_android_resident_image": {
+    "filename": "Synthia-Prime-v0.5.8-Android-Resident-1.synthimg",
+    "version": "0.5.8+android-resident.1",
+    "size_bytes": 81150494,
+    "sha256": "99d83b841c0da16a27e5ee9539663ad00118aadd07e4182a19f3b8116d5a8468",
+    "clone_files_verified": 1561,
+    "packaging_missing": 0,
+    "packaging_extra": 0,
+    "packaging_changed": 0,
+    "source_delta": {
+      "original_files_unchanged": 1556,
+      "intentionally_patched": [
+        "src/federated-synthia.mjs",
+        "src/ui/server.mjs",
+        "ui/app.mjs",
+        "ui/index.html"
+      ],
+      "added": [
+        "test/32-admin-mode.test.mjs"
+      ],
+      "removed": []
+    },
+    "additions": {
+      "admin_mode": "session-scoped override of current birth/design execution gate; identity state preserved",
+      "talk": "chat speech hooks for Android SynthiaVoice bridge with browser fallback"
+    }
+  },
+  "resident": {
+    "type": "synthia58",
+    "entry": "src/ui/server.mjs",
+    "hover_entry": "ui/index.html",
+    "port": 17759,
+    "native_voice_bridge": "native-android/app/src/main/java/org/synthai/computer/SynthiaVoiceBridge.java",
+    "native_hands_bridge": "native-android/app/src/main/java/org/synthai/computer/SynthiaAccessibilityService.java",
+    "loader_status": "WIRED_AND_CI_VERIFIED"
+  },
+  "verification": {
+    "admin_birth_front_screen_targeted_tests": {
+      "passed": 6,
+      "failed": 0
+    },
+    "full_suite_observed_before_local_runner_timeout": {
+      "passed": 29,
+      "failed": 0,
+      "complete": false
+    },
+    "packaging": "VERIFIED",
+    "resident2_targeted_tests": {
+      "passed": 7,
+      "failed": 0
+    },
+    "resident3_targeted_tests": {
+      "passed": 9,
+      "failed": 0
+    },
+    "resident4_targeted_tests": {
+      "passed": 8,
+      "failed": 0
+    },
+    "resident4_full_suite_observed": {
+      "passed_through": 29,
+      "failed": 0,
+      "complete": false,
+      "reason": "local command window timed out before suite completion"
+    }
+  },
+  "remaining": [
+    "green full APK compile with bundled Linux residence and current Android host",
+    "physical Android permission/device acceptance",
+    "place Resident 3 image into final APK assets/residents slot and re-sign final APK"
+  ],
+  "additive_android_resident_image_v2": {
+    "filename": "Synthia-Prime-v0.5.8-Android-Resident-2.synthimg",
+    "version": "0.5.8+android-resident.2",
+    "size_bytes": 81150758,
+    "sha256": "28ef14f14c96d35b0d4730f6490f43e72a3504b79c10872f21b8cb3cc539ebf8",
+    "clone_files_verified": 1562,
+    "packaging_missing": 0,
+    "packaging_extra": 0,
+    "packaging_changed": 0,
+    "additional_patch": "src/solo/android-hand-executor.mjs",
+    "additional_test": "test/33-android-hand-token.test.mjs",
+    "hands_security": "private per-install x-synthia-hand-token"
+  },
+  "additive_android_resident_image_v3": {
+    "filename": "Synthia-Prime-v0.5.8-Android-Resident-3.synthimg",
+    "version": "0.5.8+android-resident.3",
+    "size_bytes": 81152477,
+    "sha256": "46e4c3cfe41ec18bcffefa235769eebfe44d4ab43584ce099102c083998d8298",
+    "clone_files_verified": 1564,
+    "packaging_missing": 0,
+    "packaging_extra": 0,
+    "packaging_changed": 0,
+    "local_linux_runtime": {
+      "adapter": "synthia-local-linux",
+      "python": true,
+      "shell": true,
+      "node_opt_in": true
+    }
+  },
+  "additive_android_resident_image_v4": {
+    "filename": "Synthia-Prime-v0.5.8-Android-Resident-4.synthimg",
+    "version": "0.5.8+android-resident.4",
+    "size_bytes": 81152196,
+    "sha256": "49c0c31e0fc4a977ebd2004bada58a3eca03361716d92fa07d463dafec35cf08",
+    "clone_files_verified": 1564,
+    "packaging_missing": 0,
+    "packaging_extra": 0,
+    "packaging_changed": 0,
+    "additions": {
+      "admin_mode": "session-scoped birth/design execution-gate override with identity preserved",
+      "talk": "native Android SynthiaVoice hooks plus browser fallback",
+      "hands_security": "private per-install x-synthia-hand-token",
+      "local_linux_runtime": [
+        "python3",
+        "/bin/sh",
+        "node opt-in"
+      ]
+    }
+  }
+}
