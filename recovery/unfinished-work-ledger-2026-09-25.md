@@ -127,7 +127,7 @@ Parallel swarms should use the named branch lanes in the first-drop accounting s
 
 ### Concrete additive step
 
-[PR #14 — Add verified Prime APK promotion and delivery gate](https://github.com/justappgrabbin/SynthAi/pull/14) is open as a draft from `recovery/prime-apk-delivery-gate-20260925` into the protected PR #10 lane. Head: `9a0557b09013259fcd5f4960462b5ad049a784be`; 5 files, 289 additions, 0 deletions; GitHub currently reports it mergeable.
+[PR #14 — Add verified Prime APK promotion and delivery gate](https://github.com/justappgrabbin/SynthAi/pull/14) is open as a draft from `recovery/prime-apk-delivery-gate-20260925` into the protected PR #10 lane. Head: `9a0557b09013259fcd5f4960462b5ad049a784be`; 5 files, 288 additions, 0 deletions; GitHub currently reports it mergeable.
 
 The implementation:
 - rejects a host-only APK before publication
