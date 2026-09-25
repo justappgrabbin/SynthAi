@@ -1,0 +1,28 @@
+{
+  "id": "echo-stellar-cpu-v0.1.0",
+  "name": "Echo",
+  "version": "0.1.0",
+  "kind": "computer",
+  "image_role": "resident-computer",
+  "mobile_entry": "packages/computer-core/index.html",
+  "resident_entry": "packages/stellar-machine/src/control-server.mjs",
+  "resident_type": "echo",
+  "machine_controller": "packages/stellar-machine/src/controller.mjs",
+  "self_builder": "packages/system-synthia-builder/synthia-self-compile-bridge.ts",
+  "source": {
+    "archive": "StellarCPU-Rough-v0.1.0.zip",
+    "size_bytes": 154527059,
+    "sha256": "680c0b4b16dc8426ac5d48c9746a01ae6fd5fe17ad9c6af627cbf184017cc881",
+    "tree_file_count": 1756,
+    "tree_bytes": 227092901
+  },
+  "preservation": {
+    "mode": "whole-tree",
+    "original_archive_untouched": true,
+    "notes": "Echo is packaged whole. No source files are removed or rewritten by the image builder."
+  },
+  "mounting": {
+    "web_surface": "launchable now through SynthIMG mobile_entry",
+    "native_resident": "requires Echo-specific resident loader for resident_type=echo"
+  }
+}
