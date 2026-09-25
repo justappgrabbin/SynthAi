@@ -36,7 +36,8 @@ export class PentaEphemerisService {
     try {
       ({ stdout } = await execFileAsync('python3', [RUNNER, JSON.stringify({ members, ephemeris_path: EPHEMERIS_DIR })], { timeout: 30000 }));
     } catch (error) {
-      const failure = { provider: PENTA_PROVIDER_ID, error: String(error?.stderr ?? error?.message ?? error), env: 'python3+pyephem' };
+      const detail = error?.stderr || error?.message || error;
+      const failure = { provider: PENTA_PROVIDER_ID, error: String(detail), env: 'python3+pyephem' };
       this.bus?.emit('service:provider-failure', failure);
       const err = new Error(`penta ephemeris donor unavailable (${failure.error})`);
       err.providerFailure = failure;

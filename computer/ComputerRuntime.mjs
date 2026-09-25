@@ -15,6 +15,10 @@ import { AutomataEngineGateway } from './services/automata-engine.mjs';
 import { WorldEngineGateway } from './services/world-engine.mjs';
 import { PentaEphemerisService } from './services/penta-ephemeris.mjs';
 import { ExperimentLoop } from './services/experiment-loop.mjs';
+import { AutoRegistrar } from './services/auto-registrar.mjs';
+import { SynthiaResident } from './services/synthia-resident.mjs';
+import { VerifiedBuildIntake } from './services/build-intake.mjs';
+import { AdminCenter } from './services/admin-center.mjs';
 
 export class ComputerRuntime {
   constructor({ persistence = new MemoryPersistence(), namespace = 'synthai-computer', github = null, eventLogPath = null } = {}) {
@@ -49,6 +53,7 @@ export class ComputerRuntime {
     this.mutations = new MutationDispatcher({ bus: this.bus, state: this.state, shellManager: this.shellManager, automata: this.automata, tools: this.tools, agents: this.agents, morph: this.morph });
     this.intake = new ArtifactIntake({ bus: this.bus, vfs: this.vfs, artifacts: this.artifacts, mutations: this.mutations });
     this.projects = new ProjectWorkspace({ bus: this.bus, state: this.state, vfs: this.vfs, backends: this.backends });
+    this.autoRegistrar = new AutoRegistrar({ bus: this.bus, state: this.state });
 
     if (github) this.configureGitHub(github);
   }
@@ -67,6 +72,7 @@ export class ComputerRuntime {
 
   async boot() {
     await this.state.restore();
+    this.autoRegistrar.start();
     if (!this.shells.has('workspace')) this.shells.register('workspace', { name: 'Workspace Shell', kind: 'generic' });
     if (!this.shells.has('hover-field')) this.shells.register('hover-field', { name: 'Hover Field Shell', kind: 'morph-field' });
     registerCanonicalMicros(this.micros);
@@ -97,6 +103,7 @@ export class ComputerRuntime {
     this.services.register('address-service', { provider: this.addressService, contract: 'resolveAddress' });
     this.services.register('state-resolver', { provider: this.stateResolver, contract: 'resolveState' });
     this.services.register('capability-registry', { provider: this.capabilityRegistryService, contract: 'queryCapability' });
+    this.services.register('auto-registrar', { provider: this.autoRegistrar, contract: 'registerAccepted' });
     // Stage-4b/Amendment-C: automata organism gateway (donor pure-synthia
     // v0.4.0 swarm behind execute/route; gateway only, donor stays sovereign).
     this.automataGateway = new AutomataEngineGateway({ bus: this.bus, state: this.state });
@@ -114,7 +121,51 @@ export class ComputerRuntime {
       if (!this.capabilityRegistry.has(id)) this.capabilities.register(id, { providers: ['back-up-', 'computer'] });
     }
 
-    await this.state.set('computer.boot', { status: 'ready', at: Date.now(), version: '0.2.0-project-workspace' }, { source: 'boot' });
+    // Canonical resident computer. Existing donors remain sovereign and are
+    // assembled in the declared execution -> state -> ATO -> factory -> Klein
+    // -> Synthia -> hands order.
+    this.resident = new SynthiaResident({
+      bus: this.bus,
+      state: this.state,
+      stateResolver: this.stateResolver,
+      executionGateway: this.automataGateway,
+      autoRegistrar: this.autoRegistrar,
+    });
+    await this.resident.boot();
+    this.buildIntake = new VerifiedBuildIntake({
+      bus: this.bus,
+      state: this.state,
+      resident: this.resident,
+      autoRegistrar: this.autoRegistrar,
+    });
+    this.adminCenter = await new AdminCenter({
+      computer: this,
+      resident: this.resident,
+      buildIntake: this.buildIntake,
+    }).boot();
+
+    this.services.register('synthia-resident', { provider: this.resident, contract: 'chat/growTool/loadBuild' });
+    this.services.register('verified-build-intake', { provider: this.buildIntake, contract: 'receive' });
+    this.services.register('admin-center', { provider: this.adminCenter, contract: 'run/runProject/snapshot' });
+    if (!this.systems.has('synthia-resident-computer')) {
+      this.systems.register('synthia-resident-computer', {
+        name: 'Synthia Resident Computer',
+        role: 'resident-agent-computer',
+        audience: 'owner',
+        relationship: 'host',
+        platform: 'android-linux-resident',
+        affordances: ['chat', 'execution', 'state-space', 'ato', 'tool-factory', 'klein', 'browser', 'admin-center', 'verified-build-autoload'],
+      });
+    }
+    for (const id of [
+      'execution-engine', 'kimi-state-space-chat', 'ato-engine', 'integrated-tool-factory',
+      'resident-chat', 'resident-browser', 'admin-center', 'verified-build-intake',
+      'resident-autoloader', 'android-self-compile',
+    ]) {
+      if (!this.capabilityRegistry.has(id)) this.capabilities.register(id, { providers: ['synthia-resident-computer', 'computer'] });
+    }
+
+    await this.state.set('computer.boot', { status: 'ready', at: Date.now(), version: '0.3.0-synthia-resident-computer' }, { source: 'boot' });
     this.bus.emit('computer:ready', this.snapshot());
     return this;
   }
@@ -131,6 +182,14 @@ export class ComputerRuntime {
   worldEvent(event) { return this.worldGateway.process(event); }
   observeWorld() { return this.worldGateway.snapshot(); }
   groupPenta(members) { return this.pentaEphemeris.groupPenta(members); }
+  registerAccepted(input) { return this.autoRegistrar.registerAccepted(input); }
+  chat(input, context = {}) { return this.resident.chat(input, context); }
+  growTool(request = {}) { return this.resident.growTool(request); }
+  receiveBuild(candidate = {}) { return this.buildIntake.receive(candidate); }
+  admin(task, context = {}) { return this.adminCenter.run(task, context); }
+  adminSnapshot() { return this.adminCenter.snapshot(); }
+  browserSurface() { return this.resident.browserSurface(); }
+  inspectAndroid(env = {}) { return this.resident.inspectAndroid(env); }
 
   /**
    * Contract: mount(application, contract). Mounts a real artifact app through
@@ -164,7 +223,7 @@ export class ComputerRuntime {
 
   snapshot() {
     return {
-      version: '0.2.0-project-workspace',
+      version: '0.3.0-synthia-resident-computer',
       state: this.state.snapshot(),
       systems: this.systems.list(),
       micros: this.micros.list(),
@@ -177,6 +236,9 @@ export class ComputerRuntime {
       projects: this.projects.list(),
       backends: this.backendsRegistry.list().map(({ id, status }) => ({ id, status })),
       capabilities: this.capabilityRegistry.list(),
+      registrations: this.autoRegistrar.list(),
+      resident: this.resident?.snapshot?.() ?? null,
+      admin: this.adminCenter?.snapshot?.() ?? null,
       mounted: this.shellManager.listMounted()
     };
   }

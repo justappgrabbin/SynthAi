@@ -1,0 +1,59 @@
+# Synthia automatic registration contract v1
+#
+# Hard invariant:
+#   acceptance_into_synthia == registration
+# There is no manual post-ingest registration phase.
+
+invariant:
+  id: synthia.auto-registration.v1
+  statement: Every accepted resource is registered immediately at intake.
+  manual_registration_required: false
+
+registration_record:
+  required:
+    - kind
+    - identity
+    - status
+    - origin
+    - firstRegisteredAt
+    - updatedAt
+  when_applicable:
+    - capabilities
+    - relationships
+    - location
+    - verification
+    - metadata
+
+accepted_resource_kinds:
+  - file
+  - artifact
+  - tool
+  - app
+  - automaton
+  - process
+  - agent
+  - model
+  - connector
+  - project
+  - experiment
+  - build
+  - sandbox-output
+  - publication
+  - mount
+  - contract
+  - runtime-execution
+
+promotion_rule:
+  sandbox_success:
+    register_as: sandbox-output
+    verification_status: VERIFIED
+    next_state: eligible-for-app-tray
+
+persistence:
+  local_state_path: registrations.entries
+  sync_targets:
+    - supabase
+    - notion
+    - github
+    - drive
+  note: Remote continuity adapters synchronize registrations; they do not replace the local registry.
