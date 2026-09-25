@@ -26,7 +26,7 @@ android {
     }
 
     androidResources {
-        noCompress += listOf("gz", "synthimg")
+        noCompress += listOf("tgz", "synthimg")
     }
 }
 
