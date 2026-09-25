@@ -15,6 +15,7 @@ import { AutomataEngineGateway } from './services/automata-engine.mjs';
 import { WorldEngineGateway } from './services/world-engine.mjs';
 import { PentaEphemerisService } from './services/penta-ephemeris.mjs';
 import { ExperimentLoop } from './services/experiment-loop.mjs';
+import { AutoRegistrar } from './services/auto-registrar.mjs';
 
 export class ComputerRuntime {
   constructor({ persistence = new MemoryPersistence(), namespace = 'synthai-computer', github = null, eventLogPath = null } = {}) {
@@ -49,6 +50,7 @@ export class ComputerRuntime {
     this.mutations = new MutationDispatcher({ bus: this.bus, state: this.state, shellManager: this.shellManager, automata: this.automata, tools: this.tools, agents: this.agents, morph: this.morph });
     this.intake = new ArtifactIntake({ bus: this.bus, vfs: this.vfs, artifacts: this.artifacts, mutations: this.mutations });
     this.projects = new ProjectWorkspace({ bus: this.bus, state: this.state, vfs: this.vfs, backends: this.backends });
+    this.autoRegistrar = new AutoRegistrar({ bus: this.bus, state: this.state });
 
     if (github) this.configureGitHub(github);
   }
@@ -67,6 +69,7 @@ export class ComputerRuntime {
 
   async boot() {
     await this.state.restore();
+    this.autoRegistrar.start();
     if (!this.shells.has('workspace')) this.shells.register('workspace', { name: 'Workspace Shell', kind: 'generic' });
     if (!this.shells.has('hover-field')) this.shells.register('hover-field', { name: 'Hover Field Shell', kind: 'morph-field' });
     registerCanonicalMicros(this.micros);
@@ -97,6 +100,7 @@ export class ComputerRuntime {
     this.services.register('address-service', { provider: this.addressService, contract: 'resolveAddress' });
     this.services.register('state-resolver', { provider: this.stateResolver, contract: 'resolveState' });
     this.services.register('capability-registry', { provider: this.capabilityRegistryService, contract: 'queryCapability' });
+    this.services.register('auto-registrar', { provider: this.autoRegistrar, contract: 'registerAccepted' });
     // Stage-4b/Amendment-C: automata organism gateway (donor pure-synthia
     // v0.4.0 swarm behind execute/route; gateway only, donor stays sovereign).
     this.automataGateway = new AutomataEngineGateway({ bus: this.bus, state: this.state });
@@ -131,6 +135,7 @@ export class ComputerRuntime {
   worldEvent(event) { return this.worldGateway.process(event); }
   observeWorld() { return this.worldGateway.snapshot(); }
   groupPenta(members) { return this.pentaEphemeris.groupPenta(members); }
+  registerAccepted(input) { return this.autoRegistrar.registerAccepted(input); }
 
   /**
    * Contract: mount(application, contract). Mounts a real artifact app through
@@ -177,6 +182,7 @@ export class ComputerRuntime {
       projects: this.projects.list(),
       backends: this.backendsRegistry.list().map(({ id, status }) => ({ id, status })),
       capabilities: this.capabilityRegistry.list(),
+      registrations: this.autoRegistrar.list(),
       mounted: this.shellManager.listMounted()
     };
   }
