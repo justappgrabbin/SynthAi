@@ -425,6 +425,26 @@ public final class MainActivity extends Activity {
         return health;
     }
 
+    private String installedPrimeId(NativeSeedClient.Result health) {
+        try {
+            JSONObject root = new JSONObject(health.body == null ? "{}" : health.body);
+            JSONArray images = root.optJSONArray("residentImages");
+            if (images == null) return null;
+            for (int i = 0; i < images.length(); i++) {
+                JSONObject image = images.optJSONObject(i);
+                if (image != null && "synthia58".equals(image.optString("residentType"))) {
+                    return image.optString("id", null);
+                }
+            }
+        } catch (Exception ignored) {}
+        return null;
+    }
+
+    private boolean assetExists(String name) {
+        try (InputStream ignored = getAssets().open(name)) { return true; }
+        catch (Exception missing) { return false; }
+    }
+
     private void wakeRuntimeAndFlush(long elapsedMs) {
         LinuxResidenceService.start(this);
         world.setStatus("LOCAL LINUX · MESH WAKING");
