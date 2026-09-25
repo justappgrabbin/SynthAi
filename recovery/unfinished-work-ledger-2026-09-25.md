@@ -203,7 +203,7 @@ The highest app-delivery blocker remains recovery of the exact Prime Resident 3 
 
 ### Concrete additive step
 
-[PR #16 — deterministic TaskFit convergence](https://github.com/justappgrabbin/SynthAi/pull/16) promotes the already recovered TaskFit service from PR #7 into the active Native Seed/runtime line without rewriting its donor formula. Head: `9418184d2cb5010c1a8985bb68d748657dba4cfc`; stacked base: PR #15.
+[PR #16 — deterministic TaskFit convergence](https://github.com/justappgrabbin/SynthAi/pull/16) promotes the already recovered TaskFit service from PR #7 into the active Native Seed/runtime line without rewriting its donor formula. Head: `d3c3feaa5116415969fa077c4acb7bd49b131fea`; stacked base: PR #15.
 
 The implementation:
 - preserves weighted axis coverage plus ring (+0.10), gate (+0.08), and optional Sun (+0.05) bonuses
@@ -215,8 +215,8 @@ The implementation:
 
 Verification:
 - focused local deterministic formula check: passed
-- [Resident Mesh Integration run 36189010656](https://github.com/justappgrabbin/SynthAi/actions/runs/36189010656): 46 passed / 0 failed, including the TaskFit Native Seed mesh contract
-- [Mobile SynthIMG Check run 36189013933](https://github.com/justappgrabbin/SynthAi/actions/runs/36189013933): SUCCESS
+- [Resident Mesh Integration run 36189277379](https://github.com/justappgrabbin/SynthAi/actions/runs/36189277379): 46 passed / 0 failed, including the TaskFit Native Seed mesh contract
+- [Mobile SynthIMG Check run 36189277264](https://github.com/justappgrabbin/SynthAi/actions/runs/36189277264): SUCCESS
 - [TaskFit provenance and acceptance record](https://github.com/justappgrabbin/SynthAi/blob/recovery/taskfit-convergence-20260925/recovery/TASKFIT-CONVERGENCE-2026-09-25.md)
 
 Protection boundary: TaskFit is a Native Seed software service. Prime 5.8 and its life-process swarm were not modified or used as software workers; Echo, Venom, and Synthia 5.7 were not modified or conflated.
