@@ -214,6 +214,8 @@ public final class LinuxResidenceManager {
         command.add("SYNTHAI_NATIVE_PORT=17757");
         command.add("SYNTHAI_IDLE_EXIT_MS=0");
         command.add("SYNTHAI_NATIVE_STATE=/mnt/synthai-host/linux-residence/native-seed-state.json");
+        command.add("SYNTHAI_RESIDENT_IMAGE_ROOT=/mnt/synthai-host/linux-residence/resident-images");
+        command.add("SYNTHIA58_DATA_DIR=/mnt/synthai-host/linux-residence/prime-state");
         command.add("SYNTHIA_ANDROID_HAND=1");
         command.add("SYNTHIA_ANDROID_HAND_URL=http://127.0.0.1:18758");
         command.add("SYNTHIA_ANDROID_HAND_TOKEN=" + SynthiaSecurity.handToken(context));
