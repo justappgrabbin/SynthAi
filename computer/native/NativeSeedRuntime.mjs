@@ -81,7 +81,7 @@ export class NativeSeedRuntime {
     this.synthia57 = new Synthia57PackageLoader({ computer: this, bus: this.bus });
     this.synthia57Packages = new Synthia57PackageStore({ state:this.state, bus:this.bus });
     this.synthiaMirror = new Synthia57MirrorSurfaceStore({ state:this.state, bus:this.bus });
-    this.residentImages = new NativeSynthImagePackageStore({ state:this.state, bus:this.bus });
+    this.residentImages = new NativeSynthImagePackageStore({ state:this.state, bus:this.bus, root:process.env.SYNTHAI_RESIDENT_IMAGE_ROOT || undefined });
     this.imageResidents = new NativeImageResidentLoader({ computer:this, packageStore:this.residentImages, bus:this.bus, clock });
     this.stellarLab = new StellarLabAdapter({ mesh: this.meshKernel, state: this.state, bus: this.bus, clock });
     this.consciousnessRealm = new ConsciousnessRealmPackageLoader({ computer: this, bus: this.bus });
