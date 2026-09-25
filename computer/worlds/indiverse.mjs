@@ -2,11 +2,50 @@ const clone = value => value === undefined ? undefined : structuredClone(value);
 const safeKey = value => String(value ?? 'world').replace(/[^A-Za-z0-9_-]/g, c => `_${c.charCodeAt(0).toString(16)}`);
 
 export const DEFAULT_QUALIA_GRAMMAR = Object.freeze({
-  colors: {}, materials: {}, symbols: {}, orientation: {}, scale: {}, thresholds: {}, movement: {}, embodiment: {}, sound: {}, atmosphere: {},
+  colors: {},
+  materials: {},
+  symbols: {},
+  orientation: {},
+  scale: {},
+  thresholds: {},
+  movement: {},
+  embodiment: {},
+  sound: {},
+  atmosphere: {},
+  environment: {},
+  architecture: {},
+  archetypes: {},
+  layout: {},
+  effects: {},
+  interaction: {},
 });
 
 function mergeGrammar(grammar = {}) {
-  return Object.fromEntries(Object.keys(DEFAULT_QUALIA_GRAMMAR).map(key => [key, { ...DEFAULT_QUALIA_GRAMMAR[key], ...(grammar[key] ?? {}) }]));
+  const merged = clone(grammar ?? {}) ?? {};
+  for (const key of Object.keys(DEFAULT_QUALIA_GRAMMAR)) {
+    const incoming = grammar?.[key];
+    merged[key] = {
+      ...DEFAULT_QUALIA_GRAMMAR[key],
+      ...(incoming && typeof incoming === 'object' && !Array.isArray(incoming) ? incoming : {}),
+    };
+  }
+  return merged;
+}
+
+function expressionValue(grammar, family, objectKey, fallback = null) {
+  return grammar?.[family]?.[objectKey]
+    ?? grammar?.[family]?.default
+    ?? fallback;
+}
+
+function expressionObject(grammar, family, objectKey, fallback = {}) {
+  const base = grammar?.[family]?.default;
+  const specific = grammar?.[family]?.[objectKey];
+  return {
+    ...(fallback && typeof fallback === 'object' ? fallback : {}),
+    ...(base && typeof base === 'object' ? base : {}),
+    ...(specific && typeof specific === 'object' ? specific : {}),
+  };
 }
 
 function missingAffordances(requirements = [], capabilities = []) {
@@ -59,7 +98,15 @@ export class IndiVerseRuntime {
   async updateGrammar(worldId, patch = {}) {
     const world = this.world(worldId);
     if (!world) throw new Error(`unknown IndiVerse: ${worldId}`);
-    world.grammar = mergeGrammar(Object.fromEntries(Object.keys(DEFAULT_QUALIA_GRAMMAR).map(key => [key, { ...(world.grammar?.[key] ?? {}), ...(patch[key] ?? {}) }])));
+    const next=clone(world.grammar??{})??{};
+    for(const [key,value] of Object.entries(patch??{})){
+      if(value&&typeof value==='object'&&!Array.isArray(value)){
+        next[key]={...(next[key]??{}),...clone(value)};
+      }else{
+        next[key]=clone(value);
+      }
+    }
+    world.grammar = mergeGrammar(next);
     world.updatedAt = this.clock();
     await this.state.set(`indiverse.worlds.${safeKey(worldId)}`, world, { source: 'indiverse' });
     this.bus?.emit('indiverse:grammar-updated', { worldId, grammar: clone(world.grammar) });
@@ -81,12 +128,18 @@ export class IndiVerseRuntime {
     const objectKey = canonical.kind;
     const expression = {
       ...clone(canonical.presentation),
-      color: grammar.colors[objectKey] ?? grammar.colors.default ?? canonical.presentation?.color ?? null,
-      material: grammar.materials[objectKey] ?? grammar.materials.default ?? canonical.presentation?.material ?? null,
-      symbol: grammar.symbols[objectKey] ?? grammar.symbols.default ?? canonical.presentation?.symbol ?? null,
-      orientation: { ...(canonical.presentation?.orientation ?? {}), ...(grammar.orientation.default ?? {}), ...(grammar.orientation[objectKey] ?? {}) },
-      scale: grammar.scale[objectKey] ?? grammar.scale.default ?? canonical.presentation?.scale ?? 1,
-      atmosphere: { ...(grammar.atmosphere.default ?? {}), ...(grammar.atmosphere[objectKey] ?? {}) },
+      color: expressionValue(grammar, 'colors', objectKey, canonical.presentation?.color ?? null),
+      material: expressionValue(grammar, 'materials', objectKey, canonical.presentation?.material ?? null),
+      symbol: expressionValue(grammar, 'symbols', objectKey, canonical.presentation?.symbol ?? null),
+      orientation: expressionObject(grammar, 'orientation', objectKey, canonical.presentation?.orientation ?? {}),
+      scale: expressionValue(grammar, 'scale', objectKey, canonical.presentation?.scale ?? 1),
+      atmosphere: expressionObject(grammar, 'atmosphere', objectKey, {}),
+      archetype: expressionObject(grammar, 'archetypes', objectKey, canonical.presentation?.archetype ?? {}),
+      architecture: expressionObject(grammar, 'architecture', objectKey, canonical.presentation?.architecture ?? {}),
+      effects: expressionObject(grammar, 'effects', objectKey, canonical.presentation?.effects ?? {}),
+      movement: expressionObject(grammar, 'movement', objectKey, canonical.presentation?.movement ?? {}),
+      sound: expressionObject(grammar, 'sound', objectKey, canonical.presentation?.sound ?? {}),
+      interaction: expressionObject(grammar, 'interaction', objectKey, canonical.presentation?.interaction ?? {}),
     };
     return {
       mode: 'host-qualia', worldId: world.id, ownerId: world.ownerId, objectId: canonical.id,
@@ -97,7 +150,29 @@ export class IndiVerseRuntime {
         symbol: expression.symbol !== canonical.presentation?.symbol,
         orientation: JSON.stringify(expression.orientation) !== JSON.stringify(canonical.presentation?.orientation ?? {}),
         scale: expression.scale !== (canonical.presentation?.scale ?? 1),
+        archetype: JSON.stringify(expression.archetype) !== JSON.stringify(canonical.presentation?.archetype ?? {}),
+        architecture: JSON.stringify(expression.architecture) !== JSON.stringify(canonical.presentation?.architecture ?? {}),
+        effects: JSON.stringify(expression.effects) !== JSON.stringify(canonical.presentation?.effects ?? {}),
       },
+    };
+  }
+
+  worldProfile(worldId) {
+    const world = this.world(worldId);
+    if (!world) throw new Error(`unknown IndiVerse: ${worldId}`);
+    return {
+      worldId: world.id,
+      ownerId: world.ownerId,
+      name: world.name,
+      environment: clone(world.grammar?.environment ?? {}),
+      layout: clone(world.grammar?.layout ?? {}),
+      atmosphere: clone(world.grammar?.atmosphere?.world ?? world.grammar?.atmosphere?.default ?? {}),
+      architecture: clone(world.grammar?.architecture?.world ?? {}),
+      effects: clone(world.grammar?.effects?.world ?? {}),
+      sound: clone(world.grammar?.sound?.world ?? {}),
+      embodiment: clone(world.grammar?.embodiment ?? {}),
+      metadata: clone(world.metadata ?? {}),
+      grammar: clone(world.grammar ?? {}),
     };
   }
 

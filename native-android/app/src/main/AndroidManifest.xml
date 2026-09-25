@@ -34,6 +34,19 @@
         </activity>
 
         <service
+            android:name=".WorldAccessibilityService"
+            android:label="SynthAI World Recognizer"
+            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.accessibilityservice.AccessibilityService" />
+            </intent-filter>
+            <meta-data
+                android:name="android.accessibilityservice"
+                android:resource="@xml/world_accessibility_service" />
+        </service>
+
+        <service
             android:name=".WorldNotificationListener"
             android:label="SynthAI World Events"
             android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE"

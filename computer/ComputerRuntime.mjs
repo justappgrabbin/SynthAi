@@ -16,6 +16,7 @@ import { WorldEngineGateway } from './services/world-engine.mjs';
 import { PentaEphemerisService } from './services/penta-ephemeris.mjs';
 import { ExperimentLoop } from './services/experiment-loop.mjs';
 import { PurposeGuideService } from './services/purpose-guide.mjs';
+import { TaskFitService } from './services/task-fit.mjs';
 
 export class ComputerRuntime {
   constructor({ persistence = new MemoryPersistence(), namespace = 'synthai-computer', github = null, eventLogPath = null } = {}) {
@@ -128,6 +129,14 @@ export class ComputerRuntime {
         description: 'Persistent personal purpose roadmap and outcome-feedback service backed by live Computer state.'
       });
     }
+    this.taskFit = new TaskFitService({ bus: this.bus });
+    this.services.register('task-fit', { provider: this.taskFit, contract: 'scoreTask/rankCandidates' });
+    if (!this.capabilityRegistry.has('task-fit-matchmaking')) {
+      this.capabilities.register('task-fit-matchmaking', {
+        providers: ['computer'],
+        description: 'Deterministic donor-backed task/candidate fit scoring for role and capability routing.'
+      });
+    }
     for (const id of ['resolve_address', 'resolve_state', 'emit_event', 'query_capability', 'automata_activation']) {
       if (!this.capabilityRegistry.has(id)) this.capabilities.register(id, { providers: ['back-up-', 'computer'] });
     }
@@ -152,6 +161,8 @@ export class ComputerRuntime {
   buildPurposeRoadmap(input) { return this.purposeGuide.buildRoadmap(input); }
   recordPurposeOutcome(input) { return this.purposeGuide.recordOutcome(input); }
   getPurposeRoadmap(userId, roadmapId = null) { return this.purposeGuide.getRoadmap(userId, roadmapId); }
+  scoreTaskFit(input) { return this.taskFit.scoreTask(input); }
+  rankTaskFitCandidates(input) { return this.taskFit.rankCandidates(input); }
 
   /**
    * Contract: mount(application, contract). Mounts a real artifact app through

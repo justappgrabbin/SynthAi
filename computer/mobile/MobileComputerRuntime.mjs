@@ -16,6 +16,7 @@ import { IndiVerseRuntime } from '../worlds/indiverse.mjs';
 import { WorldFederation } from '../worlds/world-federation.mjs';
 import { Synthia57PackageLoader } from '../residents/synthia57-package-loader.mjs';
 import { PurposeGuideService } from '../services/purpose-guide.mjs';
+import { TaskFitService } from '../services/task-fit.mjs';
 
 export const ADDRESS_FIELDS = Object.freeze([
   'planetary', 'dimension', 'gate', 'line', 'color', 'tone', 'base',
@@ -196,6 +197,7 @@ export class MobileComputerRuntime {
       listCapabilities: () => this.capabilityRegistry.list(),
       emitEvent: event => this.events.emitEvent(event),
     });
+    this.taskFit = new TaskFitService({ bus: this.bus });
     this.stateSpace = new StateSpaceEngine();
     this.images = new SynthImageRuntime({ state: this.state, bus: this.bus });
     // Mesh is the Computer's connective substrate. The optional constructor
@@ -238,7 +240,7 @@ export class MobileComputerRuntime {
       await this.meshKernel.registerParticipant('computer:self', {
         kind: 'computer-host',
         publicState: { name: 'SynthAI Computer', flavor: 'mobile-synthimg' },
-        capabilities: ['mesh.host', 'state-space', 'execution', 'resident-host', 'indiverse', 'purpose-guide'],
+        capabilities: ['mesh.host', 'state-space', 'execution', 'resident-host', 'indiverse', 'purpose-guide', 'task-fit'],
         residency: 'active',
       });
     } else {
@@ -248,6 +250,7 @@ export class MobileComputerRuntime {
       { id: 'system:state-space', kind: 'core-service', capabilities: ['state-space.activate','state-space.query'] },
       { id: 'system:execution', kind: 'core-service', capabilities: ['automata.run','process.execute','backend.request'] },
       { id: 'system:purpose-guide', kind: 'core-service', capabilities: ['purpose.roadmap','purpose.outcome','purpose.read'] },
+      { id: 'system:task-fit', kind: 'core-service', capabilities: ['task-fit.score','task-fit.rank'] },
     ]) {
       if (!this.meshKernel.participant(core.id)) {
         await this.meshKernel.registerParticipant(core.id, {
@@ -282,6 +285,12 @@ export class MobileComputerRuntime {
       if (envelope.operation === 'read') return this.purposeGuide.getRoadmap(payload.userId, payload.roadmapId ?? null);
       throw new Error(`unsupported purpose-guide mesh operation: ${envelope.operation}`);
     });
+    this.meshKernel.bindHandler('system:task-fit', async envelope => {
+      const payload = envelope.payload ?? {};
+      if (envelope.operation === 'score') return this.taskFit.scoreTask(payload);
+      if (envelope.operation === 'rank') return this.taskFit.rankCandidates(payload);
+      throw new Error(`unsupported task-fit mesh operation: ${envelope.operation}`);
+    });
     await this.worldFederation.seedCanonicalLayers();
     if (!this.shells.has('workspace')) this.shells.register('workspace', { name: 'Mobile Workspace', kind: 'mobile' });
     if (!this.shells.has('compact')) this.shells.register('compact', { name: 'Compact Phone Shell', kind: 'mobile-lazy' });
@@ -303,6 +312,7 @@ export class MobileComputerRuntime {
       'world-federation': 'Mesh roles for home, daily-life mechanics, diagnostic lab, research lab and profile worlds',
       'synthia57-resident': 'Mounts the canonical Synthia v0.5.7 package intact as a Computer resident',
       'pathways-to-purpose': 'Persistent personal purpose roadmaps and real-world outcome feedback from live Computer state',
+      'task-fit-matchmaking': 'Deterministic donor-backed task/candidate fit scoring for role and capability routing',
     })) {
       if (!this.capabilityRegistry.has(id)) this.capabilities.register(id, { providers: ['mobile-computer'], description });
     }
@@ -318,6 +328,7 @@ export class MobileComputerRuntime {
     this.services.register('world-federation', { provider: this.worldFederation, contract: 'defineLayer/seedCanonicalLayers/bind/invoke/attachHome/registerProfileWorld' });
     this.services.register('synthia57-loader', { provider: this.synthia57, contract: 'mount/get/unmount' });
     this.services.register('purpose-guide', { provider: this.purposeGuide, contract: 'buildRoadmap/recordOutcome/getRoadmap' });
+    this.services.register('task-fit', { provider: this.taskFit, contract: 'scoreTask/rankCandidates' });
 
     await this.state.set('computer.boot', {
       status: 'ready',
@@ -461,6 +472,22 @@ export class MobileComputerRuntime {
       operation: 'read', payload: { userId, roadmapId },
     });
     if (!routed.delivered) throw new Error('purpose-guide mesh service unavailable');
+    return routed.result;
+  }
+
+  async scoreTaskFit(input) {
+    const routed = await this.meshKernel.request('system:task-fit', {
+      operation: 'score', payload: clone(input),
+    });
+    if (!routed.delivered) throw new Error('task-fit mesh service unavailable');
+    return routed.result;
+  }
+
+  async rankTaskFitCandidates(input) {
+    const routed = await this.meshKernel.request('system:task-fit', {
+      operation: 'rank', payload: clone(input),
+    });
+    if (!routed.delivered) throw new Error('task-fit mesh service unavailable');
     return routed.result;
   }
 
