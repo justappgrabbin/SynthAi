@@ -1,0 +1,37 @@
+{
+  "source": {
+    "filename": "Synthia-Solo-Hover-v0.5.8-ANDROID-HANDS-SOURCE.zip",
+    "size_bytes": 83184881,
+    "sha256": "c73d2bf2c688fc954cb3ac2e273662308a23577c6d29b08509eff85b6983a143"
+  },
+  "image": {
+    "filename": "Synthia-Prime-v0.5.8.synthimg",
+    "size_bytes": 81149942,
+    "sha256": "550d2de8ccef3bb3237a2fe6fac7c52577b386c4ba9e2438c7abb0881429a243"
+  },
+  "tree": {
+    "expected_files": 1560,
+    "actual_files": 1560,
+    "missing": 0,
+    "extra": 0,
+    "changed": 0,
+    "whole_tree_verified": true
+  },
+  "resident": {
+    "type": "synthia58",
+    "entry": "src/ui/server.mjs",
+    "hover_entry": "ui/index.html",
+    "runtime_entry": "src/index.mjs",
+    "android_hands_service": "android/src/com/synthia/solo/SynthiaAccessibilityService.java",
+    "loader_branch": "integration/echo-prime-resident-loaders",
+    "loader_status": "WIRED_AND_CI_VERIFIED"
+  },
+  "status": "PACKAGED_WHOLE_AND_RESIDENT_LOADER_WIRED",
+  "remaining_additive_work": [
+    "bundle the Linux residence inside the final APK",
+    "Cynthia Talk voice integration",
+    "Admin Mode capability override layer",
+    "Android Hands end-to-end device verification",
+    "APK assembly and physical-device acceptance"
+  ]
+}
