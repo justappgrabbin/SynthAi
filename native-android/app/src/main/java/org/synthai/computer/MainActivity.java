@@ -258,6 +258,61 @@ public final class MainActivity extends Activity {
         });
     }
 
+    private void acceptResidentImage(Uri uri, String label) {
+        world.setStatus("INSTALLING RESIDENT IMAGE");
+        io.execute(() -> {
+            try {
+                NativeSeedClient.Result health = ensureCurrentNativeSeed();
+                if (!health.ok) throw new IllegalStateException("Native Seed is not available");
+
+                long length = -1L;
+                try (android.content.res.AssetFileDescriptor afd = getContentResolver().openAssetFileDescriptor(uri, "r")) {
+                    if (afd != null) length = afd.getLength();
+                } catch (Exception ignored) {}
+
+                NativeSeedClient.Result installed;
+                try (InputStream in = getContentResolver().openInputStream(uri)) {
+                    if (in == null) throw new IllegalStateException("Could not open resident image");
+                    installed = client.upload(
+                        "/packages/resident-image/install",
+                        in,
+                        length,
+                        "application/octet-stream",
+                        "android-document-picker:" + label
+                    );
+                }
+                if (!installed.ok) throw new IllegalStateException("Resident image install failed");
+
+                JSONObject root = new JSONObject(installed.body == null ? "{}" : installed.body);
+                JSONObject image = root.optJSONObject("image");
+                String imageId = image == null ? "" : image.optString("id", "");
+                String residentType = image == null ? "" : image.optString("residentType", "");
+                if (imageId.isEmpty()) throw new IllegalStateException("Resident image id missing");
+
+                NativeSeedClient.Result mounted = client.post(
+                    "/resident-image/mount",
+                    new JSONObject().put("imageId", imageId)
+                );
+                if (!mounted.ok) throw new IllegalStateException("Resident image mount failed");
+
+                main.post(() -> {
+                    if ("synthia58".equals(residentType)) {
+                        world.setResidentName("SYNTHIA");
+                        world.setStatus("MESH ACTIVE · SYNTHIA PRIME MOUNTED");
+                        SynthiaHoverService.start(this);
+                    } else if ("echo".equals(residentType)) {
+                        world.setResidentName("ECHO");
+                        world.setStatus("MESH ACTIVE · ECHO MOUNTED");
+                    } else {
+                        world.setStatus("MESH ACTIVE · RESIDENT MOUNTED");
+                    }
+                });
+            } catch (Exception error) {
+                main.post(() -> world.setStatus("RESIDENT IMAGE INSTALL ERROR"));
+            }
+        });
+    }
+
     private void pickMirrorImage() {
         Intent pick = new Intent(Intent.ACTION_OPEN_DOCUMENT);
         pick.addCategory(Intent.CATEGORY_OPENABLE);
