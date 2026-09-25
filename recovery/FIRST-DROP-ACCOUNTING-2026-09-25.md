@@ -4,12 +4,22 @@ Target: **SynthAI Computer + Synthia Prime 5.8 all-in-one Android first-drop can
 
 Primary implementation lane: PR #10, `integration/echo-prime-resident-loaders` at `bbe36cc99e5b9a454b0eb7e0accd67a5bdbc884a`.
 
+## Governing acceptance rule
+
+The first drop does **not** pass on compilation, CI, static verification, hashes, screenshots, provenance, or reproducibility alone.
+
+It passes only when the actual usable artifact is durably stored, visibly surfaced to the creator, the access path works, the creator can retrieve/install/run it, and the required device/runtime behavior is accepted.
+
+If the creator cannot physically get the valuable artifact, that artifact is **FAILED DELIVERY** regardless of earlier technical success.
+
 Candidate:
 - `SynthAI-Prime-Linux-Resident3-debug.apk`
 - 367,532,021 bytes
 - SHA-256 `4b5012ae88b2f89309d04596f19b5c380dcf9658a17f861e2d9c7a7c1f45cf23`
-- state: **BUILT + STATICALLY VERIFIED**
-- phone acceptance: pending physical Android execution
+- technical state: **BUILT + STATICALLY VERIFIED**
+- delivery state: **FAILED DELIVERY — exact final APK bytes were not promoted to a durable creator-visible location**
+- user-access state: **NOT VERIFIED**
+- phone acceptance: **BLOCKED until an actual retrievable APK is delivered**
 
 ## INCLUDED on the current first-drop lane
 
@@ -73,6 +83,17 @@ The candidate becomes PHONE VERIFIED after evidence for:
 
 A new swarm should work from a named lane, create additive commits, and update both this accounting sheet and the Supabase preservation ledger when capability ownership or verification state changes.
 
-## Binary archive status
+## Binary archive and delivery status
 
-The candidate's identity, SHA-256, component hashes, build provenance, and source lineage are stored durably. The final assembled APK bytes were created outside GitHub. The binary archive closes when that exact file is uploaded to GitHub Actions/Release storage or Supabase Storage and its stored-object hash is rechecked against `4b5012ae88b2f89309d04596f19b5c380dcf9658a17f861e2d9c7a7c1f45cf23`.
+The candidate's identity, SHA-256, component hashes, build provenance, and source lineage are stored durably. The final assembled APK bytes were created outside GitHub and were not durably uploaded before the temporary copy disappeared.
+
+Under the canonical user-possession gate, this is a **FAILED DELIVERY**, not a completed release.
+
+Recovery/reproduction closes this failure only when:
+1. the exact binary is recovered or deterministically reproduced
+2. the APK is uploaded to GitHub Actions/Release storage or Supabase Storage
+3. the stored-object hash is rechecked against the intended artifact hash
+4. a creator-visible access path is surfaced
+5. that path is verified to exist
+6. the creator successfully retrieves/installs/runs the artifact
+7. the Android acceptance gate is completed
