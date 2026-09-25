@@ -47,6 +47,58 @@ export class NativeSeedResidentClient {
       body: JSON.stringify({ residentId }),
     }));
   }
+
+  async cartridges() {
+    return decode(await this.fetchImpl(this.baseUrl + '/automata-cartridges'));
+  }
+
+  async installCartridge(manifest, { source = 'mobile', replace = true } = {}) {
+    return decode(await this.fetchImpl(this.baseUrl + '/automata-cartridges/install', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ manifest, source, replace }),
+    }));
+  }
+
+  async assembleCartridges(capability, { exclude = [] } = {}) {
+    return decode(await this.fetchImpl(this.baseUrl + '/automata-cartridges/assemble', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ capability, exclude }),
+    }));
+  }
+
+  async executeCapability(capability, input, context = {}, options = {}) {
+    return decode(await this.fetchImpl(this.baseUrl + '/automata-cartridges/execute', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ capability, input, context, options }),
+    }));
+  }
+
+  async dislodgeCartridge(id, reason = 'manual-dislodge') {
+    return decode(await this.fetchImpl(this.baseUrl + '/automata-cartridges/dislodge', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ id, reason }),
+    }));
+  }
+
+  async restoreCartridge(id) {
+    return decode(await this.fetchImpl(this.baseUrl + '/automata-cartridges/restore', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ id }),
+    }));
+  }
+
+  async retireCartridge(id, reason = 'retired') {
+    return decode(await this.fetchImpl(this.baseUrl + '/automata-cartridges/retire', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ id, reason }),
+    }));
+  }
 }
 
 export default NativeSeedResidentClient;
