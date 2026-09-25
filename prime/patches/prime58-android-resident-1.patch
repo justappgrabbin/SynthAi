@@ -1,0 +1,220 @@
+--- a/src/federated-synthia.mjs
++++ b/src/federated-synthia.mjs
+@@ -50,6 +50,7 @@
+     if (!baseline?.synthia?.meshRuntime?.engine) throw new TypeError('FederatedSynthia requires the finished Pure Synthia baseline');
+     this.runtimeStore = runtimeStore;
+     this.requireBirthConfiguration = options.requireBirthConfiguration !== false;
++    this.adminMode = { enabled: false, enabledAt: null, reason: null };
+     this.persistenceQueue = Promise.resolve();
+     this.persistenceFailure = null;
+     this.persistenceStatus = Object.freeze({ configured: Boolean(runtimeStore), durable: false, restored: false });
+@@ -204,6 +205,7 @@
+ 
+   #assertPersonalized(context = {}) {
+     if (this.birthMirror.configuration?.configured) return;
++    if (this.adminMode.enabled === true || context.adminMode === true) return;
+     if (!this.requireBirthConfiguration || context.diagnosticMode === true) return;
+     const error = new Error('Birth date, exact time including seconds, and birthplace must configure the mirror before personalized execution.');
+     error.code = 'BIRTH_CONFIGURATION_REQUIRED';
+@@ -308,6 +310,24 @@
+     return this.birthMirror.publicSnapshot();
+   }
+ 
++  adminStatus() {
++    return Object.freeze({
++      enabled: this.adminMode.enabled === true,
++      enabledAt: this.adminMode.enabledAt,
++      reason: this.adminMode.reason,
++      scope: 'session',
++      override: 'birth-design-execution-gate',
++      identityPreserved: true,
++    });
++  }
++
++  setAdminMode(enabled, { reason = 'developer-maintenance' } = {}) {
++    this.adminMode.enabled = Boolean(enabled);
++    this.adminMode.enabledAt = this.adminMode.enabled ? new Date().toISOString() : null;
++    this.adminMode.reason = this.adminMode.enabled ? String(reason) : null;
++    return Object.freeze({ ok: true, admin: this.adminStatus(), identity: this.birthMirror.publicSnapshot() });
++  }
++
+   async visitPast({
+     agentId = null,
+     personId = null,
+--- a/src/ui/server.mjs
++++ b/src/ui/server.mjs
+@@ -158,12 +158,15 @@
+         const structurallyReady = readyFields.every((field) => audit[field] === true)
+           && audit.federation?.links > 0
+           && audit.localMeshes > 1;
+-        const ready = structurallyReady && identity.configured === true;
++        const admin = organism.adminStatus();
++        const ready = structurallyReady && (identity.configured === true || admin.enabled === true);
+         return reply(response, 200, {
+           ok: true,
+           ready,
+           structurallyReady,
+           personalizedReady: identity.configured === true,
++          adminOverride: admin.enabled === true,
++          admin,
+           auditComplete: audit.ok,
+           feedbackCycleActivated: audit.autonomyLoop,
+           identity: 'Synthia',
+@@ -187,6 +190,13 @@
+       if (request.method === 'GET' && url.pathname === '/api/identity') {
+         return reply(response, 200, { ok: true, identity: organism.identityStatus(), persistence: organism.persistenceStatus });
+       }
++      if (request.method === 'GET' && url.pathname === '/api/admin') {
++        return reply(response, 200, { ok: true, admin: organism.adminStatus(), identity: organism.identityStatus() });
++      }
++      if (request.method === 'POST' && url.pathname === '/api/admin') {
++        const body = await bodyOf(request);
++        return reply(response, 200, organism.setAdminMode(body.enabled === true, { reason: body.reason ?? 'developer-maintenance' }));
++      }
+       if (request.method === 'GET' && url.pathname === '/api/tray') {
+         return reply(response, 200, { ok: true, instruments: organism.trayCatalog() });
+       }
+--- a/ui/app.mjs
++++ b/ui/app.mjs
+@@ -9,6 +9,9 @@
+ let browserPage = null;
+ let browserBundle = null;
+ let identityConfigured = false;
++let adminEnabled = false;
++let voices = [];
++let selectedVoiceURI = localStorage.getItem('synthia.voiceURI') || null;
+ let worldAnimation = null;
+ 
+ async function api(path, options = {}) {
+@@ -59,6 +62,34 @@
+ $('#workspace-close').addEventListener('click', collapse);
+ $('#workspace-max').addEventListener('click', () => workspace.classList.toggle('maximized'));
+ $('#setup-open').addEventListener('click', () => setupDialog.showModal());
++$('#admin-toggle').addEventListener('click', async () => {
++  try {
++    const result = await api('/api/admin', { method: 'POST', body: JSON.stringify({ enabled: !adminEnabled, reason: 'user-developer-session' }) });
++    adminEnabled = result.admin?.enabled === true;
++    $('#admin-toggle').classList.toggle('active', adminEnabled);
++    $('#admin-toggle').textContent = adminEnabled ? 'ADMIN' : 'A';
++    addMessage('', adminEnabled ? 'Admin Mode active · birth/design execution gate overridden for this session.' : 'Admin Mode off · normal birth/design execution gate restored.', true);
++  } catch (error) { addMessage('', error.message, true); }
++});
++
++function populateVoices() {
++  if (!('speechSynthesis' in window)) return;
++  voices = speechSynthesis.getVoices();
++}
++populateVoices();
++if ('speechSynthesis' in window && 'onvoiceschanged' in speechSynthesis) speechSynthesis.onvoiceschanged = populateVoices;
++
++function speak(text) {
++  const value = String(text || '').trim();
++  if (!value) return;
++  if (window.SynthiaVoice?.speak) { try { window.SynthiaVoice.speak(value); return; } catch {} }
++  if (!('speechSynthesis' in window)) return;
++  const utterance = new SpeechSynthesisUtterance(value);
++  const voice = voices.find((v) => v.voiceURI === selectedVoiceURI) || voices.find((v) => /en-US|en-GB/i.test(v.lang)) || voices[0];
++  if (voice) utterance.voice = voice;
++  speechSynthesis.cancel();
++  speechSynthesis.speak(utterance);
++}
+ 
+ function addMessage(who, text, trace = false) {
+   const div = document.createElement('div');
+@@ -93,7 +124,9 @@
+       }
+     }
+     const result = await api('/api/chat', { method: 'POST', body: JSON.stringify({ message: trimmed, context: { personId: 'front-screen', agentId: 'synthia', surface: activeSurface } }) });
+-    addMessage('synthia', result.utterance || result.output || '(processed)');
++    const spoken = result.utterance || result.output || '(processed)';
++    addMessage('synthia', spoken);
++    speak(spoken);
+     if (result.pipelineTrace) addMessage('', `Trace · ${result.pipelineTrace.map((x) => x.stage).join(' → ')}`, true);
+     await syncMorphAppearance();
+   } catch (error) {
+@@ -113,6 +146,31 @@
+ });
+ $$('[data-quick]').forEach((button) => button.addEventListener('click', () => sendChat(button.dataset.quick)));
+ 
++window.addEventListener('synthia-voice-result', (event) => {
++  const text = String(event.detail || '').trim();
++  if (!text) return;
++  $('#chat-input').value = text;
++  $('#chat-form').requestSubmit();
++});
++
++let speechRecognition = null;
++if ('webkitSpeechRecognition' in window) {
++  const Recognition = window.webkitSpeechRecognition;
++  speechRecognition = new Recognition();
++  speechRecognition.lang = 'en-US';
++  speechRecognition.interimResults = false;
++  speechRecognition.continuous = false;
++  speechRecognition.onresult = (event) => {
++    const text = event.results?.[0]?.[0]?.transcript || '';
++    if (text) { $('#chat-input').value = text; $('#chat-form').requestSubmit(); }
++  };
++}
++$('#voice-listen').addEventListener('click', () => {
++  if (window.SynthiaVoice?.listen) { try { window.SynthiaVoice.listen(); return; } catch {} }
++  if (speechRecognition) speechRecognition.start();
++  else addMessage('', 'Voice input is not available on this surface.', true);
++});
++
+ function findColor(value, seen = new Set()) {
+   if (!value || typeof value !== 'object' || seen.has(value)) return null;
+   seen.add(value);
+@@ -140,6 +198,9 @@
+   try {
+     const [status, solo] = await Promise.all([api('/api/status'), api('/api/solo/status')]);
+     identityConfigured = status.personalizedReady === true;
++    adminEnabled = status.adminOverride === true || status.admin?.enabled === true;
++    $('#admin-toggle').classList.toggle('active', adminEnabled);
++    $('#admin-toggle').textContent = adminEnabled ? 'ADMIN' : 'A';
+     $('#status-dot').classList.toggle('ready', status.structurallyReady === true);
+     $('#planet-label').textContent = identityConfigured ? 'Synthia · online' : 'Synthia · setup';
+     if (!identityConfigured) $('#status-dot').title = 'Origin configuration required';
+--- a/ui/index.html
++++ b/ui/index.html
+@@ -20,6 +20,7 @@
+           <div><strong>Synthia</strong><small id="surface-subtitle">Chat</small></div>
+         </div>
+         <div class="workspace-controls">
++          <button id="admin-toggle" class="icon-btn" title="Admin Mode">A</button>
+           <button id="setup-open" class="icon-btn" title="Identity setup">◎</button>
+           <button id="workspace-max" class="icon-btn" title="Full screen">□</button>
+           <button id="workspace-close" class="icon-btn" title="Collapse">×</button>
+@@ -37,6 +38,7 @@
+           </div>
+           <form id="chat-form" class="composer">
+             <textarea id="chat-input" rows="2" placeholder="Ask Synthia anything…" required></textarea>
++            <button id="voice-listen" type="button" class="icon-btn" title="Talk to Synthia">◉</button>
+             <button type="submit" class="send-btn">↑</button>
+           </form>
+           <div class="quick-actions">
+--- /dev/null
++++ b/test/32-admin-mode.test.mjs
+@@ -0,0 +1,23 @@
++import test from 'node:test';
++import assert from 'node:assert/strict';
++import { FederatedSynthia } from '../src/index.mjs';
++
++test('admin mode is session scoped, preserves identity state, and only overrides the birth-design execution gate', async () => {
++  const synthia = await FederatedSynthia.create();
++  await assert.rejects(() => synthia.chat('normal gate remains closed'), (error) => error.code === 'BIRTH_CONFIGURATION_REQUIRED');
++
++  const enabled = synthia.setAdminMode(true, { reason: 'developer-test' });
++  assert.equal(enabled.admin.enabled, true);
++  assert.equal(enabled.admin.scope, 'session');
++  assert.equal(enabled.admin.override, 'birth-design-execution-gate');
++  assert.equal(enabled.admin.identityPreserved, true);
++  assert.equal(enabled.identity.configured, false);
++
++  const chat = await synthia.chat('admin maintenance task');
++  assert.equal(chat.ok, true);
++  assert.equal(synthia.identityStatus().configured, false);
++
++  const disabled = synthia.setAdminMode(false);
++  assert.equal(disabled.admin.enabled, false);
++  await assert.rejects(() => synthia.chat('normal gate restored'), (error) => error.code === 'BIRTH_CONFIGURATION_REQUIRED');
++});
