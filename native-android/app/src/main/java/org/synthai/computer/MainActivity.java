@@ -1,6 +1,7 @@
 package org.synthai.computer;
 
 import android.app.Activity;
+import android.Manifest;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
@@ -30,7 +31,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public final class MainActivity extends Activity {
-    private static final int REQUEST_TERMUX_RUN = 7001;
+    private static final int REQUEST_AUDIO = 7004;
     private static final int REQUEST_MIRROR_IMAGE = 7002;
     private static final int REQUEST_SYNTHIA_PACKAGE = 7003;
     private final ExecutorService io = Executors.newSingleThreadExecutor();
@@ -65,6 +66,8 @@ public final class MainActivity extends Activity {
                 Intent overlay = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:" + getPackageName()));
                 startActivity(overlay);
             } catch (Exception ignored) {}
+        } else {
+            ensureVoicePermission();
         }
         refreshApps();
         wakeRuntimeAndFlush(0);
@@ -78,6 +81,7 @@ public final class MainActivity extends Activity {
         prefs.edit().remove("backgroundAt").apply();
         LinuxResidenceService.start(this);
         SynthiaHoverService.start(this);
+        if (Build.VERSION.SDK_INT < 23 || Settings.canDrawOverlays(this)) ensureVoicePermission();
         refreshApps();
         wakeRuntimeAndFlush(elapsed);
     }
@@ -375,15 +379,19 @@ public final class MainActivity extends Activity {
         }
     }
 
+    private void ensureVoicePermission() {
+        if (Build.VERSION.SDK_INT >= 23 &&
+            checkSelfPermission(Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(new String[]{Manifest.permission.RECORD_AUDIO}, REQUEST_AUDIO);
+        }
+    }
+
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == REQUEST_TERMUX_RUN) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                wakeRuntimeAndFlush(0);
-            } else {
-                world.setStatus("MESH HELD · TERMUX PERMISSION NEEDED");
-            }
+        if (requestCode == REQUEST_AUDIO) {
+            boolean granted = grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED;
+            world.setStatus(granted ? "VOICE READY · LOCAL LINUX ACTIVE" : "VOICE OFF · LOCAL LINUX ACTIVE");
         }
     }
 
