@@ -127,7 +127,7 @@ Parallel swarms should use the named branch lanes in the first-drop accounting s
 
 ### Concrete additive step
 
-[PR #14 — Add verified Prime APK promotion and delivery gate](https://github.com/justappgrabbin/SynthAi/pull/14) is open as a draft from `recovery/prime-apk-delivery-gate-20260925` into the protected PR #10 lane. Head: `99daa2434fdbf07204daf8a87454449ebfd7725c`; 4 files, 256 additions, 0 deletions; GitHub currently reports it mergeable.
+[PR #14 — Add verified Prime APK promotion and delivery gate](https://github.com/justappgrabbin/SynthAi/pull/14) is open as a draft from `recovery/prime-apk-delivery-gate-20260925` into the protected PR #10 lane. Head: `9a0557b09013259fcd5f4960462b5ad049a784be`; 5 files, 289 additions, 0 deletions; GitHub currently reports it mergeable.
 
 The implementation:
 - rejects a host-only APK before publication
@@ -143,6 +143,7 @@ Verification run against `scripts/test-verify-prime-apk-candidate.sh`:
 - valid all-in-one fixture: PASS
 - host-only fixture: correctly rejected
 - wrong Prime hash fixture: correctly rejected
+- GitHub Actions [Prime APK delivery gate check run 36174477737](https://github.com/justappgrabbin/SynthAi/actions/runs/36174477737): SUCCESS
 
 No workflow run or APK is claimed from PR #14 yet. Its full promotion job is blocked on one external input: the exact Resident 3 image bytes, SHA-256 `8d5874a11f0a73027be14119bc13f6a0efd1adeb2aa9ac877c2284fcd5ab2f72`, must first be recovered and stored as a GitHub Actions artifact. The exact-title Library check found no copy of the Resident 3 image, protected source ZIP, or final Prime APK. The vanished APK remains **BUILT + PROVENANCE PRESERVED + FAILED DELIVERY**; PR #14 is delivery infrastructure, not delivery itself.
 
