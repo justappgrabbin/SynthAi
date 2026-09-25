@@ -1,17 +1,20 @@
-import { ComputerRuntime } from '/computer-runtime/ComputerRuntime.mjs';
+import { BrowserComputerRuntime } from '/computer-runtime/BrowserComputerRuntime.mjs';
 import { LocalStoragePersistence } from '/computer-runtime/core/kernel.mjs';
+import { DeviceProjectWorkspace } from '/computer-runtime/adapters/DeviceProjectWorkspace.mjs';
 
 const $ = selector => document.querySelector(selector);
 const $$ = selector => [...document.querySelectorAll(selector)];
 const escapeHtml = value => String(value ?? '').replace(/[&<>"']/g, char => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;' }[char]));
 const titleFor = id => ({ home:'Computer Home', build:'Build', files:'Files', github:'GitHub', systems:'Systems', activity:'Activity' }[id] || 'SynthAI Computer');
 
-const computer = await new ComputerRuntime({
+const computer = await new BrowserComputerRuntime({
   persistence: new LocalStoragePersistence(),
   namespace: 'synthai-computer-web'
 }).boot();
 
 globalThis.SynthAIComputer = computer;
+const projects = new DeviceProjectWorkspace({ runtime: computer });
+const isAndroidApp = /SynthAIComputer\//.test(navigator.userAgent);
 
 let currentProjectId = localStorage.synthaiCurrentProject || '';
 let activity = [];
@@ -30,13 +33,14 @@ function show(view) {
   $('#viewTitle').textContent = titleFor(view);
   if (view === 'files') renderFiles();
   if (view === 'systems') renderSystems();
+  window.scrollTo(0, 0);
 }
 
 $$('[data-view]').forEach(button => button.addEventListener('click', () => show(button.dataset.view)));
 $$('[data-go]').forEach(button => button.addEventListener('click', () => show(button.dataset.go)));
 
 function project() {
-  return currentProjectId ? computer.projects.get(currentProjectId) : null;
+  return currentProjectId ? projects.get(currentProjectId) : null;
 }
 
 function setCurrentProject(id) {
@@ -77,12 +81,14 @@ async function createProject() {
   const name = $('#projectName').value.trim();
   if (!name) return message('#builderMessage', 'Project name is required.', false);
   try {
-    const p = await computer.projects.create({ name, description: $('#projectDescription').value.trim() });
-    await computer.projects.writeFile(p.id, 'index.html', starterHtml(name), { type: 'text/html' });
-    setCurrentProject(p.id);
+    const p = await projects.create({ name, description: $('#projectDescription').value.trim() });
+    await projects.writeFile(p.id, 'index.html', starterHtml(name), { type: 'text/html' });
     $('#filePath').value = 'index.html';
-    loadCurrentFile();
-    message('#builderMessage', 'Project created in the Computer and persisted locally.', true);
+    setCurrentProject(p.id);
+    await loadCurrentFile();
+    message('#builderMessage', projects.source(p.id) === 'device'
+      ? 'Project created in the on-device Linux Computer and saved across restarts.'
+      : 'Project created in this browser’s storage. Your on-device Computer is unavailable.', true);
   } catch (error) {
     message('#builderMessage', error.message, false);
   }
@@ -94,48 +100,67 @@ async function saveFile() {
   const path = $('#filePath').value.trim();
   if (!path) return message('#builderMessage', 'File path is required.', false);
   try {
-    await computer.projects.writeFile(p.id, path, $('#editor').value, { type: mimeFor(path) });
-    message('#builderMessage', `${path} saved to the Computer VFS.`, true);
+    await projects.writeFile(p.id, path, $('#editor').value, { type: mimeFor(path) });
+    message('#builderMessage', `${path} saved ${projects.source(p.id) === 'device' ? 'to the on-device Computer' : 'in browser storage'}.`, true);
     renderProjects();
     renderFiles();
+    return true;
+  } catch (error) {
+    message('#builderMessage', error.message, false);
+    return false;
+  }
+}
+
+async function loadCurrentFile() {
+  const p = project();
+  $('#projectState').textContent = p ? p.status.toUpperCase() : 'NO PROJECT';
+  $('#fileProjectName').textContent = p ? p.name : 'choose a project';
+  if (!p) {
+    $('#editor').value = '';
+    renderFiles();
+    return;
+  }
+  $('#projectName').value = p.name;
+  $('#projectDescription').value = p.description || '';
+  const requested = $('#filePath').value.trim() || 'index.html';
+  try {
+    const file = await projects.readFile(p.id, requested) || (await projects.listFiles(p.id))[0];
+    if (currentProjectId !== p.id) return;
+    if (file) {
+      $('#filePath').value = file.path;
+      $('#editor').value = file.content;
+    } else {
+      $('#editor').value = '';
+    }
+    renderFiles();
+  } catch (error) {
+    message('#builderMessage', `Could not read project: ${error.message}`, false);
+  }
+}
+
+async function preview() {
+  const p = project();
+  if (!p) return message('#builderMessage', 'Choose a project first.', false);
+  try {
+    const file = await projects.readFile(p.id, 'index.html');
+    if (!file) return message('#builderMessage', 'This project has no index.html to preview.', false);
+    $('#preview').srcdoc = file.content;
+    message('#builderMessage', 'Preview rendered from the saved project file.', true);
   } catch (error) {
     message('#builderMessage', error.message, false);
   }
 }
 
-function loadCurrentFile() {
-  const p = project();
-  $('#projectState').textContent = p ? p.status.toUpperCase() : 'NO PROJECT';
-  $('#fileProjectName').textContent = p ? p.name : 'choose a project';
-  if (!p) return;
-  $('#projectName').value = p.name;
-  $('#projectDescription').value = p.description || '';
-  const requested = $('#filePath').value.trim() || 'index.html';
-  const file = computer.projects.readFile(p.id, requested) || computer.projects.listFiles(p.id)[0];
-  if (file) {
-    $('#filePath').value = file.path;
-    $('#editor').value = file.content;
-  } else {
-    $('#editor').value = '';
-  }
-  renderFiles();
-}
-
-function preview() {
-  const p = project();
-  if (!p) return message('#builderMessage', 'Choose a project first.', false);
-  const file = computer.projects.readFile(p.id, 'index.html');
-  if (!file) return message('#builderMessage', 'This project has no index.html to preview.', false);
-  $('#preview').srcdoc = file.content;
-  message('#builderMessage', 'Preview rendered from the Computer VFS.', true);
-}
-
 async function publish() {
   const p = project();
   if (!p) return message('#builderMessage', 'Choose a project first.', false);
+  if ($('#githubPanelState').textContent !== 'VERIFIED') {
+    show('github');
+    return message('#githubMessage', 'To publish, connect your GitHub account through the optional Synthia Server bridge.', false);
+  }
   try {
-    await saveFile();
-    const result = await computer.projects.publish(p.id, { backend: 'github' });
+    if (!(await saveFile())) return;
+    const result = await projects.publish(p.id, { backend: 'github' });
     renderProjects();
     const url = result?.repo?.url;
     message('#builderMessage', url ? `Published: ${url}` : 'GitHub publish completed.', true);
@@ -146,18 +171,20 @@ async function publish() {
 }
 
 function renderProjects() {
-  const projects = computer.projects.list();
-  $('#projectCount').textContent = `${projects.length} project${projects.length === 1 ? '' : 's'}`;
-  $('#projectPicker').innerHTML = '<option value="">Choose project</option>' + projects.map(p =>
-    `<option value="${escapeHtml(p.id)}" ${p.id === currentProjectId ? 'selected' : ''}>${escapeHtml(p.name)} · ${escapeHtml(p.status)}</option>`
+  const all = projects.list();
+  const deviceCount = all.filter(p => projects.source(p.id) === 'device').length;
+  const browserCount = all.length - deviceCount;
+  $('#projectCount').textContent = `${deviceCount} on device · ${browserCount} in browser`;
+  $('#projectPicker').innerHTML = '<option value="">Choose project</option>' + all.map(p =>
+    `<option value="${escapeHtml(p.id)}" ${p.id === currentProjectId ? 'selected' : ''}>${escapeHtml(p.name)} · ${projects.source(p.id) === 'device' ? 'on device' : 'browser'}</option>`
   ).join('');
-  $('#recentProjects').classList.toggle('empty', projects.length === 0);
-  $('#recentProjects').innerHTML = projects.length ? projects.slice(0, 6).map(p =>
-    `<div class="system-row"><div><strong>${escapeHtml(p.name)}</strong><small>${Object.keys(p.files || {}).length} files</small></div><span class="state">${escapeHtml(p.status.toUpperCase())}</span></div>`
+  $('#recentProjects').classList.toggle('empty', all.length === 0);
+  $('#recentProjects').innerHTML = all.length ? all.slice(0, 6).map(p =>
+    `<div class="system-row"><div><strong>${escapeHtml(p.name)}</strong><small>${Object.keys(p.files || {}).length} files · ${escapeHtml(p.status)}</small></div><span class="state">${projects.source(p.id) === 'device' ? 'ON DEVICE' : 'BROWSER'}</span></div>`
   ).join('') : 'No local projects yet.';
 }
 
-function renderFiles() {
+async function renderFiles() {
   const p = project();
   $('#fileProjectName').textContent = p ? p.name : 'choose a project';
   if (!p) {
@@ -165,11 +192,19 @@ function renderFiles() {
     $('#fileList').textContent = 'No project selected.';
     return;
   }
-  const files = computer.projects.listFiles(p.id);
-  $('#fileList').className = files.length ? 'file-list' : 'file-list empty';
-  $('#fileList').innerHTML = files.length ? files.map(file =>
-    `<button class="file-row" data-file="${escapeHtml(file.path)}"><div><strong>${escapeHtml(file.path)}</strong><small>${escapeHtml(file.type)}</small></div><span>Open</span></button>`
-  ).join('') : 'No files in this project.';
+  $('#fileList').textContent = 'Loading files…';
+  try {
+    const files = await projects.listFiles(p.id);
+    if (currentProjectId !== p.id) return;
+    $('#fileList').className = files.length ? 'file-list' : 'file-list empty';
+    $('#fileList').innerHTML = files.length ? files.map(file =>
+      `<button class="file-row" data-file="${escapeHtml(file.path)}"><div><strong>${escapeHtml(file.path)}</strong><small>${escapeHtml(file.type)}</small></div><span>Open</span></button>`
+    ).join('') : 'No files in this project.';
+  } catch (error) {
+    $('#fileList').className = 'file-list empty';
+    $('#fileList').textContent = `Could not load files: ${error.message}`;
+    return;
+  }
   $$('#fileList [data-file]').forEach(button => button.addEventListener('click', () => {
     $('#filePath').value = button.dataset.file;
     loadCurrentFile();
@@ -180,12 +215,16 @@ function renderFiles() {
 function renderSystems() {
   const systems = computer.systems.list();
   const rows = systems.map(system =>
-    `<div class="card-mini"><div><strong>${escapeHtml(system.name)}</strong><small>${escapeHtml(system.role)} · ${escapeHtml(system.relationship)}</small></div><span class="state">${system.id === 'synthai-computer' ? 'WIRED' : 'PRESENT'}</span></div>`
+    `<div class="card-mini"><div><strong>${escapeHtml(system.name)}</strong><small>${escapeHtml(system.role)} · ${escapeHtml(system.relationship)}</small></div><span class="state">${system.id === 'synthai-computer' && projects.ready ? 'ON DEVICE' : 'REGISTERED'}</span></div>`
   ).join('');
   $('#systemsList').innerHTML = rows;
   $('#homeSystems').innerHTML = systems.slice(0, 5).map(system =>
-    `<div class="system-row"><div><strong>${escapeHtml(system.name)}</strong><small>${escapeHtml(system.role)}</small></div><span class="state">${system.id === 'synthai-computer' ? 'WIRED' : 'PRESENT'}</span></div>`
+    `<div class="system-row"><div><strong>${escapeHtml(system.name)}</strong><small>${escapeHtml(system.role)}</small></div><span class="state">${system.id === 'synthai-computer' && projects.ready ? 'ON DEVICE' : 'REGISTERED'}</span></div>`
   ).join('');
+  const services = computer.localBackendHealth?.services || [];
+  $('#localServiceList').innerHTML = services.length ? services.map(id =>
+    `<div class="system-row"><strong>${escapeHtml(id)}</strong><span class="state">REGISTERED</span></div>`
+  ).join('') : '<div class="empty">Local Computer services have not been verified on this device.</div>';
 }
 
 function renderActivity() {
@@ -205,10 +244,11 @@ function message(selector, text, good) {
 async function connectGitHub() {
   const baseUrl = $('#serverUrl').value.trim().replace(/\/$/, '');
   const token = $('#computerToken').value;
+  if (!baseUrl || !token) return message('#githubMessage', 'Enter the optional server URL and its access token to connect GitHub.', false);
   localStorage.synthaiServerUrl = baseUrl;
   localStorage.synthaiComputerToken = token;
   computer.configureGitHub({ baseUrl, token });
-  $('#githubPanelState').textContent = 'WIRED';
+  $('#githubPanelState').textContent = 'CONNECTING';
   try {
     const result = await computer.backends.request('github', { action: 'status' });
     $('#githubStatus').textContent = 'VERIFIED';
@@ -217,9 +257,9 @@ async function connectGitHub() {
     message('#githubMessage', `Verified GitHub connection as ${result.user}.`, true);
     await loadRepos();
   } catch (error) {
-    $('#githubStatus').textContent = 'PARTIALLY WIRED';
-    $('#githubPanelState').textContent = 'PARTIALLY WIRED';
-    $('#githubDetail').textContent = 'bridge configured, verification failed';
+    $('#githubStatus').textContent = 'NOT CONNECTED';
+    $('#githubPanelState').textContent = 'NOT CONNECTED';
+    $('#githubDetail').textContent = 'optional GitHub connection unavailable';
     message('#githubMessage', error.message, false);
   }
 }
@@ -247,19 +287,63 @@ $('#refreshRepos').addEventListener('click', loadRepos);
 $('#projectPicker').addEventListener('change', event => setCurrentProject(event.target.value));
 $('#clearActivity').addEventListener('click', () => { activity = []; renderActivity(); });
 
+function runtimeState(status, detail) {
+  console.info('LOCAL_COMPUTER_UI_STATUS=' + status);
+  $('#bootDot').classList.toggle('good', status === 'VERIFIED');
+  $('#bootDot').classList.toggle('bad', status === 'UNAVAILABLE');
+  $('#bootLabel').textContent = status === 'VERIFIED' ? 'local Computer connected'
+    : status === 'STARTING' ? 'starting local Computer' : 'browser workspace';
+  $('#runtimeStatus').textContent = status;
+  $('#runtimeDetail').textContent = detail;
+  $('#runtimeEvidence').textContent = status === 'VERIFIED'
+    ? 'Projects and files now run in the Linux Computer on this device. No server address is needed.'
+    : status === 'STARTING'
+      ? 'Starting the embedded Linux Computer. Project creation will be available when it finishes.'
+      : `${detail} Browser projects remain accessible; new projects use browser storage until the local Computer connects.`;
+  $('#projectStatus').textContent = status === 'VERIFIED' ? 'ON DEVICE' : status === 'STARTING' ? 'WAITING' : 'BROWSER';
+  $('#createProject').disabled = status === 'STARTING';
+  $('#workspaceNotice').textContent = status === 'VERIFIED'
+    ? 'New projects are saved in the on-device Computer. Existing browser projects remain available in the project picker.'
+    : status === 'STARTING' ? 'Waiting for the on-device Computer to start.'
+      : 'New projects will be stored in this browser. Existing projects remain available.';
+}
+
+computer.bus.on('local-backend:verified', async event => {
+  try {
+    await projects.attach();
+    runtimeState('VERIFIED', `${event.payload.environment} · ${event.payload.services.length} registered services · ${event.payload.version}`);
+    renderProjects();
+    renderSystems();
+    if (currentProjectId && projects.get(currentProjectId)) await loadCurrentFile();
+    log('workspace:on-device', { projects: projects.list().filter(p => projects.source(p.id) === 'device').length });
+  } catch (error) {
+    runtimeState('UNAVAILABLE', `Could not load on-device projects: ${error.message}`);
+    log('workspace:failed', { error: error.message });
+  }
+});
+
+window.addEventListener('synthai-local-backend-error', event => {
+  const detail = String(event.detail?.message || 'The embedded Computer did not start.');
+  runtimeState('UNAVAILABLE', detail);
+  log('local-backend:unavailable', { error: detail });
+});
+
 const savedServer = localStorage.synthaiServerUrl;
 const savedToken = localStorage.synthaiComputerToken;
 if (savedServer) $('#serverUrl').value = savedServer;
 if (savedToken) $('#computerToken').value = savedToken;
 
-$('#bootDot').classList.add('good');
-$('#bootLabel').textContent = 'runtime online';
-$('#runtimeStatus').textContent = 'VERIFIED';
-$('#runtimeDetail').textContent = computer.snapshot().version;
+runtimeState(isAndroidApp ? 'STARTING' : 'BROWSER', isAndroidApp
+  ? 'Waiting for the embedded Linux backend'
+  : `Browser host ${computer.snapshot().version}; no on-device backend attached`);
 $('#mountCount').textContent = `${computer.shellManager.listMounted().length} mounted`;
 
 renderProjects();
 renderSystems();
 renderActivity();
-if (currentProjectId && computer.projects.get(currentProjectId)) loadCurrentFile();
-if (savedServer && savedToken) connectGitHub();
+if (currentProjectId && projects.get(currentProjectId)) loadCurrentFile();
+if (window.SynthAIAndroidBackendError) runtimeState('UNAVAILABLE', window.SynthAIAndroidBackendError);
+
+if (!isAndroidApp && 'serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js').catch(error => log('service-worker:failed', { error: String(error?.message ?? error) }));
+}
