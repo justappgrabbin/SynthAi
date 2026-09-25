@@ -21,8 +21,8 @@ The caller currently supplies upstream resolution decisions, task actions, capab
 
 ## Verification and acceptance
 
-See PR #16 and its Resident Mesh Integration checks for the live result. The corrected tests cover routing order, evidence-backed ability and constraint, a parallel alternative, unknown data, and persisted frozen hypothesis after a runtime restart.
+[Resident Mesh Integration run 36191192952](https://github.com/justappgrabbin/SynthAi/actions/runs/36191192952) passed 48/48 tests, including corrected TaskFit routing order, evidence-backed ability and constraint, a parallel alternative, unknown data, and persisted frozen hypothesis after restart. [Mobile SynthIMG Check run 36191192946](https://github.com/justappgrabbin/SynthAi/actions/runs/36191192946) passed.
 
-This is source built and GitHub preserved. CI verification is recorded only after the corrected head passes. It is not packaged into an APK, user-access verified, or phone accepted.
+This is source built and GitHub preserved. The corrected source is CI verified. It is not packaged into an APK, user-access verified, or phone accepted.
 
 Prime 5.8 and its life-process swarm remain protected and distinct from this Computer service, Venom, Echo, and 5.7. Supabase RLS remains open under the creator's app-birth rule.
