@@ -5,8 +5,11 @@ on:
   pull_request:
     paths:
       - 'computer/runtime/research-report-automaton.mjs'
+      - 'computer/services/task-fit.mjs'
       - 'computer/tests/research-report-automaton.test.mjs'
       - 'computer/tests/research-report-cartridge-integration.test.mjs'
+      - 'computer/tests/task-fit-native-convergence.test.mjs'
+      - 'computer/tests/task-fit-native-convergence.test.mjs'
       - 'computer/native/NativeSeedRuntime.mjs'
       - '.github/workflows/resident-integration-check.yml'
   push:
@@ -16,6 +19,7 @@ on:
       - 'integration/echo-prime-resident-loaders'
       - 'integration/synthia58-automata-cartridge-loop'
       - 'recovery/research-report-automaton-v010-20260925'
+      - 'recovery/taskfit-convergence-20260925'
     paths:
       - 'computer/runtime/mesh-kernel.mjs'
       - 'computer/runtime/dormant-compiler.mjs'
@@ -26,6 +30,7 @@ on:
       - 'computer/worlds/**'
       - 'computer/labs/**'
       - 'computer/services/purpose-guide.mjs'
+      - 'computer/services/task-fit.mjs'
       - 'computer/mobile/MobileComputerRuntime.mjs'
       - 'computer/native/**'
       - 'computer/adapters/termux-compiler.mjs'
@@ -80,6 +85,7 @@ jobs:
           computer/tests/automata-cartridge-magazine.test.mjs
           computer/tests/research-report-automaton.test.mjs
           computer/tests/research-report-cartridge-integration.test.mjs
+          computer/tests/task-fit-native-convergence.test.mjs
           computer/tests/synthia57-resident.test.mjs
           computer/tests/synthia57-package-loader.test.mjs
           computer/tests/synthia57-package-store.test.mjs
