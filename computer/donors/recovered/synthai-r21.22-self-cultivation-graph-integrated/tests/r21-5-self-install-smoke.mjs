@@ -1,0 +1,16 @@
+import fs from 'node:fs';
+import assert from 'node:assert/strict';
+const shell=fs.readFileSync(new URL('../index.html',import.meta.url),'utf8');
+const html=fs.readFileSync(new URL('../synthia-runtime.html',import.meta.url),'utf8');
+const manifest=JSON.parse(fs.readFileSync(new URL('../manifest.webmanifest',import.meta.url),'utf8'));
+const sw=fs.readFileSync(new URL('../service-worker.js',import.meta.url),'utf8');
+assert.match(html,/manifest\.webmanifest/);
+assert.match(html,/beforeinstallprompt/);
+assert.match(html,/Yes — install Synthia/);
+assert.match(html,/serviceWorker\.register/);
+assert.equal(manifest.display,'standalone');
+assert.match(manifest.start_url,/index\.html/);assert.equal(manifest.display,'standalone');
+assert.match(sw,/synthia-r21-(?:5-residence|16-webview-bootfix|22-closure)/);
+assert.doesNotMatch(html,/Approve this residence/i);
+assert.match(shell,/synthia-runtime\.html/);
+console.log('R21.5 SELF-INSTALL PASS: platform confirmation -> standalone residence; no terminal in normal launch path');

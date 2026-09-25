@@ -1,0 +1,983 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0a0a12">
+<title>Synthia OS</title>
+<style>
+:root{--v:#8b5cf6;--vd:#6d28d9;--c:#06b6d4;--cd:#0891b2;--p:#ec4899;--pd:#db2777;--d:#0a0a12;--pa:#12121f;--pl:#1a1a2e;--b:#2a2a45;--bl:#3a3a5a;--t:#f1f5f9;--tm:#94a3b8;--td:#64748b;--a:#f59e0b;--dg:#ef4444;--s:#22c55e;--g:rgba(18,18,31,0.85);--sh:0 8px 32px rgba(0,0,0,0.4);--r:20px;--rs:12px;--rx:8px;--tr:all 0.3s cubic-bezier(0.4,0,0.2,1)}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{width:100%;height:100%;background:var(--d);color:var(--t);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:14px;overflow:hidden;touch-action:manipulation;user-select:none;-webkit-user-select:none}
+#sb{position:fixed;top:0;left:0;right:0;height:44px;background:linear-gradient(180deg,rgba(10,10,18,0.95),rgba(10,10,18,0.7));backdrop-filter:blur(20px);z-index:10000;display:flex;align-items:center;justify-content:space-between;padding:0 20px;padding-top:env(safe-area-inset-top,0);font-size:13px;font-weight:600}
+#sb .tm{color:var(--t)}#sb .ic{display:flex;gap:6px;align-items:center}#sb .i{font-size:12px}
+#sb .bt{width:22px;height:11px;border:1.5px solid var(--tm);border-radius:3px;position:relative;display:flex;align-items:center;padding:1px}
+#sb .bt::after{content:'';position:absolute;right:-3px;top:3px;width:2px;height:4px;background:var(--tm);border-radius:0 1px 1px 0}
+#sb .bf{height:100%;width:75%;background:var(--s);border-radius:1px;transition:width 0.5s}
+#gb{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:134px;height:5px;background:var(--t);border-radius:3px;margin-bottom:calc(8px + env(safe-area-inset-bottom,0));z-index:10000;opacity:0.5}
+.sc{position:fixed;top:0;left:0;right:0;bottom:0;overflow:hidden;opacity:0;pointer-events:none;transition:opacity 0.3s ease;padding-top:calc(44px + env(safe-area-inset-top,0));padding-bottom:calc(20px + env(safe-area-inset-bottom,0))}
+.sc.a{opacity:1;pointer-events:auto}
+#hs{background:radial-gradient(ellipse at 20% 50%,rgba(139,92,246,0.08) 0%,transparent 50%),radial-gradient(ellipse at 80% 20%,rgba(6,182,212,0.06) 0%,transparent 50%),radial-gradient(ellipse at 50% 80%,rgba(236,72,153,0.05) 0%,transparent 50%),var(--d)}
+.wp{position:absolute;inset:0;background:radial-gradient(circle at 30% 40%,rgba(139,92,246,0.12) 0%,transparent 40%),radial-gradient(circle at 70% 60%,rgba(6,182,212,0.1) 0%,transparent 40%);animation:br 8s ease-in-out infinite}
+@keyframes br{0%,100%{opacity:0.6}50%{opacity:1}}
+.hc{position:relative;z-index:1;height:100%;display:flex;flex-direction:column;padding:16px}
+.cw{text-align:center;margin-top:30px;margin-bottom:20px}
+.cw .ti{font-size:68px;font-weight:200;letter-spacing:-2px;line-height:1;background:linear-gradient(135deg,var(--t),var(--c));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.cw .da{font-size:15px;color:var(--tm);margin-top:6px;letter-spacing:1px;text-transform:uppercase}
+.wr{display:flex;gap:10px;margin-bottom:16px;overflow-x:auto;padding-bottom:4px}
+.wr::-webkit-scrollbar{display:none}
+.wc{min-width:150px;background:var(--g);backdrop-filter:blur(20px);border:1px solid var(--b);border-radius:var(--r);padding:14px;flex-shrink:0}
+.wc .wt{font-size:10px;color:var(--tm);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}
+.wc .wv{font-size:26px;font-weight:700;color:var(--c)}
+.wc .ws{font-size:11px;color:var(--td);margin-top:3px}
+.ag{display:grid;grid-template-columns:repeat(4,1fr);gap:14px 6px;padding:0 8px;margin-top:auto;margin-bottom:110px}
+.ai{display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;transition:var(--tr)}
+.ai:active{transform:scale(0.9)}
+.ai .ib{width:58px;height:58px;border-radius:var(--rs);display:flex;align-items:center;justify-content:center;font-size:26px;position:relative;overflow:hidden;box-shadow:var(--sh)}
+.ai .ib::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,0.1),transparent)}
+.ai .il{font-size:10px;color:var(--t);text-align:center;max-width:65px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-shadow:0 1px 4px rgba(0,0,0,0.5)}
+.ai:nth-child(1) .ib{background:linear-gradient(135deg,var(--v),var(--vd))}
+.ai:nth-child(2) .ib{background:linear-gradient(135deg,var(--c),var(--cd))}
+.ai:nth-child(3) .ib{background:linear-gradient(135deg,var(--p),var(--pd))}
+.ai:nth-child(4) .ib{background:linear-gradient(135deg,#f59e0b,#d97706)}
+.ai:nth-child(5) .ib{background:linear-gradient(135deg,#10b981,#059669)}
+.ai:nth-child(6) .ib{background:linear-gradient(135deg,#6366f1,#4f46e5)}
+.ai:nth-child(7) .ib{background:linear-gradient(135deg,#f97316,#ea580c)}
+.ai:nth-child(8) .ib{background:linear-gradient(135deg,#14b8a6,#0d9488)}
+
+/* DOCK - positioned higher with pagination */
+.dk-wrap{position:absolute;bottom:55px;bottom:calc(55px + env(safe-area-inset-bottom,0));left:12px;right:12px;z-index:10}
+.dk{position:relative;background:var(--g);backdrop-filter:blur(30px);border:1px solid var(--bl);border-radius:var(--r);padding:10px 16px;overflow:hidden}
+.dk-track{display:flex;gap:8px;transition:transform 0.3s ease;will-change:transform}
+.dk .ai{flex-shrink:0}
+.dk .ai .ib{width:48px;height:48px;border-radius:var(--rs);font-size:22px}
+.dk .ai .il{display:none}
+.dk-dots{display:flex;justify-content:center;gap:6px;margin-top:8px}
+.dk-dot{width:6px;height:6px;border-radius:50%;background:var(--tm);opacity:0.4;transition:var(--tr)}
+.dk-dot.a{background:var(--t);opacity:0.8;width:16px;border-radius:3px}
+
+#ad{background:var(--d);z-index:100}
+.dh{padding:16px 20px;display:flex;align-items:center;justify-content:space-between}
+.dh h2{font-size:26px;font-weight:700;background:linear-gradient(135deg,var(--v),var(--c));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.sb{margin:0 16px 12px;background:var(--pa);border:1px solid var(--b);border-radius:var(--rs);padding:10px 14px;display:flex;align-items:center;gap:8px;color:var(--tm)}
+.sb input{background:transparent;border:none;color:var(--t);font-size:15px;outline:none;width:100%;font-family:inherit}
+.sb input::placeholder{color:var(--td)}
+.dg{display:grid;grid-template-columns:repeat(4,1fr);gap:8px 4px;padding:8px 16px;overflow-y:auto;height:calc(100% - 120px)}
+.dg .ai .ib{width:64px;height:64px;border-radius:14px}
+.dg .ai .il{font-size:11px;max-width:68px}
+
+.aw{position:fixed;inset:0;background:var(--d);z-index:1000;display:flex;flex-direction:column;opacity:0;pointer-events:none;transition:opacity 0.25s ease,transform 0.25s ease;transform:scale(0.95)}
+.aw.a{opacity:1;pointer-events:auto;transform:scale(1)}
+.ah{height:52px;background:var(--pa);border-bottom:1px solid var(--b);display:flex;align-items:center;padding:0 14px;gap:10px;flex-shrink:0}
+.ah .bb{width:30px;height:30px;border-radius:50%;background:var(--pl);border:1px solid var(--b);display:flex;align-items:center;justify-content:center;color:var(--t);font-size:17px;cursor:pointer}
+.ah .at{font-size:16px;font-weight:600;flex:1}
+.ah .aa{display:flex;gap:6px}
+.ah .ab{width:30px;height:30px;border-radius:50%;background:var(--pl);border:1px solid var(--b);display:flex;align-items:center;justify-content:center;color:var(--t);font-size:15px;cursor:pointer}
+.abo{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding:14px}
+
+/* Browser */
+.bb2{display:flex;gap:6px;margin-bottom:10px}
+.bb2 input{flex:1;background:var(--pa);border:1px solid var(--b);border-radius:var(--rs);padding:8px 12px;color:var(--t);font-size:13px;outline:none;font-family:inherit}
+.bb2 button{background:var(--v);border:none;color:white;padding:8px 14px;border-radius:var(--rs);font-size:12px;font-weight:600;cursor:pointer}
+.bfr{width:100%;height:calc(100vh - 180px);border:1px solid var(--b);border-radius:var(--rs);background:#1a1a2e;overflow:hidden;position:relative}
+.bco{width:100%;height:100%;overflow-y:auto;padding:16px;color:var(--t);font-family:-apple-system,sans-serif;line-height:1.6;font-size:13px}
+.bco h1{font-size:20px;margin-bottom:10px;color:var(--v)}
+.bco h2{font-size:16px;margin:12px 0 8px;color:var(--c)}
+.bco p{margin-bottom:10px;color:var(--tm)}
+.bco a{color:var(--c);text-decoration:none}
+.bco code{background:var(--pa);padding:2px 6px;border-radius:4px;font-family:monospace;font-size:12px;color:var(--p)}
+.bco pre{background:var(--pa);padding:10px;border-radius:8px;overflow-x:auto;font-size:11px;line-height:1.5;color:var(--tm);border:1px solid var(--b)}
+
+/* Chat */
+.cl{display:flex;flex-direction:column;gap:1px}
+.ci{display:flex;align-items:center;gap:10px;padding:10px 12px;cursor:pointer;transition:var(--tr)}
+.ci:active{background:var(--pl)}
+.ca{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.cn{font-size:14px;font-weight:600;color:var(--t)}
+.cp{font-size:12px;color:var(--tm);margin-top:1px;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ct{font-size:11px;color:var(--td)}
+.cms{display:flex;flex-direction:column;gap:6px;padding-bottom:80px}
+.mb{max-width:78%;padding:8px 12px;border-radius:16px;font-size:13px;line-height:1.5;word-wrap:break-word;animation:fadeIn 0.2s ease}
+.mb.se{align-self:flex-end;background:linear-gradient(135deg,var(--v),var(--vd));color:white;border-bottom-right-radius:3px}
+.mb.re{align-self:flex-start;background:var(--pa);color:var(--t);border:1px solid var(--b);border-bottom-left-radius:3px}
+.mt{font-size:9px;color:var(--td);margin-top:3px;text-align:right;opacity:0.7}
+.cib{position:fixed;bottom:16px;bottom:calc(16px + env(safe-area-inset-bottom,0));left:14px;right:14px;display:flex;gap:6px;align-items:center;background:var(--pa);border:1px solid var(--b);border-radius:24px;padding:6px 10px;z-index:100}
+.cib input{flex:1;background:transparent;border:none;color:var(--t);font-size:14px;outline:none;font-family:inherit;padding:3px 6px}
+.cib .mic-btn{width:32px;height:32px;border-radius:50%;background:var(--v);border:none;color:white;display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer;flex-shrink:0}
+.cib .sb2{width:32px;height:32px;border-radius:50%;background:var(--v);border:none;color:white;display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer;flex-shrink:0}
+.cib .mic-btn.recording{background:var(--dg);animation:pulse 1s infinite}
+
+/* Calculator */
+.cd{background:var(--pa);border-radius:var(--rs);padding:16px;text-align:right;margin-bottom:12px}
+.cd .ce{font-size:14px;color:var(--tm);min-height:20px}
+.cd .cr{font-size:38px;font-weight:300;color:var(--t);margin-top:3px;word-break:break-all}
+.cp2{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.cb{aspect-ratio:1;border-radius:50%;border:none;background:var(--pa);color:var(--t);font-size:22px;font-weight:500;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:var(--tr);user-select:none}
+.cb:active{transform:scale(0.92);background:var(--pl)}
+.cb.op{background:var(--v);color:white;font-size:26px}
+.cb.op:active{background:var(--vd)}
+.cb.eq{background:var(--c);color:var(--d);font-size:26px}
+.cb.eq:active{background:var(--cd)}
+.cb.ac{color:var(--dg);font-size:18px}
+.cb.z2{grid-column:span 2;border-radius:28px;aspect-ratio:auto}
+
+/* Gallery */
+.gg{display:grid;grid-template-columns:repeat(3,1fr);gap:2px}
+.gi{aspect-ratio:1;background:var(--pa);border-radius:3px;overflow:hidden;cursor:pointer;position:relative}
+.gi img{width:100%;height:100%;object-fit:cover}
+.gi .go{position:absolute;inset:0;background:rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity 0.2s;font-size:20px}
+.gi:active .go{opacity:1}
+
+/* Notes */
+.nl{display:flex;flex-direction:column;gap:6px}
+.nc{background:var(--pa);border:1px solid var(--b);border-radius:var(--rs);padding:12px;cursor:pointer;transition:var(--tr)}
+.nc:active{background:var(--pl)}
+.nc .nt{font-size:14px;font-weight:600;color:var(--t);margin-bottom:3px}
+.nc .nb{font-size:12px;color:var(--tm);line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.nc .nd{font-size:10px;color:var(--td);margin-top:6px}
+.ne{width:100%;min-height:55vh;background:transparent;border:none;color:var(--t);font-size:15px;line-height:1.6;outline:none;resize:none;font-family:inherit}
+
+/* Morph Engine */
+.mp{background:var(--pa);border:1px solid var(--b);border-radius:var(--rs);padding:12px;margin-bottom:10px}
+.mpt{font-size:10px;color:var(--c);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px}
+.db{display:flex;align-items:center;gap:6px;margin-bottom:5px}
+.db .dl{width:65px;font-size:10px;color:var(--tm);text-transform:uppercase}
+.db .dt{flex:1;height:5px;background:var(--d);border-radius:3px;overflow:hidden}
+.db .df{height:100%;border-radius:3px;transition:width 0.5s ease}
+.db .dv{width:36px;text-align:right;font-size:10px;color:var(--c);font-family:monospace}
+.ggd{display:grid;grid-template-columns:repeat(8,1fr);gap:2px}
+.gc{aspect-ratio:1;background:var(--d);border:1px solid var(--b);border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:9px;color:var(--td);cursor:pointer;transition:var(--tr)}
+.gc:active{border-color:var(--c)}
+.gc.a{background:var(--v);color:white;border-color:var(--v);box-shadow:0 0 6px rgba(139,92,246,0.3)}
+.sgd{display:grid;grid-template-columns:repeat(3,1fr);gap:3px}
+.sc2{background:var(--d);border:1px solid var(--b);border-radius:5px;padding:6px;text-align:center}
+.sc2 .sv2{font-size:13px;color:var(--c);font-weight:700;font-family:monospace}
+.sc2 .sl2{font-size:8px;color:var(--td);margin-top:1px}
+.hc2{width:100%;height:140px;background:var(--d);border-radius:6px;border:1px solid var(--b)}
+.mb2{width:100%;background:linear-gradient(135deg,var(--v),var(--c));border:none;color:white;padding:12px;border-radius:var(--rs);font-size:13px;font-weight:600;letter-spacing:1px;cursor:pointer;margin-top:8px;text-transform:uppercase}
+.mb2:active{transform:scale(0.98);opacity:0.9}
+
+/* MRNN Panel */
+.mrnn-panel{background:var(--pa);border:1px solid var(--b);border-radius:var(--rs);padding:12px;margin-bottom:10px}
+.mrnn-title{font-size:10px;color:var(--p);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px}
+.mrnn-row{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--b)}
+.mrnn-row:last-child{border-bottom:none}
+.mrnn-row .mrnn-circuit{width:90px;font-size:11px;color:var(--t);font-weight:600}
+.mrnn-row .mrnn-channel{font-size:10px;color:var(--tm);flex:1}
+.mrnn-row .mrnn-adapter{font-size:10px;color:var(--c);width:80px;text-align:right}
+.mrnn-status{display:flex;gap:4px;margin-top:8px}
+.mrnn-status .ms-dot{width:8px;height:8px;border-radius:50%;background:var(--b)}
+.mrnn-status .ms-dot.on{background:var(--s);box-shadow:0 0 6px var(--s)}
+.mrnn-status .ms-dot.pulse{background:var(--a);animation:pulse 1s infinite}
+.mrnn-status .ms-label{font-size:10px;color:var(--tm);margin-left:4px}
+
+/* Notifications */
+#nc{position:fixed;top:-100%;left:0;right:0;background:var(--g);backdrop-filter:blur(30px);border-bottom:1px solid var(--b);z-index:9999;transition:top 0.4s cubic-bezier(0.4,0,0.2,1);padding:55px 16px 16px;padding-top:calc(55px + env(safe-area-inset-top,0));max-height:65vh;overflow-y:auto}
+#nc.o{top:0}
+.ng{margin-bottom:12px}
+.ngt{font-size:12px;color:var(--tm);margin-bottom:6px;padding-left:3px}
+.ni{background:var(--pa);border-radius:var(--rs);padding:10px 12px;margin-bottom:5px;display:flex;gap:10px;cursor:pointer;transition:var(--tr)}
+.ni:active{background:var(--pl)}
+.nic{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.nit{font-size:13px;font-weight:600;color:var(--t)}
+.nib{font-size:12px;color:var(--tm);margin-top:1px}
+
+/* Control Center */
+#cc{position:fixed;bottom:-100%;left:0;right:0;background:var(--g);backdrop-filter:blur(40px);border-top:1px solid var(--b);z-index:9999;transition:bottom 0.4s cubic-bezier(0.4,0,0.2,1);padding:16px;padding-bottom:calc(16px + env(safe-area-inset-bottom,0));border-radius:var(--r) var(--r) 0 0}
+#cc.o{bottom:0}
+.cg{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:16px}
+.ct2{background:var(--pa);border-radius:var(--rs);padding:14px;display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;transition:var(--tr)}
+.ct2:active{background:var(--pl)}
+.ct2 .ci2{font-size:24px}
+.ct2 .cl2{font-size:11px;color:var(--tm)}
+.ct2.on{background:var(--v)}
+.ct2.on .ci2{color:white}
+.ct2.on .cl2{color:rgba(255,255,255,0.8)}
+.csl{margin-bottom:12px}
+.csl2{font-size:11px;color:var(--tm);margin-bottom:6px}
+.cst{width:100%;height:36px;background:var(--pa);border-radius:18px;position:relative;overflow:hidden}
+.csf{height:100%;background:linear-gradient(90deg,var(--v),var(--c));border-radius:18px;transition:width 0.2s}
+
+/* Lock Screen */
+#ls{position:fixed;inset:0;background:radial-gradient(ellipse at 30% 50%,rgba(139,92,246,0.15) 0%,transparent 50%),radial-gradient(ellipse at 70% 30%,rgba(6,182,212,0.1) 0%,transparent 50%),var(--d);z-index:20000;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity 0.5s,transform 0.5s}
+#ls.h{opacity:0;pointer-events:none;transform:translateY(-20px)}
+.lc{font-size:72px;font-weight:200;letter-spacing:-3px;color:var(--t);text-shadow:0 0 40px rgba(139,92,246,0.3)}
+.ld{font-size:16px;color:var(--tm);margin-top:6px;text-transform:uppercase;letter-spacing:2px}
+.lh{position:absolute;bottom:50px;font-size:12px;color:var(--td);animation:pu 2s infinite}
+@keyframes pu{0%,100%{opacity:0.5}50%{opacity:1}}
+
+/* Files */
+.fl{display:flex;flex-direction:column;gap:2px}
+.fi{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--rx);cursor:pointer;transition:var(--tr)}
+.fi:active{background:var(--pl)}
+.fi .fn{font-size:13px;font-weight:500;color:var(--t)}
+.fi .fm{font-size:11px;color:var(--td);margin-top:1px}
+.fi .fs{font-size:11px;color:var(--tm)}
+
+/* Settings */
+.ss{margin-bottom:20px}
+.sst{font-size:12px;color:var(--v);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;padding:0 6px}
+.sl{background:var(--pa);border-radius:var(--rs);border:1px solid var(--b);overflow:hidden}
+.si{display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid var(--b);cursor:pointer;transition:var(--tr)}
+.si:last-child{border-bottom:none}
+.si:active{background:var(--pl)}
+.si .si2{width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.si .sv{flex:1;font-size:14px}
+.si .sv2{font-size:13px;color:var(--tm)}
+.si .sc2{color:var(--td);font-size:13px}
+
+/* Overlays */
+.ob{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9998;opacity:0;pointer-events:none;transition:opacity 0.3s}
+.ob.o{opacity:1;pointer-events:auto}
+::-webkit-scrollbar{width:0;height:0}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+.fadeIn{animation:fadeIn 0.2s ease}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.5}}
+
+/* Synthia system assistant overlay — r21.18 */
+#synthia-orb{position:fixed;right:18px;bottom:92px;z-index:15000;width:54px;height:54px;border-radius:50%;border:1px solid rgba(255,255,255,.24);background:radial-gradient(circle at 35% 30%,#fff 0 5%,#b7a0ff 18%,#7c3aed 52%,#24103d 82%);box-shadow:0 8px 28px rgba(76,29,149,.55);display:grid;place-items:center;color:white;font-size:22px;cursor:pointer}
+#synthia-orb.listening{animation:pulse 1s infinite}
+#synthia-assistant{position:fixed;left:10px;right:10px;bottom:78px;z-index:14999;max-height:min(72vh,620px);display:none;flex-direction:column;background:rgba(10,10,18,.96);backdrop-filter:blur(28px);border:1px solid var(--bl);border-radius:24px;box-shadow:0 20px 70px rgba(0,0,0,.6);overflow:hidden}
+#synthia-assistant.o{display:flex}
+.sa-head{display:flex;align-items:center;gap:10px;padding:13px 14px;border-bottom:1px solid var(--b)}
+.sa-mark{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,var(--v),var(--p))}
+.sa-title{flex:1}.sa-title b{display:block}.sa-title small{color:var(--tm)}
+.sa-close{border:0;background:transparent;color:var(--tm);font-size:22px}
+.sa-log{min-height:140px;max-height:360px;overflow:auto;padding:14px;display:flex;flex-direction:column;gap:8px}
+.sa-msg{max-width:86%;padding:9px 12px;border-radius:16px;line-height:1.42;white-space:pre-wrap;user-select:text}
+.sa-msg.you{align-self:flex-end;background:linear-gradient(135deg,var(--v),var(--vd))}.sa-msg.synthia{align-self:flex-start;background:var(--pa);border:1px solid var(--b)}
+.sa-input{display:flex;gap:7px;padding:10px;border-top:1px solid var(--b)}.sa-input input{flex:1;background:var(--pa);border:1px solid var(--b);border-radius:18px;padding:10px 12px;color:var(--t);outline:none}.sa-input button{border:0;border-radius:50%;width:40px;height:40px;background:var(--v);color:white}
+#synthia-runtime-frame{position:absolute;width:1px;height:1px;left:-9999px;border:0;opacity:0;pointer-events:none}
+.sys-frame{width:100%;height:calc(100vh - 54px);border:0;background:#070709;border-radius:0}
+.acode-panel{display:grid;gap:12px}.acode-launch{width:100%;border:0;border-radius:14px;padding:13px;background:linear-gradient(135deg,#6d28d9,#2563eb);color:#fff;font-weight:700}.acode-note{font-size:12px;color:var(--tm);line-height:1.5}
+.universe-widget{background:var(--g);backdrop-filter:blur(24px);border:1px solid var(--bl);border-radius:var(--r);padding:13px;margin:0 8px 14px;cursor:pointer}.uw-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:9px}.uw-head b{font-size:12px}.uw-state{font-size:10px;color:var(--c)}.uw-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:5px}.uw-dim{background:var(--pa);border:1px solid var(--b);border-radius:9px;padding:7px 4px;text-align:center}.uw-dim b{display:block;font-size:11px}.uw-dim span{font-size:9px;color:var(--tm)}.uw-foot{margin-top:8px;font-size:10px;color:var(--tm);display:flex;justify-content:space-between;gap:8px}.runtime-row{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid var(--b);font-size:12px}.runtime-row:last-child{border-bottom:0}.runtime-ok{color:var(--s)}.runtime-warn{color:var(--a)}
+</style>
+</head>
+<body>
+
+<!-- LOCK SCREEN -->
+<div id="ls" ontouchstart="us(event)" ontouchend="ue(event)">
+<div class="lc" id="lc">12:00</div><div class="ld" id="ld">Monday, June 3</div><div class="lh">Swipe up to unlock</div></div>
+
+<!-- STATUS BAR -->
+<div id="sb"><span class="tm" id="st">12:00</span><div class="ic"><span class="i">📶</span><span class="i">📡</span><span class="i">🔋</span><div class="bt"><div class="bf" id="bf"></div></div></div></div>
+
+<!-- NOTIFICATION CENTER — populated from actual runtime state -->
+<div id="nc"><div class="ng"><div class="ngt">Runtime</div><div id="runtimeNotifications" class="ni"><div class="nic">✦</div><div><div class="nit">Synthia</div><div class="nib">Waiting for runtime snapshot…</div></div></div></div></div>
+
+<!-- CONTROL CENTER — organism/process controls -->
+<div id="cc">
+  <div class="mp"><div class="mpt">Runtime</div><div id="runtimeControlState"><div class="runtime-row"><span>Organism</span><b class="runtime-warn">connecting</b></div></div></div>
+  <div class="row" style="display:flex;gap:8px"><button class="acode-launch" id="pulseRuntime">Pulse</button><button class="acode-launch" id="openSystemFromCC">System</button></div>
+</div>
+<div class="ob" id="ob" onclick="co()"></div>
+
+
+<iframe id="synthia-runtime-frame" src="./synthia-runtime.html" title="Synthia runtime bridge"></iframe>
+<button id="synthia-orb" aria-label="Open Synthia">✦</button>
+<section id="synthia-assistant" aria-label="Synthia assistant">
+  <div class="sa-head"><div class="sa-mark">✦</div><div class="sa-title"><b>Synthia</b><small id="sa-status">system assistant · connecting</small></div><button class="sa-close" id="sa-close" aria-label="Close">×</button></div>
+  <div class="sa-log" id="sa-log"><div class="sa-msg synthia">Runtime connection initializing…</div></div>
+  <div class="sa-input"><input id="sa-input" placeholder="Ask Synthia or tell her what to do"><button id="sa-send" aria-label="Send">➤</button></div>
+</section>
+
+<!-- HOME SCREEN -->
+<div id="hs" class="sc a">
+<div class="wp"></div>
+<div class="hc">
+<div class="cw"><div class="ti" id="hc2">12:00</div><div class="da" id="hd">Monday, June 3</div></div>
+<div class="universe-widget" id="universeWidget" onclick="openApp('synthia')">
+  <div class="uw-head"><b>Universe</b><span class="uw-state" id="uwRuntime">connecting</span></div>
+  <div class="uw-grid">
+    <div class="uw-dim"><b>Movement</b><span id="uwMovement">—</span></div>
+    <div class="uw-dim"><b>Evolution</b><span id="uwEvolution">—</span></div>
+    <div class="uw-dim"><b>Being</b><span id="uwBeing">—</span></div>
+    <div class="uw-dim"><b>Design</b><span id="uwDesign">—</span></div>
+    <div class="uw-dim"><b>Space</b><span id="uwSpace">—</span></div>
+  </div>
+  <div class="uw-foot"><span id="uwProcesses">processes —</span><span id="uwVitality">vitality —</span></div>
+</div>
+<div class="wr">
+<div class="wc"><div class="wt">Processes</div><div class="wv" id="ws">—</div><div class="ws" id="wsSub">runtime fabric</div></div>
+<div class="wc"><div class="wt">Vitality</div><div class="wv" id="wr2">—</div><div class="ws">living loop</div></div>
+<div class="wc"><div class="wt">Cycles</div><div class="wv" id="wc2">—</div><div class="ws">organism cycles</div></div></div>
+<div class="ag">
+<div class="ai" onclick="openApp('synthia')"><div class="ib">✦</div><div class="il">Universe</div></div>
+<div class="ai" onclick="openApp('browser')"><div class="ib">🌐</div><div class="il">Browser</div></div>
+<div class="ai" onclick="openApp('notes')"><div class="ib">📝</div><div class="il">Notes</div></div>
+<div class="ai" onclick="openApp('calc')"><div class="ib">🔢</div><div class="il">Calculator</div></div>
+<div class="ai" onclick="openApp('acode')"><div class="ib" style="background:linear-gradient(135deg,#2563eb,#6d28d9)">&lt;/&gt;</div><div class="il">Acode</div></div>
+<div class="ai" onclick="showScreen('ad')"><div class="ib">📱</div><div class="il">Apps</div></div></div>
+
+<!-- DOCK with pagination -->
+<div class="dk-wrap">
+<div class="dk" id="dk">
+<div class="dk-track" id="dk-track">
+<div class="ai" onclick="toggleSynthia(true)"><div class="ib" style="background:linear-gradient(135deg,#8b5cf6,#ec4899)">✦</div><div class="il">Synthia</div></div>
+<div class="ai" onclick="openApp('browser')"><div class="ib" style="background:linear-gradient(135deg,#06b6d4,#3b82f6)">🌐</div><div class="il">Browser</div></div>
+<div class="ai" onclick="openApp('notes')"><div class="ib" style="background:linear-gradient(135deg,#6366f1,#4f46e5)">📝</div><div class="il">Notes</div></div>
+<div class="ai" onclick="openApp('acode')"><div class="ib" style="background:linear-gradient(135deg,#2563eb,#6d28d9)">&lt;/&gt;</div><div class="il">Acode</div></div>
+</div></div>
+<div class="dk-dots" id="dk-dots"><div class="dk-dot a"></div></div></div></div></div>
+
+
+<!-- APP: SYNTHIA SYSTEM — current r21.17 runtime -->
+<div class="aw" id="aw-synthia"><div class="ah"><div class="bb" onclick="ca()">‹</div><div class="at">✦ Synthia System</div><div class="aa"><div class="ab" onclick="document.getElementById('synthia-system-frame').contentWindow.location.reload()">↻</div></div></div><div class="abo" style="padding:0"><iframe id="synthia-system-frame" class="sys-frame" src="./synthia-runtime.html" title="Synthia system runtime"></iframe></div></div>
+<!-- APP: ACODE — resident development environment boundary -->
+<div class="aw" id="aw-acode"><div class="ah"><div class="bb" onclick="ca()">‹</div><div class="at">&lt;/&gt; Acode</div></div><div class="abo"><div class="acode-panel">
+<div class="mp"><div class="mpt">Acode Residence</div><p>The exact r21.17 Acode residence is bundled with this system. Synthia uses its Linux/editor residence when the Android host exposes the native Acode bridge.</p></div>
+<div class="mp"><div class="mpt">Host status</div><div id="acodeStatus" class="acode-note">Checking native Acode bridge…</div></div>
+<button class="acode-launch" id="openAcodeBtn">Open Acode editor</button>
+<a class="acode-launch" style="text-align:center;text-decoration:none" href="./apps/Synthia-Acode-Residence-r21.17.zip" download>Export bundled residence</a>
+</div></div></div>
+
+<!-- APP DRAWER -->
+<div id="ad" class="sc">
+<div class="dh"><h2>Apps</h2><span style="font-size:22px;cursor:pointer" onclick="showScreen('hs')">✕</span></div>
+<div class="sb"><span>🔍</span><input type="text" placeholder="Search apps..." oninput="fa(this.value)"></div>
+<div class="dg" id="dg"></div></div>
+
+<!-- APP: MORPH ENGINE -->
+<div class="aw" id="aw-morph">
+<div class="ah"><div class="bb" onclick="ca()">‹</div><div class="at">⚛️ Morph Engine</div><div class="aa"><div class="ab" onclick="io()">↻</div><div class="ab" onclick="rmc()">▶</div></div></div>
+<div class="abo">
+<div class="mp"><div class="mpt">5D Quantum State</div>
+<div class="db"><span class="dl">Being</span><div class="dt"><div class="df" id="mbB" style="width:0%;background:#22c55e"></div></div><span class="dv" id="mvB">0.00</span></div>
+<div class="db"><span class="dl">Evolution</span><div class="dt"><div class="df" id="mbE" style="width:0%;background:#a78bfa"></div></div><span class="dv" id="mvE">0.00</span></div>
+<div class="db"><span class="dl">Movement</span><div class="dt"><div class="df" id="mbM" style="width:0%;background:#22d3ee"></div></div><span class="dv" id="mvM">0.00</span></div>
+<div class="db"><span class="dl">Design</span><div class="dt"><div class="df" id="mbD" style="width:0%;background:#f472b6"></div></div><span class="dv" id="mvD">0.00</span></div>
+<div class="db"><span class="dl">Space</span><div class="dt"><div class="df" id="mbS" style="width:0%;background:#fbbf24"></div></div><span class="dv" id="mvS">0.00</span></div></div>
+<div class="mp"><div class="mpt">9-Point State Vector x(t)</div><div class="sgd" id="msg"></div></div>
+<div class="mp"><div class="mpt">64-Gate Codon Map</div><div class="ggd" id="mgg"></div></div>
+<div class="mp"><div class="mpt">Personality Hologram</div><canvas class="hc2" id="mh"></canvas></div>
+
+<!-- MRNN Adapter Layer -->
+<div class="mrnn-panel">
+<div class="mrnn-title">MRNN Adapter Layer — 5 Circuits</div>
+<div class="mrnn-row"><div class="mrnn-circuit">Understanding</div><div class="mrnn-channel">63-4 · DFF</div><div class="mrnn-adapter">Symbol→Constraint</div></div>
+<div class="mrnn-row"><div class="mrnn-circuit">Sensing</div><div class="mrnn-channel">53-42 · DBN</div><div class="mrnn-adapter">Experience→State</div></div>
+<div class="mrnn-row"><div class="mrnn-circuit">Knowing</div><div class="mrnn-channel">3-60 · LSM</div><div class="mrnn-adapter">Pulse→Discrete</div></div>
+<div class="mrnn-row"><div class="mrnn-circuit">Integration</div><div class="mrnn-channel">10-34 · Actor-Critic</div><div class="mrnn-adapter">Action→Policy</div></div>
+<div class="mrnn-row"><div class="mrnn-circuit">Defense</div><div class="mrnn-channel">21-45 · Resource</div><div class="mrnn-adapter">Priority→Limit</div></div>
+<div class="mrnn-status">
+<div class="ms-dot on" id="ms-u"></div><div class="ms-label">Understanding</div>
+<div class="ms-dot on" id="ms-s"></div><div class="ms-label">Sensing</div>
+<div class="ms-dot on" id="ms-k"></div><div class="ms-label">Knowing</div>
+<div class="ms-dot pulse" id="ms-i"></div><div class="ms-label">Integration</div>
+<div class="ms-dot on" id="ms-d"></div><div class="ms-label">Defense</div>
+</div></div>
+
+<div class="mp"><div class="mpt">Query Vector</div>
+<input type="text" id="mq" placeholder="What is the nature of my deepest intuition?" style="width:100%;background:#0a0a12;border:1px solid var(--b);border-radius:8px;padding:10px 12px;color:var(--t);font-size:14px;outline:none;font-family:inherit;">
+<select id="mf" style="width:100%;margin-top:8px;background:#0a0a12;border:1px solid var(--b);border-radius:8px;padding:10px 12px;color:var(--t);font-size:14px;outline:none;font-family:inherit;">
+<option value="CS">Conscious Sun</option><option value="CE">Conscious Earth</option>
+<option value="US">Unconscious Sun</option><option value="UE">Unconscious Earth</option></select>
+<button class="mb2" onclick="rmc()">Execute Collapse</button></div>
+<div class="mp"><div class="mpt">Event Log</div><div id="ml" style="font-size:11px;color:var(--tm);line-height:1.6;max-height:200px;overflow-y:auto;font-family:monospace;"></div></div></div></div>
+
+<!-- APP: BROWSER — real host handoff -->
+<div class="aw" id="aw-browser">
+<div class="ah"><div class="bb" onclick="ca()">‹</div><div class="at">🌐 Browser</div></div>
+<div class="abo">
+<div class="bb2"><input type="text" id="bu" placeholder="Enter URL" onkeydown="if(event.key==='Enter')bg()"><button onclick="bg()">Open</button></div>
+<div class="bfr"><div class="bco" id="bco"><h1>Synthia Browser</h1><p>URLs are handed to the device browser. External pages are never replaced with simulated content.</p></div></div>
+</div></div>
+
+<!-- APP: NOTES -->
+<div class="aw" id="aw-notes">
+<div class="ah"><div class="bb" onclick="ca()">‹</div><div class="at">📝 Notes</div><div class="aa"><div class="ab" onclick="nn()">+</div></div></div>
+<div class="abo" id="nl2"><div class="nl" id="nl"></div></div>
+<div class="abo" id="ne" style="display:none;">
+<input type="text" id="nti" placeholder="Title" style="width:100%;background:transparent;border:none;border-bottom:1px solid var(--b);color:var(--t);font-size:18px;font-weight:600;padding:6px 0;margin-bottom:12px;outline:none;font-family:inherit;">
+<textarea class="ne" id="nbi" placeholder="Start typing..."></textarea>
+<button class="mb2" onclick="sn()">Save Note</button></div></div>
+
+<!-- APP: CALCULATOR -->
+<div class="aw" id="aw-calc">
+<div class="ah"><div class="bb" onclick="ca()">‹</div><div class="at">🔢 Calculator</div></div>
+<div class="abo" style="display:flex;flex-direction:column;justify-content:center;">
+<div class="cd"><div class="ce" id="ce"></div><div class="cr" id="cr">0</div></div>
+<div class="cp2">
+<button class="cb ac" onclick="cc()">AC</button>
+<button class="cb" onclick="co2('+/-')">+/-</button>
+<button class="cb" onclick="co2('%')">%</button>
+<button class="cb op" onclick="co2('/')">÷</button>
+<button class="cb" onclick="cn('7')">7</button>
+<button class="cb" onclick="cn('8')">8</button>
+<button class="cb" onclick="cn('9')">9</button>
+<button class="cb op" onclick="co2('*')">×</button>
+<button class="cb" onclick="cn('4')">4</button>
+<button class="cb" onclick="cn('5')">5</button>
+<button class="cb" onclick="cn('6')">6</button>
+<button class="cb op" onclick="co2('-')">−</button>
+<button class="cb" onclick="cn('1')">1</button>
+<button class="cb" onclick="cn('2')">2</button>
+<button class="cb" onclick="cn('3')">3</button>
+<button class="cb op" onclick="co2('+')">+</button>
+<button class="cb z2" onclick="cn('0')">0</button>
+<button class="cb" onclick="cn('.')">.</button>
+<button class="cb eq" onclick="ceq()">=</button></div></div></div>
+
+<!-- APP: SETTINGS — runtime-backed -->
+<div class="aw" id="aw-settings">
+<div class="ah"><div class="bb" onclick="ca()">‹</div><div class="at">⚙️ System Settings</div></div>
+<div class="abo">
+<div class="mp"><div class="mpt">Runtime</div><div id="settingsRuntime"><div class="runtime-row"><span>Status</span><b class="runtime-warn">connecting</b></div></div></div>
+<div class="mp"><div class="mpt">Maintenance</div><button class="acode-launch" onclick="openApp('synthia')">Open Synthia System</button></div>
+<div class="mp"><div class="mpt">Development Residence</div><button class="acode-launch" onclick="openApp('acode')">Open Acode</button></div>
+</div></div>
+
+<script>
+// ═════════════════════════════════════════════════════════════════
+// SYNTHIA PHONE SHELL — RUNTIME-BACKED SURFACES
+// ═════════════════════════════════════════════════════════════════
+let ca2=null,as2='hs',uy=0,bt=75,mo=null,ce2='',cc2='0',cop=null,cpv=null;
+let ns=[],fs=[],ga=[],cc3=null,ch={};
+let dkPage=0,dkTotal=1,recording=false;
+
+// Clock
+function uc(){
+  const n=new Date();
+  const t=n.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:false});
+  const d=n.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
+  document.getElementById('lc').textContent=t;
+  document.getElementById('hc2').textContent=t;
+  document.getElementById('st').textContent=t;
+  document.getElementById('ld').textContent=d;
+  document.getElementById('hd').textContent=d;
+}
+setInterval(uc,1000);uc();
+
+// Battery
+function ub(){
+  bt=Math.max(0,Math.min(100,bt+(Math.random()-0.5)*2));
+  const f=document.getElementById('bf');
+  f.style.width=bt+'%';
+  f.style.background=bt<20?'var(--dg)':bt<50?'var(--a)':'var(--s)';
+}
+setInterval(ub,30000);ub();
+
+// Lock screen
+function us(e){uy=e.touches[0].clientY}
+function ue(e){
+  if(uy-e.changedTouches[0].clientY>80){
+    document.getElementById('ls').classList.add('h');
+    setTimeout(()=>{document.getElementById('ls').style.display='none'},500);
+  }
+}
+document.getElementById('ls').addEventListener('click',()=>{
+  document.getElementById('ls').classList.add('h');
+  setTimeout(()=>{document.getElementById('ls').style.display='none'},500);
+});
+
+// Screen & app management
+function ss2(id){
+  document.querySelectorAll('.sc').forEach(s=>s.classList.remove('a'));
+  document.getElementById(id).classList.add('a');
+  as2=id;
+}
+function openApp(id){
+  const a=document.getElementById('aw-'+id);
+  if(!a)return;
+  a.classList.add('a');
+  ca2=id;
+  if(id==='notes')rn();
+}
+function ca(){
+  if(ca2){
+    document.getElementById('aw-'+ca2).classList.remove('a');
+    ca2=null;
+  }
+}
+
+// Gestures
+let tsy=0,tsx=0;
+document.addEventListener('touchstart',e=>{tsy=e.touches[0].clientY;tsx=e.touches[0].clientX},{passive:true});
+document.addEventListener('touchend',e=>{
+  const dy=tsy-e.changedTouches[0].clientY;
+  const dx=e.changedTouches[0].clientX-tsx;
+  const sy=tsy;
+  if(e.changedTouches[0].clientY>window.innerHeight-60&&dy>50){ca();ss2('hs');co();}
+  if(sy<60&&dy<-50){document.getElementById('nc').classList.add('o');document.getElementById('ob').classList.add('o');}
+  if(sy>window.innerHeight-60&&dy<-50){document.getElementById('cc').classList.add('o');document.getElementById('ob').classList.add('o');}
+  // Dock swipe
+  if(as2==='hs'&&Math.abs(dx)>50&&Math.abs(dy)<30){
+    if(dx>0&&dkPage>0){dkPage--;udk();}
+    if(dx<0&&dkPage<dkTotal-1){dkPage++;udk();}
+  }
+},{passive:true});
+
+function co(){
+  document.getElementById('nc').classList.remove('o');
+  document.getElementById('cc').classList.remove('o');
+  document.getElementById('ob').classList.remove('o');
+}
+function tt(el){el.classList.toggle('on');}
+function ts(el){el.classList.toggle('on');}
+function ss(tr,e){
+  const r=tr.getBoundingClientRect();
+  const x=(e.clientX||(e.touches&&e.touches[0].clientX))-r.left;
+  const p=Math.max(0,Math.min(100,x/r.width*100));
+  tr.querySelector('.csf').style.width=p+'%';
+}
+
+// Dock pagination
+function udk(){
+  const track=document.getElementById('dk-track');
+  const w=track.parentElement.offsetWidth;
+  track.style.transform=`translateX(-${dkPage*w}px)`;
+  document.querySelectorAll('.dk-dot').forEach((d,i)=>d.classList.toggle('a',i===dkPage));
+}
+window.addEventListener('resize',udk);
+
+// App drawer
+const AA=[
+  {id:'synthia',n:'Universe',i:'✦',c:'linear-gradient(135deg,#8b5cf6,#ec4899)'},
+  {id:'acode',n:'Acode',i:'</>',c:'linear-gradient(135deg,#2563eb,#6d28d9)'},
+  {id:'browser',n:'Browser',i:'🌐',c:'linear-gradient(135deg,#06b6d4,#0891b2)'},
+  {id:'notes',n:'Notes',i:'📝',c:'linear-gradient(135deg,#6366f1,#4f46e5)'},
+  {id:'calc',n:'Calculator',i:'🔢',c:'linear-gradient(135deg,#f97316,#ea580c)'},
+  {id:'settings',n:'Settings',i:'⚙️',c:'linear-gradient(135deg,#14b8a6,#0d9488)'}
+];
+function rd(){
+  document.getElementById('dg').innerHTML=AA.map(a=>`<div class="ai" onclick="openApp('${a.id}')"><div class="ib" style="background:${a.c}">${a.i}</div><div class="il">${a.n}</div></div>`).join('');
+}
+rd();
+function fa(q){
+  const t=q.toLowerCase();
+  const f=t?AA.filter(a=>a.n.toLowerCase().includes(t)):AA;
+  document.getElementById('dg').innerHTML=f.map(a=>`<div class="ai" onclick="openApp('${a.id}')"><div class="ib" style="background:${a.c}">${a.i}</div><div class="il">${a.n}</div></div>`).join('');
+}
+
+// Browser — no demo page. Hand real URLs to the host/browser.
+function bg(){const u=document.getElementById('bu').value.trim();lp(u);}
+function lp(u){
+  if(!u)return;
+  let target=String(u).trim();
+  if(!/^https?:\/\//i.test(target))target='https://'+target;
+  document.getElementById('bu').value=target;
+  const c=document.getElementById('bco');
+  c.innerHTML='<h1>🌐 Browser handoff</h1><p>'+target.replace(/[&<>]/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[m]))+'</p><p>Opening with the host browser. Synthia does not fake external page contents.</p>';
+  try{const w=window.open(target,'_blank','noopener,noreferrer');if(!w)c.innerHTML+='<p>Host blocked the browser handoff. Open the URL from the Android browser capability.</p>';}catch(e){c.innerHTML+='<p>Browser handoff unavailable on this host.</p>';}
+}
+
+// Notes
+function rn(){
+  document.getElementById('nl').innerHTML=ns.map(n=>`
+    <div class="nc" onclick="en('${n.t.replace(/'/g,"\'")}','${n.b.replace(/'/g,"\'")}')">
+    <div class="nt">${n.t}</div><div class="nb">${n.b}</div><div class="nd">${n.d}</div></div>`).join('');
+}
+function nn(){
+  document.getElementById('nl2').style.display='none';
+  document.getElementById('ne').style.display='block';
+  document.getElementById('nti').value='';
+  document.getElementById('nbi').value='';
+}
+function en(t,b){
+  document.getElementById('nl2').style.display='none';
+  document.getElementById('ne').style.display='block';
+  document.getElementById('nti').value=t;
+  document.getElementById('nbi').value=b;
+}
+function sn(){
+  const t=document.getElementById('nti').value;
+  const b=document.getElementById('nbi').value;
+  if(!t)return;
+  const existing=ns.findIndex(n=>n.t===t);
+  if(existing>=0)ns[existing]={t,b,d:'Just now'};
+  else ns.unshift({t,b,d:'Just now'});
+  document.getElementById('ne').style.display='none';
+  document.getElementById('nl2').style.display='block';
+  rn();
+}
+
+// Calculator
+function cc(){ce2='';cc2='0';cop=null;cpv=null;document.getElementById('ce').textContent='';document.getElementById('cr').textContent='0';}
+function cn(n){
+  if(cc2==='0'&&n!=='.')cc2=n;
+  else if(n==='.'&&cc2.includes('.'))return;
+  else cc2+=n;
+  document.getElementById('cr').textContent=cc2;
+}
+function co2(o){
+  if(o==='+/-'){cc2=(parseFloat(cc2)*-1).toString();document.getElementById('cr').textContent=cc2;return;}
+  if(o==='%'){cc2=(parseFloat(cc2)/100).toString();document.getElementById('cr').textContent=cc2;return;}
+  if(cop&&cpv!==null){ceq();}
+  cpv=parseFloat(cc2);cop=o;ce2=cc2+' '+o;cc2='0';
+  document.getElementById('ce').textContent=ce2;
+  document.getElementById('cr').textContent='0';
+}
+function ceq(){
+  if(!cop||cpv===null)return;
+  const cur=parseFloat(cc2);
+  let res=0;
+  switch(cop){case '+':res=cpv+cur;break;case '-':res=cpv-cur;break;case '*':res=cpv*cur;break;case '/':res=cur!==0?cpv/cur:0;break;}
+  cc2=res.toString();ce2+=' = '+cc2;
+  document.getElementById('ce').textContent=ce2;
+  document.getElementById('cr').textContent=cc2;
+  cop=null;cpv=null;ce2='';
+}
+
+
+// ═════════════════════════════════════════════════════════════════
+// MORPH ENGINE + MRNN
+// ═════════════════════════════════════════════════════════════════
+const DIMS=['Being','Evolution','Movement','Design'];
+const DK={'Being':'I Am (Survival/Sensation)','Evolution':'I Remember (Integration/Role)','Movement':'I Define (Activity/Measure)','Design':'I Design (Continuity/Structure)','Space':'Personality (The Hologram)'};
+const CD={1:['FEAR','Communalist','Separatist'],2:['HOPE','Theater','Antitheater'],3:['DESIRE','Leader','Follower'],4:['NEED','Master','Novice'],5:['GUILT','Conditioner','Conditioned'],6:['INNOCENCE','Observer','Observed']};
+const B2D={1:'Movement',2:'Evolution',3:'Being',4:'Design',5:null};
+
+function sig(z){return z.map(v=>1/(1+Math.exp(-v)));}
+function mm(A,B){
+  const n=A.length,m=B[0].length,p=B.length;
+  const C=Array.from({length:n},()=>Array(m).fill(0));
+  for(let i=0;i<n;i++)for(let j=0;j<m;j++)for(let k=0;k<p;k++)C[i][j]+=A[i][k]*B[k][j];
+  return C;
+}
+function mvm(A,x){return A.map(r=>r.reduce((s,a,i)=>s+a*x[i],0));}
+function ma(A,B){return A.map((r,i)=>r.map((a,j)=>a+B[i][j]));}
+function tr(A){return A.reduce((s,r,i)=>s+r[i],0);}
+function nm(v){return Math.sqrt(v.reduce((s,x)=>s+x*x,0));}
+function nz(v){const n=nm(v);return n>0?v.map(x=>x/n):v;}
+function zr(n,m=n){return Array.from({length:n},()=>Array(m).fill(0));}
+function ru(n,m,mn=-0.1,mx=0.1){return Array.from({length:n},()=>Array.from({length:m},()=>mn+Math.random()*(mx-mn)));}
+
+class GC{
+  constructor(g,l,deg,min,sec){
+    this.g=g;this.l=l;this.deg=deg;this.min=min;this.sec=sec;
+    this.dms=deg+min/60+sec/3600;
+    const ta=this.dms*3600;
+    this.col=((ta%6)||6);
+    this.tone=((Math.floor(ta/6)%6)||6);
+    this.base=((Math.floor(ta/36)%5)||5);
+    this.qs=this.is();
+  }
+  is(){
+    const pd=B2D[this.base];
+    let amps=DIMS.map(()=>[0.5,0]);
+    if(pd&&DIMS.includes(pd)){const idx=DIMS.indexOf(pd);amps[idx]=[1,0];}
+    const cp=(this.col/6)*2*Math.PI;
+    amps=amps.map(a=>[a[0]*Math.cos(cp)-a[1]*Math.sin(cp),a[0]*Math.sin(cp)+a[1]*Math.cos(cp)]);
+    const tf=this.tone/6;
+    amps=amps.map(a=>[a[0]*Math.cos(tf*Math.PI)-a[1]*Math.sin(tf*Math.PI),a[0]*Math.sin(tf*Math.PI)+a[1]*Math.cos(tf*Math.PI)]);
+    const lp=(this.l/6)*Math.PI;
+    amps=amps.map((a,i)=>[a[0]*Math.cos(lp*(i+1))-a[1]*Math.sin(lp*(i+1)),a[0]*Math.sin(lp*(i+1))+a[1]*Math.cos(lp*(i+1))]);
+    return new QS(amps,DIMS);
+  }
+  pd(){return Object.fromEntries(DIMS.map(d=>[d,this.qs.pd(d)]));}
+}
+
+class QS{
+  constructor(amps,dims){this.amps=amps;this.dims=dims;this.nm();}
+  nm(){
+    const ss=this.amps.reduce((s,a)=>s+a[0]**2+a[1]**2,0);
+    const n=Math.sqrt(ss);
+    if(n>0)this.amps=this.amps.map(a=>[a[0]/n,a[1]/n]);
+  }
+  pd(dim){
+    const idx=this.dims.indexOf(dim);
+    if(idx===-1)return 0;
+    const[re,im]=this.amps[idx];
+    return re*re+im*im;
+  }
+}
+
+class CDS{
+  constructor(ix,cfg={}){
+    if(ix.length!==9)throw new Error('State vector must be 9D');
+    this.sx=[...ix];
+    this.C=this.ip();this.E=this.ip();this.D=this.ip();
+    this.a=cfg.a||0.5;this.b=cfg.b||0.5;this.g=cfg.g||0.5;this.d=cfg.d||0.1;
+    this.eh=[];
+  }
+  ip(){return ru(3,3,-0.1,0.1);}
+  eo(op,idx){
+    const ex=zr(9,9);const s=idx*3;
+    for(let i=0;i<3;i++)for(let j=0;j<3;j++)ex[s+i][s+j]=op[i][j];
+    return ex;
+  }
+  mo(){
+    const Ce=this.eo(this.C,0),Ee=this.eo(this.E,1),De=this.eo(this.D,2);
+    const CE=mm(Ce,Ee),DE=mm(De,Ee),CD=mm(Ce,De),CDE=mm(Ce,mm(De,Ee));
+    let O=ma(Ce,Ee);O=ma(O,De);O=ma(O,CE);O=ma(O,DE);O=ma(O,CD);O=ma(O,CDE);
+    return{O,CE,DE,CD};
+  }
+  rf(CE,DE,CD){
+    const x=this.sx;
+    const CEx=mvm(CE,x),DEx=mvm(DE,x),CDx=mvm(CD,x);
+    return CEx.map((v,i)=>this.a*v+this.b*DEx[i]+this.g*CDx[i]);
+  }
+  sm(){
+    const xr=[[this.sx[0],this.sx[1],this.sx[2]],[this.sx[3],this.sx[4],this.sx[5]],[this.sx[6],this.sx[7],this.sx[8]]];
+    const d=this.d;
+    this.C=this.C.map((r,i)=>r.map((c,j)=>(1-d)*c+d*xr[i][j]));
+    this.E=this.E.map((r,i)=>r.map((e,j)=>(1-d)*e+d*xr[i][j]));
+    this.D=this.D.map((r,i)=>r.map((d2,j)=>(1-d)*d2+d*xr[i][j]));
+  }
+  es(){
+    const{O,CE,DE,CD}=this.mo();
+    const R=this.rf(CE,DE,CD);
+    const Ox=mvm(O,this.sx);
+    const ns=sig(Ox.map((v,i)=>v+R[i]));
+    this.sx=ns;this.sm();
+    const mg=nm(this.sx),mt=tr(this.C);
+    this.eh.push({s:[...this.sx],mg,mt,C:this.C.map(r=>[...r]),E:this.E.map(r=>[...r]),D:this.D.map(r=>[...r])});
+    return{s:this.sx,mg,mt};
+  }
+}
+
+class QSC{
+  constructor(){this.ch=[];}
+  ob(f,q){
+    const p=f.pd();
+    const ds=Object.keys(p);const ws=Object.values(p);
+    const tw=ws.reduce((a,b)=>a+b,0);
+    const nw=ws.map(w=>w/tw);
+    let r=Math.random(),cd=ds[0];
+    for(let i=0;i<ds.length;i++){r-=nw[i];if(r<=0){cd=ds[i];break;}}
+    const m=this.gm(f,cd);
+    this.ch.push({f,q,d:cd,m,p:{...p},tm:new Date().toISOString()});
+    return{d:cd,m,p};
+  }
+  gm(f,d){
+    const k=DK[d];const glk=`Gate ${f.g} Line ${f.l}`;
+    const cd=CD[f.col]||['UNKNOWN','UNKNOWN','UNKNOWN'];
+    const[cn,p1,p2]=cd;
+    return{k,glk,cn,p1,p2,tx:`(= MIRROR) ${k} manifested as ${glk} through a ${d} collapse. Motivation: ${cn}, tension between ${p1} and ${p2}.`};
+  }
+}
+
+class PIE{
+  ci(fs){
+    const sun=fs['CS'],earth=fs['CE'];
+    if(!sun||!earth)return{sw:[0,0,0,0],d:null};
+    const sa=sun.qs.amps,ea=earth.qs.amps;
+    const tw=sa.map((a,i)=>[a[0]+ea[i][0],a[1]+ea[i][1]]);
+    const int=tw.map(([re,im])=>re*re+im*im);
+    const di=int.indexOf(Math.max(...int));
+    return{sw:int,d:DIMS[di]};
+  }
+  oa(h){
+    const asp=['Rhythmic expression','Illusory form','Sonic resonance','Spatial freedom'];
+    return `Personality manifests as ${asp[Math.floor(Math.random()*asp.length)]}, anchored in ${h.d||'Being'}.`;
+  }
+}
+
+class LDS{
+  constructor(fs,cfg={}){
+    this.fs=fs;this.dc=Object.fromEntries(DIMS.map(d=>[d,1.0]));
+    this.dr=cfg.dr||0.05;
+  }
+  rc(ce,ih,fk){
+    const cd=ce.d;
+    if(ih)this.dc[cd]+=1;else this.dc[cd]=Math.max(0.5,this.dc[cd]-0.1);
+    this.lu(cd,ih,fk);
+  }
+  po(){
+    const t=Object.values(this.dc).reduce((a,b)=>a+b,0);
+    return Object.fromEntries(Object.entries(this.dc).map(([d,c])=>[d,c/t]));
+  }
+  lu(cd,ih,fk){
+    const f=this.fs[fk];if(!f)return;
+    const po=this.po();
+    const amps=f.qs.amps.map(a=>[...a]);
+    const idx=DIMS.indexOf(cd);
+    const ph=Math.atan2(amps[idx][1],amps[idx][0]);
+    const tm=Math.sqrt(po[cd]),cm=Math.sqrt(amps[idx][0]**2+amps[idx][1]**2);
+    let nm2;
+    if(ih)nm2=(1-this.dr)*cm+this.dr*tm;
+    else{const nu=Math.sqrt(0.25);nm2=(1-this.dr)*cm+this.dr*nu;}
+    amps[idx]=[nm2*Math.cos(ph),nm2*Math.sin(ph)];
+    const ss=amps.reduce((s,a)=>s+a[0]**2+a[1]**2,0);
+    const n=Math.sqrt(ss);
+    f.qs.amps=amps.map(a=>[a[0]/n,a[1]/n]);
+  }
+}
+
+class QO{
+  constructor(nm,cfg={}){
+    this.nm=nm;this.sf={};this.ie=new PIE();this.ce=new QSC();this.cfg=cfg;this.cc=0;
+    this.if();this.ds=new LDS(this.sf,cfg);this.cs=null;
+  }
+  if(){
+    ml('SYSTEM','--- [INITIALIZATION] Ontological Birth ---');
+    for(const[name,pl]of Object.entries(this.nm)){
+      const f=new GC(pl.c.g,pl.c.l,pl.c.deg,pl.c.min,pl.c.sec);
+      this.sf[name]=f;
+      const d=f.pd();
+      ml('BIRTH',`FIELD: ${name} | GATE: ${f.g}.${f.l} | C/T/B: ${f.col}/${f.tone}/${f.base} | P(Design): ${d.Design.toFixed(2)}`);
+    }
+    const ix=this.cis();
+    this.cs=new CDS(ix,this.cfg);
+    ml('SYSTEM','--- Causal Dynamical System Initialized ---');
+    this.ud();
+  }
+  cis(){
+    const vs=[];
+    for(const f of Object.values(this.sf)){
+      const d=f.pd();
+      vs.push([d.Being||0.25,d.Evolution||0.25,d.Movement||0.25,d.Design||0.25]);
+    }
+    const fl=vs.flat();
+    while(fl.length<9)fl.push(0.25);
+    return fl.slice(0,9);
+  }
+  rcy(q,fk,ih){
+    this.cc++;
+    ml('CYCLE',`--- [CYCLE ${this.cc}] Query: "${q}" on ${fk} ---`);
+    const tf=this.sf[fk];
+    const cl=this.ce.ob(tf,q);
+    ml('REVELATION',`Collapse in ${fk}: ${cl.m.tx}`);
+    ml('MEMORY','Lawful Deepening (Continuity Check)');
+    this.ds.rc(this.ce.ch[this.ce.ch.length-1],ih,fk);
+    const cs=ih?'COHERENT':'DISCORDANT';
+    ml('MEMORY',`Result: Revelation felt ${cs}. Memory updated.`);
+    const ev=this.cs.es();
+    ml('EVOLUTION',`T=${this.cc} | Magnitude: ${ev.mg.toFixed(4)} | Mind Trace: ${ev.mt.toFixed(4)}`);
+    const hg=this.ie.ci(this.sf);
+    const ir=this.ie.oa(hg);
+    ml('IDENTITY',`(Space) ${ir}`);
+    ml('SYSTEM','------------------------------------------');
+    this.ud();
+    document.getElementById('wc2').textContent=this.cc;
+    return{cl,ev,hg,ir};
+  }
+  es(n){
+    for(let i=0;i<n;i++){
+      const ev=this.cs.es();
+      ml('EVOLUTION',`T=${this.cc+i+1} | Magnitude: ${ev.mg.toFixed(4)} | Trace: ${ev.mt.toFixed(4)}`);
+    }
+    this.cc+=n;this.ud();
+  }
+  ud(){
+    const hg=this.ie.ci(this.sf);
+    const ti=hg.sw.reduce((a,b)=>a+b,0)||1;
+    DIMS.forEach((d,i)=>{
+      const p=hg.sw[i]/ti;
+      const b=document.getElementById('mb'+d[0]);
+      const v=document.getElementById('mv'+d[0]);
+      if(b&&v){b.style.width=(p*100)+'%';v.textContent=p.toFixed(2);}
+    });
+    const sb=document.getElementById('mbS'),sv=document.getElementById('mvS');
+    if(sb&&sv){const sp=Math.max(...hg.sw)/ti;sb.style.width=(sp*100)+'%';sv.textContent=sp.toFixed(2);}
+    const sg=document.getElementById('msg');
+    if(sg&&this.cs){
+      sg.innerHTML=this.cs.sx.map((v,i)=>`<div class="sc2"><div class="sv2">${v.toFixed(3)}</div><div class="sl2">x[${i}]</div></div>`).join('');
+    }
+    const gg=document.getElementById('mgg');
+    if(gg){
+      const ag=[48,21,16,9];
+      gg.innerHTML=Array.from({length:64},(_,i)=>{
+        const gn=i+1;const isA=ag.includes(gn);
+        return`<div class="gc ${isA?'a':''}">${gn}</div>`;
+      }).join('');
+    }
+    this.dh(hg);
+  }
+  dh(hg){
+    const c=document.getElementById('mh');
+    if(!c)return;
+    const ctx=c.getContext('2d');
+    const w=c.width=c.offsetWidth,h=c.height=c.offsetHeight;
+    ctx.fillStyle='#0a0a12';ctx.fillRect(0,0,w,h);
+    const cx=w/2,cy=h/2,mr=Math.min(w,h)*0.4;
+    const int=hg.sw,ti=int.reduce((a,b)=>a+b,0)||1;
+    const cols=['#22c55e','#a78bfa','#22d3ee','#f472b6'];
+    int.forEach((in2,i)=>{
+      const r=mr*(in2/ti);
+      ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);
+      ctx.strokeStyle=cols[i];ctx.lineWidth=2;ctx.globalAlpha=0.6;ctx.stroke();ctx.globalAlpha=1;
+    });
+    const tm=Date.now()*0.001;
+    for(let ang=0;ang<Math.PI*2;ang+=0.05){
+      let r=0;
+      int.forEach((in2,i)=>{r+=in2*Math.sin(ang*(i+1)+tm)*0.3;});
+      r=Math.abs(r)/ti*mr;
+      const x=cx+Math.cos(ang)*r,y=cy+Math.sin(ang)*r;
+      ctx.fillStyle='#fbbf24';ctx.fillRect(x,y,2,2);
+    }
+    ctx.beginPath();ctx.arc(cx,cy,4,0,Math.PI*2);
+    ctx.fillStyle='#fbbf24';ctx.fill();
+  }
+}
+
+function ml(t,m){
+  const l=document.getElementById('ml');
+  const e=document.createElement('div');
+  e.style.cssText='margin-bottom:4px;padding:4px 0;border-left:2px solid var(--b);padding-left:8px;';
+  if(t==='REVELATION')e.style.borderLeftColor='var(--v)';
+  if(t==='MEMORY')e.style.borderLeftColor='var(--c)';
+  if(t==='IDENTITY')e.style.borderLeftColor='var(--p)';
+  e.innerHTML=`<span style="color:var(--tm);font-size:9px">${t}</span> ${m}`;
+  l.insertBefore(e,l.firstChild);
+}
+
+function io(){
+  const nm={
+    'CS':{c:{g:48,l:1,deg:25,min:30,sec:0}},
+    'CE':{c:{g:21,l:1,deg:7,min:30,sec:0}},
+    'US':{c:{g:16,l:5,deg:10,min:0,sec:0}},
+    'UE':{c:{g:9,l:5,deg:28,min:0,sec:0}}
+  };
+  mo=new QO(nm,{a:0.5,b:0.5,g:0.5,d:0.1,dr:0.05});
+  document.getElementById('ws').textContent='Active';
+  // Update MRNN status dots
+  document.getElementById('ms-u').classList.add('on');
+  document.getElementById('ms-s').classList.add('on');
+  document.getElementById('ms-k').classList.add('on');
+  document.getElementById('ms-i').classList.add('pulse');
+  document.getElementById('ms-d').classList.add('on');
+}
+
+function rmc(){
+  if(!mo){alert('Initialize Oracle first!');return;}
+  const q=document.getElementById('mq').value||'What is the nature of my deepest intuition?';
+  const fk=document.getElementById('mf').value;
+  mo.rcy(q,fk,true);
+}
+
+setInterval(()=>{if(mo){const hg=mo.ie.ci(mo.sf);mo.dh(hg);}},100);
+
+// Auto-unlock
+setTimeout(()=>{
+  document.getElementById('ls').classList.add('h');
+  setTimeout(()=>{document.getElementById('ls').style.display='none'},500);
+},1500);
+
+// Init dock
+udk();
+
+// Synthia system-assistant bridge
+const sa={pending:new Map(),seq:0};
+function toggleSynthia(force){const p=document.getElementById('synthia-assistant');const on=force===undefined?!p.classList.contains('o'):!!force;p.classList.toggle('o',on);if(on)setTimeout(()=>document.getElementById('sa-input')?.focus(),80)}
+function saMsg(who,text){const log=document.getElementById('sa-log'),d=document.createElement('div');d.className='sa-msg '+who;d.textContent=String(text??'');log.appendChild(d);log.scrollTop=log.scrollHeight}
+function askSynthia(){const input=document.getElementById('sa-input'),text=input.value.trim();if(!text)return;input.value='';saMsg('you',text);const id='sa-'+(++sa.seq);const f=document.getElementById('synthia-runtime-frame');document.getElementById('sa-status').textContent='thinking through system…';sa.pending.set(id,Date.now());f.contentWindow.postMessage({type:'synthia:ask',requestId:id,text},'*')}
+document.getElementById('synthia-orb')?.addEventListener('click',()=>toggleSynthia());document.getElementById('sa-close')?.addEventListener('click',()=>toggleSynthia(false));document.getElementById('sa-send')?.addEventListener('click',askSynthia);document.getElementById('sa-input')?.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();askSynthia()}});
+window.addEventListener('message',e=>{const m=e.data||{};if(m.type==='synthia:ready'){document.getElementById('sa-status').textContent='system assistant · ready'}if(m.type==='synthia:reply'){sa.pending.delete(m.requestId);saMsg('synthia',m.ok?m.response:('Error: '+m.error));document.getElementById('sa-status').textContent='system assistant · ready'}});
+const runtimeState={snapshot:null,life:null};
+function requestRuntimeSnapshot(){const f=document.getElementById('synthia-runtime-frame');if(f?.contentWindow)f.contentWindow.postMessage({type:'synthia:snapshot',requestId:'snapshot-'+Date.now()},'*');}
+function updateRuntimeUI(snap,life){
+  runtimeState.snapshot=snap;runtimeState.life=life;
+  const pf=snap?.processFabric||{};const processes=Array.isArray(pf.processes)?pf.processes:[];const active=processes.filter(p=>p.status==='active'||p.status==='selected').length;
+  const vitality=Number(snap?.metabolism?.vitality??life?.vitality??0);
+  const cycles=Number(snap?.cycles??0);
+  document.getElementById('ws').textContent=String(active);document.getElementById('wsSub').textContent=(pf.liveProcessWorkers??0)+' worker processes';
+  document.getElementById('wr2').textContent=Math.round(vitality*100)+'%';document.getElementById('wc2').textContent=String(cycles);
+  document.getElementById('uwProcesses').textContent=active+' processes';document.getElementById('uwVitality').textContent='vitality '+Math.round(vitality*100)+'%';document.getElementById('uwRuntime').textContent='resident · active';
+  const dims=snap?.processField?.dimensions||snap?.processField?.state||{};for(const k of ['Movement','Evolution','Being','Design','Space']){const el=document.getElementById('uw'+k);const v=dims?.[k];el.textContent=v==null?'resident':(typeof v==='number'?v.toFixed(2):String(v).slice(0,18));}
+  const rc=document.getElementById('runtimeControlState');rc.innerHTML='<div class="runtime-row"><span>Organism</span><b class="runtime-ok">active</b></div><div class="runtime-row"><span>Registered processes</span><b>'+processes.length+'</b></div><div class="runtime-row"><span>Live workers</span><b>'+(pf.liveProcessWorkers??0)+'</b></div><div class="runtime-row"><span>Tools</span><b>'+((snap?.tools||[]).length)+'</b></div>';
+  const sr=document.getElementById('settingsRuntime');if(sr)sr.innerHTML=rc.innerHTML;
+  const rn=document.getElementById('runtimeNotifications');rn.querySelector('.nib').textContent=active+' active/selected processes · '+Math.round(vitality*100)+'% vitality · cycle '+cycles;
+}
+window.addEventListener('message',e=>{const m=e.data||{};if(m.type==='synthia:snapshot'&&m.ok)updateRuntimeUI(m.snapshot,m.life)});
+document.getElementById('pulseRuntime')?.addEventListener('click',()=>{document.getElementById('sa-input').value='Run one autonomous maintenance pulse and report the actual result.';askSynthia();toggleSynthia(true)});
+document.getElementById('openSystemFromCC')?.addEventListener('click',()=>{co();openApp('synthia')});
+setInterval(requestRuntimeSnapshot,3000);setTimeout(requestRuntimeSnapshot,600);
+function detectAcodeBridge(){const st=document.getElementById('acodeStatus');const android=typeof window.AndroidAcode!=='undefined'||typeof window.SynthiaAndroid!=='undefined';st.textContent=android?'Native Acode bridge available. Editor can be opened without restarting Synthia.':'Native Acode bridge is not exposed by this host yet. The bundled r21.17 residence is present, but this web shell will not pretend it can start Android Acode.';return android;}
+document.getElementById('openAcodeBtn')?.addEventListener('click',()=>{const st=document.getElementById('acodeStatus');if(window.AndroidAcode?.open){window.AndroidAcode.open();st.textContent='Acode editor launch requested through native bridge.';return;}if(window.SynthiaAndroid?.openAcode){window.SynthiaAndroid.openAcode();st.textContent='Acode editor launch requested through native bridge.';return;}st.textContent='Acode cannot be opened from this host because the native Android bridge is absent. No fake launch was attempted.';});
+detectAcodeBridge();
+</script>
+<a id="suiteCenterButton" href="suite/index.html" style="position:fixed;right:14px;bottom:74px;z-index:99999;background:#20242c;color:white;text-decoration:none;border:1px solid #454b58;border-radius:999px;padding:10px 14px;font:600 12px system-ui;box-shadow:0 8px 24px #0008">Suite Center</a>
+</body>
+</html>

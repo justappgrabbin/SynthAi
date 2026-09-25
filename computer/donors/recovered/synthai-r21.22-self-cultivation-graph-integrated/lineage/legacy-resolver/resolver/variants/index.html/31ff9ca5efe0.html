@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Synthia OS — Living Coordinate Space</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background: #0a0a0f;
+  color: #e0e0ff;
+  font-family: 'Courier New', monospace;
+  overflow: hidden;
+  width: 100vw;
+  height: 100vh;
+}
+#canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; }
+#ui {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  z-index: 10;
+  background: rgba(10, 10, 15, 0.9);
+  border: 1px solid #333;
+  border-radius: 8px;
+  padding: 16px;
+  max-width: 400px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+#ui h1 { font-size: 14px; color: #00ff88; margin-bottom: 12px; letter-spacing: 2px; }
+#ui h2 { font-size: 11px; color: #666; margin-top: 16px; margin-bottom: 8px; text-transform: uppercase; }
+#ui .stat { font-size: 12px; margin: 4px 0; display: flex; justify-content: space-between; }
+#ui .stat .label { color: #888; }
+#ui .stat .value { color: #00ff88; font-weight: bold; }
+#ui .center-tag {
+  display: inline-block;
+  padding: 2px 8px;
+  margin: 2px;
+  border-radius: 4px;
+  font-size: 10px;
+  background: #1a1a2e;
+  border: 1px solid #333;
+}
+#ui .center-tag.active { background: #00ff88; color: #0a0a0f; }
+#controls {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  z-index: 10;
+  display: flex;
+  gap: 8px;
+}
+#controls button {
+  background: #1a1a2e;
+  border: 1px solid #333;
+  color: #e0e0ff;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 11px;
+  transition: all 0.2s;
+}
+#controls button:hover { background: #2a2a3e; border-color: #00ff88; }
+#controls button.active { background: #00ff88; color: #0a0a0f; }
+#input-panel {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 10;
+  background: rgba(10, 10, 15, 0.9);
+  border: 1px solid #333;
+  border-radius: 8px;
+  padding: 12px;
+  width: 300px;
+}
+#input-panel input {
+  width: 100%;
+  background: #1a1a2e;
+  border: 1px solid #333;
+  color: #e0e0ff;
+  padding: 8px;
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 12px;
+}
+#input-panel input:focus { outline: none; border-color: #00ff88; }
+#output-log {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 10;
+  background: rgba(10, 10, 15, 0.9);
+  border: 1px solid #333;
+  border-radius: 8px;
+  padding: 12px;
+  width: 350px;
+  max-height: 40vh;
+  overflow-y: auto;
+  font-size: 11px;
+}
+#output-log .log-entry { margin: 4px 0; padding: 4px; border-left: 2px solid #333; }
+#output-log .log-entry.system { border-color: #00ff88; }
+#output-log .log-entry.error { border-color: #ff4444; }
+#output-log .log-entry.create { border-color: #ff8800; }
+</style>
+</head>
+<body>
+
+<canvas id="canvas"></canvas>
+
+<div id="ui">
+  <h1>SYNTHIA OS</h1>
+
+  <h2>Substrate</h2>
+  <div class="stat"><span class="label">Total Nodes:</span><span class="value" id="total-nodes">—</span></div>
+  <div class="stat"><span class="label">Active Nodes:</span><span class="value" id="active-nodes">—</span></div>
+  <div class="stat"><span class="label">Channels:</span><span class="value" id="channels">—</span></div>
+
+  <h2>Defined Centers</h2>
+  <div id="centers"></div>
+
+  <h2>Resonance</h2>
+  <div class="stat"><span class="label">Current:</span><span class="value" id="resonance">—</span></div>
+  <div class="stat"><span class="label">Energy:</span><span class="value" id="energy">—</span></div>
+
+  <h2>Active Gates</h2>
+  <div id="active-gates"></div>
+
+  <h2>Latest Creation</h2>
+  <div id="latest-creation" style="font-size: 10px; color: #888; line-height: 1.4;"></div>
+</div>
+
+<div id="controls">
+  <button id="btn-resolve" onclick="sendResolve()">Resolve</button>
+  <button id="btn-transform" onclick="sendTransform()">Transform</button>
+  <button id="btn-create" onclick="sendCreate()">Create</button>
+  <button id="btn-teach" onclick="sendTeach()">Teach</button>
+  <button id="btn-infer" onclick="sendInfer()">Infer</button>
+  <button id="btn-substrate" onclick="requestSubstrate()">Substrate</button>
+</div>
+
+<div id="input-panel">
+  <input type="text" id="user-input" placeholder="Enter text to resolve..." 
+         onkeydown="if(event.key==='Enter')sendResolve()">
+</div>
+
+<div id="output-log"></div>
+
+<script>
+// ============================================================================
+// WEBSOCKET CONNECTION
+// ============================================================================
+
+const ws = new WebSocket(`ws://${location.host}`);
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+
+let substrateState = {
+  totalNodes: 0,
+  activeNodes: 0,
+  channels: 0,
+  centers: [],
+  activeGates: [],
+  resonance: 0,
+  energy: 0,
+};
+
+let nodes = []; // Visual representation of active nodes
+let edges = []; // Visual representation of edges
+let particles = []; // Flow particles
+
+ws.onopen = () => {
+  log('Connected to Synthia substrate', 'system');
+  requestSubstrate();
+};
+
+ws.onmessage = (event) => {
+  const msg = JSON.parse(event.data);
+
+  switch (msg.type) {
+    case 'substrate_init':
+      substrateState.totalNodes = msg.totalNodes;
+      substrateState.channels = msg.channels;
+      updateUI();
+      break;
+
+    case 'substrate_state':
+      substrateState.activeNodes = msg.activeNodes;
+      updateUI();
+      break;
+
+    case 'mesh_event':
+      handleMeshEvent(msg.channel, msg.source, msg.payload);
+      break;
+
+    case 'resolved':
+      log(`Resolved: Gate ${msg.state.coordinates.gate}, Line ${msg.state.coordinates.line}`, 'system');
+      log(`Centers: ${msg.centers.join(', ')}`, 'system');
+      substrateState.centers = msg.centers;
+      substrateState.resonance = msg.resonance;
+      addNode(msg.state.coordinates.gate, msg.state.coordinates.line, msg.resonance);
+      updateUI();
+      break;
+
+    case 'created':
+      log(`Created: ${msg.result.creations.length} analogies`, 'create');
+      log(`Energy: ${msg.result.energy.toFixed(3)}`, 'create');
+      substrateState.energy = msg.result.energy;
+      if (msg.result.creations[0]) {
+        document.getElementById('latest-creation').textContent = msg.result.creations[0].surface;
+      }
+      updateUI();
+      break;
+
+    case 'test_proposed':
+      log(`Test proposed: ${msg.testCase.id}`, 'system');
+      break;
+
+    case 'inferred':
+      log(`Inferred: ${msg.result.newRules.length} rules, depth: ${msg.result.recursiveDepth}`, 'system');
+      break;
+
+    case 'error':
+      log(`Error: ${msg.message}`, 'error');
+      break;
+  }
+};
+
+ws.onclose = () => {
+  log('Disconnected from substrate', 'error');
+};
+
+// ============================================================================
+// UI UPDATES
+// ============================================================================
+
+function updateUI() {
+  document.getElementById('total-nodes').textContent = substrateState.totalNodes.toLocaleString();
+  document.getElementById('active-nodes').textContent = substrateState.activeNodes.toLocaleString();
+  document.getElementById('channels').textContent = substrateState.channels;
+  document.getElementById('resonance').textContent = substrateState.resonance.toFixed(3);
+  document.getElementById('energy').textContent = substrateState.energy.toFixed(3);
+
+  const centersDiv = document.getElementById('centers');
+  centersDiv.innerHTML = substrateState.centers.map(c => 
+    `<span class="center-tag active">${c}</span>`
+  ).join('');
+
+  const gatesDiv = document.getElementById('active-gates');
+  gatesDiv.innerHTML = substrateState.activeGates.map(g => 
+    `<span class="center-tag">Gate ${g}</span>`
+  ).join('');
+}
+
+function log(message, type = 'system') {
+  const logDiv = document.getElementById('output-log');
+  const entry = document.createElement('div');
+  entry.className = `log-entry ${type}`;
+  entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+  logDiv.appendChild(entry);
+  logDiv.scrollTop = logDiv.scrollHeight;
+}
+
+// ============================================================================
+// WEBSOCKET COMMANDS
+// ============================================================================
+
+function sendResolve() {
+  const text = document.getElementById('user-input').value;
+  if (!text) return;
+  ws.send(JSON.stringify({ type: 'resolve', text, domain: 'language' }));
+  log(`Resolving: "${text}"`, 'system');
+}
+
+function sendTransform() {
+  ws.send(JSON.stringify({ type: 'transform', domain: 'language' }));
+  log('Requesting transform...', 'system');
+}
+
+function sendCreate() {
+  ws.send(JSON.stringify({ type: 'create', domain: 'language', depth: 1 }));
+  log('Requesting creation...', 'create');
+}
+
+function sendTeach() {
+  const text = document.getElementById('user-input').value;
+  ws.send(JSON.stringify({ 
+    type: 'teach', 
+    who: 'user', 
+    what: text, 
+    domain: 'language',
+    why: 'learning_style'
+  }));
+  log(`Teaching: "${text}"`, 'system');
+}
+
+function sendInfer() {
+  ws.send(JSON.stringify({ type: 'infer', force: true }));
+  log('Requesting inference...', 'system');
+}
+
+function requestSubstrate() {
+  ws.send(JSON.stringify({ type: 'substrate_state' }));
+  log('Requesting substrate state...', 'system');
+}
+
+function handleMeshEvent(channel, source, payload) {
+  if (channel === 'system.centers' && payload) {
+    substrateState.centers = payload.centers || [];
+    substrateState.activeGates = payload.gates || [];
+    updateUI();
+  }
+}
+
+// ============================================================================
+// CANVAS VISUALIZATION
+// ============================================================================
+
+function resizeCanvas() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
+
+function addNode(gate, line, resonance) {
+  const angle = (gate / 64) * Math.PI * 2;
+  const radius = 150 + (line * 30);
+  nodes.push({
+    x: canvas.width / 2 + Math.cos(angle) * radius,
+    y: canvas.height / 2 + Math.sin(angle) * radius,
+    gate,
+    line,
+    resonance,
+    life: 1.0,
+    color: resonance > 0.7 ? '#00ff88' : resonance > 0.4 ? '#ff8800' : '#4444ff',
+  });
+}
+
+function updateNodes() {
+  for (let i = nodes.length - 1; i >= 0; i--) {
+    nodes[i].life -= 0.005;
+    if (nodes[i].life <= 0) nodes.splice(i, 1);
+  }
+}
+
+function drawGrid() {
+  ctx.strokeStyle = 'rgba(255, 255, 255, 0.03)';
+  ctx.lineWidth = 1;
+  const gridSize = 50;
+  for (let x = 0; x < canvas.width; x += gridSize) {
+    ctx.beginPath();
+    ctx.moveTo(x, 0);
+    ctx.lineTo(x, canvas.height);
+    ctx.stroke();
+  }
+  for (let y = 0; y < canvas.height; y += gridSize) {
+    ctx.beginPath();
+    ctx.moveTo(0, y);
+    ctx.lineTo(canvas.width, y);
+    ctx.stroke();
+  }
+}
+
+function drawNodes() {
+  for (const node of nodes) {
+    const alpha = node.life * 0.8;
+    ctx.fillStyle = node.color;
+    ctx.globalAlpha = alpha;
+
+    // Draw node
+    ctx.beginPath();
+    ctx.arc(node.x, node.y, 4 + node.resonance * 6, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Draw glow
+    ctx.shadowColor = node.color;
+    ctx.shadowBlur = 20 * node.life;
+    ctx.beginPath();
+    ctx.arc(node.x, node.y, 8 + node.resonance * 10, 0, Math.PI * 2);
+    ctx.strokeStyle = node.color;
+    ctx.lineWidth = 1;
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+
+    // Draw label
+    ctx.fillStyle = '#fff';
+    ctx.font = '10px monospace';
+    ctx.fillText(`G${node.gate}`, node.x + 12, node.y - 4);
+  }
+  ctx.globalAlpha = 1;
+}
+
+function drawConnections() {
+  ctx.strokeStyle = 'rgba(0, 255, 136, 0.1)';
+  ctx.lineWidth = 1;
+  for (let i = 0; i < nodes.length; i++) {
+    for (let j = i + 1; j < nodes.length; j++) {
+      const dx = nodes[i].x - nodes[j].x;
+      const dy = nodes[i].y - nodes[j].y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist < 200) {
+        ctx.beginPath();
+        ctx.moveTo(nodes[i].x, nodes[i].y);
+        ctx.lineTo(nodes[j].x, nodes[j].y);
+        ctx.stroke();
+      }
+    }
+  }
+}
+
+function drawCenter() {
+  const cx = canvas.width / 2;
+  const cy = canvas.height / 2;
+
+  // Draw center ring
+  ctx.strokeStyle = 'rgba(0, 255, 136, 0.2)';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.arc(cx, cy, 100, 0, Math.PI * 2);
+  ctx.stroke();
+
+  // Draw center glow
+  ctx.shadowColor = '#00ff88';
+  ctx.shadowBlur = 30;
+  ctx.fillStyle = 'rgba(0, 255, 136, 0.1)';
+  ctx.beginPath();
+  ctx.arc(cx, cy, 80, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.shadowBlur = 0;
+
+  // Draw center text
+  ctx.fillStyle = '#00ff88';
+  ctx.font = '12px monospace';
+  ctx.textAlign = 'center';
+  ctx.fillText('SYNTHIA', cx, cy - 5);
+  ctx.fillStyle = '#666';
+  ctx.font = '10px monospace';
+  ctx.fillText(`${substrateState.activeNodes} active`, cx, cy + 10);
+  ctx.textAlign = 'left';
+}
+
+function animate() {
+  ctx.fillStyle = 'rgba(10, 10, 15, 0.1)';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  drawGrid();
+  drawConnections();
+  drawCenter();
+  drawNodes();
+  updateNodes();
+
+  requestAnimationFrame(animate);
+}
+
+animate();
+
+// ============================================================================
+// INITIALIZATION
+// ============================================================================
+
+log('Synthia OS Visualization initialized', 'system');
+log('Waiting for substrate connection...', 'system');
+</script>
+
+</body>
+</html>

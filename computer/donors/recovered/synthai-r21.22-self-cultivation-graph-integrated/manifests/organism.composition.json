@@ -1,0 +1,34 @@
+{
+  "version": 2,
+  "organism": "synthia",
+  "statement": "Synthia is instantiated by composition of independently addressable pieces; no single archive is the organism.",
+  "boot": [
+    "seed.constitution",
+    "memory.local",
+    "process.fabric",
+    "builder.verify",
+    "builder.autocoder",
+    "builder.mutation",
+    "builder.build",
+    "organism.unit",
+    "field.pathways",
+    "field.resonance",
+    "world.semantic",
+    "movement.knowledge",
+    "memory.persistence-triad",
+    "autopoiesis.resonant-runtime"
+  ],
+  "optional_residences": [
+    "residence.acode"
+  ],
+  "distribution_rule": "pieces may ship independently and are mounted by manifest/address/dependency",
+  "development_cycle": [
+    "discovery",
+    "assessment",
+    "placement",
+    "activation",
+    "optimization",
+    "sustain"
+  ],
+  "sentence_system_rule": "Movement knowledge performs state recognition/reference only; generative language is a separate downstream capability."
+}

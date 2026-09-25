@@ -1,0 +1,9 @@
+async function digest(text){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(text));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')}
+const TOOLS=['autoling','control-of-grammar','diseminer','paraphraser','autonovel','symbolic-validator'];
+export class LearningMesh{
+ constructor({unit=null}={}){this.unit=unit;this.learnings=new Map();this.edges=new Map();this.growth=new Map(TOOLS.map(id=>[id,{toolId:id,observations:0,acceptedLearnings:0,receivedLearnings:0,version:1,lastLearnedAt:null}]));}
+ async publish({toolId='autoling',kind='relation',value,confidence,evidence=[]}){const base={toolId,kind,value:String(value),confidence:Number(confidence||0),evidence};const id=`mesh:${await digest(JSON.stringify(base))}`;if(this.learnings.has(id))return this.learnings.get(id);const learnedAt=Date.now(),stored={...base,id,learnedAt,revision:1};this.learnings.set(id,stored);const owner=this.growth.get(toolId)||this.growth.get('autoling');owner.observations++;if(stored.confidence>=.5)owner.acceptedLearnings++;owner.version++;owner.lastLearnedAt=learnedAt;if(stored.confidence>=.5){for(const g of this.growth.values()){g.receivedLearnings++;g.version++;g.lastLearnedAt=learnedAt;}this.unit?.memory?.remember('facts',{kind:'mesh-learning',learning:stored,evidence:{source:'validated-learning-mesh',at:learnedAt}});}return stored;}
+ async connect(from,to,relation,evidenceIds=[]){const id=`edge:${await digest(`${from}\0${relation}\0${to}`)}`;let e=this.edges.get(id);if(e){e.traversals++;e.weight=Math.min(1,e.weight+.02);e.evidenceIds=[...new Set([...e.evidenceIds,...evidenceIds])];}else{e={id,from,to,relation,weight:.5,traversals:1,evidenceIds:[...new Set(evidenceIds)]};this.edges.set(id,e);}return structuredClone(e);}
+ snapshot(){return {learnings:[...this.learnings.values()],edges:[...this.edges.values()],tools:[...this.growth.values()]};}
+}
+export default LearningMesh;

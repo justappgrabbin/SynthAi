@@ -1,0 +1,5 @@
+const stable=v=>JSON.stringify(v,(_,x)=>x&&typeof x==='object'&&!Array.isArray(x)?Object.fromEntries(Object.entries(x).sort(([a],[b])=>a.localeCompare(b))):x);
+export class BehaviorLoopDetector{
+ constructor({repeatLimit=3,patternLimit=3,window=24}={}){this.repeatLimit=repeatLimit;this.patternLimit=patternLimit;this.window=window;this.events=[];}
+ observe(action){const key=stable(action);this.events.push({key,action,at:Date.now()});if(this.events.length>this.window)this.events.shift();const tail=this.events.map(x=>x.key);let repeated=0;for(let i=tail.length-1;i>=0&&tail[i]===key;i--)repeated++;if(repeated>=this.repeatLimit)return {loop:true,kind:'identical-repeat',repeated,key};for(let size=2;size<=Math.floor(tail.length/this.patternLimit);size++){const pat=tail.slice(-size).join('|');let n=0;for(let end=tail.length;end>=size&&tail.slice(end-size,end).join('|')===pat;end-=size)n++;if(n>=this.patternLimit)return {loop:true,kind:'repeated-pattern',repeated:n,size};}return {loop:false};}}
+export default BehaviorLoopDetector;

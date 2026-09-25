@@ -1,0 +1,15 @@
+import assert from 'node:assert/strict';
+import SynthiaUnit from '../core/SynthiaUnit.mjs';
+const unit=new SynthiaUnit({autoStart:false,memoryKey:'test.hd.cultivation.closure'});
+const p=unit.upsertHumanDesignProfile({id:'test-design',name:'Test',type:'Generator',authority:'Sacral',profile:'1/3',gates:[34,20,57,10],goal:'finish a useful build'});
+assert.equal(p.type,'Generator');
+const path=unit.humanDesignPath('finish a useful build',p.id);
+assert.ok(path.steps.length>=5);
+const result=await unit.ask('human design path for finishing this build',{humanDesign:{profileId:p.id}});
+assert.ok(result.route.includes('human-design'));
+assert.ok(result.outputs.some(x=>x.organ==='human-design'&&x.out?.operation==='path'));
+const cycle=unit.createCultivationCycle({goal:'finish a useful build',context:'phone-first Synthia closure'});
+assert.equal(cycle.humanDesign?.goal,'finish a useful build');
+assert.equal(unit.auditCapabilities().checks.humanDesignCultivation,true);
+unit.stopLife();
+console.log('HUMAN DESIGN CULTIVATION CLOSURE PASS');

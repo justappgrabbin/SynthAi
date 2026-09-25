@@ -1,0 +1,24 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs/promises';
+import path from 'node:path';
+import {spawn} from 'node:child_process';
+import {fileURLToPath} from 'node:url';
+const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
+const manifest=JSON.parse(await fs.readFile(path.join(root,'knowledge/source-index.json'),'utf8'));
+assert.equal(manifest.type,'external-knowledge-source-index');
+assert.ok(manifest.files.length>500,'supplied corpus provenance index should remain');
+assert.ok(manifest.files.every(x=>x.bundled===false),'raw corpus should not ride inside runnable app');
+for(const f of ['browser/ValidatedLearningStore.mjs','browser/LearningMesh.mjs','browser/MCPChairClient.mjs'])await fs.stat(path.join(root,f));
+const port=19080+Math.floor(Math.random()*500);
+const child=spawn(process.execPath,['bootstrap/serve.mjs'],{cwd:root,env:{...process.env,PORT:String(port),HOST:'127.0.0.1'},stdio:['ignore','pipe','pipe']});
+const wait=ms=>new Promise(r=>setTimeout(r,ms));
+let ready=false;for(let i=0;i<40;i++){await wait(100);try{const r=await fetch(`http://127.0.0.1:${port}/mcp/session`);if(r.ok){ready=true;break}}catch{}}
+assert.ok(ready,'MCP chair server should boot');
+const session=await (await fetch(`http://127.0.0.1:${port}/mcp/session`)).json();assert.ok(session.token);assert.ok(session.tools.includes('propose_file_change'));
+const rpc=async(method,params={})=>(await (await fetch(`http://127.0.0.1:${port}/mcp`,{method:'POST',headers:{'content-type':'application/json','authorization':`Bearer ${session.token}`},body:JSON.stringify({jsonrpc:'2.0',id:1,method,params})})).json());
+const discover=await rpc('server/discover',{_meta:{'io.modelcontextprotocol/protocolVersion':'2026-07-28','io.modelcontextprotocol/clientCapabilities':{},'io.modelcontextprotocol/clientInfo':{name:'r19-smoke',version:'1'}}});assert.ok(discover.result.supportedVersions.includes('2026-07-28'));
+const init=await rpc('initialize');assert.equal(init.result.serverInfo.name,'synthia-residence-chair');
+const list=await rpc('tools/list',{_meta:{'io.modelcontextprotocol/protocolVersion':'2026-07-28','io.modelcontextprotocol/clientCapabilities':{}}});assert.equal(list.result.resultType,'complete');assert.ok(list.result.tools.some(t=>t.name==='submit_learning'));
+const learn=await rpc('tools/call',{name:'submit_learning',arguments:{source:'r19-smoke',location:'test',text:'Movement is Energy.'}});assert.equal(learn.result.structuredContent.status,'pending');
+child.kill('SIGTERM');
+console.log(JSON.stringify({ok:true,indexedExternalSources:manifest.files.length,mcpTools:session.tools.length},null,2));

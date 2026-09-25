@@ -1,0 +1,16 @@
+{
+  "input": "I need to fill out this application",
+  "route": {
+    "kind": "browser",
+    "task": "form-workflow",
+    "dimension": "BEING"
+  },
+  "browser": {
+    "status": "awaiting-human",
+    "autofilled": ["name", "email"],
+    "unresolved": ["signature"],
+    "humanOnly": ["signature"],
+    "next": "collect unresolved human-only or missing fields"
+  },
+  "guarantee": "signature was not autofilled even when a profile value was supplied in the unit test"
+}

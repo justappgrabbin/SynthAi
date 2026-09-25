@@ -1,0 +1,27 @@
+{
+  "r15_REAL_WORLD_LINEAGE": {
+    "filename": "Adaya-Automaton-ORGANISM-v0.10.4-r15-REAL-WORLD-LINEAGE.zip",
+    "sha256": "0ec6fb166b4face677b65e62dcb9055cd56037760fe727e2a9ae6798e3c6e269",
+    "size_bytes": 875772
+  },
+  "r16_RESOLUTION_POSTED": {
+    "filename": "Adaya-Automaton-ORGANISM-v0.10.5-r16-RESOLUTION-POSTED.zip",
+    "sha256": "6549871f7e72ca3652feb700423b9eb285054235586e67649c44337940760c37",
+    "size_bytes": 881550
+  },
+  "daemon_bootstrap": {
+    "filename": "synthia-daemon-bootstrap.zip",
+    "sha256": "46d80858e1b8f38daa7e58ad4c4103f3e763d14dc225730f9e03eb3f24840a2a",
+    "size_bytes": 5890
+  },
+  "merge_fact": {
+    "r16_inherits_all_r15_paths": true,
+    "r15_only_paths": 0,
+    "r16_added_paths": [
+      "R16_RESOLUTION_MEANS_POSTED.md",
+      "runtime/ResolutionPipeline.js",
+      "runtime/SupabaseResolutionPoster.js",
+      "tests/resolution-supabase-smoke.mjs"
+    ]
+  }
+}

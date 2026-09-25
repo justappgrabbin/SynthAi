@@ -1,0 +1,9 @@
+{
+  "name": "resonance-engine-substrate",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Non-HTML module-source version of the mesh/substrate + DimensionRouter -- mirrors organism.html's logic as real, separate, importable files (for APK/browser-extension builds, which need real modules, not one inline-script HTML file).",
+  "dependencies": {
+    "uuid": "^9.0.0"
+  }
+}

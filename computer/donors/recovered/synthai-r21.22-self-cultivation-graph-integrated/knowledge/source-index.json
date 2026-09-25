@@ -1,0 +1,4090 @@
+{
+  "version": "r21.10",
+  "type": "external-knowledge-source-index",
+  "generatedAt": "2026-08-18",
+  "status": "externalization-required",
+  "note": "External source index. r21.10 adds cited engineering references without vendoring their code.",
+  "files": [
+    {
+      "sourcePath": "donors/todays_session_complete.zip",
+      "size": 1773785,
+      "sha256": "df8f80fa7d98b44e0b7702b1fa48e1dff335ae1c4dd8e8885af2376ac8df7af2",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "donors/biverse-guide-synthia-mesh-complete-20260725.zip",
+      "size": 22413948,
+      "sha256": "a0a2de265f41293dc54520116fd67be089acb836b3379ddad81ab7f17a6da752",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/manifest.json",
+      "size": 118811,
+      "sha256": "6e0f32385715a5db75791327f48bd513b2fd8df396e4ca998f8c755e2f51f928",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/CHANGELOG.md",
+      "size": 11316,
+      "sha256": "0addc23ee56e95fdeff0b30db019d1ac3e8c3f7c044025055e5f7f614342fd7d",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/pyproject.toml",
+      "size": 2856,
+      "sha256": "d4e654b7ff554ef7fb797fa8755277bada0085239c4931419662af6ce99e1469",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/requirements-web.txt",
+      "size": 66,
+      "sha256": "9dbebfc56693cb86cda61fadcce7f38a7629fc0ad9b9fba35dcd8116ad29381a",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/requirements-dev.txt",
+      "size": 96,
+      "sha256": "7203a457531335f5a3b9ca978aef8cf12c007358d6865d907bde61c697e31fb2",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/SKILL.md",
+      "size": 5553,
+      "sha256": "06c6d9a47bb34cce96dd0a3f15a0a43aee6dd956f4331c69bf296b1a158c6096",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/.env.example",
+      "size": 297,
+      "sha256": "818009f9091428d3a144c1dee48967f30bf4f707e878523b53edcba672f82518",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/requirements.txt",
+      "size": 84,
+      "sha256": "4a3cfdc9ee811619b00f06ee57e444c5b826b5e109c50db7f7958151e3073289",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/README.md",
+      "size": 18338,
+      "sha256": "163272435353c05cb936f4c07068aa40f84678923655d63400e469ceb56da8b6",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/today/PROJECT_SUMMARY.md",
+      "size": 6340,
+      "sha256": "555b1dfde1442c9a57bb0c781fa9cc8363e4fbf5bce6be83515666e49df2d339",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/today/SHELDON_KLEIN_INTEGRATION.md",
+      "size": 21533,
+      "sha256": "a0abc8bb4042da1e49f62ebe09d8f93f2ceda70a75ed3f16eee20ae681336459",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/today/WORLD_RESONANCE_ENGINE_ARCHITECTURE.md",
+      "size": 19681,
+      "sha256": "def1633da9b325bcceea418bd923452161916d091b879f1a1b5c87d82047e838",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/today/autopoetic-resonance-engine-v2/index.html",
+      "size": 1847,
+      "sha256": "7a345a59da566dd63b70bbd3f3751d0594c6a272087fec970c9d9939938a5fee",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/today/autopoetic-resonance-engine-v2/vite.config.js",
+      "size": 1754,
+      "sha256": "aa1cf54270dce0df3ade73082c522e6cd958d4b4c863520835b2e1d3343db3d0",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/today/autopoetic-resonance-engine-v2/package.json",
+      "size": 1126,
+      "sha256": "d0e59beaded61f3aad09f7c36231c9dfbe420d6b2d2f6726bc350536276bfb72",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/today/autopoetic-resonance-engine-v2/README.md",
+      "size": 5479,
+      "sha256": "4664969b59702f05ececff15b0c270aeaa98798eb12e4ae539bd317fb025168c",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/today/autopoetic-resonance-engine-v2/src/main.jsx",
+      "size": 394,
+      "sha256": "4cd4ae1618ba07d566a785b4721532b4799382272dadde3c48aa9dd21a9f979b",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/today/autopoetic-resonance-engine-v2/src/App.jsx",
+      "size": 10407,
+      "sha256": "bbde4bbb2cf1306479954fac0f15f9546027f5793071e2fc63d5b718022a0334",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/today/autopoetic-resonance-engine-v2/src/App.css",
+      "size": 32367,
+      "sha256": "8f1726b81cbb2f606a95878f3d486b319a27433e0d6cdb6639e603e3b25dc6cf",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/today/autopoetic-resonance-engine-v2/src/services/pdfIngestor.js",
+      "size": 10743,
+      "sha256": "78c1a8feb39bb00d85ee3c7e7162c0c1795fe51b2f2ddb2b51396cf619a203c5",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/today/autopoetic-resonance-engine-v2/src/contexts/TriadContext.js",
+      "size": 487,
+      "sha256": "28fa090ddf697f271bef6a09626494d203383b826a1f455802127063ba818979",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/today/autopoetic-resonance-engine-v2/src/engine/SelfTeachingEphemeris.js",
+      "size": 11558,
+      "sha256": "5d999e08a5f2a2479b97a66d40936a4693f54d13305f198457b99224b048601d",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/today/autopoetic-resonance-engine-v2/src/engine/CodonMatrix.js",
+      "size": 6559,
+      "sha256": "04fd39993ac6a9ac107460778e40ab168583887c4528e56a8562c8fd5ad317bc",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/today/autopoetic-resonance-engine-v2/src/engine/AspirationCore.js",
+      "size": 14234,
+      "sha256": "8cc226313c92e358616e0b40b32186a33835d84ee256f54f6d55018e6a4d3f74",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/today/autopoetic-resonance-engine-v2/src/engine/MetaLearningController.js",
+      "size": 17970,
+      "sha256": "ae1edc7e8b05f3d008a0ee6dc2170cf24ea23ffee0507caa9bae37ece98499cb",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/today/autopoetic-resonance-engine-v2/src/engine/KleinLinguisticLayer.js",
+      "size": 28963,
+      "sha256": "25c37594dd4e78ee4e42ce63e4066e575f93e20c4d0aa0d91843b396ef4e041a",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/today/autopoetic-resonance-engine-v2/src/engine/AutopoeticTriad.js",
+      "size": 16238,
+      "sha256": "f3b36db0e35b1baa286b3e349dd4bd67b5249afd031000f52d0d570f4b47c93c",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/today/autopoetic-resonance-engine-v2/src/engine/CHNOPS.js",
+      "size": 9485,
+      "sha256": "adf5a9838fab416383b9e475f742dc4e8069db3d190958878cce9119a78ddde8",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/today/autopoetic-resonance-engine-v2/src/components/ThesisLab.jsx",
+      "size": 9751,
+      "sha256": "a675d94e81101071558bced903763868b093ced58d6f2533faa9f97310f64851",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/today/autopoetic-resonance-engine-v2/src/components/LearningDashboard.jsx",
+      "size": 10410,
+      "sha256": "2243c2cd4f0988b89b1cc03adb20527e15fb937e3c5cfc6ac67bea16aa46a159",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/today/autopoetic-resonance-engine-v2/src/components/ScienceMode.jsx",
+      "size": 8407,
+      "sha256": "16b41dbb89abcc102e34e612007bdef609a8bc03be11a59f5f8547f4da42f901",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/today/autopoetic-resonance-engine-v2/src/components/ComplementaryView.jsx",
+      "size": 7679,
+      "sha256": "6a0b69ae7164600276ca600021ca53114e90bf8dbcf8aaea88f3fef4d37058b1",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/today/autopoetic-resonance-engine-v2/src/components/ResonanceField.jsx",
+      "size": 10644,
+      "sha256": "3215e91c85adcbb2cae24df6f50b169961e5d5fb5fe7cb97b01a11d7516fcabe",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/today/autopoetic-resonance-engine-v2/src/components/KnowledgeBase.jsx",
+      "size": 8118,
+      "sha256": "36f29d8dd38b2a6e7777b4317637ccf3cfb35e27c00014650e41218e101ce12b",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/index.json",
+      "size": 7649,
+      "sha256": "9a4a288fcfdfc0ec4c32b4632bef1e6b49ee5afa517796222a5b30fb32fcd1ef",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/README.md",
+      "size": 1107,
+      "sha256": "d71aab7175095597ccec1c582e7af350154fa334c8288962047db0a92a3e3250",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/docs/versioning.md",
+      "size": 1193,
+      "sha256": "b852df30f9c48eb434f2a4666dea74ec037ea857601b76816066f2b1501f9275",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/docs/v2-scorecard.md",
+      "size": 1611,
+      "sha256": "7b708e678773ff7cfcd466444fba2723d1ef832014dd46f7d63a011316d13c09",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/docs/INTRODUCTION.md",
+      "size": 5973,
+      "sha256": "f1be2ff6ba3f905ffb3139fca2f330fb427b4390ad75f586b19758dc434a8f1f",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/docs/calculation-service-architecture.md",
+      "size": 26605,
+      "sha256": "0d97e878a0842c5a0bba748b78dd99359ce073568d528193d03f2c0a61e0ddfa",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/docs/release-checklist.md",
+      "size": 1633,
+      "sha256": "a2b1fa129d888fd14ab32bbcac29b603fd472f2ee3f817c908423256f72f3ad4",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/docs/install.md",
+      "size": 1131,
+      "sha256": "b8610674c0a3ed212c1f04efb5e8a120a57b990953cb3d1f0ef9d0811e231250",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/docs/empirical-validation-protocol.md",
+      "size": 5690,
+      "sha256": "2fe162b17356305b58ee27b7af559355f111a167d4b15875c78dedd6a7361af7",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/docs/v2-delivery-plan.md",
+      "size": 5053,
+      "sha256": "e1a2f52477f8d0840cbdd34e3c737ff1ded5e192bd0f54cad7333366bf7c3236",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/docs/klein-system-recovery.md",
+      "size": 6355,
+      "sha256": "b7b47632a811c0da7f05efd1d0f1dd39c6c85eea93c03870acce65198383655e",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/docs/roadmap.md",
+      "size": 9007,
+      "sha256": "0e65a3d5d4e1af6ba464a962b4a3e7e132b2e797e75a653b891b6fd5f5e2d0c2",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/docs/isohuman-unified-field-architecture.md",
+      "size": 3218,
+      "sha256": "ef172a3b24538e4de7c9fbce95a1d2cb1d7880755d3c30c8c4184128e5818b1e",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/docs/SEO.md",
+      "size": 4869,
+      "sha256": "cc8de006c9a4a97ad9977111196715dc04a08bc67b185c5355fa52546532a9b2",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/docs/v2-master-plan.md",
+      "size": 2052,
+      "sha256": "8735f957f4f8c5d803ab9171cf78f0244ba22bc1a96349eef62900715dcde945",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/docs/v0.4-product-requirements.md",
+      "size": 21990,
+      "sha256": "23c17fc5887c71d2de6b51cd7cf3f17d3069dd5c8c340b0244b4e187826d3ed4",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/docs/product-requirements-web-app.md",
+      "size": 5286,
+      "sha256": "a9d80c25a74ac974cfbc40ec83eb916ba92470b0c578332f430a1b38eeac15c6",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/docs/v0.3-product-requirements.md",
+      "size": 3268,
+      "sha256": "ef3fca56ec1e3bb62160b7a3f77d64f05a9071c58a8c9bdc0f402098d5fe95aa",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/docs/execution-plan.md",
+      "size": 8379,
+      "sha256": "e7fc466ff15deb34f65854c1eb7502debc426d5afa59f0faa94fd4a6ecd4d770",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/docs/github-research.md",
+      "size": 5821,
+      "sha256": "5c58c0dec1aefff78341c9e75333df38676cf77cd3cd9c7fc4772d7378247c3e",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/agents/openai.yaml",
+      "size": 424,
+      "sha256": "355e403d91131bc08366eebd44e970a48e485627b5ea311c952023c0ba20f052",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/tests/test_being_state.py",
+      "size": 1438,
+      "sha256": "ec549acf1e4440c8eed616fbf7353d00f2ea6dac090bbf7945a8c9456f2d2a7c",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/tests/conftest.py",
+      "size": 188,
+      "sha256": "94270695d918421eaf4306b44c963f12baff4201b4255f7ebf5c77ba24041ba1",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/tests/test_empirical_dataset.py",
+      "size": 1763,
+      "sha256": "07369353bb489e5255b4d3fa8408a702c6fc52603ae9347f34dd47ed61873242",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/tests/test_deep_synthesis.py",
+      "size": 1656,
+      "sha256": "f23bee0e52cd84513728ef772bf372e83ae6850dff7c5e6b6adcadfad18a7c4f",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/tests/test_geonatal.py",
+      "size": 1341,
+      "sha256": "6f531bd0a0049e7c3f775e6707cdb23c5918a4ffe45242e5875c8616fc24f573",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/tests/test_learning_api.py",
+      "size": 1806,
+      "sha256": "1f3e0864dd620c18324dfebbbcb18290af24cdf579e5a08cb7858c72bd587b7d",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/tests/test_relationship_reading.py",
+      "size": 1331,
+      "sha256": "9195efeaacd71bcce4913dd8459d4a057558ca40091f481d3bdeb74c3e122015",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/tests/test_product.py",
+      "size": 6860,
+      "sha256": "28ecee14c3fc3eec7a9a6d58dfba09218de35b2ea8c6233f10f4d64f86a6e3c6",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/tests/test_shared_cognition.py",
+      "size": 2519,
+      "sha256": "c9faafb6cebf5bd99d0c408d6044dc4a909e339d0e5e72f606ff748322747235",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/tests/test_contact_loop.py",
+      "size": 2317,
+      "sha256": "e6a4974301215cf9363876613d5cecb4d0ad85c14bd09fa5408546b88015bd09",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/tests/test_empirical.py",
+      "size": 2584,
+      "sha256": "938d6041dd05eb1e4ec9cde3edeb597bc9c070df3de42797f0e136324c2c25fd",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/tests/test_interpretation_maps.py",
+      "size": 4006,
+      "sha256": "31d6c9c743587106e3902c8c5f78f742309d3396805e49a88badf0eb0e16211e",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/tests/test_installer.py",
+      "size": 1619,
+      "sha256": "9f9c286266c162d6f32314dcd1e86410545af3e4ea19b23d21fe55ad5fd9c402",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/tests/test_relationship.py",
+      "size": 1338,
+      "sha256": "924ad667e2889fdfa5a93c45fb15abf39d38e55e60874728661558450cc322fc",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/tests/test_timing_reading.py",
+      "size": 1173,
+      "sha256": "0e8ad0612ac8c3da4c955346b5578c702a7e92c50c53599ee2d40ffc4de70095",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/tests/test_dimensional.py",
+      "size": 2475,
+      "sha256": "0c71559fc271fe4a2d138c4e962a9cacb6df5f95befe1b5d718b500408f35aa0",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/tests/test_evals.py",
+      "size": 6698,
+      "sha256": "5808da7bee8a9c6ce4e64b2d39171d95f314176c3ed5322e45ec2e2a9a5c87ab",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/tests/test_source_learning.py",
+      "size": 1980,
+      "sha256": "c1f623a8c5e2fb65dd1321d3dbadea1a7a0e58b095cb52b58d22a4141cd9eeac",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/tests/test_output_session.py",
+      "size": 2835,
+      "sha256": "f289f3aa9dd2aef6a5ae2bbd4c1d3d3c7d462a2e276cbc98199b7aefef8cc2e5",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/tests/test_timing.py",
+      "size": 1197,
+      "sha256": "eb80966afea276d8445e97f8ae41e947db05ac4fa040c720ed4ee2d42b97cd2e",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/tests/test_engine.py",
+      "size": 4060,
+      "sha256": "f1b18d5fcbaaff0e7f77d439793ea76568282b7685009c13d60aa5bca8b064b4",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/tests/test_bodygraph.py",
+      "size": 1278,
+      "sha256": "f32fb0424458cc76bc975b72ee3d9895b71f1537fcc9343ffd3337c133facbf9",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/tests/test_knowledge.py",
+      "size": 2665,
+      "sha256": "c122ac2a43e7bf067d1f1d70d9a01475d2cd540226409e29f7ff01b338b8bb92",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/tests/test_ato_being_state.py",
+      "size": 7396,
+      "sha256": "0acc8657fb9d195d470104872085b47d3c0d35e80a0ae40a95139f0dfccb4fa0",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/tests/test_source_generation.py",
+      "size": 904,
+      "sha256": "34370b735d9b1a7c83e9bcb1156bf63c152fb45bc19515474b77f813af668907",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/tests/test_validated_learning.py",
+      "size": 3287,
+      "sha256": "6ff972f21ddcafc16b719a7b800c0c4aab6b62518f402adec1d84f27dbb44ca2",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/tests/test_field_hub.py",
+      "size": 1504,
+      "sha256": "31a52ec7891c2d34127d7182c242f1559f897dc570de088e7195f3c032347a6d",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/tests/test_providers.py",
+      "size": 2801,
+      "sha256": "1fa67b281f6664bbdc32c4492e4b772dc5a106134e665af2b42070db6114bbcd",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/tests/test_language_contact.py",
+      "size": 2038,
+      "sha256": "87c648eb94365919e853787e449455f9b524486ab0dbf7b987025ab3ad992d31",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/tests/test_uncertainty.py",
+      "size": 1306,
+      "sha256": "ef8430dfd82d1e6ea6eaf60d66d53c005fac95e333a452f17e671065b2098beb",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/tests/test_version.py",
+      "size": 714,
+      "sha256": "ce92371e1571597f76d45844c4c7baa44b67a4219a525fc660b34a3bbd9e0889",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/tests/test_body_energy.py",
+      "size": 1420,
+      "sha256": "ebd30dd617416f85f6dbe718af33838f4819e4dbc58bd17e3107035d389b7f43",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/tests/test_reading.py",
+      "size": 2495,
+      "sha256": "8223cfb7156d9e98c06667ab5c966f6f98e2300a499536d1229df88278c689b2",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/tests/test_career.py",
+      "size": 1743,
+      "sha256": "8ff023fe3b7760bd34a0bbb27e1343b30c86b992e4e8df1fb852ca46d6c9aa93",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/tests/test_input.py",
+      "size": 4109,
+      "sha256": "5c631d8aff4218f8f2de462c898d5a80df6d9771c557b13f399ec1e043861743",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/tests/test_relationship_product.py",
+      "size": 1661,
+      "sha256": "8c73c105bb1b1cf3b6aed8bb735855e752f827437d067908755f80b3c1d0fc15",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/tests/test_web_api.py",
+      "size": 14561,
+      "sha256": "b55135ade09cc0ee8b2b11ae887bdaee9d9652013a627e22791529d5207d59bf",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/tests/test_timing_product.py",
+      "size": 1471,
+      "sha256": "a7909679d788a1922c1297ce5617c26be52e00ab4bf856db5b4effcc3612e4fa",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/web/index.html",
+      "size": 593,
+      "sha256": "304c06d451b1548add1996d145dd9e0f591eb89e7b350149f551a35ab5aee722",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/web/tsconfig.node.json",
+      "size": 316,
+      "sha256": "fbd0717cb0542bb5b0ab3984fa85a02f4ef455f9a02f2ba4ccfe25a6317d57f9",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/web/package-lock.json",
+      "size": 64198,
+      "sha256": "fc391afdc963fd5f0b9326af5e08bf9c1bcd8fe7f7cd3736b6995ce677d97cf8",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/web/vite.config.ts",
+      "size": 316,
+      "sha256": "6f8a821697018ee2572acf1e5b8bb273c65cb772150848c65ebafc4f9f5698f9",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/web/tsconfig.json",
+      "size": 628,
+      "sha256": "be6ac777267e4b6ba8f78b355b8740c3f11c37fa04f20aeb9f4d55d5435bfc26",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/web/package.json",
+      "size": 597,
+      "sha256": "b1e291f088164b2f21f5d27f7655963a959cc20a284cc7aa79a5898c3523b5b1",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/README.md",
+      "size": 763,
+      "sha256": "2c40321cb69dfc5875b7745df771639757f223d0deeaeac6e0f76da8f4e63d8b",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/scripts/analyze_prospective_registry.py",
+      "size": 1337,
+      "sha256": "716a281c35292289eaadc2a0cf40beabb96c14d309ba07debbb77730ff2ca23d",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/scripts/generate_timing_product.py",
+      "size": 2713,
+      "sha256": "5278e90218c49ed9b4c65c9da9da3bc817c3be509653f2899ec6a0c98781d48a",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/scripts/evaluate_timing.py",
+      "size": 1904,
+      "sha256": "1c75ef0170fceb44b8798dee6864264e23ce1830f378aca515890028d99ab392",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/scripts/evaluate_public_figures.py",
+      "size": 2009,
+      "sha256": "a3c2179484df9423651f08289bf1fc94c6c4c635a46943688909f959a8b62ec6",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/scripts/run_validated_learning_test.py",
+      "size": 4926,
+      "sha256": "c1bca71021509f4a3945021586e8a0dd320dd86bcfb2ecf9acb7b83c54bd0c86",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/scripts/generate_career_reading.py",
+      "size": 1918,
+      "sha256": "4c961b39b4cd5516893786fcacc771c56c19f030413a25c2874d7aae5333fa32",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/scripts/freeze_empirical_protocol.py",
+      "size": 1193,
+      "sha256": "de5158957a5833b848590264326374b130232bde99624118184dbd2be047c1b5",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/scripts/generate_llm_product.py",
+      "size": 3037,
+      "sha256": "ce978dcdabd7c362a69a81ba6d9a385f9d0fec16026a5c61172fc63af1df8be3",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/scripts/generate_relationship_product.py",
+      "size": 3091,
+      "sha256": "3f54171061e3200086efa1e55012dcf19fc609cbc8d6f52c6079d5fb539a5a4a",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/scripts/evaluate_relationship.py",
+      "size": 2234,
+      "sha256": "3744b18d826138a27189e1f39cda097e228f4a79f19b3a330f64d40b4aab72de",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/scripts/learn_sources.py",
+      "size": 2175,
+      "sha256": "068794ac4f2c7546f7d6ccf012d8425e798282629bce5a937ee219bb90f883e8",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/scripts/run_cognitive_learning_test.py",
+      "size": 4675,
+      "sha256": "644fe9fb43d730d18f83b8578f230843087b9a8cfba8f4327bce43165e97ca03",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/scripts/analyze_uncertainty.py",
+      "size": 2060,
+      "sha256": "62ecd859c482f95463768d65999ba9f585b6a7fa71e1458a3bbf385372f3b326",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/scripts/render_bodygraph.py",
+      "size": 1816,
+      "sha256": "ef96be6c3d48979d6c751dd56832eb52394d41a06f85ac5c69940a28335497fc",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/scripts/evaluate_v2.py",
+      "size": 10729,
+      "sha256": "41501e69335ec07c13f3d5d0ab108fd32bb1bd06b55975315c2f77f837f6575c",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/scripts/build_holdout_trials.py",
+      "size": 1415,
+      "sha256": "f384c9b8cf242f31c866f85536fe49cb08104bb9d27282571622cd70b21a09fa",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/scripts/evaluate_empirical_readiness.py",
+      "size": 2477,
+      "sha256": "f59c4b59100b208e91901c50360227524328166a0ebab19172593f79c08a4343",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/scripts/generate_reading.py",
+      "size": 2173,
+      "sha256": "601bab488cd6c0799184679a0edcd4ccd097760add040ab86149aa5329312307",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/scripts/evaluate_accuracy_benchmark.py",
+      "size": 2644,
+      "sha256": "7df7bdd307559a6b3f33abbfa7ce1cb83867f9ff8fe3f557bcfb94876dd62bd8",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/scripts/calculate_chart.py",
+      "size": 2068,
+      "sha256": "e4ab60fc4d8d514b99a3bc63c56a4c62ae0267188e06689a4e271b356169ced7",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/scripts/evaluate_narrative.py",
+      "size": 1371,
+      "sha256": "51349dc9bc2309306c71b733fc888019b4e23be13616b75ccc6419b1c290cf71",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/scripts/compare_relationship.py",
+      "size": 1933,
+      "sha256": "686bcacdc7bad2937ec3637356b912881e2885ca3f6745d690b3772c9a7218f8",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/scripts/smoke_all.py",
+      "size": 1305,
+      "sha256": "0305459e6c8e5fd963e71474c99fd2949945bbc58171073397753660812cde77",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/scripts/install_skill.py",
+      "size": 1686,
+      "sha256": "765700b503821013ac0120cfd07a7a9379e5c73a5c5ed982f1169a37baee5a0a",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/scripts/analyze_timing.py",
+      "size": 1694,
+      "sha256": "8da93d0af8bc31c74b6a0bb648984ff9c5bb129b5aa73a732b9af8ed52216b3d",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/scripts/generate_timing_reading.py",
+      "size": 1944,
+      "sha256": "8ed29c03069f98900c703583459f34aaea6eeb7189877b887c429e7d7bb4e42f",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/scripts/build_learning_preview.py",
+      "size": 8313,
+      "sha256": "be2c7e696139a982024c1a038d623625f07f3bed088382879a6b09749476254f",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/scripts/generate_relationship_reading.py",
+      "size": 2291,
+      "sha256": "2e730c88e56635ee80fef197479d5918087ad27de5eaee458a04aa0da3638194",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/scripts/build_public_figure_manifest.py",
+      "size": 2125,
+      "sha256": "2a6c9a304baa6d9265b50d5ccb6d0a57e60c578e112af03508d3581688badca3",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/scripts/analyze_empirical_trial.py",
+      "size": 1602,
+      "sha256": "46c739009e7adff897ca586989802997b7c0dd28e90f7ca79db8e1e3705600bf",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/scripts/analyze_label_predictions.py",
+      "size": 1994,
+      "sha256": "1308c875d418f9bdbaade6e7f9e61cc29f88bc9d1a70d29670dc86fa8d8694d0",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/human_design/installer.py",
+      "size": 2352,
+      "sha256": "7f2f9d4ac9e9f9b7698e57977fe0ff995c37aabaada1e9d889419e1a1089ef0c",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/human_design/validated_learning.py",
+      "size": 13839,
+      "sha256": "50ac1e1a3654cf6429dfcf741eb38f31d09861df9a7b2ea42623cc366615559d",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/human_design/knowledge.py",
+      "size": 18963,
+      "sha256": "e17c8a1503c362b4699cc952628dd237e5e6e77c52e5ea513b9bd774034b6a61",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/human_design/being_state.py",
+      "size": 7093,
+      "sha256": "9450bf05076887dfd6ba0495b201ec8f884c2825a90ba1d7d4a30872dd7b6350",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/human_design/protocol_freeze.py",
+      "size": 1313,
+      "sha256": "3951c34f964e491f197e1bf2f20909436476fa955e60982ef3fd3bf2238ae94b",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/human_design/body_energy.py",
+      "size": 13841,
+      "sha256": "f6b1da662a27f0f10f00a0e0d50d860a5646a18b6f4b9c5eb2ca99bd3b1e99e3",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/human_design/contact_loop.py",
+      "size": 12937,
+      "sha256": "fbc4968755f1cdc48a774357225973a8e0046a6d9f968d51a2dc7cd8a5a8f0d3",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/human_design/prediction_registry.py",
+      "size": 1693,
+      "sha256": "ab0f7f4581203cb790d772d0521c7386429995f374e9cb3d48e088e567c96d39",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/human_design/providers.py",
+      "size": 12603,
+      "sha256": "960ff856b72106234fd5a9979eabf9cf5c3bb822076ff9f8230fdb065c6d3274",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/human_design/pyhd_adapter.py",
+      "size": 1902,
+      "sha256": "0cab3742892d74a6c47f11c678fee4181733e4960791545c56ee6b061f221aea",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/human_design/career.py",
+      "size": 19378,
+      "sha256": "2eb37e3efd92140a3b05645b4c3b5e2e4034ba8b0eba031bdd2cb6bf3b971be2",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/human_design/uncertainty.py",
+      "size": 5597,
+      "sha256": "68a20275a326a455eb2621ea59988ecc9e36b922efa3b783cfe71a45d79677b8",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/human_design/schema.py",
+      "size": 11438,
+      "sha256": "915be85006be59775567082eddf09a36dcea7b14b909cd6726340bfe0f114271",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/human_design/labels.py",
+      "size": 7331,
+      "sha256": "aae71492c053c71f4fd1891ccde281951654d39d8ed81ef04f44099cd618ff6e",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/human_design/web_models.py",
+      "size": 4230,
+      "sha256": "29957408b2edef3401c25a1b803c3de88475e0b7824aa7f0da38d6c337a5fcbe",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/human_design/shared_cognition.py",
+      "size": 19962,
+      "sha256": "d655812663ca1b3add6bacc35a214ff424267aef0dd58fc526f3bff076d4c5e0",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/human_design/research_corpus.py",
+      "size": 4441,
+      "sha256": "37cc0ad1265ed773716541b64c22aec31c495887eeaba8ac8ac56909aad9c277",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/human_design/empirical_dataset.py",
+      "size": 6583,
+      "sha256": "2e0bacf038a05a07a5b6d0490e6bed71d41663a69ce055100400cfd5ce378d5a",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/human_design/deep_synthesis.py",
+      "size": 30968,
+      "sha256": "5da7435561b8adcb7e06a4dbc83be2082fadbb226c3beae364693700abd98b18",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/human_design/field_hub.py",
+      "size": 4152,
+      "sha256": "6b5308dc58829ad4341f11fa77fe21c39a0ee6105725be3fdce49b246e262960",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/human_design/source_generation.py",
+      "size": 3059,
+      "sha256": "f84c50d3c2d9c46827b99e77f748d60602b63d00c3ee5fd009805e772f965963",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/human_design/timing.py",
+      "size": 2802,
+      "sha256": "03ba7461c71c29408aa3f173aeff650ef469a87e7d760359a17b1fa6766f2ec7",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/human_design/empirical_trials.py",
+      "size": 4085,
+      "sha256": "e50afc393ede1bce84fad41e2e5248fd1d188191f097b0100edeb8f937168919",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/human_design/bodygraph.py",
+      "size": 25358,
+      "sha256": "c1a66bf79babd1b0a465bacc95586ad6668390c6d0b7d4af021dd932e857ac4b",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/human_design/reading.py",
+      "size": 19575,
+      "sha256": "8c477193f998535daa9ebffe3c694fa395a350d68fcedad7cc2d10d6531e28dd",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/human_design/dimensional.py",
+      "size": 7042,
+      "sha256": "151df70fac9f4c7d17c704e3a55654ceeb1fae42455cceec9ef212c0c92cc06b",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/human_design/version.py",
+      "size": 19,
+      "sha256": "ed0e447699e1f22450961898d1177d160de2bbaf2e8cd247919e563a0d79822e",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/human_design/timing_reading.py",
+      "size": 12223,
+      "sha256": "e0aea007e0076e8b036b97c2289929d9a5caef5e734da4ac2dc635069a3e6c45",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/human_design/source_learning.py",
+      "size": 10753,
+      "sha256": "ec35fb64e3c8c6077a5e6dfc5c4fbb76826a0115b2d7f45d8871f4d095b16b64",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/human_design/geonatal.py",
+      "size": 1222,
+      "sha256": "d51ea29254aba44277b6c5f685dd79d462dbea88dac70e4ad9958017b0575d56",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/human_design/empirical.py",
+      "size": 7591,
+      "sha256": "f1001712aa52845a14dac0fd40d93f842dff66db78d0af20cacf6bec015b4870",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/human_design/ato_being_state.py",
+      "size": 16800,
+      "sha256": "cf890780b27da12f71c24fa7542975c6f097ce33ac717f05e7c5202844ad20ff",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/human_design/interpretation_maps.py",
+      "size": 49234,
+      "sha256": "f668070569fc527b6073569560395c5e760cc4b03e5508364747e2ade962adb5",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/human_design/local_chart.py",
+      "size": 10976,
+      "sha256": "cb6c46ce8d3e853df870dc96b650796275e6bdfecf352bebdd737995ab89b063",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/human_design/evals.py",
+      "size": 57187,
+      "sha256": "d67be149563a2091394aaf0c93f639458d01f3744d295dc9e38c05069554d9dd",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/human_design/relationship_product.py",
+      "size": 20410,
+      "sha256": "60e10f303fba58ac09f2da0e375f36bae9460d9d0a0ce8496afb6a22ea1be812",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/human_design/__init__.py",
+      "size": 3027,
+      "sha256": "523986c0914babf0a41820623c3ab28e3de0f9212f09acf47dda7ab0fe244a27",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/human_design/product.py",
+      "size": 36653,
+      "sha256": "0f9f48cb383e47753e891b33521fe388b044ca82aaeab82fd8590ab541b5b68d",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/human_design/engine.py",
+      "size": 7250,
+      "sha256": "25dc2259a667e50b8c48b4f218a69ba9d9549d76d4c2f6862340363b317953b5",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/human_design/web_api.py",
+      "size": 53150,
+      "sha256": "11079bcfa999f305bc2b1b5c220c4b152bbeae02cf0e41429d8b4fe48b74489b",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/human_design/input.py",
+      "size": 11659,
+      "sha256": "9619cbd2b8268a7d63f957c16e599d0c0d05db668777b04070e3b8972b4284f1",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/human_design/session.py",
+      "size": 1418,
+      "sha256": "9566f0a4bc1bf583bcf1751d3f8a6827252279e60376e4c6f15309ff20941405",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/human_design/relationship_reading.py",
+      "size": 17730,
+      "sha256": "d4006771848d9c909ff65c41d8cca1c796b3e2686885800306b10ba6e650dce0",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/human_design/timing_product.py",
+      "size": 17755,
+      "sha256": "6acab756e394fe487a00161801a203f297dd4a472be16ac9345f05b6ec235985",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/human_design/language_contact.py",
+      "size": 12250,
+      "sha256": "ad29bf59fa19555a5fc9f0d9ad8106669d4c764a623ce62c59bb325f56ac82b4",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/human_design/relationship.py",
+      "size": 3247,
+      "sha256": "a7862b0112d9cde56241934a3cc771735fc30e75195c63d0011c01ce2afb990c",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/human_design/assets/bodygraph-template.svg",
+      "size": 36618,
+      "sha256": "6dff93465ab778111a4391cd3d99092d2a0a47b78561e574b2a2a19673c6d4b5",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/human_design/assets/dimensions-v1.json",
+      "size": 7666,
+      "sha256": "ca75d464bd5216dfbd0a94b97010f61d533fd8eb3134723ec0d447d464af5f23",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/codex/SYSTEM_PROMPT.md",
+      "size": 1332,
+      "sha256": "e31fc5562bd5856198fa665a7b4d43e96621d6bdade78dc1e2433d1ffa43e888",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/hermes/SYSTEM_PROMPT.md",
+      "size": 1163,
+      "sha256": "6c2a3ab82675bf49ade2b9490ee0ab8e4f96ab5644cbad0a55194fad89dabb32",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/jest.config.js",
+      "size": 192,
+      "sha256": "9137e055de7c77b42b9e1566d46ed9c6e9b5382a4b0387641532413107504818",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/package-lock.json",
+      "size": 196224,
+      "sha256": "87a4bbb894f9ce2a62a55c4062371ef8a9149b9bd35e247a7573b157776b0c15",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/tsconfig.json",
+      "size": 455,
+      "sha256": "4e5ce02d6058e6d308a3a49d2901a5ff6819f8e284441980d533c3474ba6e76d",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/package.json",
+      "size": 1016,
+      "sha256": "a61703e82fc53e80f8de1697e68146243764dc49234a080bcee552779dd6bbf2",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/openclaw/SYSTEM_PROMPT.md",
+      "size": 1131,
+      "sha256": "e1bda06c9e84920e4163b94f9a3b9afa28161adae79dd163dc4615bd6f51a3e4",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/tests/foundation.test.ts",
+      "size": 14619,
+      "sha256": "808a7c76f4b697cfe5583be3d6ee52922e82537c3c727539a1d75085c99ad522",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/tests/learning-mesh.test.ts",
+      "size": 3681,
+      "sha256": "59b20ea05320f3b59affa89ed2bfcc2f2506bc96fb14d9f4da2b3bf86988b137",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/dist/index.js",
+      "size": 1776,
+      "sha256": "ee1fd62c43b68943b24f609bf9ed56ae65b0aea98b6766dd114a0499918a4542",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/dist/index.d.ts",
+      "size": 733,
+      "sha256": "bc8c1227bae7abba0c84e1788049f27e93b12e4e544ae783d832e14ce1227ee2",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/src/index.ts",
+      "size": 698,
+      "sha256": "696f74ab448d3987ec01690a883ca5260adab62e93428d467a81234ed526d910",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/src/emergence/GateEmergence.ts",
+      "size": 1744,
+      "sha256": "d28162d07d6c902ec4087a127807e9589297359701e5556df96074dea9acea96",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/src/composition/ToolGenomeRegistry.ts",
+      "size": 3478,
+      "sha256": "5642b1a65afb4d16115befc7e6642bf6b5e1f453b6f47542ba437ba082947425",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/src/composition/TripletToolComposer.ts",
+      "size": 1765,
+      "sha256": "f87155be2bbce83bccbf6b700ac1a3a7fb3cb09978ce7aadbc4241c8f314edae",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/src/synthia/SynthiaMeshBuilder.ts",
+      "size": 4016,
+      "sha256": "f79e6fa8a066c1572b83d687ef428606f27e1694f3cfc2b692dad1f0a6b96e7d",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/src/operators/index.ts",
+      "size": 261,
+      "sha256": "ce1fe95ad187018676c2a30c47d01c1ccc4d7aab3452c6faa26cbf2f105885c6",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/src/operators/MovementOperator.ts",
+      "size": 1392,
+      "sha256": "eac1fff56aeb0a7fe0af2b94e1174eeaf89c52cd077ce8ab3bb504aa30061315",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/src/operators/EvolutionOperator.ts",
+      "size": 1189,
+      "sha256": "81f39eb8b0c3c4554941df4a0c5e5e29c725c933906a584af767c1a6ed026ce3",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/src/operators/SpaceOperator.ts",
+      "size": 856,
+      "sha256": "a56a571836fc1ff5c96cac72cc0982b5f3c743eb78edd31e5fb0a303f340d532",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/src/operators/BeingOperator.ts",
+      "size": 1224,
+      "sha256": "53a9047cf0d1a9fea4f40b868527d151fe2bbff18cd1701d86a96dee723e4d6f",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/src/operators/DesignOperator.ts",
+      "size": 1145,
+      "sha256": "1dae335d1da8d3694475c6a0b5bdfe54fe62b5e4758ae7ef6b94c8107897bf92",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/src/adapters/AdapterRegistry.ts",
+      "size": 2828,
+      "sha256": "f484656b72c8eaa31ef81d9cb38e7d5ae319d493939e2f905cd4514c7a4f6454",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/src/correction/ReversibleCorrection.ts",
+      "size": 2371,
+      "sha256": "fce632b93977d1f43a69775f7d46a61122c8576b815a176af601750aeaad5205",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/src/memory/SharedLearningMemory.ts",
+      "size": 3968,
+      "sha256": "458ef7dffe5fff21b3effbc140ba74a21ec4163743e77345aaa06b62caaae628",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/src/state/FiveSpaceState.ts",
+      "size": 3143,
+      "sha256": "1e879407ebbda193e059ba79163417990428278841c5049ff45d8c82b3fd3c0a",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/src/graph/ContrastResolver.ts",
+      "size": 1609,
+      "sha256": "156e5216f37b253ac1166ad8bc93677f4b9ee25795470f2421117b0b989bdab8",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/src/graph/NeighborResolver.ts",
+      "size": 1589,
+      "sha256": "2a759f18c5531307eb3724c73ee17162ce3bfbcb0a99360d9a2d81b2799453b9",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/src/graph/ReciprocalPathResolver.ts",
+      "size": 2525,
+      "sha256": "9c6b0480ec68c92642983f669ee8228b8bd2a5ca2cfb55e62074bd24a4024466",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/src/graph/StateGraph.ts",
+      "size": 2863,
+      "sha256": "fa26dbbb23ea3cb4ade7d7829a61c04eb6d7e1b471fbfcd8db124daf1566c9f0",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/src/channels/ChannelProcessor.ts",
+      "size": 1721,
+      "sha256": "80a4ed02218c43f1962ac437b9552232e196bf3a72394da0f2b7361897c3750c",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/src/channels/EmergentChannelFunction.ts",
+      "size": 1865,
+      "sha256": "a51945f46bc9b304fd253042b959413c95233dd32161cd82b24b5950d59de816",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/src/channels/ChannelRegistry.ts",
+      "size": 10013,
+      "sha256": "c54082c4d9ef6dbfea8d90f536964efaa4140fceb12152428468018abbc05cab",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/src/channels/CircuitRegistry.ts",
+      "size": 2664,
+      "sha256": "60bd0382bd948d257e5c1a007f8b63afd621fb61d980c5c42c58dc6b7e0068e9",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/src/routing/AttentionRouter.ts",
+      "size": 1104,
+      "sha256": "d3cc522c85e36ba844b701476dadb045b70a59f6b9e8d61d00a14aa02c87d94f",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/src/routing/CoherenceRegulator.ts",
+      "size": 1505,
+      "sha256": "403466f03ac66c1385eab5ca764ca1b384eddee578c5adfdf4e18df4bd6fd485",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/src/routing/MonopoleController.ts",
+      "size": 3155,
+      "sha256": "312a8bf25c63a161505557fffc730bd5a8e0165d9fde7a0f1e878b7beeb3d37d",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/src/persistence/JsonSnapshotRepository.ts",
+      "size": 983,
+      "sha256": "ec6372dc692c337bf12f91760414ae2df3a14785be477ace57f8b172d8252cd6",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/src/recurrence/FibonacciScheduler.ts",
+      "size": 1231,
+      "sha256": "1db8e17bba59d6f828bd56f745d2c128679b1d93846cdb11d2cc14ecf29e7c8f",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/src/recurrence/RecurrenceQueue.ts",
+      "size": 1058,
+      "sha256": "3758cdfcf72d14fd13fd83eb38dc17806682ad79db5f0586611174c65b527ec2",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/src/semantics/MeaningScorer.ts",
+      "size": 3349,
+      "sha256": "40f1b5a1b08aac409179533bf715aca0cb88c9242ef543dfb46590ace9fed7f9",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/src/semantics/SemanticResolver.ts",
+      "size": 1646,
+      "sha256": "eb8c5c5548d202f45b5aebc3ab05327756d697b3f64ec3d082e01c591d85cbcd",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/src/semantics/SemanticAttractor.ts",
+      "size": 2753,
+      "sha256": "bc9f536727ac4fe1b2aa8ed1f2b5030372119f22ba781a8832e6df2f87b259a3",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/src/semantics/MeaningExpander.ts",
+      "size": 1756,
+      "sha256": "6eeedee689a097b0f70246d9351d697c8beac306317b9ea2126c41eef71a8763",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/src/semantics/MeaningPruner.ts",
+      "size": 1376,
+      "sha256": "4df9df6a21877d17ebb1edbd89466d750ba68ff086982d79940e5d7bb720a98b",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/src/mesh/KleinMeshRuntime.ts",
+      "size": 2507,
+      "sha256": "ec6d9d760e073d28da4f4ab7bba2322c903e9d6aad099a61238776691773a2cb",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/src/mesh/LearningMesh.ts",
+      "size": 6191,
+      "sha256": "ee2e89591a19c60c5f0f1761dbfc4a3878bfded6bf33e60d03f492597d2ecc88",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/src/mcp/PermissionController.ts",
+      "size": 642,
+      "sha256": "e40fd497e43af04a8f27794b310c4c13f386d334b470a97415b9bc5e8563fa64",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/src/mcp/AuditLogger.ts",
+      "size": 608,
+      "sha256": "d968716aa5e92a4930e0832a9cf26ccc1a5ac37cf85b1cc8cbe61231193a97c8",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/src/mcp/ToolRegistry.ts",
+      "size": 735,
+      "sha256": "e5370ef6060a078c3e71aeaa4323d5a8199fe853636c7832f4b477acb5228e5b",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/src/mcp/MCPHub.ts",
+      "size": 2542,
+      "sha256": "d2b428fd83ecc291c3d63c808f9566dfd0da9f2e64000def105ecaaa68a84c4f",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/src/models/index.ts",
+      "size": 11541,
+      "sha256": "71b84e997d45a4bbca34b2a2dfb0e710461b40959b28946cf1e0fef9deac744b",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/src/ato/ATOEngine.ts",
+      "size": 2361,
+      "sha256": "3d94c9354197cb9e0718ecf878955cb06e4ee44b0799ee318b0d04302f48ef57",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/src/ato/KleinStrongEquivalence.ts",
+      "size": 3160,
+      "sha256": "f13abc9003e88174a4e2c52f420372f496c01a38ed05584972d281a7867f81ad",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/src/astrology/GeonatalCalculator.ts",
+      "size": 9388,
+      "sha256": "d16b2eed3857c76b7cd8cc1d3705001b5d5c5cddeaf3991528a0705158b984f6",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/src/klein/SymbolicValidator.ts",
+      "size": 1434,
+      "sha256": "3e37a5e595da5c7d8d3ba4e3729f7b0eff6bdee15919504468ddfea016cfa9ac",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/src/klein/AutolingEngine.ts",
+      "size": 2276,
+      "sha256": "621df098edd50ede2bf7e9114d99444048afec3eaa6da7d1b8aa76f772880f71",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/src/klein/GrammarInducer.ts",
+      "size": 2195,
+      "sha256": "325858457f3a8ded954542f7ddebc3ffcb04a8ed4679b5bc43a1c16b0c988b58",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/src/klein/NarrativeGenerator.ts",
+      "size": 1497,
+      "sha256": "af9ab4c798b5cb5ad3ac3ae8c390f6c55070e8f1896a2e4118b0606950df7de3",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/src/klein/Paraphraser.ts",
+      "size": 1154,
+      "sha256": "bcb1ae9d2ed246704d13df755d093c684860e39b56ee054e5188aa5b5e3d94aa",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/src/klein/DiseminerEngine.ts",
+      "size": 2375,
+      "sha256": "962336e836d65b10b0358e2899cd3911aab7b55f15183821126c7d0cb8cbc97c",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/src/topology/FuxiEncoder.ts",
+      "size": 3703,
+      "sha256": "1f13879bfa311de6094caf8f0a91980fca4cb07324b733fefe2124b68aac99e9",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/src/topology/ConnectionGraph.ts",
+      "size": 1724,
+      "sha256": "e6ffa3584334b140f7bd00d213df6936f3be83110548d650f83d7fddcee57e40",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/src/topology/CrossingResolver.ts",
+      "size": 1991,
+      "sha256": "326c346442062f608cfc10e6652df68eeb07a9ebf4ff981611809ec0f21cd0f5",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/src/topology/HammingResolver.ts",
+      "size": 828,
+      "sha256": "0e05b8b77f1cebd82df490de6f96eb1cde0db8317bcd624bddad37881856cfd6",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/src/cli/synthia-build.ts",
+      "size": 3254,
+      "sha256": "e0a40bd70b69d3de983c44f090403c3db5b8048fcca50574360966e937501a60",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/src/cli/geonatal.ts",
+      "size": 798,
+      "sha256": "989eb33b9d147be2548dd0b3a7d9db457dadbc3a542e0d012dfca80ee26fc817",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/src/rag/SourceRAG.ts",
+      "size": 5701,
+      "sha256": "e21763922e7130711082ed16e390c4e745e9037614088e15e1af467fda0f0986",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/dist/emergence/GateEmergence.js",
+      "size": 1422,
+      "sha256": "49acdff53e66c8b882b8ed7fa0ce82684e4cfa9debf606fa90bb4c12d47e8f42",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/dist/emergence/GateEmergence.d.ts",
+      "size": 897,
+      "sha256": "480036fc2a9c63932a16bb89d57b1e7cb0d668fa435a927952edb3757bd12f99",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/dist/composition/ToolGenomeRegistry.js",
+      "size": 2844,
+      "sha256": "d48cec32c9cd6c37ca7a9c5f8245a8983199188758600b742fa637baaf1c8359",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/dist/composition/ToolGenomeRegistry.d.ts",
+      "size": 1388,
+      "sha256": "748070cf4b383f0eda85b0180be9e30be10597b63274790098b961c7fdb7355d",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/dist/composition/TripletToolComposer.js",
+      "size": 1130,
+      "sha256": "82a9743b87a15a9bd17f8038549e94b37bce4ad027b36f1ef1e87aa06350f5c8",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/dist/composition/TripletToolComposer.d.ts",
+      "size": 1073,
+      "sha256": "84aacbc47a989384461504f8fad2d30e2eb9de17e5164284fdfa79179c609e9c",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/dist/synthia/SynthiaMeshBuilder.js",
+      "size": 3915,
+      "sha256": "8c4e4c6f1346e95935d6c6736aa450c032a1ab1a1558c5d8c94859219f0b2b46",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/dist/synthia/SynthiaMeshBuilder.d.ts",
+      "size": 1024,
+      "sha256": "3ae11eb47cfa685cfa7c184c736b135b4924201a890f2afcfc17f34ef71ac631",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/dist/operators/index.js",
+      "size": 1191,
+      "sha256": "df12a30b3b3d1d0230bafe35f71aa6513f2f5964b3886911c4032f4b5399bf2c",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/dist/operators/EvolutionOperator.js",
+      "size": 1078,
+      "sha256": "baa14cf88724216eab89d60c862310fd1a8b75986c2947c08931ed033d329a2e",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/dist/operators/index.d.ts",
+      "size": 296,
+      "sha256": "fa6a4f83fea48794030cece7dc3b2e4fd347ef9298d8627eb15d4d7e78528865",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/dist/operators/BeingOperator.d.ts",
+      "size": 275,
+      "sha256": "47dfbbe6a8dd801cfc5eb9f7756a6c62715e5e5f6fd6a9edbb324f6be09c2e76",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/dist/operators/DesignOperator.d.ts",
+      "size": 310,
+      "sha256": "10ef83b429130d2ea692305a2728ab8b994b04166be46093c8c2afc24106571b",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/dist/operators/MovementOperator.d.ts",
+      "size": 310,
+      "sha256": "8f3697dabab9975e22778ccff060db5d35597bfdc8af47f2363b3d53736f40b3",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/dist/operators/BeingOperator.js",
+      "size": 1157,
+      "sha256": "363eb896a9bcec8b6ead7c8aea6e9af39ccea4c7286738dccd225ec67dcded2e",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/dist/operators/SpaceOperator.d.ts",
+      "size": 275,
+      "sha256": "cfdd40133c0d3e019c330f5626c34a0debadba0f5664fe04dbef90ed5775506b",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/dist/operators/MovementOperator.js",
+      "size": 1197,
+      "sha256": "36dc6cfbd15c81a840281eeaad827e1e7dcddb965d9f7735e7117bf773619203",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/dist/operators/SpaceOperator.js",
+      "size": 724,
+      "sha256": "8eec279ea8a33007964dff51ca6ced443fb3a2cbcefa3655944ebc0af8867649",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/dist/operators/EvolutionOperator.d.ts",
+      "size": 283,
+      "sha256": "16d8da09b95551680d57aa8d276888988986ec4c275235acca839239713a3b05",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/dist/operators/DesignOperator.js",
+      "size": 1003,
+      "sha256": "22c83129dde7dd94c3b466c8c7886932ed25f28d83de01662bcf8fbeb0163b07",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/dist/adapters/AdapterRegistry.d.ts",
+      "size": 333,
+      "sha256": "c6c4401ff2a0a2658a40d0a47b80f3763cda34e4c53154129fbe97bab27e7d73",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/dist/adapters/AdapterRegistry.js",
+      "size": 2889,
+      "sha256": "36cca029531982d532c8d600f0637bd8836b1014a1638142271ece33968353aa",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/dist/correction/ReversibleCorrection.js",
+      "size": 2345,
+      "sha256": "b53737b81e9147f07949180c078f2ad7768d21e3b2485b97eeb7230f89b4a10f",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/dist/correction/ReversibleCorrection.d.ts",
+      "size": 661,
+      "sha256": "6f8a7d41d21565258efc28717d54d15534f706c5e90b400be997290a19b7065f",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/dist/memory/SharedLearningMemory.d.ts",
+      "size": 1930,
+      "sha256": "75ef9158c10f72051bea4d6566ac98320e46c77c3006b31d96bea64347fbf6a1",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/dist/memory/SharedLearningMemory.js",
+      "size": 2803,
+      "sha256": "fbc6aead28945af571113e54c748ca3eeb936776a6c5209cc0104d492095754c",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/dist/state/FiveSpaceState.d.ts",
+      "size": 1684,
+      "sha256": "69ef42ec6a1ffd37daa47499dc0f9ab25617e2f792ab5f25f7f30302498132ab",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/dist/state/FiveSpaceState.js",
+      "size": 2167,
+      "sha256": "5d4b0992fb474669db66f0141bed15be0f34a4489bf0f094bf06ee6f6d57c3b2",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/dist/graph/ReciprocalPathResolver.js",
+      "size": 2356,
+      "sha256": "a5667034deadfabfece577c34ce77cff46cbe047482e89117edfaa56afd8fdbb",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/dist/graph/NeighborResolver.d.ts",
+      "size": 429,
+      "sha256": "e6903ea084dd9c55408abfe2aa91a1530985742430b876b4857e7e44484b318a",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/dist/graph/ContrastResolver.js",
+      "size": 1379,
+      "sha256": "89d7a2e82bc3ec3acd8b78c168b8875a1fd37fd1580fe26069d7828822714d04",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/dist/graph/StateGraph.d.ts",
+      "size": 934,
+      "sha256": "8a345ba89813c9af96b16d518df76e548ff253549c9956fe3ad7300db6ef77be",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/dist/graph/ReciprocalPathResolver.d.ts",
+      "size": 704,
+      "sha256": "cd7e5e2b0b77fcdf3f0f854d1c674caf347909e5c41dc39f01a28de3462f4389",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/dist/graph/StateGraph.js",
+      "size": 2452,
+      "sha256": "d678f2ca03844775b383df0ee8a14bbafed1902ed25bdfb6ad6a75e16ce71363",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/dist/graph/ContrastResolver.d.ts",
+      "size": 595,
+      "sha256": "ba3f55ae0cda3d41cd0aa88a054b9837feceaee861e0719c8b0a2fede9f07ce7",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/dist/graph/NeighborResolver.js",
+      "size": 1470,
+      "sha256": "5de418d195be62459fb10648683c98e9b85d8a4250eaff6510218b637cb9d532",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/dist/channels/CircuitRegistry.js",
+      "size": 2555,
+      "sha256": "2e53ccfb6a15b3b18c1222864ecffca74a958bd7ff1d5d8f62e967725a96746a",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/dist/channels/ChannelProcessor.d.ts",
+      "size": 389,
+      "sha256": "202d904d1b629951953b1dfaae8d5ffc0a31bbc2f673f9090a82b64539cd116c",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/dist/channels/ChannelProcessor.js",
+      "size": 1734,
+      "sha256": "60e5812b82f1c54f9be66c3534da560098c4070e212622e46267cfd541fff8d7",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/dist/channels/EmergentChannelFunction.d.ts",
+      "size": 755,
+      "sha256": "5939d37e9737443298600659948efe21b10a0e6db80ed21801fd104740b8ecb8",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/dist/channels/ChannelRegistry.d.ts",
+      "size": 618,
+      "sha256": "4d852d1cad56af37e7f99df2b315e9429db92da5c501582a533a583ecb0e2608",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/dist/channels/EmergentChannelFunction.js",
+      "size": 1840,
+      "sha256": "16678dc3cd87c5d3380f64334a26935ee4f07c8129a588acf8051da117c9ac45",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/dist/channels/CircuitRegistry.d.ts",
+      "size": 482,
+      "sha256": "5984d27740dabdcea423a359e7bac1aa5913dd121e28a8513a6f06f2b1c3dbec",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/dist/channels/ChannelRegistry.js",
+      "size": 9705,
+      "sha256": "ad0f8abaa447ceb60da18e8b941059eac988822f28e2814afa90e7b9a73f05b7",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/dist/routing/AttentionRouter.d.ts",
+      "size": 235,
+      "sha256": "93e07009b78a53ed419bc4dad96af40bc7a4c7e1167f705d12b5d99006ffd303",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/dist/routing/CoherenceRegulator.d.ts",
+      "size": 228,
+      "sha256": "5c58e4f48a91b2e9a6f8e0fb712097f7c464d6621d5c9063699ba869f0f337a1",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/dist/routing/CoherenceRegulator.js",
+      "size": 1513,
+      "sha256": "d078c5da8c47b4369064cecd73c565b51e3c9ecf1a85f7294de62397ec515259",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/dist/routing/AttentionRouter.js",
+      "size": 1051,
+      "sha256": "20269a719a079132349a9a74206783c1cc2491245264f1b19bc0c03af6c8df88",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/dist/routing/MonopoleController.js",
+      "size": 3219,
+      "sha256": "f927b888b1b8b395ecaff8bdd48905283b99343d1233fa35ed9aa650dfa6de08",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/dist/routing/MonopoleController.d.ts",
+      "size": 372,
+      "sha256": "29c53aae8cafc0b99b1b7a737cca37fe4d77c30e64c03ddbf43063e6028527ab",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/dist/persistence/JsonSnapshotRepository.js",
+      "size": 1322,
+      "sha256": "2eef2c4c87f0ec78f7bb435a649647af41521911f0aecc0409fc278581de0de0",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/dist/persistence/JsonSnapshotRepository.d.ts",
+      "size": 350,
+      "sha256": "f31485c668227ed8257b9dfa89169842fd5186275784ae9900c39af2bc374c28",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/dist/recurrence/FibonacciScheduler.d.ts",
+      "size": 393,
+      "sha256": "188835830a8d9a0a51b477d615e79909c630bdff3e772fcce82e22f9a9dc30f3",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/dist/recurrence/FibonacciScheduler.js",
+      "size": 1431,
+      "sha256": "4f904df043298b917328c3e4faa423e58556d4146f4982b570dac8485c5071b0",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/dist/recurrence/RecurrenceQueue.d.ts",
+      "size": 438,
+      "sha256": "5ad708d51664ba1bd8672bf0dadbbc7503d4d0f2c074231046e9793877380e86",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/dist/recurrence/RecurrenceQueue.js",
+      "size": 866,
+      "sha256": "95f90d858b8d84c590e724ab662cd9d9e432abebf622d7a5d5312b2af08f421b",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/dist/semantics/SemanticAttractor.d.ts",
+      "size": 462,
+      "sha256": "76438d76138879d3fb476611d43951dfbcb95f7a2b01e01e2e235d18f094796d",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/dist/semantics/SemanticResolver.js",
+      "size": 1490,
+      "sha256": "e47e45e8c0943f30b0630048c36111470194e1eb94f3d326b2ccec01f6ddaaf7",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/dist/semantics/MeaningExpander.js",
+      "size": 1659,
+      "sha256": "5130838a254787503643fbaf21ee55c2d873cde6bf7360554e3709ec44b103ca",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/dist/semantics/MeaningScorer.js",
+      "size": 3123,
+      "sha256": "f9e582d0e4b827760379d11f42ce35d94db6f1d04ac7a2df15787b826953ca40",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/dist/semantics/SemanticResolver.d.ts",
+      "size": 462,
+      "sha256": "f3e3697125f9aaaf29505b56621ebb54720bfb893acf35ce4448edff41f5a77f",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/dist/semantics/MeaningPruner.d.ts",
+      "size": 274,
+      "sha256": "cbddc5c76e28f18f72b1d40d064fc80d7f4fac3f0f3916251701c88139e07f01",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/dist/semantics/SemanticAttractor.js",
+      "size": 2724,
+      "sha256": "5f43a59f1c851d10078c5d8016028ec0095fed563983e50f7bb2c01055dcb257",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/dist/semantics/MeaningScorer.d.ts",
+      "size": 550,
+      "sha256": "2ef91dafde356551aa4a7485cd92b0330e0ba2fb76540d8cc63ce7130d0dc11d",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/dist/semantics/MeaningExpander.d.ts",
+      "size": 485,
+      "sha256": "7366f3075a7c6c76b35be9e49c413ebfa5d123bbd51c4a6ae24e4d2f96628905",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/dist/semantics/MeaningPruner.js",
+      "size": 1350,
+      "sha256": "3f76d2c2b60da0bf5cc530d44ce8874e98d76bcbcab6494899c85d6da756952b",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/dist/mesh/LearningMesh.js",
+      "size": 5566,
+      "sha256": "97e72a8d8a987c4305c3389c9da3e9be5bfa4f04e487b32d3e8c4d7615cc6365",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/dist/mesh/KleinMeshRuntime.js",
+      "size": 2682,
+      "sha256": "9dfc36339d192fa5b69b2435d2d56cd4b502aa050dee81014b5aec99d788a064",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/dist/mesh/KleinMeshRuntime.d.ts",
+      "size": 971,
+      "sha256": "3c49a0873ea44c043f6b7bf948983c110a3056aff96884e66e6fbb6cccd6e05a",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/dist/mesh/LearningMesh.d.ts",
+      "size": 1913,
+      "sha256": "47dab61a3f7765b1e36d23f6f4f00cf6b8d0eed5b6c3e2f1a77a6a860538552f",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/dist/mcp/AuditLogger.d.ts",
+      "size": 295,
+      "sha256": "75b71f57bea51421cccaadda81651467a326c008d4c31be7ce8c6423bac8804a",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/dist/mcp/MCPHub.js",
+      "size": 2356,
+      "sha256": "adae311c9d8f86bc13e47f33a16d01f07cb38ee21aaa71abbe48cb074aa80588",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/dist/mcp/MCPHub.d.ts",
+      "size": 399,
+      "sha256": "3bd0d5f2e73fc53d4190d95b2bd7c6b7e5c54a8b9585c3fa2877ce50221882b7",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/dist/mcp/ToolRegistry.d.ts",
+      "size": 340,
+      "sha256": "73404e26be1d2ec4a4ae5868def8ee42e086344a87c196dd2a638a006c9d68f0",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/dist/mcp/AuditLogger.js",
+      "size": 430,
+      "sha256": "336ceae705e65f7b33d4404abbbf3640b0c9c9cd832e6f55a4d67c54472ca990",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/dist/mcp/ToolRegistry.js",
+      "size": 542,
+      "sha256": "2d5eff1610e84e969d9c78911c22b47709464a4d7c1c3bd7b0b74f9aa8dea00a",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/dist/mcp/PermissionController.js",
+      "size": 534,
+      "sha256": "c62e0edf907feb24ac7529b7034442ad545938bac0b1d0e84c8c73eca28e23c5",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/dist/mcp/PermissionController.d.ts",
+      "size": 271,
+      "sha256": "dc375e7ca4b00c874da86d1e423984e59efd79a5ee52ba5aee46b8041387a5e7",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/dist/models/index.js",
+      "size": 318,
+      "sha256": "fb3492604fedb591ecc119ed563871ac1267e49d2db8c8cd65fea5a1356a28d4",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/dist/models/index.d.ts",
+      "size": 11689,
+      "sha256": "bcace14d8fc6fff1697c9c7f825d2415864bafbe29b8ffef14d29a4950f3ed72",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/dist/ato/KleinStrongEquivalence.js",
+      "size": 2998,
+      "sha256": "39eaf721ee32a9aa319bb142f054c128cb5ee3c6ccba1faf4e03c4d931fb231d",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/dist/ato/ATOEngine.js",
+      "size": 1789,
+      "sha256": "06495d535b57daa9f9b109645c61d75bb320fab293edf43a6582972899a4e412",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/dist/ato/ATOEngine.d.ts",
+      "size": 989,
+      "sha256": "3b039fe74bcde6a7c95726ed1f6200b6819a016af83ed1c515eb822190874de6",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/dist/ato/KleinStrongEquivalence.d.ts",
+      "size": 993,
+      "sha256": "2baa56216232a4d4c5235f929377602d7e81309aedc3a1cad40034a22a50aba7",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/dist/astrology/GeonatalCalculator.js",
+      "size": 8489,
+      "sha256": "7625ef880c6dffe6d77d4a3d7b24bdb7172212dfd5c5b9e309140b706ea6866a",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/dist/astrology/GeonatalCalculator.d.ts",
+      "size": 1599,
+      "sha256": "4ee5a2a1775df865ed8e7f3e788f4d61c7ea4586f51351d9c0b442d84fcf2cd9",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/dist/klein/SymbolicValidator.js",
+      "size": 1221,
+      "sha256": "4abf1ea4a422cd68ded50b78ca8e287ff4b8c29bc7f12c73d7a34e2baf5c779f",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/dist/klein/AutolingEngine.d.ts",
+      "size": 499,
+      "sha256": "3b8132445d61aa32322c5453cc12ff06bc23d8f161b941dc09a449d60a6431d8",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/dist/klein/Paraphraser.d.ts",
+      "size": 244,
+      "sha256": "4f9fdcdcee87044c23b0e7c2ca924b5196bfb5ed85bef167f1c3dcc6c87eecf0",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/dist/klein/Paraphraser.js",
+      "size": 992,
+      "sha256": "f92ef9cf0875b01412660b5f7d3ed62c89ea41cadda20d6ef65c3717b0042954",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/dist/klein/DiseminerEngine.d.ts",
+      "size": 392,
+      "sha256": "7d040a35f08ba38ce7fbf07263d8c21ddcc16fe6d14e9077f5f5e3de0b94d30b",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/dist/klein/DiseminerEngine.js",
+      "size": 2223,
+      "sha256": "584b032e3a27eba460f68c7575ab0fd102f6386c3e6d1282e467eb7740beb5ce",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/dist/klein/SymbolicValidator.d.ts",
+      "size": 343,
+      "sha256": "b6deb6c0566e1271c87e7a0b367fe1b23d0e4bb9defffaabb549782f4c14dfce",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/dist/klein/NarrativeGenerator.js",
+      "size": 1443,
+      "sha256": "045cb4dbe27c17e518686dc17cc62a9254cd68d96172a8b1204bf20dd47eca49",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/dist/klein/AutolingEngine.js",
+      "size": 2079,
+      "sha256": "bf0bef29387df5dd63b297fdb5ae5577b8798d2fd82d878c7b10934f38f8cb86",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/dist/klein/GrammarInducer.js",
+      "size": 2072,
+      "sha256": "a1f06aabb1ad21dffa3e5d335f31aac39fd4e4dd6b20a8747ae1f56f4bd5d99d",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/dist/klein/GrammarInducer.d.ts",
+      "size": 579,
+      "sha256": "32dfad44d4d3de4fb85759fb4ec66bec98d5eda1d8b7f17f82c7872eee2c3976",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/dist/klein/NarrativeGenerator.d.ts",
+      "size": 247,
+      "sha256": "b3390eea579cc7533a6755025d8f86c7317ab76ea71db87b79d9dafa1dd03a46",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/dist/topology/FuxiEncoder.d.ts",
+      "size": 828,
+      "sha256": "1138448e5bb4c49c328e13e3edf8160b34cf7a3f0b99c3bf27cb234023bd53d6",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/dist/topology/HammingResolver.js",
+      "size": 954,
+      "sha256": "860e991d28f63720a383601d6f0b8a6bc13e77de6965ff5c5ab1f2109eaaa2a5",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/dist/topology/FuxiEncoder.js",
+      "size": 3747,
+      "sha256": "a73e0b5b2879ae2b2c9d33f0945575bec66c23e8c925629f39e5c5f9fe7f1ca2",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/dist/topology/ConnectionGraph.d.ts",
+      "size": 485,
+      "sha256": "c9417aa5bc717a358959395b4a7381d85d9cc23ceacc26cb3573b983985915ce",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/dist/topology/CrossingResolver.d.ts",
+      "size": 658,
+      "sha256": "5c0c3ed013a7b4de2c46644f950623e3bb925c16758939e7683d5e8bb206beb5",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/dist/topology/CrossingResolver.js",
+      "size": 1644,
+      "sha256": "1e28f15d87e4d0341d4656a2093d99b8c4fa973646ac9e99d1f3c7b416b42efa",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/dist/topology/ConnectionGraph.js",
+      "size": 1575,
+      "sha256": "26720a3f3c4c2d9a2743b7d8e1c6702a74036bfcaa593c720fcb5cd3b6fcf8c2",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/dist/topology/HammingResolver.d.ts",
+      "size": 361,
+      "sha256": "c4913c3802ac615a53d15db7231f461ce0203d51026e01e00c3011b1e98c90fc",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/dist/cli/synthia-build.d.ts",
+      "size": 54,
+      "sha256": "c4b523c7b13e831bab7f32e33d402b7b8ff93538790a132ec66d9f8f4cfc0145",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/dist/cli/geonatal.d.ts",
+      "size": 49,
+      "sha256": "e9efbbe709616767d66484e381d4ed83ac4af36907f3f9ed777f4ce2b7497dfc",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/dist/cli/synthia-build.js",
+      "size": 3797,
+      "sha256": "d59fd6495b6f74815a9ffdb70ca67abbc82817a110b30a25a80d18137f697b53",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/dist/cli/geonatal.js",
+      "size": 988,
+      "sha256": "554f913fc83777609e31934fce6dafe290818295bdfdef0f3e92dd66e0150c27",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/dist/rag/SourceRAG.d.ts",
+      "size": 951,
+      "sha256": "2a7a47a3a396c7fdf39332f4b32b0ccd7c27f83be0efaa93b8ab5134297af72e",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/runtimes/isohuman/dist/rag/SourceRAG.js",
+      "size": 5801,
+      "sha256": "b80187fb7f362f87bd8d06f24271abd293cb0da03691e3ba3c496191419b3841",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/web/public/favicon.svg",
+      "size": 322,
+      "sha256": "c99017b48ddc1993e02f24db60eaea5a39661b23dbbd2e8091fa982ef65bc5af",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/web/src/main.tsx",
+      "size": 223,
+      "sha256": "7b50e87aea9f82442f456429a13ead8f31d42bd4308e71c604a527338775e12b",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/web/src/api.ts",
+      "size": 8268,
+      "sha256": "b66b36eee7d585954bc921e025b5df8db251f9fbd67be1b663d341242529c925",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/web/src/chinaLocations.ts",
+      "size": 7037,
+      "sha256": "51ca15b37e26ac581290a6177cd0442aec495bb9541eb735c76ac77e1565e7fa",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/web/src/styles.css",
+      "size": 19183,
+      "sha256": "369cdf914fc4f181e48630d6a7314d4bf8015c7c243e28a038c61376046ec3c8",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/web/src/App.tsx",
+      "size": 31952,
+      "sha256": "50a988f5422ce50605e51029e656b0fbcfcd0a48384987ec05f8c45d074c9fb5",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/data/source-learning/ra-uru-hu-human-design-black-book-1991.notes.json",
+      "size": 416062,
+      "sha256": "42e162c1b430c3f7cef6ebfe3d3c45bf742f98a98711c5106040622f3695b133",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/data/source-learning/hua-ching-ni-book-changes-unchanging-truth.notes.json",
+      "size": 3171486,
+      "sha256": "83cbc348dc24920f36a810289add7bfd53c0c544ffb5b1503e2af81d5df6e2f5",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/data/source-learning/ra-uru-hu-rave-iching-line-companion.learning.jsonl",
+      "size": 6700373,
+      "sha256": "1fee4a9a4e068144e0272a868b7d99251cad60ed556d488fb946582235a046ae",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/data/source-learning/michael-servetus-gnostic-book-of-changes.learning.jsonl",
+      "size": 6401600,
+      "sha256": "b2090e7fc4fef789579a8a593c82bd6319acf29c41809b36b15330b181128cd6",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/data/source-learning/michael-servetus-gnostic-book-of-changes.notes.json",
+      "size": 5218137,
+      "sha256": "cf51616d8d281ac624b7909f39ff03ffb61fbadbee2f66b2d76a7acb82f4c809",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/data/source-learning/hatcher-yijing-word-by-word-2009.notes.json",
+      "size": 2507287,
+      "sha256": "4a10d631a2214db78da9b79931ab250f91fed5f7c13795bccd6c69241eb66172",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/data/source-learning/hua-ching-ni-book-changes-unchanging-truth.learning.jsonl",
+      "size": 3932581,
+      "sha256": "20b41a6d14573abb5ff77909407221ebf7d13a50a9235212f82405c83f250519",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/data/source-learning/ra-uru-hu-rave-bodygraph-circuitry-2001.notes.json",
+      "size": 815836,
+      "sha256": "1b5d86d126d1bf56502090e5bc75d453fdde16433076eb959c0c8d18a90f66df",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/data/source-learning/hatcher-yijing-word-by-word-2009.learning.jsonl",
+      "size": 3018884,
+      "sha256": "c547471bda4a979ba327e88550b244186fd9f8c7a75fd444ec7230041925f09b",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/data/source-learning/ra-uru-hu-rave-bodygraph-circuitry-2001.learning.jsonl",
+      "size": 994463,
+      "sha256": "9e1ba873879aab3e7ba06eafaae0a6d1c450334c2ae799559ffb50bb1f3cb00f",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/data/source-learning/preview.html",
+      "size": 659014,
+      "sha256": "09a8c2e227f55c1ced21a0896184b776ab01fae207d3f26cc382da95497fc1b1",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/data/source-learning/ra-uru-hu-human-design-black-book-1991.learning.jsonl",
+      "size": 516095,
+      "sha256": "c1e475a84d380ec23a2b9ea9fa8454a6386498df066963c724265f239ba829c9",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/data/source-learning/ra-uru-hu-rave-iching-line-companion.notes.json",
+      "size": 5479122,
+      "sha256": "a4485cb4ba73d1c3894235604a064f823226d3e2c4a3e61a9d9fe91a61b8b06e",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/data/synthia/mesh-assignment.json",
+      "size": 2659,
+      "sha256": "db87a519f77f2596d327dadb609cf967307195a5d70ecb750654047759965677",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/data/learning-test/black-book-v1.html",
+      "size": 30858,
+      "sha256": "1b2f17de030edfe4ce26ac8e698f775cf4acf628e1c7f7e5abb3290b70a319e9",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/data/learning-test/black-book-v1.json",
+      "size": 59958,
+      "sha256": "8320080602683c979ec69aee084f9d46275780af690cc1d74f1d01b99678159e",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/data/empirical/holdout_trials_blinded.jsonl",
+      "size": 375800,
+      "sha256": "0ed315d2a17f559ff833805365c3d434959b5b576eafe68d6684840b8efd1aad",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/data/empirical/prospective_prediction_registry.jsonl",
+      "size": 239,
+      "sha256": "99ab971f997080bf44f1c65e499c23316c341770c2a8ab10cd9dc28a3e5b36e9",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/data/empirical/public_figure_manifest_summary.json",
+      "size": 473,
+      "sha256": "d84b86177046fbdfbf156c76cf95c3094b205844548bc3cdedc87dcda04ddfc8",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/data/empirical/public_figure_manifest.jsonl",
+      "size": 6208722,
+      "sha256": "637df322ba6bafab3638eed39eaa1cdbc05014833e325afd2e6393f51d00016e",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/data/empirical/holdout_trials_answer_key.jsonl",
+      "size": 66800,
+      "sha256": "2414b0fb3dc575352b830845d48f5712cf7626607ae097ddc03e6ae394ed359b",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/data/synthia/builds/generative-mesh-v1/rag-index.json",
+      "size": 35655865,
+      "sha256": "3822438d1328a774b517b6e6b237528902e656c4508a3d8df7abe2f1cb285dbe",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/data/synthia/builds/generative-mesh-v1/learning-mesh.json",
+      "size": 50946,
+      "sha256": "d051fc3d9f23c66e38ba5e657ee422083317f657637a409a2a3fd023c4fbad4c",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/data/synthia/builds/generative-mesh-v1/build-proposal.json",
+      "size": 6842,
+      "sha256": "0d8b78df7476445a5552430036f6ed2ca3b63766d715ac4a57bcf3f894e99c66",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/tests/fixtures/narrative_cases.json",
+      "size": 3685,
+      "sha256": "51cc3b992f28024f648493e6337c23b1244b96cf83f7c2946aca4e8d27c72a8f",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/tests/fixtures/timing_cases.json",
+      "size": 799,
+      "sha256": "41bcda37ac54592a1eb4f07f9ae365274207656ea87e4b031d57434231a31ab8",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/tests/fixtures/public_figures.json",
+      "size": 4411,
+      "sha256": "35c740ce9453db94bb06604ce0c0e9ba62186241b694c7dede0ee1f62abc77e2",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/tests/fixtures/empirical_forced_choice_demo.json",
+      "size": 669,
+      "sha256": "056353cf0cc133b949d916d3c61f08ca8b18ef5de8fd9f7c710dc65c22a5e65e",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/tests/fixtures/relationship_cases.json",
+      "size": 864,
+      "sha256": "5177e898d81225ae8aed23a7384022e3b0470124b94020d6b13a964bef853879",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/tests/fixtures/relationship_narrative_cases.json",
+      "size": 3033,
+      "sha256": "d1e8ad39e449a323b454c94b15f9597ca61ca99764910aaaafaf4699c9960be0",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/tests/fixtures/chart_cases.json",
+      "size": 2863,
+      "sha256": "24496b1d9af2bc6f1c1f3d89c3793ca2630320a68228e79baee692b6f942928a",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/tests/fixtures/timing_narrative_cases.json",
+      "size": 2863,
+      "sha256": "cf3e06f95a0930b96b82d96877b9b8376ed329115cabcc081cd74567a80fcbd4",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/docs/research/human-design-source-digest-2026-06.md",
+      "size": 9540,
+      "sha256": "8adfda82c084acaed4237189b8ec675b325681cf72563a731b0d8b095c9da813",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/docs/protocol-freezes/human-design-accuracy-v1.freeze.json",
+      "size": 452,
+      "sha256": "2722a498c0c022f5f182480f0c30644c446f6cba2c539394f4d97bfcec516335",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/docs/contracts/relationship-package.md",
+      "size": 2940,
+      "sha256": "9b38a8565a2163ff98b29fb36ab12b7e06450a4b0cde49f0ac5a6b1bd5930272",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/docs/contracts/timing-reading.md",
+      "size": 1105,
+      "sha256": "d740f87c509ff0cfb7db616395ee08904671b3d9a3259eda53feda62cf509573",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/docs/contracts/empirical-trial.md",
+      "size": 2579,
+      "sha256": "5292a476adbb6b8099b963816c8f13f42b3e58647b59d9e88c1e25b04b1ae238",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/docs/contracts/reading.md",
+      "size": 2609,
+      "sha256": "ba02018732bca3a98910a2b62fe5d76f3d05100893b09111fd66bb2f42a538b8",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/docs/contracts/uncertainty.md",
+      "size": 2858,
+      "sha256": "1399d75ef00f59543dfbe7f58a83f2ac99a44d5bc60652bcf70962cbfd7e82fa",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/docs/contracts/output-depth.md",
+      "size": 1603,
+      "sha256": "0cd9a48993202d330e6ae6b3ee879eed09de0748376b1dec7d5a2d2d02f44ffa",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/docs/contracts/label-predictions.md",
+      "size": 868,
+      "sha256": "e46082844cc718e486ea50d83f6c9790aa25b6424368643a54cd69f397682c8c",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/docs/contracts/relationship.md",
+      "size": 2709,
+      "sha256": "f0a070a21a9c5c72dbef2cc2d2cb5a6caff7dd0d6ad0fe00a1d178373ea2d482",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/docs/contracts/llm-package.md",
+      "size": 5847,
+      "sha256": "ae5674e64ea3dd04b5d7d7d7c48902bee448d81405e9eed83b69b4ecd0e9f44c",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/docs/contracts/timing-package.md",
+      "size": 2011,
+      "sha256": "71463a94e528d8a5aac2dd02e4e6702693b9332fdded72206fda29bb48e78c44",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/docs/contracts/public-figure-manifest.md",
+      "size": 1601,
+      "sha256": "870ee32429537f3f48494d832db955a47a7f8f7d5c65b99a82b4f22ccdf39839",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/docs/contracts/timing.md",
+      "size": 2025,
+      "sha256": "dc4c8f16955ab93136536ef7d03751a768b6b46f1cfe3c1c70b351872727a866",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/docs/contracts/relationship-reading.md",
+      "size": 2045,
+      "sha256": "03945908566a11549df9438ea833b2c4380e7baa1921385fc1b974bb46a2276a",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/docs/contracts/prospective-prediction.md",
+      "size": 1208,
+      "sha256": "002c18c17dfdb057f36ed2a34da3c7985b95fa3c3eba8d9ea59877902cc467dc",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/docs/contracts/chart.md",
+      "size": 4471,
+      "sha256": "9172205674caf371d0f7f63377a26ad5571928ae115d3461cafb74c5e2097799",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/docs/contracts/session.md",
+      "size": 1981,
+      "sha256": "1659cda6c40f3e5f520f9237ebace2867f1a546e7cba9a465398a352842eb945",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/docs/contracts/web-api.md",
+      "size": 9070,
+      "sha256": "e1a9fe16ffc85751b4dafe6c4f262ac5bae9fa8c4afeb66c7a9b24c35f092a7b",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/centers/root.md",
+      "size": 1076,
+      "sha256": "7ce1179bd9e499ff92a86a86082e1bfca9e45d5f96ed436fc44235d5a031d82a",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/centers/spleen.md",
+      "size": 1070,
+      "sha256": "89e0b51bd85f0bf8f23e36cec4d8fbf69296731f74d9d2926ba0809a0867ce31",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/centers/head.md",
+      "size": 1088,
+      "sha256": "195f48470da1fac0146cad0e80f72c044fbffc771f3817b609fa7b13af1e2a85",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/centers/throat.md",
+      "size": 1055,
+      "sha256": "bb92fa58f460f7888150bc41fd7e3f314e811d8cd2742675b42692a783f8fc8d",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/centers/solar-plexus.md",
+      "size": 1064,
+      "sha256": "92032c2ae3a34c81451e7eadf2dc8a09ac50466854995f82b51de40c505cac9b",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/centers/ajna.md",
+      "size": 1100,
+      "sha256": "bd7c32c474b271a058e38275b31ae7eaa80d59c205a55d4f97ca4182ba390895",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/centers/sacral.md",
+      "size": 1067,
+      "sha256": "8f6551e42e64d4f19ea3bfdf876c38a18fea3f9390cb7bc8d63cb842336c8eee",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/centers/heart.md",
+      "size": 1097,
+      "sha256": "360d188c1706f0864fbf5496b113e83bc25fb067e6069c4375a7f6a955e6218d",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/centers/g.md",
+      "size": 1074,
+      "sha256": "2ec9be1fb8b706d4de7cf3acc1625249fcc0a67adbb420ad84b143bfb93fb8c9",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/authorities/solar-plexus.md",
+      "size": 1137,
+      "sha256": "7ae243386a0441f7cc449025dd38aa45d9fe8b375b6e5b032a2afc3de99f9c72",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/authorities/ego-manifested.md",
+      "size": 1131,
+      "sha256": "830c518cf9ea52573c59b1543a0a930770c14483ea3a221afc2ea513ad24c822",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/authorities/splenic.md",
+      "size": 1113,
+      "sha256": "f9c1350ec4a5e2340463383943b83f619b07eea151c62676ec4ecf73c86e474f",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/authorities/self-projected.md",
+      "size": 1101,
+      "sha256": "6bdff793277560ff986db9e0179816638028c0ef31db4b345a7c49e0f583dea5",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/authorities/ego-projected.md",
+      "size": 1110,
+      "sha256": "d75eab33977420e5752956fd2f3eb800d2c575d16497cdb8100ca8b3098d1ac3",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/authorities/sacral.md",
+      "size": 1106,
+      "sha256": "c1643118c38ce70ae2b37ea89d1a202bb7b8eda071bd23d6e9583cd9b17bfd7b",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/authorities/lunar.md",
+      "size": 1098,
+      "sha256": "25c041e1a388cd5a698d2bf51b3c11f3004b7f874ccaf3e39f1aeef60d1cc8e3",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/authorities/outer-authority.md",
+      "size": 1107,
+      "sha256": "2eadce0250214f219ea51545ec3fed84252fd200dabdcce52680c8bd26eed8c1",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/channels/06-59.md",
+      "size": 1274,
+      "sha256": "4dbc29b93c68c19df0b3f49b93c01c879ed6abfb3420af6fc2e71817cc36a109",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/channels/05-15.md",
+      "size": 1306,
+      "sha256": "9abc3288cc7c1f57aaaceebd10e94c47f143b4cb3f3f183f963519e64de8ba6c",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/channels/42-53.md",
+      "size": 1458,
+      "sha256": "a31172f19280197aab81b28951296c70df76375fb93158be2a03ca9199f839b6",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/channels/12-22.md",
+      "size": 1214,
+      "sha256": "23616be557426a08f53291b849913b647cbd87b600e4fa52f0d3f3734c2a8223",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/channels/04-63.md",
+      "size": 1280,
+      "sha256": "c9abe12dfb4aa264949c813afc886fd16588473a443c1460e31792a46b52ccab",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/channels/02-14.md",
+      "size": 1279,
+      "sha256": "ea58a6666e208615adb74549d07915f673967bea0aa7201ed1f1af65df5d4797",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/channels/16-48.md",
+      "size": 1298,
+      "sha256": "3dfabb8f44dca7d55dd8814defdee2d71d2b0b64b672757ec34bf6eb979095fe",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/channels/28-38.md",
+      "size": 1457,
+      "sha256": "0218362310a8c3e43ae45e82e2eaa3f3da2e56d7d96a724208e390915d912df0",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/channels/10-20.md",
+      "size": 1182,
+      "sha256": "6ee8ca6f831c7bd34d41053aa7d15927b63e7adc2c868b12cc883dc2df17eddc",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/channels/24-61.md",
+      "size": 1230,
+      "sha256": "8beeb1e873b4a99ce5a127ae8f6dcdb6b41a2258e4e27539a5857acc4a727bcc",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/channels/19-49.md",
+      "size": 1323,
+      "sha256": "82afcb73dca00c9701f865ad643742748266ccbb4c9d5e54eb34f07547fc7b63",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/channels/07-31.md",
+      "size": 1221,
+      "sha256": "9aa6be39ec1df614ad11a62df15ad21f4e648e2fd64bff737a67a6de1c0f82c6",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/channels/17-62.md",
+      "size": 1243,
+      "sha256": "6ed46500cc94b85fc9936cc4fd2f2b805469967b80acdb41e909bfd8d7197024",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/channels/10-34.md",
+      "size": 1250,
+      "sha256": "d660c350aa33870d233dc28ac05cb0f3e3a30c3895b4377761557c9e9194ee93",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/channels/30-41.md",
+      "size": 1472,
+      "sha256": "56fc744648fec9d250566124fc9d7f2355792b74aaf6acde3e774a9755b6525f",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/channels/23-43.md",
+      "size": 1216,
+      "sha256": "bdd9b83fa25209d7f4a08ba35747c241e0a2e0d12750b07f35f2fe918d098986",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/channels/01-08.md",
+      "size": 1415,
+      "sha256": "afd7fefaebeae5b5fd3c01a5942298c074a36b677ffb52c0dbde613371ddfee3",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/channels/34-57.md",
+      "size": 1436,
+      "sha256": "6bdb2471eb8cb6c5cc324915b5dcb21de108682aa6c9d0cc5a85791f0560a3b5",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/channels/13-33.md",
+      "size": 1314,
+      "sha256": "c6b2dbbcf44ae49fc28dc4ae5365fd5beceb43d8880bea7537545a3dca891f4a",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/channels/25-51.md",
+      "size": 1147,
+      "sha256": "da8ad421110cb4cb56d44e7193890a36eeab634bebf96af564372678d46e6d5d",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/channels/11-56.md",
+      "size": 1215,
+      "sha256": "3583d53b8a7a6e3c2fa59ae9df10ec71fd713a7f7aff8e61ca9501f19fd5671a",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/channels/39-55.md",
+      "size": 1455,
+      "sha256": "94cb1b9a3836650f03418347b3783d906d0ffdb1b3326f88b7741f27e4b4fe7f",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/channels/20-34.md",
+      "size": 1265,
+      "sha256": "239350e36e40c18042ce44fb3431d8a7ce012e26a338ebcda2825bed0a9e2647",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/channels/26-44.md",
+      "size": 1455,
+      "sha256": "580b59a574801fbb3e6c58717443765c0333e8941e33fae216a8faf49266698f",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/channels/29-46.md",
+      "size": 1452,
+      "sha256": "4cbab38a6c9371e8a1e5122c24bd23b4104e4b8be79a3f4886ee08ee65509ae1",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/channels/27-50.md",
+      "size": 1461,
+      "sha256": "dd632aca5e7f3ebd87b356a78b20f37a85ef783d0a8609db8710b20541dc30c6",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/channels/20-57.md",
+      "size": 1240,
+      "sha256": "1233ed8214aaf8e77911538bb8244f0001622a89caa6481c885d39be72f83e3d",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/channels/03-60.md",
+      "size": 1253,
+      "sha256": "073280a576e4c0ae17894109202ccc016848e301385bbc5f947cfc563454162a",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/channels/47-64.md",
+      "size": 1478,
+      "sha256": "fb90d14babf0a0aa2b6ecc2834d616369cd5f469245dc583fdfbcb9c73ff4406",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/channels/32-54.md",
+      "size": 1477,
+      "sha256": "6e7cd635494cc555d7b01cf05be9c14e73b04ae000d3ea5d2a775e4c5c0451ae",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/channels/37-40.md",
+      "size": 1458,
+      "sha256": "577e58cfe24903c56555e3976afaddf67d63af7c1684c0d1d97bd1f098e58982",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/channels/10-57.md",
+      "size": 1223,
+      "sha256": "4201c3fdb7a5a4a16b755030f42b8127e499c80ee84ac2eed74ef992d2717703",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/channels/21-45.md",
+      "size": 1253,
+      "sha256": "d07fd8cd384a160bd2cb6eead696da298226e4efa79ce9cf23cf04dba754be3c",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/channels/09-52.md",
+      "size": 1231,
+      "sha256": "6596efaf3ef530c9a090bc573d59ffed0ccf2fd9c6b8e9a8a6310a813162136e",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/channels/18-58.md",
+      "size": 1248,
+      "sha256": "e9941324e27a80904e1d822c4eefd1ba6d95be287fe753d63c342090029c7418",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/channels/35-36.md",
+      "size": 1487,
+      "sha256": "cdbb3905d132089e11cee22240384aae2d84a96c34bc571dea428d8897616102",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/research-corpus/book-source-manifest-v1.json",
+      "size": 7219,
+      "sha256": "46aca885091ab4ab1d8b9a2d25a648900960a86469bde0b07365048dc2cdc2df",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/research-corpus/dimensions-v1.json",
+      "size": 7666,
+      "sha256": "ca75d464bd5216dfbd0a94b97010f61d533fd8eb3134723ec0d447d464af5f23",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/definitions/quadruple-split.md",
+      "size": 1103,
+      "sha256": "4f30bf544240a947f4e9a340696382c9897319db82b5f3ad28a07f542a3c410f",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/definitions/wide-split.md",
+      "size": 1125,
+      "sha256": "366602097c8146a6ed895b02db0ea4eb40a830fff3cf7594679de6e9f97ce95a",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/definitions/triple-split.md",
+      "size": 1118,
+      "sha256": "eb049e612b6cf0917b6d32c039dd1ee30a4d9ecd9bcddc52ada7472a2387b2e7",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/definitions/no.md",
+      "size": 1087,
+      "sha256": "ccf0eaeacc9adaee93a4af8459937a8d2a7a05aec773cfae178da05345dab122",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/definitions/single.md",
+      "size": 1109,
+      "sha256": "0e84eda1d1546d3816e45cd51cda70c4cf1afeb164e3b12f118ee9cc5bcc9972",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/definitions/simple-split.md",
+      "size": 1103,
+      "sha256": "9efb4f6f2545901e804a09e5bfe483910d90540d66cbc8878f919dd7be1db243",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/gates/10.md",
+      "size": 1139,
+      "sha256": "2bfd3dcf47b75a01171fefcc28ed0067c7e0ba665fd70d7a18dddbfa3a6e7cf1",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/gates/18.md",
+      "size": 1144,
+      "sha256": "4009cf63c46efacd31cf28631172c9ac53aa8bc092447bae084bf4effd989796",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/gates/1.md",
+      "size": 1226,
+      "sha256": "da00bd465f9c7bc33ed0a8e6b8ce0c8a171e4dd3cd778876c52b18ce94274da5",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/gates/2.md",
+      "size": 1185,
+      "sha256": "d942f83e610eee24fedd7ee09924ab3c2c727b99c33377cfbd712ef545613905",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/gates/7.md",
+      "size": 1115,
+      "sha256": "9c89c49393927ca352deb4971d94183c43664eec7056e03567b669dc010f204a",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/gates/36.md",
+      "size": 1468,
+      "sha256": "a7757eee76f8201f3c0ca33005825706aac25187d06282ce22137f47937f76cc",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/gates/37.md",
+      "size": 1464,
+      "sha256": "e1e90e41b15760ab9cfe4ed80d92dc1eeda9f3668d228e20e3b258347b0a38c6",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/gates/24.md",
+      "size": 1096,
+      "sha256": "d792ba847f97dba4c6c72669f64f207642183d57476703c30df5d73cb0cddfee",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/gates/55.md",
+      "size": 1434,
+      "sha256": "bd700be455ded79179e18e5e9e77e7fca563b024bacebd8b698cdbcb6a312891",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/gates/50.md",
+      "size": 1434,
+      "sha256": "ec68f2b24055441b5eea35d3c1bb24e89fc802e08499c260e1ecdf1951a05fa1",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/gates/4.md",
+      "size": 1177,
+      "sha256": "f13d9e2e6c2f8594496a0ed04533ad27921e697954d7ed629449b4f61c17a605",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/gates/27.md",
+      "size": 1094,
+      "sha256": "1c9222cd760f2945790d747b2e6e927133f339a5002ef4c06cf1e485759a12a0",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/gates/28.md",
+      "size": 1094,
+      "sha256": "456983663fbac40788d9f240c7d5d1c9f30b4ec305d471af5c484723a57f46c7",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/gates/49.md",
+      "size": 1464,
+      "sha256": "13cd3405a41b7ab39782bbbb385179de50804c36d92c8d3085adcfdae9faaa9b",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/gates/12.md",
+      "size": 1090,
+      "sha256": "3259775c4e9e1597000482679302d43e4fd29a671136c3f3d73b0bc035c14f50",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/gates/13.md",
+      "size": 1101,
+      "sha256": "2d0b92c99b48db644a02da5693605fe1d48f66aad2466520d3b9a1fdc322739d",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/gates/39.md",
+      "size": 1472,
+      "sha256": "530f739b522dd77fb8bdf0a7f50efe654480c2f69c5269a20dbf1f66c479cfdb",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/gates/51.md",
+      "size": 1433,
+      "sha256": "6514a477c9c0ccb96b5675d881dd7652b33edfa4eb886a22ae6b79e6528864c6",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/gates/60.md",
+      "size": 1459,
+      "sha256": "fb083ccd326e051742e806d9914c62eda3f24bed1a85fa422936ecfdf6f3c4c8",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/gates/30.md",
+      "size": 1109,
+      "sha256": "67e4d2d20a66678a596d75a542bf00117afa632a946b5283c775d422f6aeaa95",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/gates/25.md",
+      "size": 1068,
+      "sha256": "85d8753cceb741c220ccdd136ce59ceaf118fd0477f3bb87c90d8d5169ad01bc",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/gates/22.md",
+      "size": 1124,
+      "sha256": "0fed43f5f6a96b725ae1473a5d0bc926b4bc9e732347df3787789e6e77ce7301",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/gates/14.md",
+      "size": 1167,
+      "sha256": "01228cd083f3e37ca1bb7bd3836ca6e7fb35e7b2e74581f99e8e7687b8768091",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/gates/48.md",
+      "size": 1419,
+      "sha256": "09ef0bb27250f36aa994a6b5808c2d4a4b3b79495e4636f25bf72e518dc00815",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/gates/29.md",
+      "size": 1102,
+      "sha256": "05cc71496077a21179a7ff65103a4407d6c30deafa41f65a84b0f17f5e3d652f",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/gates/41.md",
+      "size": 1462,
+      "sha256": "d229d5a2e079efe5a4418cf5cdae0998f76466e27abaac3b8c2cbd8d335917eb",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/gates/35.md",
+      "size": 1431,
+      "sha256": "f7905bfe56f04d2588ef5f34dbfeb1dc044647a5e80372eca20fd8fc2b373937",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/gates/57.md",
+      "size": 997,
+      "sha256": "8d617828db10bef925e3599141683638bc0fb13f3bb3405e675899745b87b40f",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/gates/38.md",
+      "size": 1466,
+      "sha256": "72488f3a6db1289764d0f275257017aa295333fc910afaecb147a7dc502b15af",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/gates/17.md",
+      "size": 1125,
+      "sha256": "b0b452aa37f9f22827810beea47641c6222180a1248af17ed61040577b9c3f9d",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/gates/20.md",
+      "size": 1105,
+      "sha256": "b67a5be4c5ac003bc80c44b4fd48064c78cafc217969dc0b5bf518ea9b5545e1",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/gates/58.md",
+      "size": 1445,
+      "sha256": "455ffbd2d1d1b1b49e0873a693894948966e4b9e02e59314e0e6029031110622",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/gates/6.md",
+      "size": 1117,
+      "sha256": "77c66ce05f512b18fb9093b3fadfb346538127a9a81fd38cf45a511eb3953319",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/gates/23.md",
+      "size": 1083,
+      "sha256": "ef9f7f53e62a485880d185c3a6c8f6fb3dfb60beed67892ef38ab18247b14089",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/gates/40.md",
+      "size": 1456,
+      "sha256": "5caa2c31377e17f3e0cb23f8679b16714c1060e36970712d51311fef7eb87324",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/gates/56.md",
+      "size": 1474,
+      "sha256": "67ba50273ed4bc9b1bf0f339699f66dc5dba36c56bcf71b0341340cf11b4e969",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/gates/64.md",
+      "size": 1468,
+      "sha256": "9cffa4be5e0b8a4695238c2eb975f6997407e3edea7e81ec135089a612b85634",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/gates/3.md",
+      "size": 1201,
+      "sha256": "7bd2f98f2fdecef70371a0c5e842d73aab52b3b45ce796c885ac07aecd70481e",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/gates/21.md",
+      "size": 1109,
+      "sha256": "0efbc80a8c7d10ee03e051c87914d400ed700d25f431259a2af2e4904675d750",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/gates/32.md",
+      "size": 1091,
+      "sha256": "fc86dc2e48f0016205c104d5cc1af80a9a78b65e4bba6da7e733795a73cacfee",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/gates/33.md",
+      "size": 1436,
+      "sha256": "1fe8aab49dc9c534bd71af48b0fb86eb738a174b4a0a62e647bfd72cd4a6fa73",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/gates/34.md",
+      "size": 1451,
+      "sha256": "37f3dbd9831c0109686c55c18741b7d77d55905d30f5bcaf644c39400d6bef3d",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/gates/63.md",
+      "size": 1441,
+      "sha256": "ac19409fdd6876785176db472e1884ef8d09fbae0ada0355117171fdd0b9e23c",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/gates/26.md",
+      "size": 1088,
+      "sha256": "d0bb4c865215d059fa74e06ae8ef30340bc1169b6593120ad1b6f9c3d9ac0ec1",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/gates/62.md",
+      "size": 1482,
+      "sha256": "dc5ac9e15f6bd6eaf9e8d0489d819f5e436315e517f4649c3a8e2e67c9b45ac9",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/gates/59.md",
+      "size": 1454,
+      "sha256": "f0a755d1e9af5279d0b49038df6cb14d316c0c1fd0baf2c0b664bf66b93309e0",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/gates/54.md",
+      "size": 1442,
+      "sha256": "51148a0e23d9cfdcfc74be59767fb467eaf89b4b0ab0013704e14837ad15782c",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/gates/61.md",
+      "size": 1443,
+      "sha256": "87a58056a5cefb98001adb6c0eb98a1d6775e7b96196be0b5c819b217abe151f",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/gates/52.md",
+      "size": 1484,
+      "sha256": "6729469f6dac80f0834f6bf57ddee59328322b747402e8fbf26b2bfd8722c871",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/gates/45.md",
+      "size": 1465,
+      "sha256": "7b3ba6f5393a707832c8c1b1b680170cf39edbf613f9470f7a00fa1c1cee3b3c",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/gates/47.md",
+      "size": 1471,
+      "sha256": "0fab239056926641802104608a8e0e6dc54029a9de30ae26fd32e837c2389b1c",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/gates/16.md",
+      "size": 1081,
+      "sha256": "5e93a162da517b9eb22885e123a7c7dcf2bbf7bd85db587aeb3a933d9be02568",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/gates/44.md",
+      "size": 1459,
+      "sha256": "21c6b50bf0873e0b1b540f181426724a0c1cc85422ecc002570eb1589099987c",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/gates/15.md",
+      "size": 1111,
+      "sha256": "7b44128bc2be37e422993b5e2297a580f91db8444393fa3b855a049dcf49de51",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/gates/19.md",
+      "size": 1130,
+      "sha256": "726c1d57e8121575b74f4008f68ea56f4571938cc575b780086fb15fcb189955",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/gates/43.md",
+      "size": 1448,
+      "sha256": "189fd7f0c76cdf6e67ae751edc8a86ac13f1cd34e31c4af0545671c358ce3bd8",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/gates/46.md",
+      "size": 1598,
+      "sha256": "5e2f842c42e8ee6a506be129260396fa7701780198bd2af3f591bad5d69fae5d",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/gates/53.md",
+      "size": 1465,
+      "sha256": "c10410cc6346b282ccaf651d9ec99359032c236fb541741c1e7fc84d43f9940a",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/gates/8.md",
+      "size": 1154,
+      "sha256": "449468d3690ecce8f0b7a7f46f8c93704deb2385ffb410d99b3b1e000e17e57c",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/gates/42.md",
+      "size": 1432,
+      "sha256": "959ededc3407b4ea0c701ea969bf1f3cb6129bd58134016ab9bb6c84f88644dd",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/gates/31.md",
+      "size": 1065,
+      "sha256": "a501144beabc6d4750e51e60d2b9f37e462358437b65947dd86a47beae8010f2",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/gates/9.md",
+      "size": 1132,
+      "sha256": "25d853afc6b38b41d160a568eb42ede68741f13c92bc9f9b2dd1ed318ac817bc",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/gates/5.md",
+      "size": 1068,
+      "sha256": "3496017a24ef5983dad12e627f141f961544691e1c3666def63e3ced7a1f1d36",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/gates/11.md",
+      "size": 1134,
+      "sha256": "8c9a58a6d1ecc1d047132a0d709cce38a13d041a85203a38b7e3144dd6e7b10b",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/types/classic-projector.md",
+      "size": 1106,
+      "sha256": "54ba04e98e1a8b7a258117b3e8924634fafc7e0529b122b36a647a0751c9ec69",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/types/mental-projector.md",
+      "size": 1102,
+      "sha256": "fe852db1ae8dd79ecb272b250656c8d8cb37868c6ffbf478dd9d82faa793a79d",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/types/manifestor.md",
+      "size": 1072,
+      "sha256": "4330829be1536da67dbb6e4affe039764071c175584f43438668b340883968af",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/types/manifesting-generator.md",
+      "size": 1119,
+      "sha256": "6cb9e217963df1d98fe693d9e522c8e125d2ef76a2673b6bcf0e07fb52d32ba8",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/types/energy-projector.md",
+      "size": 1120,
+      "sha256": "7078dc06a8bb47bb572975ee569e38b27456e288ac7bd1ede913b092a68355c1",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/types/pure-generator.md",
+      "size": 1100,
+      "sha256": "28b763b7ed405d75c2097037d246097bdfa6dbde2494ac6248599a4a61185217",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/types/reflector.md",
+      "size": 1080,
+      "sha256": "864bbe71820e6f5aafb0998986bedb85145b9cd482eac95c813c82872a8ef613",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/profiles/5-1.md",
+      "size": 1192,
+      "sha256": "e2bf019d50c9b7186c245cd3c3afe9e1aff8691e06b0e68c8ba8d8d2cb8e2d10",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/profiles/6-3.md",
+      "size": 1183,
+      "sha256": "96b1914922b65fda166af02e66ae10308c3a412e2241cccb8eb9eb18b671444a",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/profiles/2-4.md",
+      "size": 1204,
+      "sha256": "5b2eee8e44c3e887753a5883bfe72242c35c0f528937fd100d46351c7456bff7",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/profiles/3-6.md",
+      "size": 1204,
+      "sha256": "d2f54a5849cbdb6a3dc034942e689835e93c9a12f02eb67dddd699ac30b1ba20",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/profiles/1-3.md",
+      "size": 1186,
+      "sha256": "45128451c1c11b90d46d0201970da712a960780f342a9e2a0f0169a2fec6a84b",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/profiles/4-1.md",
+      "size": 1192,
+      "sha256": "eac3a7852eeed80e484092f6562414ce01fb90d323fe98340d45337728ecadf0",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/profiles/3-5.md",
+      "size": 1210,
+      "sha256": "0c504ac2bcaf3fa79a6cb66675e8952fc53524417d4d0059339cc30fad896c01",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/profiles/2-5.md",
+      "size": 1192,
+      "sha256": "cea20ce4209ff830ae14c30f1e6b9cff6e2730f7195546c7fa96cb3f23ce0e72",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/profiles/6-2.md",
+      "size": 1195,
+      "sha256": "a42ab8a7e1edfcad299cd246a0794b215c2460d5790eddd6f5581497d1738f03",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/profiles/1-4.md",
+      "size": 1195,
+      "sha256": "bd9a9e3b61a374612ef0c36a48cc1a4946203aa3460100adde921b11603c990f",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/profiles/5-2.md",
+      "size": 1186,
+      "sha256": "afca39d97ccd701ed7ee0318e4bcfde4f3d277d527605ff766f77be6ed6962c8",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/profiles/4-6.md",
+      "size": 1198,
+      "sha256": "dce2d2aa6634f76808fd2beff3f6e1e222301723676c67c8eac6160811b34b54",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/research-corpus/v0.3/sources.json",
+      "size": 3549,
+      "sha256": "d92e0bcf6f688e1f782b37c6063b4a9fbfbeb39bd9a697144cf443b9eb07633c",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/research-corpus/v0.3/interpretation_rules.json",
+      "size": 8727,
+      "sha256": "48fb8349cabaf0e9dc234b0ce9ca7d450a6be6108708a97c819b3989f283c2b9",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "preload/biverse/references/research-corpus/v0.3/knowledge_atoms.json",
+      "size": 13195,
+      "sha256": "7eb874dffb6eb5de46e0603c21375e5cf260ea3dfe06769ef40f82341895096a",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "seed/manifest.json",
+      "size": 458,
+      "sha256": "0786b5167614a8858ba524af8164345eabd5df0d959bf5fe6c9768b3dd9b6847",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "seed/PROJECT_SUMMARY.md",
+      "size": 6340,
+      "sha256": "555b1dfde1442c9a57bb0c781fa9cc8363e4fbf5bce6be83515666e49df2d339",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "seed/ra-uru-hu-rave-iching-line-companion.learning.jsonl",
+      "size": 6700373,
+      "sha256": "1fee4a9a4e068144e0272a868b7d99251cad60ed556d488fb946582235a046ae",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "seed/michael-servetus-gnostic-book-of-changes.learning.jsonl",
+      "size": 6401600,
+      "sha256": "b2090e7fc4fef789579a8a593c82bd6319acf29c41809b36b15330b181128cd6",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "seed/hua-ching-ni-book-changes-unchanging-truth.learning.jsonl",
+      "size": 3932581,
+      "sha256": "20b41a6d14573abb5ff77909407221ebf7d13a50a9235212f82405c83f250519",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "seed/hatcher-yijing-word-by-word-2009.learning.jsonl",
+      "size": 3018884,
+      "sha256": "c547471bda4a979ba327e88550b244186fd9f8c7a75fd444ec7230041925f09b",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "seed/SHELDON_KLEIN_INTEGRATION.md",
+      "size": 21533,
+      "sha256": "a0abc8bb4042da1e49f62ebe09d8f93f2ceda70a75ed3f16eee20ae681336459",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "seed/ra-uru-hu-rave-bodygraph-circuitry-2001.learning.jsonl",
+      "size": 994463,
+      "sha256": "9e1ba873879aab3e7ba06eafaae0a6d1c450334c2ae799559ffb50bb1f3cb00f",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "seed/ra-uru-hu-human-design-black-book-1991.learning.jsonl",
+      "size": 516095,
+      "sha256": "c1e475a84d380ec23a2b9ea9fa8454a6386498df066963c724265f239ba829c9",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "seed/WORLD_RESONANCE_ENGINE_ARCHITECTURE.md",
+      "size": 19681,
+      "sha256": "def1633da9b325bcceea418bd923452161916d091b879f1a1b5c87d82047e838",
+      "storageTarget": "Supabase/external source store",
+      "bundled": false
+    },
+    {
+      "sourcePath": "https://github.com/Conway-Research/automaton",
+      "url": "https://github.com/Conway-Research/automaton",
+      "name": "Conway Research Automaton",
+      "use": "continuous lifecycle, heartbeat, audited self-modification, lineage",
+      "storageTarget": "reference-only / runtime knowledge",
+      "bundled": false
+    },
+    {
+      "sourcePath": "https://pubmed.ncbi.nlm.nih.gov/35896150/",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/35896150/",
+      "name": "Generative Episodic Memory paper",
+      "use": "sparse episodic traces and semantic completion",
+      "storageTarget": "reference-only / runtime knowledge",
+      "bundled": false
+    },
+    {
+      "sourcePath": "https://github.com/Tribler/self-compile-Android",
+      "url": "https://github.com/Tribler/self-compile-Android",
+      "name": "Tribler self-compile Android",
+      "use": "on-device source mutation and self-compilation pattern",
+      "storageTarget": "reference-only / runtime knowledge",
+      "bundled": false
+    },
+    {
+      "sourcePath": "https://github.com/Tribler/tribler",
+      "url": "https://github.com/Tribler/tribler",
+      "name": "Tribler",
+      "use": "decentralized peer-to-peer discovery and resilient communication",
+      "storageTarget": "reference-only / runtime knowledge",
+      "bundled": false
+    },
+    {
+      "sourcePath": "https://github.com/Tribler/Dollynator",
+      "url": "https://github.com/Tribler/Dollynator",
+      "name": "Dollynator",
+      "use": "autonomous lifecycle, lineage and replication",
+      "storageTarget": "reference-only / runtime knowledge",
+      "bundled": false
+    },
+    {
+      "sourcePath": "https://github.com/Tribler/cfrt",
+      "url": "https://github.com/Tribler/cfrt",
+      "name": "CFRT / BloomCRDT",
+      "use": "conflict-free replicated state and spatial reconciliation",
+      "storageTarget": "reference-only / runtime knowledge",
+      "bundled": false
+    },
+    {
+      "sourcePath": "https://github.com/Tribler/bnf",
+      "url": "https://github.com/Tribler/bnf",
+      "name": "Tribler BNF",
+      "use": "explicit grammar parsing and lawful generative structure",
+      "storageTarget": "reference-only / runtime knowledge",
+      "bundled": false
+    }
+  ]
+}

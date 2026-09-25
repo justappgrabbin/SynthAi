@@ -1,0 +1,59 @@
+{
+  "request": "I need to fill out an application for a job",
+  "navigation": {
+    "status": "goal-reached",
+    "reason": "fillable-form-found",
+    "steps": 2,
+    "trace": [
+      {
+        "step": 1,
+        "pageTitle": "Acme Home",
+        "actionText": "Work With Us",
+        "score": 1.5,
+        "matched": [
+          "work"
+        ]
+      },
+      {
+        "step": 2,
+        "pageTitle": "Careers",
+        "actionText": "Open Roles & Apply",
+        "score": 7.9,
+        "matched": [
+          "apply",
+          "career",
+          "careers",
+          "open",
+          "roles"
+        ]
+      }
+    ]
+  },
+  "reached": {
+    "title": "Candidate Application",
+    "status": "awaiting-human",
+    "unresolved": [
+      "signature"
+    ],
+    "humanOnly": [
+      "signature"
+    ],
+    "fields": [
+      {
+        "name": "name",
+        "value": "Ada Lovelace",
+        "required": true
+      },
+      {
+        "name": "email",
+        "value": "ada@example.test",
+        "required": true
+      },
+      {
+        "name": "signature",
+        "value": "",
+        "required": true
+      }
+    ]
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "canonicalBase": "Adaya-Automaton-CANONICAL-RECOVERY-v0.9.2-r1",
+  "result": "Adaya-Automaton-CANONICAL-v0.9.2-r2",
+  "method": "recover-finished-only-no-redesign",
+  "lineages": {
+    "Synthia-Autonomous-JS-v0.8.0": {"files":107,"missingFromR1":0,"decision":"fully-subsumed"},
+    "Synthia-Autonomous-Agent-v0.7.0": {"decision":"source-and-test-lineage; newer canonical implementations retained; finished Morph MIR recovered via PASS6"},
+    "Synthia-PASS6-ACTIVE-v0.6.13": {"decision":"verified capability donor","verifiedBaseTools":16,"graftedActive":["morph-mir"],"preservedTier":["VisualPrimitiveCompiler","SceneGraphCompiler","RendererRouter","ContactRuntime","browser/contact workflow","ChromeDevToolsBrowserExecutor"]},
+    "SynthiaIntegratedSystem": {"decision":"older mixed JS/Python integrated donor; canonical source-closure retained; no Python promoted into phone-first JS runtime"}
+  },
+  "activeRuntime": {
+    "spine":"GraphRuntime",
+    "baseTools":16,
+    "morphMirRestored":true,
+    "phoneFirst":"pure browser JavaScript",
+    "hostTierPath":"recovered/PASS6-v0.6.13"
+  },
+  "supabaseExternalState": {
+    "tables":["adaya_gallery","adaya_guide_memory","adaya_patterns","adaya_interactions","adaya_wave_log","entry_paths","platform_config"],
+    "note":"Persistent Adaya state remains authoritative external state; not duplicated into code bundle."
+  },
+  "verification": {
+    "baseSmoke":"PASS",
+    "autonomySmoke":"PASS",
+    "morphMirSmoke":"PASS",
+    "lifecycleSmoke":"PASS",
+    "lifecycle":["boot","ingest","address","route","tool-execution","learn/memory","persist","reload","continue"]
+  }
+}

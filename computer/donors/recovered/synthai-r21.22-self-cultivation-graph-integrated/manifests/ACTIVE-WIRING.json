@@ -1,0 +1,178 @@
+{
+  "version": "0.10.4-r15-real-world-lineage",
+  "runtime": "synthia-browser-system-javascript",
+  "resolver": false,
+  "pythonActive": false,
+  "addressAuthority": "canonical-address-runtime/synthia-bridge.js",
+  "addressSpine": [
+    "planetary",
+    "dimension",
+    "gate",
+    "line",
+    "color",
+    "tone",
+    "base",
+    "degree",
+    "minute",
+    "second",
+    "arc",
+    "zodiac",
+    "house"
+  ],
+  "structures": {
+    "bigram": 1,
+    "trigram": 2,
+    "hexagram": 5,
+    "decagram": 8
+  },
+  "locked": [
+    "Klein tool family",
+    "ATO Core",
+    "Integrated Tool Factory",
+    "canonical Synthia address runtime",
+    "MCP message passing"
+  ],
+  "organs": [
+    {
+      "id": "advice",
+      "status": "active",
+      "source": [
+        "LanguageContactModel",
+        "KleinLinguisticLayer",
+        "AspirationCore"
+      ]
+    },
+    {
+      "id": "media",
+      "status": "active",
+      "source": [
+        "VisualPrimitiveCompiler",
+        "SceneGraphCompiler"
+      ],
+      "port": "browser Canvas/MediaRecorder"
+    },
+    {
+      "id": "builder",
+      "status": "active",
+      "source": [
+        "SemanticArtifactCompiler",
+        "ArtifactAssembler"
+      ],
+      "port": "browser Blob HTML artifact"
+    },
+    {
+      "id": "browser-planner",
+      "status": "active",
+      "source": [
+        "BrowserTaskPlanner",
+        "BrowserPerceptionNavigator",
+        "BrowserOutcomeVerifier",
+        "ContactActionRouter"
+      ],
+      "note": "Synthia is the browser/action surface. Planning emits actions for Synthia browser faculties; external sites remain real-world targets, not host containers."
+    },
+    {
+      "id": "resonance",
+      "status": "active",
+      "source": [
+        "CHNOPS",
+        "CodonMatrix"
+      ]
+    },
+    {
+      "id": "world",
+      "status": "active",
+      "source": [
+        "SynthWorld real-world person/place/thing/resource/service/event model"
+      ],
+      "note": "Keeps externally checkable world addresses separate from internal 5D/canonical coordinates."
+    },
+    {
+      "id": "economy",
+      "status": "active-local",
+      "source": [
+        "economy stack opportunity/gift/need concepts"
+      ],
+      "note": "SQLite backend removed; local in-memory/browser persistence"
+    },
+    {
+      "id": "autoling",
+      "status": "available",
+      "source": [
+        "legacy 5d-autoling-engine"
+      ],
+      "note": "5D fieldworker + SemanticNetwork"
+    },
+    {
+      "id": "grammar",
+      "status": "available",
+      "source": [
+        "legacy monte-carlo-grammar-engine",
+        "automatic-novel-writer"
+      ],
+      "note": "MonteCarlo + Novel deep structure"
+    },
+    {
+      "id": "disseminer",
+      "status": "available",
+      "source": [
+        "legacy disseminer"
+      ],
+      "note": "Semantic fields / cooccurrence / inference"
+    }
+  ],
+  "hostOnlyPorts": [
+    {
+      "source": "BrowserArtifactComposer node/fs",
+      "status": "ported",
+      "replacement": "BuilderOrgan Blob artifacts"
+    },
+    {
+      "source": "BrowserTaskMemory node/fs",
+      "status": "ported",
+      "replacement": "LocalMemory/localStorage"
+    }
+  ],
+  "sourceDrops": [
+    {
+      "file": "Synthia_Progressive_Upgrade_v0_6.zip",
+      "sha256": "28c3a7978e1443672540f59374a7fbfa0ffc9950ec33286594ca7ea0d311cfc2",
+      "bytes": 898462
+    },
+    {
+      "file": "Synthia-full-suite-fix-v0_6_12-PATCHED.zip",
+      "sha256": "c743d36a33dd834b7826898a988afbb5e004b9fd6a72a530fa6b6d3285d0936a",
+      "bytes": 1261274
+    },
+    {
+      "file": "Synthia-Autonomous-Agent-v0.7.0.zip",
+      "sha256": "3fa73a453a7de6fbf15aa6dc75451005dae6e82a1999d702d4fe0a8b3759c526",
+      "bytes": 2265071
+    },
+    {
+      "file": "integrated-tool-factory-v1_6_0.zip",
+      "sha256": "e1f4da4388392a2a6aeb49ddd9140bb072c66514f44fd4c938fefccbdad7f169",
+      "bytes": 23433
+    },
+    {
+      "file": "economy-stack-1.zip",
+      "sha256": "eafdacfc406f22c12e049aac9eef1db7ddceecfe7ebbda725f2494ce0f5f956d",
+      "bytes": 45084
+    },
+    {
+      "file": "todays_session_complete(6).zip",
+      "sha256": "df8f80fa7d98b44e0b7702b1fa48e1dff335ae1c4dd8e8885af2376ac8df7af2",
+      "bytes": 1773785
+    },
+    {
+      "file": "SynthiaIntegratedSystem.zip",
+      "sha256": "678e52bb0af17d4330e92c15e50282f5ea3f500e3ba9928aec7f98dac5c17bbd",
+      "bytes": 839984
+    }
+  ],
+  "curtain": "soft",
+  "note": "Soft curtain: active + available + legacy organs are all runnable. Only explicit dormant status blocks. SOURCE-CLOSURE is inventory, not a gate.",
+  "versionPolicy": "coexisting-lineage-explicit-promotion-no-auto-resolve",
+  "realWorldAuthority": "organs/WorldOrgan.js",
+  "lineageArchive": "lineage/legacy-resolver (preserved history only; never auto-promoted)"
+}

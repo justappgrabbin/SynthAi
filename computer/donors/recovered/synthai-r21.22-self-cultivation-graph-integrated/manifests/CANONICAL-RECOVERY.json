@@ -1,0 +1,20 @@
+{
+  "name": "Adaya Automaton Canonical Recovery",
+  "recovered": "2026-08-12",
+  "base": "Synthia-Unified-v0.9.2-generative.zip",
+  "version": "0.9.2-recovery.1",
+  "authority": "core/SynthiaUnit.mjs -> runtime/GraphRuntime.js",
+  "patches": [
+    {
+      "file": "core/SynthiaUnit.mjs",
+      "issue": "autonomousCycle referenced nonexistent GraphRuntime.createSession()",
+      "resolution": "use existing GraphRuntime.ingest() session API",
+      "architectureChanged": false
+    }
+  ],
+  "verification": [
+    "npm run smoke",
+    "npm run smoke:autonomy"
+  ],
+  "status": "PASS"
+}
