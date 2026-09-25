@@ -245,3 +245,11 @@ The creator reports that the current implementation is overengineered relative t
 
 Corrected TaskFit verification on 2026-09-25: [Resident Mesh Integration 36191192952](https://github.com/justappgrabbin/SynthAi/actions/runs/36191192952) passed 48/48, including three capability/fallback/science-log cases; [Mobile SynthIMG Check 36191192946](https://github.com/justappgrabbin/SynthAi/actions/runs/36191192946) passed. This is source/CI verification only; app wiring, automatic chart derivation, APK delivery, user access, and phone acceptance remain open.
 
+## September 25 continuation — addressed IndiVerse registration (14:27 Pacific)
+
+[PR #17](https://github.com/justappgrabbin/SynthAi/pull/17) is stacked on the corrected Computer TaskFit PR #16. The active IndiVerse baseline was inspected: canonical registration previously stored kind, presentation, and metadata without a dedicated state-space address or creator choice; host rendering selected attributes largely by kind.
+
+The additive step preserves an explicit creator choice and supplied state address (one of five dimensions, gate 1–64, optional line/color/tone/base) on canonical registration. It exposes these alongside host grammar as a morph input; repeated registration cannot silently change an existing address or creator choice. Legacy objects remain explicitly `unresolved` and no gate is guessed. [Resident Mesh Integration 36191565563](https://github.com/justappgrabbin/SynthAi/actions/runs/36191565563) passed 50/50 tests, including cross-host rendering, restart persistence, address invariance, and unresolved legacy registration. [Mobile SynthIMG Check 36191565534](https://github.com/justappgrabbin/SynthAi/actions/runs/36191565534) passed.
+
+Status: **registration/handoff source built + GitHub-preserved + CI-verified**. The state-space address derivation, migration of current device registrations, five-level generative morph engine, actual 5.7 integration, app delivery, user-access verification, and phone acceptance remain open. The [creator's morph architecture note](https://github.com/justappgrabbin/SynthAi/blob/recovery/unfinished-work-ledger-20260925/recovery/SYNTHIA57-MORPH-STATE-SPACE-2026-09-25.md) remains the governing review target. Prime's Resident 3 artifact blocker and the RLS acceptance rule are unchanged.
+
