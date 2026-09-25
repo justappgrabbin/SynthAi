@@ -61,12 +61,16 @@
     "resident2_targeted_tests": {
       "passed": 7,
       "failed": 0
+    },
+    "resident3_targeted_tests": {
+      "passed": 9,
+      "failed": 0
     }
   },
   "remaining": [
     "green full APK compile with bundled Linux residence and current Android host",
     "physical Android permission/device acceptance",
-    "place Resident 2 image into final APK assets/residents slot"
+    "place Resident 3 image into final APK assets/residents slot and re-sign final APK"
   ],
   "additive_android_resident_image_v2": {
     "filename": "Synthia-Prime-v0.5.8-Android-Resident-2.synthimg",
@@ -80,5 +84,21 @@
     "additional_patch": "src/solo/android-hand-executor.mjs",
     "additional_test": "test/33-android-hand-token.test.mjs",
     "hands_security": "private per-install x-synthia-hand-token"
+  },
+  "additive_android_resident_image_v3": {
+    "filename": "Synthia-Prime-v0.5.8-Android-Resident-3.synthimg",
+    "version": "0.5.8+android-resident.3",
+    "size_bytes": 81152477,
+    "sha256": "46e4c3cfe41ec18bcffefa235769eebfe44d4ab43584ce099102c083998d8298",
+    "clone_files_verified": 1564,
+    "packaging_missing": 0,
+    "packaging_extra": 0,
+    "packaging_changed": 0,
+    "local_linux_runtime": {
+      "adapter": "synthia-local-linux",
+      "python": true,
+      "shell": true,
+      "node_opt_in": true
+    }
   }
 }
