@@ -31,8 +31,8 @@ import java.util.concurrent.Executors;
  */
 public final class LinuxResidenceManager {
     private static final String TAG = "SynthAILinuxResidence";
-    private static final String ROOTFS_ASSET = "runtime/rootfs-arm64.tgz";
-    private static final String PROOT_PACKAGE_ASSET = "runtime/proot-android-aarch64.tgz";
+    private static final String ROOTFS_ASSET = "runtime/rootfs-arm64.bin";
+    private static final String PROOT_PACKAGE_ASSET = "runtime/proot-android-aarch64.bin";
     private static final String MANIFEST_ASSET = "runtime/residence-manifest.properties";
     private static final String INSTALL_VERSION = "2026-09-25-resident-v1";
     private static final int COPY_BUFFER = 128 * 1024;
