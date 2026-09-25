@@ -21,6 +21,8 @@ import { PhoneWorldBridge } from './phone-world.mjs';
 import { NativeTerminalService } from './terminal-service.mjs';
 import { TermuxCompilerAdapter } from '../adapters/termux-compiler.mjs';
 import { PurposeGuideService } from '../services/purpose-guide.mjs';
+import { TaskFitService } from '../services/task-fit.mjs';
+import { TaskFitCapabilityService } from '../services/task-fit-capability.mjs';
 
 const clone = value => value === undefined ? undefined : structuredClone(value);
 
@@ -94,6 +96,8 @@ export class NativeSeedRuntime {
       clock,
     });
     this.researchReport = new ResearchReportAutomaton({ clock });
+    this.legacyTaskFit = new TaskFitService({ bus:this.bus });
+    this.taskFit = new TaskFitCapabilityService({ state:this.state, bus:this.bus, clock });
     this.stellarLab = new StellarLabAdapter({ mesh: this.meshKernel, state: this.state, bus: this.bus, clock });
     this.consciousnessRealm = new ConsciousnessRealmPackageLoader({ computer: this, bus: this.bus });
     this.humanAgent = null;
@@ -110,7 +114,7 @@ export class NativeSeedRuntime {
     await this.#ensureParticipant('computer:self', {
       kind: 'native-seed',
       residency: 'active',
-      capabilities: ['mesh.host','state-space','execution','resident-host','resident-image.install','resident-image.mount','automata-cartridge.install','automata-cartridge.assemble','automata-cartridge.execute','compiler.dormant','terminal','app.host','indiverse','world-federation','purpose-guide','research.report'],
+      capabilities: ['mesh.host','state-space','execution','resident-host','resident-image.install','resident-image.mount','automata-cartridge.install','automata-cartridge.assemble','automata-cartridge.execute','compiler.dormant','terminal','app.host','indiverse','world-federation','purpose-guide','research.report','task-fit.assess','task-fit.observe','task-fit.science-log'],
       publicState: { name: 'SynthAI Native Seed', runtime: 'native-seed' },
     });
     await this.#ensureParticipant('system:state-space', {
@@ -146,13 +150,18 @@ export class NativeSeedRuntime {
       capabilities: ['cartridge.install','cartridge.assemble','cartridge.execute','cartridge.dislodge','cartridge.restore','cartridge.retire'],
       publicState: { name:'automata-cartridge-magazine', wired:true },
     });
+    await this.#ensureParticipant('system:task-fit', {
+      kind: 'core-service', residency: 'active',
+      capabilities: ['task-fit.assess','task-fit.observe','task-fit.science-log'],
+      publicState: { name:'task-fit', wired:true, deterministic:true },
+    });
     await this.#ensureParticipant('system:research-report', {
       kind: 'bounded-automata-service', residency: 'active',
       capabilities: ['research.report','research.scout','research.evidence','research.verify','research.publish'],
       publicState: { name:'ResearchReportAutomaton', version:'0.1.0', wired:true },
     });
 
-    for (const id of ['system:state-space','system:execution','system:compiler','system:resident-host','system:indiverse','system:purpose-guide','system:automata-cartridge-magazine','system:research-report']) {
+    for (const id of ['system:state-space','system:execution','system:compiler','system:resident-host','system:indiverse','system:purpose-guide','system:automata-cartridge-magazine','system:task-fit','system:research-report']) {
       if (!this.meshKernel.relationshipsFor(id).some(e => e.type === 'hosted-by' && e.to === 'computer:self')) {
         await this.meshKernel.connect(id, 'computer:self', { type: 'hosted-by' });
       }
@@ -196,6 +205,13 @@ export class NativeSeedRuntime {
       if (envelope.operation === 'retire') return this.automataCartridges.retire(p.id, p.reason);
       if (envelope.operation === 'snapshot') return this.automataCartridges.snapshot();
       throw new Error(`unsupported cartridge-magazine operation: ${envelope.operation}`);
+    });
+    this.meshKernel.bindHandler('system:task-fit', async envelope => {
+      const p = envelope.payload ?? {};
+      if (envelope.operation === 'assess') return this.taskFit.assess(p);
+      if (envelope.operation === 'observe') return this.taskFit.recordObservation(p);
+      if (envelope.operation === 'science-log') return this.taskFit.scienceLog(p.personId, p.taskId);
+      throw new Error(`unsupported task-fit operation: ${envelope.operation}`);
     });
     this.meshKernel.bindHandler('system:research-report', async envelope => {
       const p = envelope.payload ?? {};
@@ -424,6 +440,26 @@ export class NativeSeedRuntime {
 
   async executeAutomataCapability(capability, input, context = {}, options = {}) {
     return this.automataCartridges.execute(capability, input, context, options);
+  }
+
+  async assessTaskFit(input) {
+    const routed = await this.meshKernel.request('system:task-fit', { operation:'assess', payload:clone(input) });
+    if (!routed.delivered) throw new Error('task-fit mesh service unavailable');
+    return routed.result;
+  }
+
+  async recordTaskFitObservation(input) {
+    const routed = await this.meshKernel.request('system:task-fit', { operation:'observe', payload:clone(input) });
+    if (!routed.delivered) throw new Error('task-fit mesh service unavailable');
+    return routed.result;
+  }
+
+  async taskFitScienceLog(personId, taskId) {
+    const routed = await this.meshKernel.request('system:task-fit', {
+      operation:'science-log', payload:{ personId, taskId },
+    });
+    if (!routed.delivered) throw new Error('task-fit mesh service unavailable');
+    return routed.result;
   }
 
   async createResearchReport(request, context = {}, options = {}) {
