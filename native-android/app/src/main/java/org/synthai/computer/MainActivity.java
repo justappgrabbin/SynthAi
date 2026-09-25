@@ -202,7 +202,23 @@ public final class MainActivity extends Activity {
         startActivityForResult(pick, REQUEST_SYNTHIA_PACKAGE);
     }
 
+    private String displayName(Uri uri) {
+        try (Cursor cursor = getContentResolver().query(uri, new String[]{OpenableColumns.DISPLAY_NAME}, null, null, null)) {
+            if (cursor != null && cursor.moveToFirst()) {
+                int index = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
+                if (index >= 0) return cursor.getString(index);
+            }
+        } catch (Exception ignored) {}
+        String fallback = uri.getLastPathSegment();
+        return fallback == null ? "" : fallback;
+    }
+
     private void acceptSynthiaPackage(Uri uri) {
+        String name = displayName(uri);
+        if (name.toLowerCase().endsWith(".synthimg")) {
+            acceptResidentImage(uri, name);
+            return;
+        }
         world.setStatus("INSTALLING SYNTHIA 5.7");
         io.execute(() -> {
             try {
