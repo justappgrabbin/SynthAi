@@ -9,7 +9,6 @@ on:
       - 'computer/tests/research-report-automaton.test.mjs'
       - 'computer/tests/research-report-cartridge-integration.test.mjs'
       - 'computer/tests/task-fit-native-convergence.test.mjs'
-      - 'computer/tests/task-fit-native-convergence.test.mjs'
       - 'computer/native/NativeSeedRuntime.mjs'
       - '.github/workflows/resident-integration-check.yml'
   push:
@@ -50,6 +49,7 @@ on:
       - 'computer/tests/world-adapters.test.mjs'
       - 'computer/tests/research-report-automaton.test.mjs'
       - 'computer/tests/research-report-cartridge-integration.test.mjs'
+      - 'computer/tests/task-fit-native-convergence.test.mjs'
       - '.github/workflows/resident-integration-check.yml'
 
 permissions:
