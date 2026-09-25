@@ -1,0 +1,28 @@
+name: Computer Runtime Tests
+
+on:
+  pull_request:
+    paths:
+      - 'computer/**'
+      - 'package.json'
+      - '.github/workflows/computer-runtime-tests.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  computer-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Run Computer tests and web build
+        run: npm test
