@@ -61,6 +61,8 @@ jobs:
           cat native-android/app/src/main/assets/runtime/residence-manifest.properties
 
       - name: Build native debug APK
+        env:
+          GRADLE_OPTS: -Dorg.gradle.jvmargs="-Xmx5g -XX:MaxMetaspaceSize=1g"
         run: gradle -p native-android :app:assembleDebug --stacktrace
 
       - name: Verify APK really contains the Linux residence
