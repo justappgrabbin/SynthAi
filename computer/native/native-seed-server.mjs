@@ -3,6 +3,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { NativeSeedRuntime } from './NativeSeedRuntime.mjs';
+import { LocalTerminalHost } from './local-terminal-host.mjs';
 import { JsonFilePersistence } from '../runtime/json-file-persistence.mjs';
 
 class NativePhoneHostProxy {
@@ -68,6 +69,7 @@ const runtime = new NativeSeedRuntime({
   namespace:'synthai-native-seed',
 });
 await runtime.boot();
+await runtime.bindTerminalHost(new LocalTerminalHost({ defaultCwd: process.env.SYNTHAI_NATIVE_CWD ?? process.cwd() }));
 
 const phoneHost = new NativePhoneHostProxy();
 await runtime.bindPhoneHost(phoneHost);
@@ -97,7 +99,13 @@ const optionalMounts=await mountOptionalResidents();
 
 function json(res,status,data){
   const body=JSON.stringify(data);
-  res.writeHead(status,{'content-type':'application/json','content-length':Buffer.byteLength(body)});
+  res.writeHead(status,{
+    'content-type':'application/json',
+    'content-length':Buffer.byteLength(body),
+    'access-control-allow-origin':'https://localhost',
+    'access-control-allow-headers':'content-type,x-synthai-source',
+    'access-control-allow-methods':'GET,POST,OPTIONS',
+  });
   res.end(body);
 }
 
@@ -155,18 +163,22 @@ async function route(req,res){
   armIdleExit();
   try{
     const url=new URL(req.url,'http://127.0.0.1');
+    if(req.method==='OPTIONS') return json(res,204,{});
     if(req.method==='GET' && url.pathname==='/health'){
       return json(res,200,{
         ok:true,
         service:'synthai-native-seed',
         apiVersion:2,
-        serviceVersion:'native-seed-synthia57-resident-v1',
+        serviceVersion:'native-seed-resident-images-v2',
         port:PORT,
         statePath,
         optionalMounts,
         synthia57Package:runtime.synthia57Packages.snapshot(),
         synthiaMirror:runtime.synthiaMirrorSnapshot(),
-        synthia57FrontScreen:frontScreenSnapshot()
+        synthia57FrontScreen:frontScreenSnapshot(),
+        residentImages:runtime.residentImages.list(),
+        imageResidents:runtime.imageResidents.snapshot(),
+        terminal:runtime.terminal?.snapshot?.()??null
       });
     }
     if(req.method==='GET' && url.pathname==='/snapshot'){
@@ -195,8 +207,35 @@ async function route(req,res){
         mounted:Boolean(runtime.synthia57.get('synthia')),
       });
     }
+    if(req.method==='POST' && url.pathname==='/packages/resident-image/install'){
+      const contentLength=req.headers['content-length']==null ? null : Number(req.headers['content-length']);
+      const result=await runtime.installResidentImage(req,{
+        contentLength,
+        source:String(req.headers['x-synthai-source']??'resident-image-upload'),
+      });
+      return json(res,200,result);
+    }
+    if(req.method==='GET' && url.pathname==='/packages/resident-images'){
+      return json(res,200,{
+        images:runtime.residentImages.list(),
+        mounted:runtime.imageResidents.snapshot(),
+      });
+    }
 
     const body=req.method==='POST' ? await readJson(req) : {};
+
+    if(req.method==='POST' && url.pathname==='/resident-image/mount'){
+      return json(res,200,await runtime.mountResidentImage(String(body.imageId),{
+        residentId:body.residentId??null,
+        timeoutMs:body.timeoutMs??15000,
+      }));
+    }
+    if(req.method==='POST' && url.pathname==='/resident-image/request'){
+      return json(res,200,await runtime.residentImageRequest(String(body.residentId),String(body.operation),body.payload??{}));
+    }
+    if(req.method==='POST' && url.pathname==='/resident-image/unmount'){
+      return json(res,200,{unmounted:await runtime.unmountResidentImage(String(body.residentId))});
+    }
 
     if(req.method==='POST' && url.pathname==='/synthia/mirror-image'){
       const result=await runtime.setSynthiaMirrorImage({
