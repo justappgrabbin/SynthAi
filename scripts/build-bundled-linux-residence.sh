@@ -5,7 +5,7 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 ASSET_DIR="$ROOT/native-android/app/src/main/assets/runtime"
 WORK_DIR="${RUNNER_TEMP:-/tmp}/synthai-linux-residence"
 CONTAINER="synthai-arm64-residence-builder"
-PROOT_URL="https://github.com/proot-me/proot/releases/download/v5.3.0/proot-v5.3.0-android-arm64"
+PROOT_URL="https://raw.githubusercontent.com/proot-me/proot-static-build/master/static/proot-arm64"
 
 rm -rf "$WORK_DIR"
 mkdir -p "$WORK_DIR" "$ASSET_DIR"
@@ -47,6 +47,9 @@ curl --fail --location --retry 5 --retry-all-errors \
   "$PROOT_URL" \
   --output "$ASSET_DIR/proot-arm64"
 chmod 0755 "$ASSET_DIR/proot-arm64"
+file "$ASSET_DIR/proot-arm64"
+PROOT_DOWNLOADED_BYTES="$(wc -c < "$ASSET_DIR/proot-arm64" | tr -d ' ')"
+test "$PROOT_DOWNLOADED_BYTES" -gt 500000
 echo "::endgroup::"
 
 ROOTFS_SHA="$(sha256sum "$ASSET_DIR/rootfs-arm64.tar.gz" | awk '{print $1}')"
