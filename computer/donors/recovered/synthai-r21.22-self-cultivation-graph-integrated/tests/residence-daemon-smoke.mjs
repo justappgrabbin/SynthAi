@@ -1,0 +1,11 @@
+import assert from 'node:assert/strict';
+import SynthiaUnit from '../core/SynthiaUnit.mjs';
+const unit=new SynthiaUnit({autoStart:true,residence:{approved:false}});
+assert.equal(unit.snapshot().residence.approved,true,'local runtime must establish residence automatically');
+assert.equal(unit.lifeSnapshot().running,true,'life loop must start without an approval ceremony');
+assert.equal(unit.snapshot().residence.address,null,'unknown address remains unresolved, not zero-filled');
+const out=await unit.ask('hello',{organ:'advice'});assert.equal(out.ok,true,'interaction must be available immediately');
+const resolved=unit.resolveResidenceAddress({planetary:'Sun',dimension:'Space',gate:25,line:3,color:2,tone:4,base:5,zodiac:1,house:1},{evidence:{source:'test-fact'}});
+assert.equal(resolved.address.gate,25);assert.equal(resolved.addressComplete,true);
+unit.stopLife();
+console.log('RESIDENCE PASS: local launch is active immediately; no approval gate; factual address may resolve later');

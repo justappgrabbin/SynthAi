@@ -1,0 +1,13 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+const html=fs.readFileSync('index.html','utf8');
+const sw=fs.readFileSync('sw.js','utf8');
+const app=fs.readFileSync('app.mjs','utf8');
+assert.ok(html.includes("addEventListener('click'"),'approval has independent boot-safe click handler');
+assert.ok(html.includes("location.reload()"),'approval persists then reloads into living organism');
+assert.ok(html.includes('boot error ·'),'browser boot errors are visible in UI');
+assert.ok(html.includes('app.mjs?v=r20.2'),'versioned module entry bypasses stale URL cache');
+assert.ok(sw.includes("synthia-r20.2-shell-v1"),'service-worker cache version bumped');
+assert.ok(sw.includes("fetch(e.request,{cache:'no-store'})"),'same-origin shell is network-first');
+assert.ok(app.includes("updateViaCache:'none'"),'service worker update bypasses HTTP cache');
+console.log('R20.2 BROWSER LIVE UI PASS: approval has boot-safe handler; stale SW cache cannot pin old shell; boot errors surface visibly');

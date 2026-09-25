@@ -1,0 +1,3 @@
+import {computeCHNOPS,computeResonance,computePurposeVector,detectDeviation} from './today/CHNOPS.js';
+export class ResonanceOrgan{constructor(){this.id='resonance';this.capabilities=['resonance','chnops','codon','science'];}execute({gates=[],comparison=[],purpose=[]}){const a=computeCHNOPS(gates.length?gates:[1]);const b=comparison.length?computeCHNOPS(comparison):null;const resonance=b?computeResonance(a.normalized,b.normalized):null;let p=null,d=null;try{if(purpose.length)p=computePurposeVector(purpose);if(p)d=detectDeviation(a.normalized,p)}catch{}return {ok:true,field:a,comparison:b,resonance,purpose:p,deviation:d};}}
+export default ResonanceOrgan;

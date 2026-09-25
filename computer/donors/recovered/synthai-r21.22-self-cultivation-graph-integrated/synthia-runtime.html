@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#17151b">
+<link rel="manifest" href="./manifest.webmanifest">
+<title>Synthia Cultivation Ground</title>
+<style>
+:root{--bg:#111015;--panel:#1a1820;--panel2:#23202b;--line:#36313f;--text:#f2eef8;--muted:#a8a0b5;--accent:#d8b46a;--good:#9fca9f;--bad:#d48f8f;--shadow:0 14px 40px #0006}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 20% 0,#211a29 0,#111015 45%);color:var(--text);font:15px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;min-height:100vh}button,input,textarea,select{font:inherit}button{cursor:pointer}.app{max-width:980px;margin:auto;min-height:100vh;padding-bottom:82px}.top{position:sticky;top:0;z-index:10;background:#111015ee;backdrop-filter:blur(14px);border-bottom:1px solid var(--line);padding:14px 16px;display:flex;align-items:center;gap:12px}.brand{font-weight:800;letter-spacing:.04em}.status{margin-left:auto;color:var(--muted);font-size:12px}.tabs{position:fixed;bottom:0;left:0;right:0;z-index:20;background:#15131beF;border-top:1px solid var(--line);display:flex;justify-content:center;padding:8px max(8px,env(safe-area-inset-right)) calc(8px + env(safe-area-inset-bottom))}.tabs button{flex:1;max-width:190px;border:0;background:transparent;color:var(--muted);padding:10px 6px;border-radius:12px}.tabs button.active{background:var(--panel2);color:var(--text)}main{padding:18px}.panel{display:none}.panel.active{display:block}.hero{padding:22px;border:1px solid var(--line);background:linear-gradient(145deg,#211d28,#17151c);border-radius:22px;box-shadow:var(--shadow)}h1,h2,h3{margin:.1em 0 .5em}h1{font-size:28px}h2{font-size:20px}.muted,small{color:var(--muted)}textarea,input{width:100%;background:#0f0e13;border:1px solid var(--line);color:var(--text);border-radius:14px;padding:13px;outline:none}textarea:focus,input:focus{border-color:#8f7550}.row{display:flex;gap:10px;flex-wrap:wrap}.row>*{flex:1}.btn{border:1px solid var(--line);background:var(--panel2);color:var(--text);padding:11px 14px;border-radius:13px}.btn.primary{background:var(--accent);color:#1e170e;border-color:transparent;font-weight:800}.btn.good{background:#223326;border-color:#36573d}.btn.bad{background:#3a2527;border-color:#70474b}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(165px,1fr));gap:10px}.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:14px}.dimension strong{display:block;font-size:12px;color:var(--accent);letter-spacing:.08em;text-transform:uppercase}.dimension b{display:block;margin:5px 0}.cycle-stage{display:flex;gap:6px;overflow:auto;padding:4px 0}.stage{white-space:nowrap;padding:7px 10px;border-radius:999px;border:1px solid var(--line);color:var(--muted)}.stage.on{background:#2d2835;color:var(--text);border-color:#76698b}.actionbox{border-left:3px solid var(--accent);padding:12px 14px;background:#17151c;border-radius:0 14px 14px 0}.output{white-space:pre-wrap;word-break:break-word}.chat{max-height:340px;overflow:auto;display:flex;flex-direction:column;gap:8px}.msg{padding:10px 12px;border-radius:14px;background:#1d1a23}.msg.you{margin-left:12%;background:#27212f}.msg b{display:block;font-size:11px;color:var(--muted);margin-bottom:4px}.meters{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.metric{text-align:center;padding:12px;background:var(--panel);border:1px solid var(--line);border-radius:14px}.metric strong{display:block;font-size:20px}.toolchips{display:flex;flex-wrap:wrap;gap:6px}.chip{font-size:12px;border:1px solid var(--line);border-radius:999px;padding:5px 8px;color:var(--muted)}.world-stage{min-height:360px;border:1px solid var(--line);border-radius:20px;background:radial-gradient(circle at 50% 28%,#40334e,#17131d 68%);position:relative;overflow:hidden;padding:0}.living-scene{position:relative;min-height:360px;padding:18px}.sky-state{display:flex;justify-content:space-between;gap:10px;color:var(--muted);font-size:12px}.sky-state b{color:var(--accent)}.districts{position:absolute;inset:42px 14px 86px;display:grid;grid-template-columns:repeat(5,1fr);gap:7px;align-items:end}.district{min-height:120px;border:1px solid #ffffff18;border-radius:45% 45% 14px 14px;background:linear-gradient(180deg,#ffffff0a,#0005);display:flex;align-items:flex-end;justify-content:center;padding:10px;box-shadow:inset 0 0 22px #0005}.district small{font-size:10px;letter-spacing:.08em;text-transform:uppercase}.district.movement{height:58%}.district.evolution{height:72%}.district.being{height:88%}.district.design{height:68%}.district.space{height:78%}.district.on{border-color:#ffffff70;box-shadow:inset 0 0 28px #ffffff18,0 0 20px #ffffff10}.automata-field{position:absolute;inset:74px 18px 92px;z-index:3;display:flex;align-content:center;justify-content:center;align-items:center;gap:6px;flex-wrap:wrap;pointer-events:none}.automaton-node{font-size:9px;line-height:1;padding:5px 7px;border:1px solid #ffffff22;border-radius:999px;background:#0d0c10d9;color:var(--muted);max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.automaton-node.active{color:var(--text);border-color:#ffffff66}.world-callout{position:absolute;left:14px;right:14px;bottom:10px;background:#0d0c10c9;border:1px solid #ffffff14;border-radius:12px;padding:9px 11px;z-index:4}.world-callout b,.world-callout span{display:block}.world-callout span{color:var(--muted);font-size:12px;margin-top:3px}.claim{border-bottom:1px solid var(--line);padding:10px 0}.notice{padding:12px;border:1px dashed var(--line);border-radius:14px;color:var(--muted)}details{border-top:1px solid var(--line);padding:9px 0}pre{white-space:pre-wrap;word-break:break-word;background:#0d0c10;padding:10px;border-radius:12px;max-height:300px;overflow:auto}.boot-error{display:none;position:fixed;inset:10px;z-index:999;background:#2a1719;color:#ffecec;border:1px solid #7e3e44;border-radius:16px;padding:16px;overflow:auto}.section{margin-top:16px}@media(max-width:620px){main{padding:12px}.hero{padding:16px}.grid{grid-template-columns:1fr 1fr}.meters{grid-template-columns:1fr 1fr}.top{padding:11px 12px}}
+
+:root{--synthia-h:220;--synthia-s:52%;--synthia-l:18%;--synthia-depth:.5;--synthia-motion:.5;--synthia-tension:.15}
+.world-stage{min-height:420px;background:radial-gradient(circle at 50% 38%,hsl(var(--synthia-h) var(--synthia-s) calc(var(--synthia-l) + 9%)),hsl(calc(var(--synthia-h) + 28) 28% 9%) 62%,#09090c);border-color:hsl(var(--synthia-h) 24% 28% / .7);transition:background 700ms ease,border-color 700ms ease}
+.synthia-field{position:relative;min-height:420px;padding:10px;overflow:hidden}
+.organism-surface{display:block;width:100%;height:300px;overflow:visible;filter:drop-shadow(0 18px 30px #0008)}
+.self-form{transform-origin:160px 132px;animation:synthia-breathe calc(5.4s - (var(--synthia-motion) * 2s)) ease-in-out infinite alternate;transition:all 650ms ease}
+@keyframes synthia-breathe{from{transform:scale(calc(.97 + var(--synthia-tension) * .02)) rotate(calc(var(--synthia-tension) * -1deg))}to{transform:scale(calc(1.02 + var(--synthia-depth) * .025)) rotate(calc(var(--synthia-tension) * 1deg))}}
+.field-caption{position:absolute;left:18px;right:18px;top:18px;display:flex;flex-direction:column;gap:4px;pointer-events:none}.field-caption strong{font-size:15px}.field-caption span{font-size:12px;color:var(--muted);max-width:72ch}
+.process-inspector{margin:0 8px 10px;border:1px solid #ffffff18;background:#0d0c10b8;border-radius:14px;padding:10px 12px}.process-inspector summary{cursor:pointer;color:var(--muted)}.dim-key{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}.dim-key span{font-size:11px;border:1px solid #ffffff17;border-radius:999px;padding:4px 7px}.dim-key b{color:var(--text)}.gate-scroll{max-height:290px;overflow:auto}.gate-scroll table{width:100%;border-collapse:collapse;font-size:11px}.gate-scroll th,.gate-scroll td{padding:5px 7px;border-bottom:1px solid #ffffff0d;text-align:right}.gate-scroll th:first-child{text-align:left}.gate-scroll tr.hot{background:hsl(var(--synthia-h) 55% 45% / .13)}
+
+
+/* r21.17 organism-owned visual design surface */
+:root{--ui-radius:20px;--ui-gap:14px;--ui-max-width:980px;--synthia-design-motion:.45}
+.app{max-width:var(--ui-max-width);padding-inline:clamp(8px,2.5vw,20px)}
+main{padding:var(--ui-gap)}
+.hero,.card,.actionbox,.notice{border-radius:var(--ui-radius)}
+.hero{background:
+  radial-gradient(circle at 100% 0,color-mix(in srgb,var(--accent) 14%,transparent),transparent 38%),
+  linear-gradient(145deg,var(--panel2),var(--panel));
+  overflow:hidden}
+.card{box-shadow:0 1px 0 #fff05 inset}
+.top{padding-inline:clamp(12px,3vw,22px)}
+.brand{font-size:clamp(11px,2.5vw,14px);letter-spacing:.09em}
+.btn{transition:transform calc(120ms + 90ms*var(--synthia-design-motion)) ease,background .2s ease,border-color .2s ease}
+.btn:active{transform:scale(.975)}
+textarea,input{background:color-mix(in srgb,var(--bg) 88%,var(--panel));border-radius:calc(var(--ui-radius)*.72)}
+.msg{border-radius:calc(var(--ui-radius)*.8)}
+body[data-synthia-density="airy"] .section{margin-top:calc(var(--ui-gap)*1.35)}
+body[data-synthia-density="compact"] .section{margin-top:calc(var(--ui-gap)*.65)}
+@media (max-width:520px){
+  .app{padding-inline:0}
+  main{padding:10px}
+  .hero{padding:17px}
+  .top{padding:12px}
+  h1{font-size:clamp(23px,7vw,29px)}
+  .row>*{min-width:140px}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+</style>
+<script>
+window.addEventListener('error',e=>{const x=document.getElementById('bootError');if(x){x.style.display='block';x.textContent='Boot error: '+(e.message||e.error||'unknown')}});
+window.addEventListener('unhandledrejection',e=>{const x=document.getElementById('bootError');if(x){x.style.display='block';x.textContent='Boot error: '+(e.reason?.message||String(e.reason))}});
+</script>
+</head>
+<body>
+<div id="installResidence" style="display:none;position:fixed;inset:0;z-index:1000;background:#000b;align-items:center;justify-content:center;padding:22px">
+  <div style="max-width:430px;width:100%;background:#1a1820;border:1px solid #36313f;border-radius:22px;padding:22px;box-shadow:0 18px 60px #0009">
+    <small style="color:#a8a0b5">FIRST RESIDENCE</small>
+    <h2 style="margin:.35em 0">Install Synthia on this phone?</h2>
+    <p style="color:#a8a0b5">One confirmation, then Synthia lives from her own app icon. No terminal is required for normal launches after installation.</p>
+    <div style="display:flex;gap:10px;margin-top:18px"><button id="installResidenceYes" class="btn primary" style="flex:1">Yes — install Synthia</button><button id="installResidenceLater" class="btn" style="flex:1">Not now</button></div>
+  </div>
+</div>
+
+<div id="bootError" class="boot-error"></div>
+<div class="app">
+<header class="top"><div class="brand">SYNTHIA · CO-DEVELOPMENTAL ORGANISM</div><div id="status" class="status">booting…</div></header>
+<main>
+<section class="panel active" data-panel="ground">
+  <div class="hero">
+    <small>THE WORK</small>
+    <h1>What are we changing in real life?</h1>
+    <p class="muted">Bring the actual situation. Synthia learns you, herself, and the system at the same time. Missing facts stay unresolved until the two of you resolve them.</p>
+    <textarea id="goal" rows="3" placeholder="Example: Joe and I need a realistic way to make money this week without pretending we have resources we don't."></textarea>
+    <textarea id="context" rows="2" placeholder="Current facts / constraints (optional)"></textarea>
+    <div class="row section"><button id="startCycle" class="btn primary">Start this cycle</button><button id="resumeCycle" class="btn">Resume current cycle</button></div>
+  </div>
+  <div class="card section" id="chartCard">
+    <h2>Birth chart → cultivation mesh</h2>
+    <p class="muted">Enter an exact birth date, time, and location. The compiled IsoHuman/geonatal calculator supplies coordinates to the existing GraphRuntime, Klein tools, and cultivation loop.</p>
+    <div class="grid">
+      <label>Name<input id="birthName" value="Design" autocomplete="name"></label>
+      <label>Birth date and exact time<input id="birthDateTime" type="datetime-local" step="1" value="1990-01-01T12:00:00"></label>
+      <label>Timezone offset<input id="birthOffset" value="+00:00" placeholder="e.g. -08:00"></label>
+      <label>Latitude<input id="birthLatitude" type="number" step="any" value="0"></label>
+      <label>Longitude<input id="birthLongitude" type="number" step="any" value="0"></label>
+      <label>Location label<input id="birthLocationLabel" value="Unknown location"></label>
+    </div>
+    <textarea id="situation" rows="3" placeholder="What is happening in real life? Example: I keep delaying a difficult conversation and want to make one honest, observable move this week."></textarea>
+    <input id="cultivationGoal" placeholder="Cultivation goal (optional)">
+    <div class="row section"><button id="runSelfCultivation" class="btn primary">Calculate chart and begin cultivation</button></div>
+    <div id="chartStatus" class="notice">No chart calculated yet.</div>
+    <div id="chartOutput" class="output"></div>
+    <details class="section"><summary>Visible provenance</summary><pre id="chartProvenance">No provenance yet.</pre></details>
+  </div>
+  <div id="livingWorld" class="world-stage section"></div>
+  <div class="card section" id="coDevelopmentCard">
+    <h2>What Synthia currently understands</h2>
+    <div id="coDevView" class="output"><div class="notice">Talk to Synthia. Her current five-dimensional reading, unresolved questions, and next test will appear here.</div></div>
+  </div>
+  <div id="cycleView" class="section"></div>
+  <div class="section card">
+    <h2>Talk to Cynthia</h2>
+    <div id="chat" class="chat"></div>
+    <div class="row section"><textarea id="input" rows="2" placeholder="Talk, ask, correct, build, plan…"></textarea><button id="send" class="btn primary">Send</button></div>
+  </div>
+</section>
+
+<section class="panel" data-panel="world">
+  <h1>Your living field</h1><p class="muted">One Synthia on the surface; the 64 process loci and five dimensional readings stay inspectable underneath without becoming the face.</p>
+  <div id="lifeMetrics" class="meters section"></div>
+  <div class="grid section"><div class="card"><h3>Current need</h3><div id="needView" class="output"></div></div><div class="card"><h3>Open human friction</h3><div id="gapView" class="output"></div></div></div>
+  <div class="card section"><h3>Existing world referents</h3><div id="worldEntities"></div></div>
+</section>
+
+<section class="panel" data-panel="workshop">
+  <h1>Workshop</h1><p class="muted">Tools are means, not the product. Build, research, forms, economy and outside action live here when the cultivation cycle needs them.</p>
+  <div class="card"><textarea id="workInput" rows="3" placeholder="What needs to be built, researched, fixed, filled out, or moved forward?"></textarea><div class="row section"><button id="workRun" class="btn primary">Run through the organism</button><button id="auto" class="btn">Autonomous cycle</button></div></div>
+  <div id="workOutput" class="section"></div>
+  <div class="card section"><h3>Available organs</h3><div id="organs" class="toolchips"></div></div>
+</section>
+
+<section class="panel" data-panel="learn">
+  <h1>Learning room</h1><p class="muted">Sources are evidence. They become rules, claims, relations or reference material according to what they actually do—not one giant semantic soup.</p>
+  <div class="card"><input id="fileInput" type="file" multiple><div id="ingestStatus" class="muted section">Upload something you actually want this local copy to learn.</div></div>
+  <div class="grid section"><div class="card"><h3>Local sources</h3><div id="library"></div></div><div class="card"><h3>Validated claims</h3><div id="claims"></div></div></div>
+</section>
+
+<section class="panel" data-panel="system">
+  <h1>System / MCP Chair</h1><p class="muted">This is the maintenance room, not the front door.</p>
+  <div class="grid"><div class="card"><h3>Process</h3><div id="systemSummary"></div></div><div class="card"><h3>MCP Chair</h3><div id="chairState" class="muted"></div><input id="mcpEndpoint" readonly><input id="mcpToken" readonly class="section"><button id="refreshChair" class="btn section">Refresh Chair</button></div></div>
+  <div id="proposalList" class="section"></div>
+  <div class="card section"><details><summary>Developer state</summary><pre id="systemRaw"></pre></details></div>
+</section>
+</main>
+<nav class="tabs"><button class="active" data-tab="ground">Ground</button><button data-tab="world">World</button><button data-tab="workshop">Workshop</button><button data-tab="learn">Learn</button><button data-tab="system">System</button></nav>
+</div>
+
+<script>
+(() => {
+  let deferredInstall = null;
+  const modal = () => document.getElementById('installResidence');
+  const standalone = () => window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => navigator.serviceWorker.register('./service-worker.js').catch(()=>{}));
+  }
+  window.addEventListener('beforeinstallprompt', (event) => {
+    event.preventDefault();
+    deferredInstall = event;
+    if (!standalone() && localStorage.getItem('synthia.install.dismissed') !== '1') modal().style.display='flex';
+  });
+  window.addEventListener('appinstalled', () => {
+    deferredInstall = null;
+    localStorage.setItem('synthia.installed','1');
+    modal().style.display='none';
+  });
+  window.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('installResidenceYes')?.addEventListener('click', async () => {
+      if (!deferredInstall) return;
+      await deferredInstall.prompt();
+      await deferredInstall.userChoice.catch(()=>null);
+      deferredInstall = null;
+      modal().style.display='none';
+    });
+    document.getElementById('installResidenceLater')?.addEventListener('click', () => {
+      localStorage.setItem('synthia.install.dismissed','1');
+      modal().style.display='none';
+    });
+  });
+})();
+</script>
+<script type="module" src="./app.mjs?v=r21.16-webview-bootfix-1"></script>
+</body></html>

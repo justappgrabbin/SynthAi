@@ -1,0 +1,10 @@
+import SynthiaUnit from '../core/SynthiaUnit.mjs';
+const unit=new SynthiaUnit({autoStart:false,profile:{id:'embodied-test',micro:{gate:25,line:3,color:2,tone:4,base:5},macro:{planet:1,dimension:4,zodiac:1,house:1}}});
+const p=unit.morphPhenotype();
+if(p.source!=='live-synthia-organism-state')throw new Error('phenotype not organism-driven');
+if(p.address.gate!==25)throw new Error('address not reflected');
+if(!['Movement','Evolution','Being','Design','Space'].includes(p.dominantDimension))throw new Error('dimension missing');
+if(p.proportions.height<.88||p.proportions.height>1.14)throw new Error('height out of bounded morphology');
+if(p.anatomy.toolCount!==unit.runtime.getRegisteredTools().length)throw new Error('tool anatomy mismatch');
+console.log('embodied-morph-smoke: PASS',JSON.stringify({dimension:p.dominantDimension,state:p.state,address:p.address,tools:p.anatomy.toolCount,proportions:p.proportions},null,2));
+unit.stopLife();
