@@ -163,8 +163,9 @@ export class SynthiaResident {
     const missing = CANONICAL_KIMI_TOOLS.filter(id => !ids.has(id));
     if (missing.length) throw new Error(`Kimi mesh missing canonical tools: ${missing.join(', ')}`);
     const metrics = this.kimi.meshMetrics();
+    const projections = metrics?.projections ?? {};
     for (const projection of ['knowledge', 'causal', 'phase', 'temporal', 'dependency']) {
-      if (!metrics?.[projection]) throw new Error(`Kimi mesh missing projection: ${projection}`);
+      if (!projections?.[projection]) throw new Error(`Kimi mesh missing projection: ${projection}`);
     }
   }
 
@@ -233,7 +234,7 @@ export class SynthiaResident {
     const probe = request.probeInput ?? factoryProbe(tool, request);
     try {
       const output = await automaton.call(probe, { purpose: 'resident-retention-test' });
-      const link = this.atoMesh.connect(automaton.id, 'resident-mesh-hub', { outputPort: 'out', inputPort: 'in' });
+      const link = this.atoMesh.connect(automaton.id, 'resident-mesh-hub', { inputPort: 'in' });
       const manifest = tool.manifest();
       this.autoRegistrar?.registerAccepted({
         kind: 'tool', identity: tool.id, status: 'VERIFIED', origin: { source: 'integrated-tool-factory', at: Date.now() },
@@ -291,7 +292,13 @@ export class SynthiaResident {
       ato: this.atoMesh?.snapshot?.() ?? null,
       toolFactory: this.factory?.snapshot?.() ?? null,
       klein: { mounted: this.kleinTools?.map(tool => tool.id) ?? [] },
-      kimi: { toolCount: kimiTools.length, tools: kimiTools, mesh: this.kimi?.meshMetrics?.() ?? null, grownTools: this.kimi?.grownTools?.()?.map?.(tool => tool.id ?? tool.manifest?.id ?? null) ?? [] },
+      kimi: {
+        toolCount: kimiTools.length,
+        tools: kimiTools,
+        mesh: this.kimi?.meshMetrics?.()?.projections ?? null,
+        meshSummary: this.kimi?.meshMetrics?.() ?? null,
+        grownTools: this.kimi?.grownTools?.()?.map?.(tool => tool.id ?? tool.manifest?.id ?? null) ?? [],
+      },
       hands: { browser: this.browserSurface(), androidSelfCompile: Boolean(this.androidSelfCompile) },
       loadedBuilds: [...this.loadedBuilds.keys()],
       federation: {
