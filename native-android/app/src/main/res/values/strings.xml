@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">SynthAI Computer</string>
+    <string name="synthia_accessibility_description">Lets Synthia Prime inspect and operate the visible Android interface when you enable Hands.</string>
+</resources>
