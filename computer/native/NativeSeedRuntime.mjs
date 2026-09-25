@@ -354,12 +354,10 @@ export class NativeSeedRuntime {
 
   async installResidentImage(readable, options = {}) {
     const record = await this.residentImages.installSynthImageStream(readable, options);
-    const resident = await this.imageResidents.mount({ imageId: record.id, residentId: options.residentId ?? null });
     return {
       installed: true,
-      mounted: true,
+      mounted: false,
       image: this.residentImages.list().find(image => image.id === record.id) ?? null,
-      resident,
     };
   }
 
