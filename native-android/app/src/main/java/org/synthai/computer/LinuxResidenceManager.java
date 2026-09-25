@@ -216,7 +216,7 @@ public final class LinuxResidenceManager {
         command.add("SYNTHAI_IDLE_EXIT_MS=0");
         command.add("SYNTHAI_NATIVE_STATE=/mnt/synthai-host/linux-residence/native-seed-state.json");
         command.add("SYNTHIA_ANDROID_HAND=1");
-        command.add("SYNTHIA_ANDROID_HAND_URL=http://127.0.0.1:18758");
+        command.add("SYNTHIA_ANDROID_HAND_URL=http://127.0.0.1:18758");\n        command.add("SYNTHIA_ANDROID_HAND_TOKEN=" + SynthiaSecurity.handToken(context));
         command.add("/usr/bin/node");
         command.add("/opt/synthai/computer/native/native-seed-server.mjs");
 
