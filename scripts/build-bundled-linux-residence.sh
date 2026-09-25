@@ -5,7 +5,7 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 ASSET_DIR="$ROOT/native-android/app/src/main/assets/runtime"
 WORK_DIR="${RUNNER_TEMP:-/tmp}/synthai-linux-residence"
 CONTAINER="synthai-arm64-residence-builder"
-PROOT_PACKAGE_URL="https://raw.githubusercontent.com/green-green-avk/build-proot-android/master/packages/proot-android-aarch64.tar.gz"
+PROOT_PACKAGE_URL="https://raw.githubusercontent.com/green-green-avk/build-proot-android/master/packages/proot-android-aarch64.bin"
 
 rm -rf "$WORK_DIR"
 mkdir -p "$WORK_DIR" "$ASSET_DIR"
