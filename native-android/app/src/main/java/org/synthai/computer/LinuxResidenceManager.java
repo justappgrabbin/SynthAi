@@ -208,7 +208,6 @@ public final class LinuxResidenceManager {
         command.add("-L");
         command.add("-b"); command.add("/system");
         command.add("/usr/bin/env");
-        command.add("PROOT_TMP_DIR=" + prootTmpDir.getAbsolutePath());
         command.add("HOME=/root");
         command.add("PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin");
         command.add("SYNTHAI_NATIVE_HOST=127.0.0.1");
@@ -222,6 +221,10 @@ public final class LinuxResidenceManager {
 
         ProcessBuilder builder = new ProcessBuilder(command);
         builder.directory(residenceDir);
+        builder.environment().put("PROOT_TMP_DIR", prootTmpDir.getAbsolutePath());
+        builder.environment().put("TERMSH_UID", String.valueOf(android.os.Process.myUid()));
+        builder.environment().remove("TMPDIR");
+        builder.environment().remove("LD_LIBRARY_PATH");
         builder.redirectErrorStream(true);
         builder.redirectOutput(ProcessBuilder.Redirect.appendTo(log));
         nativeSeedProcess = builder.start();
