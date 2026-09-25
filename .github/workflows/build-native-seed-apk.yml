@@ -17,6 +17,10 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: native-seed-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build-native-seed:
     runs-on: ubuntu-latest
