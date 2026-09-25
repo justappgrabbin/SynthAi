@@ -47,6 +47,7 @@ curl --fail --location --retry 5 --retry-all-errors \
   "$PROOT_PACKAGE_URL" \
   --output "$ASSET_DIR/proot-android-aarch64.tgz"
 test "$(wc -c < "$ASSET_DIR/proot-android-aarch64.tgz" | tr -d ' ')" -gt 100000
+echo "$PROOT_PACKAGE_SHA256  $ASSET_DIR/proot-android-aarch64.tgz" | sha256sum -c -
 tar -tzf "$ASSET_DIR/proot-android-aarch64.tgz" | tee /tmp/proot-package-files.txt
 grep -q '^root/bin/proot$' /tmp/proot-package-files.txt
 echo "::endgroup::"
