@@ -36,7 +36,7 @@ public final class MainActivity extends Activity {
     private static final int REQUEST_AUDIO = 7004;
     private static final int REQUEST_MIRROR_IMAGE = 7002;
     private static final int REQUEST_SYNTHIA_PACKAGE = 7003;
-    private static final String BUNDLED_PRIME_ASSET = "residents/Synthia-Prime-v0.5.8-Android-Resident-2.synthimg";
+    private static final String BUNDLED_PRIME_ASSET = "residents/Synthia-Prime-v0.5.8-Android-Resident-3.synthimg";
     private final ExecutorService io = Executors.newSingleThreadExecutor();
     private final Handler main = new Handler(Looper.getMainLooper());
     private NativeSeedClient client;
