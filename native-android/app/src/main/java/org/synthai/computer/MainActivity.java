@@ -10,7 +10,9 @@ import android.util.Base64;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.os.Bundle;
+import android.os.Build;
 import android.os.Handler;
+import android.provider.Settings;
 import android.os.Looper;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -44,6 +46,8 @@ public final class MainActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        LinuxResidenceService.start(this);
+        SynthiaHoverService.start(this);
         client = new NativeSeedClient("http://127.0.0.1:17757");
         journal = new EventJournal(this);
         prefs = getSharedPreferences("synthai-native", MODE_PRIVATE);
@@ -55,6 +59,13 @@ public final class MainActivity extends Activity {
         mirrorFile = new File(getFilesDir(), "synthia-mirror-face.jpg");
         loadMirrorFace();
         setContentView(world);
+        if (Build.VERSION.SDK_INT >= 23 && !Settings.canDrawOverlays(this)) {
+            world.setStatus("ENABLE SYNTHIA HOVER");
+            try {
+                Intent overlay = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:" + getPackageName()));
+                startActivity(overlay);
+            } catch (Exception ignored) {}
+        }
         refreshApps();
         wakeRuntimeAndFlush(0);
     }
@@ -65,6 +76,8 @@ public final class MainActivity extends Activity {
         long last = prefs.getLong("backgroundAt", 0L);
         long elapsed = last > 0 ? Math.max(0, System.currentTimeMillis() - last) : 0;
         prefs.edit().remove("backgroundAt").apply();
+        LinuxResidenceService.start(this);
+        SynthiaHoverService.start(this);
         refreshApps();
         wakeRuntimeAndFlush(elapsed);
     }
@@ -309,35 +322,21 @@ public final class MainActivity extends Activity {
     private NativeSeedClient.Result ensureCurrentNativeSeed() {
         NativeSeedClient.Result health = client.health();
         if (!health.ok) {
-            TermuxBridge.startNativeSeed(this);
-            for (int i = 0; i < 6 && !health.ok; i++) {
-                try { Thread.sleep(700L * (i + 1)); } catch (InterruptedException ignored) {}
+            LinuxResidenceService.start(this);
+            for (int i = 0; i < 12 && !health.ok; i++) {
+                try { Thread.sleep(450L * (i + 1)); } catch (InterruptedException ignored) {}
                 health = client.health();
             }
         }
-
         if (health.ok && runtimeApiVersion(health) < 2) {
-            main.post(() -> world.setStatus("UPDATING NATIVE SEED"));
-            try { client.post("/sleep", new JSONObject()); } catch (Exception ignored) {}
-            TermuxBridge.updateAndStartNativeSeed(this);
-            for (int i = 0; i < 9; i++) {
-                try { Thread.sleep(800L * (i + 1)); } catch (InterruptedException ignored) {}
-                health = client.health();
-                if (health.ok && runtimeApiVersion(health) >= 2) break;
-            }
+            main.post(() -> world.setStatus("LOCAL RESIDENCE API NEEDS APK UPDATE"));
         }
         return health;
     }
 
     private void wakeRuntimeAndFlush(long elapsedMs) {
-        if (TermuxBridge.isInstalled(this) &&
-            android.os.Build.VERSION.SDK_INT >= 23 &&
-            checkSelfPermission(TermuxBridge.RUN_PERMISSION) != PackageManager.PERMISSION_GRANTED) {
-            world.setStatus("GRANT TERMUX RUN PERMISSION");
-            requestPermissions(new String[]{TermuxBridge.RUN_PERMISSION}, REQUEST_TERMUX_RUN);
-            return;
-        }
-        world.setStatus("MESH WAKING");
+        LinuxResidenceService.start(this);
+        world.setStatus("LOCAL LINUX · MESH WAKING");
         io.execute(() -> {
             NativeSeedClient.Result health = ensureCurrentNativeSeed();
             boolean ready = health.ok;
