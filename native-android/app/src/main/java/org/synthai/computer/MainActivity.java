@@ -439,6 +439,13 @@ public final class MainActivity extends Activity {
     private boolean hasMountedSynthia(NativeSeedClient.Result health) {
         try {
             JSONObject root = new JSONObject(health.body == null ? "{}" : health.body);
+            JSONArray residents = root.optJSONArray("imageResidents");
+            if (residents != null) {
+                for (int i = 0; i < residents.length(); i++) {
+                    JSONObject resident = residents.optJSONObject(i);
+                    if (resident != null && "synthia58".equals(resident.optString("residentType"))) return true;
+                }
+            }
             JSONObject mounts = root.optJSONObject("optionalMounts");
             if (mounts == null || !mounts.has("synthia57")) return false;
             Object value = mounts.opt("synthia57");
