@@ -10,6 +10,7 @@ on:
       - 'computer/tests/research-report-automaton.test.mjs'
       - 'computer/tests/research-report-cartridge-integration.test.mjs'
       - 'computer/tests/task-fit-native-convergence.test.mjs'
+      - 'computer/tests/indiverse-addressed-registration.test.mjs'
       - 'computer/native/NativeSeedRuntime.mjs'
       - '.github/workflows/resident-integration-check.yml'
   push:
@@ -20,6 +21,7 @@ on:
       - 'integration/synthia58-automata-cartridge-loop'
       - 'recovery/research-report-automaton-v010-20260925'
       - 'recovery/taskfit-convergence-20260925'
+      - 'recovery/indiverse-addressed-registration-20260925'
     paths:
       - 'computer/runtime/mesh-kernel.mjs'
       - 'computer/runtime/dormant-compiler.mjs'
@@ -88,6 +90,7 @@ jobs:
           computer/tests/research-report-automaton.test.mjs
           computer/tests/research-report-cartridge-integration.test.mjs
           computer/tests/task-fit-native-convergence.test.mjs
+          computer/tests/indiverse-addressed-registration.test.mjs
           computer/tests/synthia57-resident.test.mjs
           computer/tests/synthia57-package-loader.test.mjs
           computer/tests/synthia57-package-store.test.mjs
