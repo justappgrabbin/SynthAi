@@ -117,9 +117,11 @@ pre{white-space:pre-wrap;word-break:break-word;background:#0c0712;border-radius:
 
 <script type="module">
 import { MobileComputerRuntime } from './computer-runtime/mobile/MobileComputerRuntime.mjs';
+import { NativeSeedResidentClient } from './computer-runtime/mobile/NativeSeedResidentClient.mjs';
 
 const $ = id => document.getElementById(id);
-const computer = await new MobileComputerRuntime().boot();
+const nativeResidents = new NativeSeedResidentClient();
+const computer = await new MobileComputerRuntime({ nativeResidents }).boot();
 window.synthComputer = computer;
 
 try {
@@ -168,12 +170,17 @@ function renderApps() {
       </div>`;
     el.querySelector('[data-wake]').onclick = async () => {
       try {
-        const result = await computer.launchSynthImage(app.id, { full: mode === 'full' });
-        $('viewer').src = result.launchUrl;
-        $('viewerTitle').textContent = `${app.name} · ${result.record.lifecycle.toUpperCase()}`;
-        $('viewerWrap').classList.remove('hidden');
+        const residentType = app.manifest?.resident_type ?? app.manifest?.residentType ?? null;
+        const result = app.residentEntry && ['echo','synthia58'].includes(residentType)
+          ? await computer.mountResidentSynthImage(app.id)
+          : await computer.launchSynthImage(app.id, { full: mode === 'full' });
+        if (result.launchUrl) {
+          $('viewer').src = result.launchUrl;
+          $('viewerTitle').textContent = `${app.name} · ${result.record.lifecycle.toUpperCase()}`;
+          $('viewerWrap').classList.remove('hidden');
+          $('viewerWrap').scrollIntoView({behavior:'smooth'});
+        }
         renderApps();
-        $('viewerWrap').scrollIntoView({behavior:'smooth'});
       } catch (error) { alert(error.message); }
     };
     el.querySelector('[data-sleep]').onclick = async () => {
