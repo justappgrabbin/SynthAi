@@ -1,0 +1,109 @@
+name: Promote verified Prime APK candidate
+
+on:
+  workflow_dispatch:
+    inputs:
+      source_run_id:
+        description: GitHub Actions run containing the preserved Prime Resident 3 image artifact
+        required: true
+        type: string
+      source_artifact_name:
+        description: Artifact containing exactly one Resident 3 .synthimg file
+        required: true
+        default: synthia-prime-resident3
+        type: string
+
+permissions:
+  actions: read
+  contents: read
+
+concurrency:
+  group: prime-apk-promotion-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  promote:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      PRIME_ASSET_PATH: assets/residents/Synthia-Prime-v0.5.8-Android-Resident-3.synthimg
+      PRIME_SHA256: 8d5874a11f0a73027be14119bc13f6a0efd1adeb2aa9ac877c2284fcd5ab2f72
+      PROOT_SHA256: 9629eb30cdf86e95c6ba681f8ab89c6fdaa9eca093d5577163513c99af5ca281
+      CANDIDATE_NAME: SynthAI-Prime-Linux-Resident3-recovery-debug.apk
+    steps:
+      - name: Checkout protected integration lane
+        uses: actions/checkout@v4
+
+      - name: Setup Java 17
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+
+      - name: Setup ARM64 emulation
+        uses: docker/setup-qemu-action@v3
+        with:
+          platforms: arm64
+
+      - name: Test the identity gate
+        run: bash scripts/test-verify-prime-apk-candidate.sh
+
+      - name: Download preserved Prime image artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ inputs.source_artifact_name }}
+          run-id: ${{ inputs.source_run_id }}
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          path: incoming-prime
+
+      - name: Verify and stage Prime Resident 3 without modifying its bytes
+        run: |
+          mapfile -t images < <(find incoming-prime -type f -name '*.synthimg' -print)
+          test "${#images[@]}" -eq 1
+          test "$(sha256sum "${images[0]}" | awk '{print $1}')" = "$PRIME_SHA256"
+          mkdir -p "native-android/app/src/main/$(dirname "$PRIME_ASSET_PATH")"
+          cp -- "${images[0]}" "native-android/app/src/main/$PRIME_ASSET_PATH"
+          test "$(sha256sum "native-android/app/src/main/$PRIME_ASSET_PATH" | awk '{print $1}')" = "$PRIME_SHA256"
+
+      - name: Build APK-local Linux residence
+        run: bash scripts/build-bundled-linux-residence.sh
+
+      - name: Capture the rebuilt residence identity and enforce pinned PRoot
+        run: |
+          manifest=native-android/app/src/main/assets/runtime/residence-manifest.properties
+          ROOTFS_SHA256="$(sed -n 's/^rootfs_sha256=//p' "$manifest")"
+          test -n "$ROOTFS_SHA256"
+          test "$(sed -n 's/^proot_package_sha256=//p' "$manifest")" = "$PROOT_SHA256"
+          echo "ROOTFS_SHA256=$ROOTFS_SHA256" >> "$GITHUB_ENV"
+
+      - name: Build signed debug candidate
+        env:
+          GRADLE_OPTS: -Dorg.gradle.jvmargs="-Xmx5g -XX:MaxMetaspaceSize=1g"
+        run: gradle -p native-android :app:assembleDebug --stacktrace
+
+      - name: Verify embedded byte identities and create delivery manifest
+        run: |
+          mkdir -p delivery
+          cp native-android/app/build/outputs/apk/debug/app-debug.apk "delivery/$CANDIDATE_NAME"
+          bash scripts/verify-prime-apk-candidate.sh \
+            "delivery/$CANDIDATE_NAME" \
+            "$PRIME_ASSET_PATH" \
+            "$PRIME_SHA256" \
+            "$ROOTFS_SHA256" \
+            "$PROOT_SHA256" \
+            delivery/prime-apk-candidate.properties \
+            "$GITHUB_OUTPUT"
+
+      - name: Upload verified candidate and identity manifest together
+        uses: actions/upload-artifact@v4
+        with:
+          name: synthai-prime-linux-resident3-verified-candidate
+          path: delivery/
+          if-no-files-found: error
+          retention-days: 90
