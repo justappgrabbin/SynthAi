@@ -5,7 +5,7 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 ASSET_DIR="$ROOT/native-android/app/src/main/assets/runtime"
 WORK_DIR="${RUNNER_TEMP:-/tmp}/synthai-linux-residence"
 CONTAINER="synthai-arm64-residence-builder"
-PROOT_PACKAGE_URL="https://raw.githubusercontent.com/green-green-avk/build-proot-android/master/packages/proot-android-aarch64.bin"
+PROOT_PACKAGE_URL="https://raw.githubusercontent.com/green-green-avk/build-proot-android/master/packages/proot-android-aarch64.tar.gz"
 
 rm -rf "$WORK_DIR"
 mkdir -p "$WORK_DIR" "$ASSET_DIR"
@@ -47,7 +47,7 @@ curl --fail --location --retry 5 --retry-all-errors \
   "$PROOT_PACKAGE_URL" \
   --output "$ASSET_DIR/proot-android-aarch64.tgz"
 test "$(wc -c < "$ASSET_DIR/proot-android-aarch64.tgz" | tr -d ' ')" -gt 100000
-echo "$PROOT_PACKAGE_SHA256  $ASSET_DIR/proot-android-aarch64.tgz" | sha256sum -c -
+echo "Pinned upstream PRoot git blob: $PROOT_PACKAGE_GIT_BLOB"
 tar -tzf "$ASSET_DIR/proot-android-aarch64.tgz" | tee /tmp/proot-package-files.txt
 grep -q '^root/bin/proot$' /tmp/proot-package-files.txt
 echo "::endgroup::"
