@@ -1,0 +1,33 @@
+name: Prime APK delivery gate check
+
+on:
+  pull_request:
+    paths:
+      - 'scripts/verify-prime-apk-candidate.sh'
+      - 'scripts/test-verify-prime-apk-candidate.sh'
+      - '.github/workflows/promote-prime-apk-candidate.yml'
+      - '.github/workflows/prime-apk-delivery-gate-check.yml'
+  push:
+    branches:
+      - 'recovery/prime-apk-delivery-gate-20260925'
+    paths:
+      - 'scripts/verify-prime-apk-candidate.sh'
+      - 'scripts/test-verify-prime-apk-candidate.sh'
+      - '.github/workflows/promote-prime-apk-candidate.yml'
+      - '.github/workflows/prime-apk-delivery-gate-check.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  identity-gate-fixtures:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check shell syntax
+        run: |
+          bash -n scripts/verify-prime-apk-candidate.sh
+          bash -n scripts/test-verify-prime-apk-candidate.sh
+      - name: Verify positive and rejection fixtures
+        run: bash scripts/test-verify-prime-apk-candidate.sh
+
