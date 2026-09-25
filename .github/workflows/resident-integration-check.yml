@@ -6,6 +6,7 @@ on:
     paths:
       - 'computer/runtime/research-report-automaton.mjs'
       - 'computer/services/task-fit.mjs'
+      - 'computer/services/task-fit-capability.mjs'
       - 'computer/tests/research-report-automaton.test.mjs'
       - 'computer/tests/research-report-cartridge-integration.test.mjs'
       - 'computer/tests/task-fit-native-convergence.test.mjs'
@@ -30,6 +31,7 @@ on:
       - 'computer/labs/**'
       - 'computer/services/purpose-guide.mjs'
       - 'computer/services/task-fit.mjs'
+      - 'computer/services/task-fit-capability.mjs'
       - 'computer/mobile/MobileComputerRuntime.mjs'
       - 'computer/native/**'
       - 'computer/adapters/termux-compiler.mjs'
