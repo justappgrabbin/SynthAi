@@ -6,10 +6,12 @@ on:
     branches:
       - 'integration/synthia-reality-resident'
       - 'integration/echo-prime-resident-loaders'
+      - 'integration/synthia58-automata-cartridge-loop'
     paths:
       - 'native-android/**'
       - 'computer/native/**'
       - 'computer/residents/**'
+      - 'computer/runtime/automata-cartridge-magazine.mjs'
       - 'computer/mobile/**'
       - 'scripts/build-bundled-linux-residence.sh'
       - '.github/workflows/build-native-seed-apk.yml'
