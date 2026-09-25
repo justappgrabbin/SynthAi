@@ -12,6 +12,7 @@ import { Synthia57MirrorSurfaceStore } from '../residents/synthia57-mirror-surfa
 import { NativeSynthImagePackageStore } from '../residents/native-synthimg-package-store.mjs';
 import { NativeImageResidentLoader } from '../residents/native-image-resident-loader.mjs';
 import { AutomataCartridgeMagazine } from '../runtime/automata-cartridge-magazine.mjs';
+import { ResearchReportAutomaton, researchReportCartridgeManifest } from '../runtime/research-report-automaton.mjs';
 import { StellarLabAdapter } from '../labs/stellar-lab-adapter.mjs';
 import { ConsciousnessRealmPackageLoader } from '../worlds/consciousness-realm-loader.mjs';
 import { HumanAgentMechanicsAdapter } from '../worlds/adapters/human-agent.mjs';
@@ -92,6 +93,7 @@ export class NativeSeedRuntime {
       mesh:this.meshKernel,
       clock,
     });
+    this.researchReport = new ResearchReportAutomaton({ clock });
     this.stellarLab = new StellarLabAdapter({ mesh: this.meshKernel, state: this.state, bus: this.bus, clock });
     this.consciousnessRealm = new ConsciousnessRealmPackageLoader({ computer: this, bus: this.bus });
     this.humanAgent = null;
@@ -108,7 +110,7 @@ export class NativeSeedRuntime {
     await this.#ensureParticipant('computer:self', {
       kind: 'native-seed',
       residency: 'active',
-      capabilities: ['mesh.host','state-space','execution','resident-host','resident-image.install','resident-image.mount','automata-cartridge.install','automata-cartridge.assemble','automata-cartridge.execute','compiler.dormant','terminal','app.host','indiverse','world-federation','purpose-guide'],
+      capabilities: ['mesh.host','state-space','execution','resident-host','resident-image.install','resident-image.mount','automata-cartridge.install','automata-cartridge.assemble','automata-cartridge.execute','compiler.dormant','terminal','app.host','indiverse','world-federation','purpose-guide','research.report'],
       publicState: { name: 'SynthAI Native Seed', runtime: 'native-seed' },
     });
     await this.#ensureParticipant('system:state-space', {
@@ -144,8 +146,13 @@ export class NativeSeedRuntime {
       capabilities: ['cartridge.install','cartridge.assemble','cartridge.execute','cartridge.dislodge','cartridge.restore','cartridge.retire'],
       publicState: { name:'automata-cartridge-magazine', wired:true },
     });
+    await this.#ensureParticipant('system:research-report', {
+      kind: 'bounded-automata-service', residency: 'active',
+      capabilities: ['research.report','research.scout','research.evidence','research.verify','research.publish'],
+      publicState: { name:'ResearchReportAutomaton', version:'0.1.0', wired:true },
+    });
 
-    for (const id of ['system:state-space','system:execution','system:compiler','system:resident-host','system:indiverse','system:purpose-guide','system:automata-cartridge-magazine']) {
+    for (const id of ['system:state-space','system:execution','system:compiler','system:resident-host','system:indiverse','system:purpose-guide','system:automata-cartridge-magazine','system:research-report']) {
       if (!this.meshKernel.relationshipsFor(id).some(e => e.type === 'hosted-by' && e.to === 'computer:self')) {
         await this.meshKernel.connect(id, 'computer:self', { type: 'hosted-by' });
       }
@@ -190,6 +197,14 @@ export class NativeSeedRuntime {
       if (envelope.operation === 'snapshot') return this.automataCartridges.snapshot();
       throw new Error(`unsupported cartridge-magazine operation: ${envelope.operation}`);
     });
+    this.meshKernel.bindHandler('system:research-report', async envelope => {
+      const p = envelope.payload ?? {};
+      return this.researchReport.execute(envelope.operation, p.input ?? {}, p.context ?? {});
+    });
+
+    if (!this.automataCartridges.list().some(item => item.id === 'research-report-automaton-v0.1.0')) {
+      await this.automataCartridges.install(researchReportCartridgeManifest(), { source:'built-in' });
+    }
 
     await this.worldFederation.seedCanonicalLayers();
     await this.stellarLab.mount();
@@ -409,6 +424,10 @@ export class NativeSeedRuntime {
 
   async executeAutomataCapability(capability, input, context = {}, options = {}) {
     return this.automataCartridges.execute(capability, input, context, options);
+  }
+
+  async createResearchReport(request, context = {}, options = {}) {
+    return this.executeAutomataCapability('research.report', request, context, options);
   }
 
   async dislodgeAutomataCartridge(id, reason = 'manual-dislodge') {
