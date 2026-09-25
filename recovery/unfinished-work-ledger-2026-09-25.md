@@ -199,3 +199,35 @@ ResearchReportAutomaton v0.1.0 is now **BUILT (source implementation) + PRESERVE
 
 The highest app-delivery blocker remains recovery of the exact Prime Resident 3 image bytes (SHA-256 `8d5874a11f0a73027be14119bc13f6a0efd1adeb2aa9ac877c2284fcd5ab2f72`) so PR #14 can produce and publish a verified recovery APK. After that, the report cartridge must be included in the packaged runtime and exercised from the creator-visible app surface before its user-access/phone status changes. Supabase RLS remains open until the creator accepts a usable app and explicitly authorizes that birth milestone.
 
+## September 25 continuation — TaskFit convergence (14:00 Pacific)
+
+### Concrete additive step
+
+[PR #16 — deterministic TaskFit convergence](https://github.com/justappgrabbin/SynthAi/pull/16) promotes the already recovered TaskFit service from PR #7 into the active Native Seed/runtime line without rewriting its donor formula. Head: `9418184d2cb5010c1a8985bb68d748657dba4cfc`; stacked base: PR #15.
+
+The implementation:
+- preserves weighted axis coverage plus ring (+0.10), gate (+0.08), and optional Sun (+0.05) bonuses
+- removes randomness, fabricated participant records, and storage side effects
+- registers a distinct `system:task-fit` mesh service with `task-fit.score` and `task-fit.rank`
+- exposes deterministic Native Seed score/rank methods
+- retains donor provenance to `LegacyBuild/attached_assets/SynthUniverse/server/services/taskfit.ts`
+- leaves PR #7 authoritative for its still-unpromoted device-world and accessibility work
+
+Verification:
+- focused local deterministic formula check: passed
+- [Resident Mesh Integration run 36189010656](https://github.com/justappgrabbin/SynthAi/actions/runs/36189010656): 46 passed / 0 failed, including the TaskFit Native Seed mesh contract
+- [Mobile SynthIMG Check run 36189013933](https://github.com/justappgrabbin/SynthAi/actions/runs/36189013933): SUCCESS
+- [TaskFit provenance and acceptance record](https://github.com/justappgrabbin/SynthAi/blob/recovery/taskfit-convergence-20260925/recovery/TASKFIT-CONVERGENCE-2026-09-25.md)
+
+Protection boundary: TaskFit is a Native Seed software service. Prime 5.8 and its life-process swarm were not modified or used as software workers; Echo, Venom, and Synthia 5.7 were not modified or conflated.
+
+### Refreshed artifact evidence
+
+GitHub code and commit search, the complete visible `/Synthia` Library inventory, Notion workspace search/control-panel evidence, Drive search, and the Supabase preservation ledger still contain no recoverable copy of the exact Resident 3 image bytes with SHA-256 `8d5874a11f0a73027be14119bc13f6a0efd1adeb2aa9ac877c2284fcd5ab2f72`. Notion's control panel continues to record the named Prime APK as failed delivery with no valid download link. This is negative evidence, not proof that no offline copy exists.
+
+### State and next blocker
+
+TaskFit is **BUILT + PRESERVED ON GITHUB + STATICALLY/CI VERIFIED**. It is not yet included in a delivered APK, user-access verified, or phone accepted.
+
+The app-delivery blocker is unchanged: recover the exact Prime Resident 3 image, hash-match it, and feed it through PR #14's guarded promotion workflow. Separately, the next actionable reconciliation item in PR #7 is its device-world/accessibility lane. Supabase RLS findings remain inventoried and intentionally open until a usable app is delivered, phone accepted by the creator, and explicit RLS authorization is given.
+
