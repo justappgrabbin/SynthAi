@@ -40,6 +40,27 @@ const ACCEPTED_EVENTS = new Map([
 
 const first = (...values) => values.find(value => value !== undefined && value !== null && value !== '');
 
+function providerDescriptor(value) {
+  if (!value) return value;
+  if (typeof value === 'string') return value;
+  return {
+    id: first(value.providerId, value.id, value.name, null),
+    type: value.constructor?.name ?? typeof value,
+    status: first(value.status, value.lifecycle, null)
+  };
+}
+
+function registrationMetadata(record = {}) {
+  const out = {};
+  for (const [key, value] of Object.entries(record || {})) {
+    if (['provider', 'adapter'].includes(key)) out[key] = providerDescriptor(value);
+    else if (['implementation', 'execute', 'run', 'verify', 'install'].includes(key) && typeof value === 'function') {
+      out[key] = { type: 'function', name: value.name || key };
+    } else out[key] = value;
+  }
+  return out;
+}
+
 function identityFor(kind, payload = {}, event = {}) {
   const record = payload.record ?? payload.artifact ?? payload;
   return String(first(
@@ -118,7 +139,7 @@ export class AutoRegistrar {
         relationships: normalizeRelationships(payload),
         location: locationFor(record, payload),
         verification: [{ kind: 'event', ref: event.type, status: 'observed', at: event.at }],
-        metadata: record
+        metadata: registrationMetadata(record)
       });
       return;
     }
@@ -146,7 +167,7 @@ export class AutoRegistrar {
         status: event.type.endsWith(':complete') || event.type === 'mutation:applied' ? 'verified-by-runtime' : 'observed',
         at: event.at
       }],
-      metadata: record
+      metadata: registrationMetadata(record)
     });
   }
 
