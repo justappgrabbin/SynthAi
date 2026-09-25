@@ -484,6 +484,7 @@ public final class MainActivity extends Activity {
         world.setStatus("LOCAL LINUX · MESH WAKING");
         io.execute(() -> {
             NativeSeedClient.Result health = ensureCurrentNativeSeed();
+            if (health.ok) health = ensurePrimeResident(health);
             boolean ready = health.ok;
             boolean synthiaReady = ready && hasMountedSynthia(health);
             if (ready) {
