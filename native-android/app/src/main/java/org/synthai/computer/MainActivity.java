@@ -446,7 +446,7 @@ public final class MainActivity extends Activity {
     }
 
     private NativeSeedClient.Result ensurePrimeResident(NativeSeedClient.Result health) {
-        if (!health.ok || hasMountedSynthia(health)) return health;
+        if (!health.ok || hasMountedPrime(health)) return health;
         try {
             String imageId = installedPrimeId(health);
             if (imageId == null && assetExists(BUNDLED_PRIME_ASSET)) {
@@ -502,6 +502,19 @@ public final class MainActivity extends Activity {
                     : "MESH DORMANT · EVENTS HELD");
             });
         });
+    }
+
+    private boolean hasMountedPrime(NativeSeedClient.Result health) {
+        try {
+            JSONObject root = new JSONObject(health.body == null ? "{}" : health.body);
+            JSONArray residents = root.optJSONArray("imageResidents");
+            if (residents == null) return false;
+            for (int i = 0; i < residents.length(); i++) {
+                JSONObject resident = residents.optJSONObject(i);
+                if (resident != null && "synthia58".equals(resident.optString("residentType"))) return true;
+            }
+        } catch (Exception ignored) {}
+        return false;
     }
 
     private boolean hasMountedSynthia(NativeSeedClient.Result health) {
