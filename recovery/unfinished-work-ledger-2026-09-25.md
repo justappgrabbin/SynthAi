@@ -107,3 +107,12 @@ The same audit notes `.synthia/mcp-token` in archived material. Scan any donor i
 At each session: (1) refresh this ledger's links/status; (2) pick the highest-priority blocked capability with a real baseline; (3) inspect code and donor provenance; (4) patch in its existing project on a branch; (5) run targeted tests and capture output/commit/CI; (6) update this ledger with verified result and next blocker. Preserve source and user data. No deletion outside the current project, and avoid deletions inside projects without explicit reconciliation. Use GitHub PRs for code changes. A stale or empty scratch folder is not the canonical baseline.
 
 **Inventory limits:** This is a first pass through accessible search results, recent Library metadata, selected Notion pages, Drive source documents, and Supabase schema summaries. It does not assert all private files or all historical work are accounted for yet.
+
+
+## Durable preservation rule — 2026-09-25
+
+The project now carries a durable preservation protocol at `recovery/PRESERVATION-PROTOCOL.md` and a first-drop capability map at `recovery/FIRST-DROP-ACCOUNTING-2026-09-25.md`.
+
+The active Supabase project **SynthAi Foundry Official** also has a private `synthia_preservation_ledger` containing durable records for the current first-drop candidate, this recovery ledger, the recovered self-cultivation donor, PurposeGuide, PR #7 TaskFit/device-world work, and PR #8 packaging work.
+
+Parallel swarms should use the named branch lanes in the first-drop accounting sheet. Capability convergence is recorded explicitly, so preserved work remains visible even while another branch is active.
