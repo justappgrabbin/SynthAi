@@ -128,6 +128,7 @@ export class AutomataCartridgeMagazine {
           manifest: clone(previous.manifest),
           status: previous.status,
           health: clone(previous.health),
+          verification: clone(previous.verification ?? { state: 'unverified', lastPassedAt: null }),
           replacedAt: now,
         }].slice(-20)
       : [];
@@ -139,6 +140,7 @@ export class AutomataCartridgeMagazine {
       source: String(source),
       installedAt: previous?.installedAt ?? now,
       updatedAt: now,
+      verification: { state: 'unverified', lastPassedAt: null },
       health: {
         successes: previous?.health?.successes ?? 0,
         failures: previous?.health?.failures ?? 0,
@@ -180,6 +182,8 @@ export class AutomataCartridgeMagazine {
       installedAt: record.installedAt,
       updatedAt: record.updatedAt,
       health: clone(record.health),
+      verification: clone(record.verification ?? { state: 'unverified', lastPassedAt: null }),
+      verifiedForPromotion: record.status === 'active' && record.verification?.state === 'runtime-passed',
       historyCount: record.history?.length ?? 0,
       sidelinedAt: record.sidelinedAt,
       sidelinedReason: record.sidelinedReason,
@@ -264,6 +268,7 @@ export class AutomataCartridgeMagazine {
     record.health.consecutiveFailures = 0;
     record.health.lastSuccessAt = this.clock();
     record.health.lastError = null;
+    record.verification = { state: 'runtime-passed', lastPassedAt: record.health.lastSuccessAt };
     record.updatedAt = this.clock();
     await this.#save(ledger, 'cartridge-health-success');
   }
