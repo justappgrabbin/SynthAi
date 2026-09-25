@@ -25,3 +25,8 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
 }
+
+
+dependencies {
+    implementation("org.apache.commons:commons-compress:1.27.1")
+}
