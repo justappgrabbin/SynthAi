@@ -1,0 +1,29 @@
+{
+  "status": "PASS",
+  "invariant": "person-scoped-synthia-and-world-morph",
+  "people": [
+    {
+      "personId": "person-alice",
+      "packetId": "canonical-morph:eb854059",
+      "stateId": "dna-state:79ad7a48",
+      "dimension": "Space",
+      "gate": 57,
+      "actionCount": 1
+    },
+    {
+      "personId": "person-bob",
+      "packetId": "canonical-morph:08b5bc72",
+      "stateId": "dna-state:dd2d0952",
+      "dimension": "Movement",
+      "gate": 44,
+      "actionCount": 1
+    }
+  ],
+  "checks": {
+    "separateRuntimeInstances": true,
+    "separateWorldPorts": true,
+    "separateActionQueues": true,
+    "distinctMorphPackets": true,
+    "distinctResolvedStates": true
+  }
+}

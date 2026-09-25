@@ -1,0 +1,31 @@
+CONSCIOUSNESS REALM + SYNTHIA 0.5.7 VERIFICATION
+PERSON-SCOPED MORPH CHECKPOINT
+
+VERIFIED:
+- Synthia upstream canonical morph integration test: 3/3 PASS
+- Full 13-field canonical address survives into Realm morph packet: PASS
+- Canonical packet render-ready data path: PASS
+- PracticeWorldPort snapshot/event attachment: PASS
+- Synthia -> Realm action adapter round trip: PASS
+- Separate FederatedSynthia instances per person: PASS
+- Separate PracticeWorldPort adapters per person: PASS
+- Separate action queues per person: PASS
+- Distinct canonical morph packet IDs: PASS
+- Distinct resolved state IDs: PASS
+- Distinct hashed persistence lanes: PASS
+- Server TypeScript syntax: PASS
+- Modified client TS/TSX syntax/parse path: PASS
+
+OBSERVED TEST DIVERGENCE:
+- person-alice -> Space / Gate 57
+- person-bob   -> Movement / Gate 44
+
+NOT VERIFIED IN SANDBOX:
+- Full Vite/React browser render, because npm dependency retrieval stalled.
+
+STATUS:
+- Synthia source/runtime invariant: preserved
+- World-port boundary: WIRED + VERIFIED
+- Person-scoped runtime registry: WIRED + VERIFIED
+- Per-person canonical morph data path: WIRED + VERIFIED
+- Browser visual result: source WIRED, browser verification pending
