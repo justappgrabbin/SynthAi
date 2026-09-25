@@ -32,7 +32,7 @@ import java.util.concurrent.Executors;
 public final class LinuxResidenceManager {
     private static final String TAG = "SynthAILinuxResidence";
     private static final String ROOTFS_ASSET = "runtime/rootfs-arm64.tar.gz";
-    private static final String PROOT_ASSET = "runtime/proot-arm64";
+    private static final String PROOT_PACKAGE_ASSET = "runtime/proot-android-aarch64.tar.gz";
     private static final String MANIFEST_ASSET = "runtime/residence-manifest.properties";
     private static final String INSTALL_VERSION = "2026-09-25-resident-v1";
     private static final int COPY_BUFFER = 128 * 1024;
@@ -48,7 +48,9 @@ public final class LinuxResidenceManager {
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
     private final File residenceDir;
     private final File rootfsDir;
+    private final File prootPackageDir;
     private final File prootBin;
+    private final File prootTmpDir;
     private final File marker;
     private volatile Process nativeSeedProcess;
     private volatile boolean starting;
@@ -58,7 +60,9 @@ public final class LinuxResidenceManager {
         this.assets = this.context.getAssets();
         this.residenceDir = new File(this.context.getFilesDir(), "linux-residence");
         this.rootfsDir = new File(residenceDir, "rootfs");
-        this.prootBin = new File(residenceDir, "proot-arm64");
+        this.prootPackageDir = new File(residenceDir, "proot-android");
+        this.prootBin = new File(prootPackageDir, "root/bin/proot");
+        this.prootTmpDir = new File(prootPackageDir, "tmp");
         this.marker = new File(residenceDir, ".installed-version");
     }
 
@@ -108,6 +112,7 @@ public final class LinuxResidenceManager {
             String existing = new String(readAll(new FileInputStream(marker)), StandardCharsets.UTF_8);
             if (existing.equals(expectedVersion)) {
                 Os.chmod(prootBin.getAbsolutePath(), 0700);
+                prootTmpDir.mkdirs();
                 return;
             }
         }
@@ -117,8 +122,12 @@ public final class LinuxResidenceManager {
         deleteRecursively(rootfsDir);
         if (!rootfsDir.mkdirs()) throw new IllegalStateException("Could not create rootfs directory");
 
-        copyAsset(PROOT_ASSET, prootBin);
+        deleteRecursively(prootPackageDir);
+        if (!prootPackageDir.mkdirs()) throw new IllegalStateException("Could not create PRoot package directory");
+        extractTarGzipAsset(PROOT_PACKAGE_ASSET, prootPackageDir);
+        if (!prootBin.exists()) throw new IllegalStateException("Bundled Android PRoot package is missing root/bin/proot");
         Os.chmod(prootBin.getAbsolutePath(), 0700);
+        prootTmpDir.mkdirs();
 
         try (InputStream raw = new BufferedInputStream(assets.open(ROOTFS_ASSET), COPY_BUFFER);
              GzipCompressorInputStream gzip = new GzipCompressorInputStream(raw);
@@ -194,7 +203,12 @@ public final class LinuxResidenceManager {
         command.add("-b"); command.add("/proc");
         command.add("-b"); command.add("/sys");
         command.add("-b"); command.add(context.getFilesDir().getAbsolutePath() + ":/mnt/synthai-host");
+        command.add("--link2symlink");
+        command.add("-p");
+        command.add("-L");
+        command.add("-b"); command.add("/system");
         command.add("/usr/bin/env");
+        command.add("PROOT_TMP_DIR=" + prootTmpDir.getAbsolutePath());
         command.add("HOME=/root");
         command.add("PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin");
         command.add("SYNTHAI_NATIVE_HOST=127.0.0.1");
@@ -225,6 +239,43 @@ public final class LinuxResidenceManager {
     public void shutdown() {
         stop();
         executor.shutdownNow();
+    }
+
+    private void extractTarGzipAsset(String asset, File destination) throws Exception {
+        try (InputStream raw = new BufferedInputStream(assets.open(asset), COPY_BUFFER);
+             GzipCompressorInputStream gzip = new GzipCompressorInputStream(raw);
+             TarArchiveInputStream tar = new TarArchiveInputStream(gzip)) {
+            TarArchiveEntry entry;
+            byte[] buffer = new byte[COPY_BUFFER];
+            String destinationRoot = destination.getCanonicalPath() + File.separator;
+            while ((entry = tar.getNextTarEntry()) != null) {
+                String name = sanitizePath(entry.getName());
+                if (name == null || name.isEmpty()) continue;
+                File out = new File(destination, name);
+                String candidate = out.getCanonicalPath();
+                if (!candidate.equals(destination.getCanonicalPath()) && !candidate.startsWith(destinationRoot)) {
+                    throw new SecurityException("Tar path escapes destination: " + candidate);
+                }
+                if (entry.isDirectory()) {
+                    if (!out.exists() && !out.mkdirs()) throw new IllegalStateException("Could not create " + name);
+                    chmodQuiet(out, entry.getMode());
+                    continue;
+                }
+                File parent = out.getParentFile();
+                if (parent != null && !parent.exists() && !parent.mkdirs()) throw new IllegalStateException("Could not create parent for " + name);
+                if (entry.isSymbolicLink()) {
+                    if (out.exists()) out.delete();
+                    Os.symlink(entry.getLinkName(), out.getAbsolutePath());
+                    continue;
+                }
+                if (!entry.isFile()) continue;
+                try (OutputStream output = new BufferedOutputStream(new FileOutputStream(out), COPY_BUFFER)) {
+                    int read;
+                    while ((read = tar.read(buffer)) >= 0) if (read > 0) output.write(buffer, 0, read);
+                }
+                chmodQuiet(out, entry.getMode());
+            }
+        }
     }
 
     private boolean rootfsLooksReady() {
