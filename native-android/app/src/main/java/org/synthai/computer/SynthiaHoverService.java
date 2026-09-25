@@ -24,6 +24,8 @@ public final class SynthiaHoverService extends Service {
     private WindowManager windowManager;
     private View bubble;
     private FrameLayout panel;
+    private WebView primeWebView;
+    private SynthiaVoiceBridge voiceBridge;
     private boolean expanded;
 
     public static void start(Context context) {
@@ -101,6 +103,9 @@ public final class SynthiaHoverService extends Service {
         web.getSettings().setJavaScriptEnabled(true);
         web.getSettings().setDomStorageEnabled(true);
         web.setWebViewClient(new WebViewClient());
+        voiceBridge = new SynthiaVoiceBridge(this, web);
+        web.addJavascriptInterface(voiceBridge, "SynthiaVoice");
+        primeWebView = web;
         web.loadUrl("http://127.0.0.1:17759/");
         shell.addView(web, new FrameLayout.LayoutParams(
             FrameLayout.LayoutParams.MATCH_PARENT,
@@ -124,6 +129,15 @@ public final class SynthiaHoverService extends Service {
         if (panel != null && windowManager != null) {
             windowManager.removeView(panel);
             panel = null;
+        }
+        if (voiceBridge != null) {
+            voiceBridge.shutdown();
+            voiceBridge = null;
+        }
+        if (primeWebView != null) {
+            primeWebView.removeJavascriptInterface("SynthiaVoice");
+            primeWebView.destroy();
+            primeWebView = null;
         }
         expanded = false;
     }
