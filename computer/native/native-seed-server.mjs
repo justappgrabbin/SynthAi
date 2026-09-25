@@ -178,6 +178,7 @@ async function route(req,res){
         synthia57FrontScreen:frontScreenSnapshot(),
         residentImages:runtime.residentImages.list(),
         imageResidents:runtime.imageResidents.snapshot(),
+        automataCartridges:runtime.automataCartridges.snapshot(),
         terminal:runtime.terminal?.snapshot?.()??null
       });
     }
@@ -221,6 +222,9 @@ async function route(req,res){
         mounted:runtime.imageResidents.snapshot(),
       });
     }
+    if(req.method==='GET' && url.pathname==='/automata-cartridges'){
+      return json(res,200,runtime.automataCartridges.snapshot());
+    }
 
     const body=req.method==='POST' ? await readJson(req) : {};
 
@@ -235,6 +239,34 @@ async function route(req,res){
     }
     if(req.method==='POST' && url.pathname==='/resident-image/unmount'){
       return json(res,200,{unmounted:await runtime.unmountResidentImage(String(body.residentId))});
+    }
+    if(req.method==='POST' && url.pathname==='/automata-cartridges/install'){
+      return json(res,200,await runtime.installAutomataCartridge(body.manifest??body,{
+        source:String(body.source??'native-api'),
+        replace:body.replace!==false,
+      }));
+    }
+    if(req.method==='POST' && url.pathname==='/automata-cartridges/assemble'){
+      return json(res,200,runtime.assembleAutomataCartridges(String(body.capability),{
+        exclude:Array.isArray(body.exclude)?body.exclude:[],
+      }));
+    }
+    if(req.method==='POST' && url.pathname==='/automata-cartridges/execute'){
+      return json(res,200,await runtime.executeAutomataCapability(
+        String(body.capability),
+        body.input,
+        body.context??{},
+        body.options??{},
+      ));
+    }
+    if(req.method==='POST' && url.pathname==='/automata-cartridges/dislodge'){
+      return json(res,200,await runtime.dislodgeAutomataCartridge(String(body.id),body.reason??'manual-dislodge'));
+    }
+    if(req.method==='POST' && url.pathname==='/automata-cartridges/restore'){
+      return json(res,200,await runtime.restoreAutomataCartridge(String(body.id)));
+    }
+    if(req.method==='POST' && url.pathname==='/automata-cartridges/retire'){
+      return json(res,200,await runtime.retireAutomataCartridge(String(body.id),body.reason??'retired'));
     }
 
     if(req.method==='POST' && url.pathname==='/synthia/mirror-image'){

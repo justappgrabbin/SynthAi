@@ -7,10 +7,12 @@ on:
       - 'integration/synthia-reality-resident'
       - 'integration/synthia57-realm-morph-reskin-2026-09-24'
       - 'integration/echo-prime-resident-loaders'
+      - 'integration/synthia58-automata-cartridge-loop'
     paths:
       - 'computer/runtime/mesh-kernel.mjs'
       - 'computer/runtime/dormant-compiler.mjs'
       - 'computer/runtime/resident-host.mjs'
+      - 'computer/runtime/automata-cartridge-magazine.mjs'
       - 'computer/residents/**'
       - 'computer/worlds/**'
       - 'computer/labs/**'
@@ -64,6 +66,7 @@ jobs:
           computer/tests/world-adapters.test.mjs
           computer/tests/resident-mesh-indiverse.test.mjs
           computer/tests/native-resident-images.test.mjs
+          computer/tests/automata-cartridge-magazine.test.mjs
           computer/tests/synthia57-resident.test.mjs
           computer/tests/synthia57-package-loader.test.mjs
           computer/tests/synthia57-package-store.test.mjs
