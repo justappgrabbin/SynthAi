@@ -2,6 +2,13 @@ name: Resident Mesh Integration
 
 on:
   workflow_dispatch:
+  pull_request:
+    paths:
+      - 'computer/runtime/research-report-automaton.mjs'
+      - 'computer/tests/research-report-automaton.test.mjs'
+      - 'computer/tests/research-report-cartridge-integration.test.mjs'
+      - 'computer/native/NativeSeedRuntime.mjs'
+      - '.github/workflows/resident-integration-check.yml'
   push:
     branches:
       - 'integration/synthia-reality-resident'
