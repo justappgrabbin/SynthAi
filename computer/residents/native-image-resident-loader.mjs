@@ -38,7 +38,7 @@ function descriptorFor(record, { residentId = null } = {}) {
   }
   if (type === 'synthia58') {
     const port = Number(manifest.port ?? manifest.resident_port ?? manifest.residentPort ?? 17759);
-    const dataDir = manifest.data_dir ?? manifest.dataDir ?? path.join(os.homedir(), '.synthai', 'residents', 'synthia58', 'state');
+    const dataDir = manifest.data_dir ?? manifest.dataDir ?? process.env.SYNTHIA58_DATA_DIR ?? path.join(os.homedir(), '.synthai', 'residents', 'synthia58', 'state');
     return {
       residentId: residentId ?? manifest.resident_id ?? manifest.residentId ?? 'synthia-prime',
       type,
