@@ -11,6 +11,7 @@ import { Synthia57PackageStore } from '../residents/synthia57-package-store.mjs'
 import { Synthia57MirrorSurfaceStore } from '../residents/synthia57-mirror-surface.mjs';
 import { NativeSynthImagePackageStore } from '../residents/native-synthimg-package-store.mjs';
 import { NativeImageResidentLoader } from '../residents/native-image-resident-loader.mjs';
+import { AutomataCartridgeMagazine } from '../runtime/automata-cartridge-magazine.mjs';
 import { StellarLabAdapter } from '../labs/stellar-lab-adapter.mjs';
 import { ConsciousnessRealmPackageLoader } from '../worlds/consciousness-realm-loader.mjs';
 import { HumanAgentMechanicsAdapter } from '../worlds/adapters/human-agent.mjs';
@@ -83,6 +84,14 @@ export class NativeSeedRuntime {
     this.synthiaMirror = new Synthia57MirrorSurfaceStore({ state:this.state, bus:this.bus });
     this.residentImages = new NativeSynthImagePackageStore({ state:this.state, bus:this.bus, root:process.env.SYNTHAI_RESIDENT_IMAGE_ROOT || undefined });
     this.imageResidents = new NativeImageResidentLoader({ computer:this, packageStore:this.residentImages, bus:this.bus, clock });
+    this.automataCartridges = new AutomataCartridgeMagazine({
+      state:this.state,
+      bus:this.bus,
+      automataEngine:this.automata,
+      automataRegistry:this.automataRegistry,
+      mesh:this.meshKernel,
+      clock,
+    });
     this.stellarLab = new StellarLabAdapter({ mesh: this.meshKernel, state: this.state, bus: this.bus, clock });
     this.consciousnessRealm = new ConsciousnessRealmPackageLoader({ computer: this, bus: this.bus });
     this.humanAgent = null;
@@ -94,11 +103,12 @@ export class NativeSeedRuntime {
   async boot() {
     await this.state.restore();
     await this.meshKernel.boot();
+    await this.automataCartridges.restore();
 
     await this.#ensureParticipant('computer:self', {
       kind: 'native-seed',
       residency: 'active',
-      capabilities: ['mesh.host','state-space','execution','resident-host','resident-image.install','resident-image.mount','compiler.dormant','terminal','app.host','indiverse','world-federation','purpose-guide'],
+      capabilities: ['mesh.host','state-space','execution','resident-host','resident-image.install','resident-image.mount','automata-cartridge.install','automata-cartridge.assemble','automata-cartridge.execute','compiler.dormant','terminal','app.host','indiverse','world-federation','purpose-guide'],
       publicState: { name: 'SynthAI Native Seed', runtime: 'native-seed' },
     });
     await this.#ensureParticipant('system:state-space', {
@@ -129,8 +139,13 @@ export class NativeSeedRuntime {
       capabilities: ['purpose.roadmap','purpose.outcome','purpose.read'],
       publicState: { name:'purpose-guide', wired:true },
     });
+    await this.#ensureParticipant('system:automata-cartridge-magazine', {
+      kind: 'core-service', residency: 'active',
+      capabilities: ['cartridge.install','cartridge.assemble','cartridge.execute','cartridge.dislodge','cartridge.restore','cartridge.retire'],
+      publicState: { name:'automata-cartridge-magazine', wired:true },
+    });
 
-    for (const id of ['system:state-space','system:execution','system:compiler','system:resident-host','system:indiverse','system:purpose-guide']) {
+    for (const id of ['system:state-space','system:execution','system:compiler','system:resident-host','system:indiverse','system:purpose-guide','system:automata-cartridge-magazine']) {
       if (!this.meshKernel.relationshipsFor(id).some(e => e.type === 'hosted-by' && e.to === 'computer:self')) {
         await this.meshKernel.connect(id, 'computer:self', { type: 'hosted-by' });
       }
@@ -163,6 +178,17 @@ export class NativeSeedRuntime {
       if (envelope.operation === 'outcome') return this.purposeGuide.recordOutcome(p);
       if (envelope.operation === 'read') return this.purposeGuide.getRoadmap(p.userId, p.roadmapId ?? null);
       throw new Error(`unsupported purpose-guide operation: ${envelope.operation}`);
+    });
+    this.meshKernel.bindHandler('system:automata-cartridge-magazine', async envelope => {
+      const p = envelope.payload ?? {};
+      if (envelope.operation === 'install') return this.automataCartridges.install(p.manifest ?? p, { source:p.source ?? 'mesh' });
+      if (envelope.operation === 'assemble') return this.automataCartridges.assemble(p.capability, { exclude:p.exclude ?? [] });
+      if (envelope.operation === 'execute') return this.automataCartridges.execute(p.capability, p.input, p.context ?? {}, p.options ?? {});
+      if (envelope.operation === 'dislodge') return this.automataCartridges.dislodge(p.id, p.reason);
+      if (envelope.operation === 'restore') return this.automataCartridges.restoreCartridge(p.id);
+      if (envelope.operation === 'retire') return this.automataCartridges.retire(p.id, p.reason);
+      if (envelope.operation === 'snapshot') return this.automataCartridges.snapshot();
+      throw new Error(`unsupported cartridge-magazine operation: ${envelope.operation}`);
     });
 
     await this.worldFederation.seedCanonicalLayers();
@@ -373,6 +399,30 @@ export class NativeSeedRuntime {
 
   async unmountResidentImage(residentId) { return this.imageResidents.unmount(residentId); }
 
+  async installAutomataCartridge(manifest, options = {}) {
+    return this.automataCartridges.install(manifest, options);
+  }
+
+  assembleAutomataCartridges(capability, options = {}) {
+    return this.automataCartridges.assemble(capability, options);
+  }
+
+  async executeAutomataCapability(capability, input, context = {}, options = {}) {
+    return this.automataCartridges.execute(capability, input, context, options);
+  }
+
+  async dislodgeAutomataCartridge(id, reason = 'manual-dislodge') {
+    return this.automataCartridges.dislodge(id, reason);
+  }
+
+  async restoreAutomataCartridge(id) {
+    return this.automataCartridges.restoreCartridge(id);
+  }
+
+  async retireAutomataCartridge(id, reason = 'retired') {
+    return this.automataCartridges.retire(id, reason);
+  }
+
   async mountInstalledSynthia57() {
     const verified = await this.synthia57Packages.verify();
     if (!verified.installed) return { mounted:false, reason:verified.reason ?? 'NO_PACKAGE' };
@@ -442,6 +492,7 @@ export class NativeSeedRuntime {
       synthiaMirror: this.synthiaMirror.snapshot(),
       residentImages: this.residentImages.list(),
       imageResidents: this.imageResidents.snapshot(),
+      automataCartridges: this.automataCartridges.snapshot(),
     };
   }
 }
