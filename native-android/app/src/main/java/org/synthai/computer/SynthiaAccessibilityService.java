@@ -19,6 +19,7 @@ import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -27,9 +28,10 @@ public final class SynthiaAccessibilityService extends AccessibilityService {
     private volatile boolean running;
     private ServerSocket server;
     private Thread thread;
+    private String handToken;
     private final Map<String, AccessibilityNodeInfo> nodes = Collections.synchronizedMap(new HashMap<>());
 
-    @Override protected void onServiceConnected() { super.onServiceConnected(); startBridge(); }
+    @Override protected void onServiceConnected() { super.onServiceConnected(); handToken = SynthiaSecurity.handToken(this); startBridge(); }
     @Override public void onAccessibilityEvent(AccessibilityEvent event) {}
     @Override public void onInterrupt() {}
 
@@ -64,9 +66,20 @@ public final class SynthiaAccessibilityService extends AccessibilityService {
             String method = request.length > 0 ? request[0] : "GET";
             String path = request.length > 1 ? request[1] : "/";
             int length = 0;
+            String suppliedToken = null;
             String line;
             while ((line = reader.readLine()) != null && !line.isEmpty()) {
-                if (line.toLowerCase().startsWith("content-length:")) length = Integer.parseInt(line.substring(15).trim());
+                String lower = line.toLowerCase();
+                if (lower.startsWith("content-length:")) length = Integer.parseInt(line.substring(15).trim());
+                if (lower.startsWith("x-synthia-hand-token:")) suppliedToken = line.substring(line.indexOf(':') + 1).trim();
+            }
+            if (!tokenMatches(suppliedToken)) {
+                byte[] denied = new JSONObject().put("ok", false).put("error", "UNAUTHORIZED").toString().getBytes(StandardCharsets.UTF_8);
+                OutputStream out = s.getOutputStream();
+                out.write(("HTTP/1.1 401 Unauthorized\r\nContent-Type: application/json\r\nContent-Length: " + denied.length + "\r\nConnection: close\r\n\r\n").getBytes(StandardCharsets.UTF_8));
+                out.write(denied);
+                out.flush();
+                return;
             }
             char[] bodyChars = new char[length];
             int offset = 0;
@@ -94,6 +107,14 @@ public final class SynthiaAccessibilityService extends AccessibilityService {
             out.write(bytes);
             out.flush();
         } catch (Exception ignored) {}
+    }
+
+    private boolean tokenMatches(String supplied) {
+        if (handToken == null || supplied == null) return false;
+        return MessageDigest.isEqual(
+            handToken.getBytes(StandardCharsets.UTF_8),
+            supplied.getBytes(StandardCharsets.UTF_8)
+        );
     }
 
     private JSONObject dispatch(String method, String path, JSONObject body) throws Exception {
