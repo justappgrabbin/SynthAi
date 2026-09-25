@@ -231,3 +231,15 @@ TaskFit is **BUILT + PRESERVED ON GITHUB + STATICALLY/CI VERIFIED**. It is not y
 
 The app-delivery blocker is unchanged: recover the exact Prime Resident 3 image, hash-match it, and feed it through PR #14's guarded promotion workflow. Separately, the next actionable reconciliation item in PR #7 is its device-world/accessibility lane. Supabase RLS findings remain inventoried and intentionally open until a usable app is delivered, phone accepted by the creator, and explicit RLS authorization is given.
 
+## September 25 creator corrections — TaskFit and 5.7 morph (14:22 Pacific)
+
+### TaskFit correction to the earlier entry
+
+The preceding TaskFit entry describes the PR #7 historical weighted donor and the first PR #16 commit. It is **superseded as the intended TaskFit behavior** by the creator's September 24 discussion and September 25 correction. The 0–100 weighted axis/ring/gate score is not canonical TaskFit. [PR #16](https://github.com/justappgrabbin/SynthAi/pull/16) now keeps that source as historical provenance and routes a capability assessment through the Computer. TaskFit runs only when intention, conversation/Klein, qualitative event addressing, and known capability routing remain unresolved. It reports observed ability, supported/adjacent/parallel/decomposed/delegated/complementary paths, current constraints with reasons, and unknowns where evidence is absent. A frozen supplied chart hypothesis and later observed science log are kept separate. [Correction record](https://github.com/justappgrabbin/SynthAi/blob/recovery/taskfit-convergence-20260925/recovery/TASKFIT-CONVERGENCE-2026-09-25.md).
+
+The corrected source and tests are GitHub-preserved. CI result for the corrected head must be checked before claiming verification. Chart calculations and automatic upstream orchestration remain integration work; the caller currently supplies those inputs.
+
+### 5.7 gaming/Computer morph rule
+
+The creator reports that the current implementation is overengineered relative to the intended flow. The [durable architecture note](https://github.com/justappgrabbin/SynthAi/blob/recovery/unfinished-work-ledger-20260925/recovery/SYNTHIA57-MORPH-STATE-SPACE-2026-09-25.md) records the rule: person chooses the intended thing; registration assigns a persistent 64-gate state-space address; state attributes and current context drive the morph engine's generative expression through the five levels. Review the actual 5.7/device-world baseline against this path before additive convergence. This is **documented**, not yet an implementation or phone acceptance claim.
+
