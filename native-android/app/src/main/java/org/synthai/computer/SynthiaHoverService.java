@@ -42,6 +42,12 @@ public final class SynthiaHoverService extends Service {
         if (Settings.canDrawOverlays(this)) showBubble();
     }
 
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        if (bubble == null && Settings.canDrawOverlays(this)) showBubble();
+        return START_STICKY;
+    }
+
     private void createChannel() {
         if (Build.VERSION.SDK_INT >= 26) {
             getSystemService(NotificationManager.class).createNotificationChannel(
