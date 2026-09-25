@@ -445,6 +445,40 @@ public final class MainActivity extends Activity {
         catch (Exception missing) { return false; }
     }
 
+    private NativeSeedClient.Result ensurePrimeResident(NativeSeedClient.Result health) {
+        if (!health.ok || hasMountedSynthia(health)) return health;
+        try {
+            String imageId = installedPrimeId(health);
+            if (imageId == null && assetExists(BUNDLED_PRIME_ASSET)) {
+                long length = -1L;
+                try (android.content.res.AssetFileDescriptor afd = getAssets().openFd(BUNDLED_PRIME_ASSET)) {
+                    length = afd.getLength();
+                } catch (Exception ignored) {}
+                try (InputStream in = getAssets().open(BUNDLED_PRIME_ASSET)) {
+                    NativeSeedClient.Result installed = client.upload(
+                        "/packages/resident-image/install",
+                        in,
+                        length,
+                        "application/octet-stream",
+                        "apk-bundled-prime"
+                    );
+                    if (!installed.ok) return health;
+                    JSONObject root = new JSONObject(installed.body == null ? "{}" : installed.body);
+                    JSONObject image = root.optJSONObject("image");
+                    imageId = image == null ? null : image.optString("id", null);
+                }
+            }
+            if (imageId != null && !imageId.isEmpty()) {
+                NativeSeedClient.Result mounted = client.post(
+                    "/resident-image/mount",
+                    new JSONObject().put("imageId", imageId)
+                );
+                if (mounted.ok) return client.health();
+            }
+        } catch (Exception ignored) {}
+        return health;
+    }
+
     private void wakeRuntimeAndFlush(long elapsedMs) {
         LinuxResidenceService.start(this);
         world.setStatus("LOCAL LINUX · MESH WAKING");
