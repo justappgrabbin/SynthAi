@@ -1,6 +1,21 @@
 const clone = value => value === undefined ? undefined : structuredClone(value);
 const safeKey = value => String(value ?? 'world').replace(/[^A-Za-z0-9_-]/g, c => `_${c.charCodeAt(0).toString(16)}`);
 
+const DIMENSIONS = new Set(['Being', 'Evolution', 'Movement', 'Design', 'Space']);
+function validateAddress(address) {
+  if (!address || !DIMENSIONS.has(address.dimension)) throw new TypeError('state address requires one of five dimensions');
+  if (!Number.isInteger(address.gate) || address.gate < 1 || address.gate > 64) {
+    throw new RangeError('state address gate must be 1..64');
+  }
+  for (const [field, maximum] of [['line',6],['color',6],['tone',6],['base',5]]) {
+    if (address[field] != null && (!Number.isInteger(address[field]) || address[field] < 1 || address[field] > maximum)) {
+      throw new RangeError(`state address ${field} must be 1..${maximum}`);
+    }
+  }
+  return clone(address);
+}
+
+
 export const DEFAULT_QUALIA_GRAMMAR = Object.freeze({
   colors: {}, materials: {}, symbols: {}, orientation: {}, scale: {}, thresholds: {}, movement: {}, embodiment: {}, sound: {}, atmosphere: {},
 });
@@ -22,8 +37,18 @@ export class IndiVerseRuntime {
 
   async registerCanonicalObject(object = {}) {
     if (!object.id || !object.kind) throw new Error('canonical object requires id and kind');
+    const existing = this.canonicalObject(object.id);
+    const stateAddress = object.stateAddress == null ? existing?.stateAddress ?? null : validateAddress(object.stateAddress);
+    if (existing?.stateAddress && stateAddress && JSON.stringify(existing.stateAddress) !== JSON.stringify(stateAddress)) {
+      throw new Error('canonical state address is invariant for an existing object');
+    }
+    const creatorChoice = object.creatorChoice ?? existing?.creatorChoice ?? null;
+    if (existing?.creatorChoice && creatorChoice !== existing.creatorChoice) {
+      throw new Error('creator choice is invariant for an existing object');
+    }
     const record = {
       id: String(object.id), kind: String(object.kind), function: object.function ?? null,
+      stateAddress: clone(stateAddress), creatorChoice, addressStatus: stateAddress ? 'addressed' : 'unresolved',
       topology: clone(object.topology ?? {}), affordances: clone(object.affordances ?? []),
       entryPoints: clone(object.entryPoints ?? []), relations: clone(object.relations ?? []),
       presentation: clone(object.presentation ?? {}), metadata: clone(object.metadata ?? {}),
@@ -32,6 +57,17 @@ export class IndiVerseRuntime {
     await this.state.set(`indiverse.canonical.${safeKey(record.id)}`, record, { source: 'indiverse' });
     this.bus?.emit('indiverse:canonical-object', clone(record));
     return clone(record);
+  }
+
+  // The creator supplies the choice and a resolved state-space address.
+  // This method never guesses a gate from an app category or a sprite atlas.
+  async registerAddressedObject(object = {}) {
+    if (!object.creatorChoice || typeof object.creatorChoice !== 'string') {
+      throw new TypeError('addressed registration requires creatorChoice');
+    }
+    return this.registerCanonicalObject({
+      ...object, stateAddress: validateAddress(object.stateAddress),
+    });
   }
 
   canonicalObject(id) { return this.state.get(`indiverse.canonical.${safeKey(id)}`, null); }
@@ -91,6 +127,13 @@ export class IndiVerseRuntime {
     return {
       mode: 'host-qualia', worldId: world.id, ownerId: world.ownerId, objectId: canonical.id,
       canonical: clone(canonical), expression, grammar: clone(grammar),
+      morphInput: {
+        objectId: canonical.id,
+        creatorChoice: canonical.creatorChoice ?? null,
+        stateAddress: clone(canonical.stateAddress ?? null),
+        hostWorldId: world.id,
+        hostGrammar: clone(grammar),
+      },
       difference: {
         color: expression.color !== canonical.presentation?.color,
         material: expression.material !== canonical.presentation?.material,
@@ -116,6 +159,7 @@ export class IndiVerseRuntime {
       identityInvariant: clone(visitor.identity ?? null),
       hostExpression: rendered.expression,
       hostGrammar: rendered.grammar,
+      morphInput: clone(rendered.morphInput),
       requiredAffordances: requirements,
       missingAffordances: missing,
       suggestedAdaptations: missing.map(req => alternatives[req] ?? { capability: req, mode: 'acquire-or-morph' }),
