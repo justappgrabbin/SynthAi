@@ -77,6 +77,14 @@ jobs:
           grep -q 'assets/runtime/rootfs-arm64.bin' /tmp/apk-files.txt
           grep -q 'assets/runtime/proot-android-aarch64.bin' /tmp/apk-files.txt
           grep -q 'assets/runtime/residence-manifest.properties' /tmp/apk-files.txt
+          unzip -p "$APK" assets/runtime/rootfs-arm64.bin > /tmp/apk-rootfs.bin
+          unzip -p "$APK" assets/runtime/proot-android-aarch64.bin > /tmp/apk-proot.bin
+          ROOTFS_EXPECTED="$(sed -n 's/^rootfs_sha256=//p' native-android/app/src/main/assets/runtime/residence-manifest.properties)"
+          PROOT_EXPECTED="$(sed -n 's/^proot_package_sha256=//p' native-android/app/src/main/assets/runtime/residence-manifest.properties)"
+          test "$(sha256sum /tmp/apk-rootfs.bin | awk '{print $1}')" = "$ROOTFS_EXPECTED"
+          test "$(sha256sum /tmp/apk-proot.bin | awk '{print $1}')" = "$PROOT_EXPECTED"
+          gzip -t /tmp/apk-rootfs.bin
+          gzip -t /tmp/apk-proot.bin
           ls -lh "$APK"
           sha256sum "$APK"
 
