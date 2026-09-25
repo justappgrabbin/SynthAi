@@ -1,4 +1,28 @@
-const clone = value => value === undefined ? undefined : structuredClone(value);
+function serializable(value, seen = new WeakSet()) {
+  if (value === undefined || value === null) return value;
+  const type = typeof value;
+  if (type === 'string' || type === 'number' || type === 'boolean') return value;
+  if (type === 'bigint') return value.toString();
+  if (type === 'function') return { type: 'function', name: value.name || 'anonymous' };
+  if (value instanceof Date) return value.toISOString();
+  if (Array.isArray(value)) return value.map(item => serializable(item, seen));
+  if (value instanceof Map) return Object.fromEntries([...value].map(([key, item]) => [String(key), serializable(item, seen)]));
+  if (value instanceof Set) return [...value].map(item => serializable(item, seen));
+  if (type === 'object') {
+    if (seen.has(value)) return '[Circular]';
+    seen.add(value);
+    const out = {};
+    for (const [key, item] of Object.entries(value)) {
+      try { out[key] = serializable(item, seen); }
+      catch { out[key] = '[Unserializable]'; }
+    }
+    seen.delete(value);
+    return out;
+  }
+  return String(value);
+}
+
+const clone = value => value === undefined ? undefined : serializable(value);
 
 const ACCEPTED_EVENTS = new Map([
   ['artifact:ingested', 'artifact'],
