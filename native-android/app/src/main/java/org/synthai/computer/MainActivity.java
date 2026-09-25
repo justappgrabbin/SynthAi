@@ -147,24 +147,37 @@ public final class MainActivity extends Activity {
     }
 
     private void openSynthiaField() {
-        world.setStatus("OPENING SYNTHIA 5.7 FIELD");
+        world.setStatus("OPENING SYNTHIA");
         io.execute(() -> {
             NativeSeedClient.Result health = ensureCurrentNativeSeed();
             boolean available = false;
             String fieldUrl = "http://127.0.0.1:17758/";
             try {
                 JSONObject root = new JSONObject(health.body == null ? "{}" : health.body);
-                JSONObject front = root.optJSONObject("synthia57FrontScreen");
-                if (front != null) {
-                    available = front.optBoolean("mounted", false);
-                    fieldUrl = front.optString("url", fieldUrl);
+                JSONArray residents = root.optJSONArray("imageResidents");
+                if (residents != null) {
+                    for (int i = 0; i < residents.length(); i++) {
+                        JSONObject resident = residents.optJSONObject(i);
+                        if (resident != null && "synthia58".equals(resident.optString("residentType"))) {
+                            available = true;
+                            fieldUrl = resident.optString("url", "http://127.0.0.1:17759/");
+                            break;
+                        }
+                    }
+                }
+                if (!available) {
+                    JSONObject front = root.optJSONObject("synthia57FrontScreen");
+                    if (front != null) {
+                        available = front.optBoolean("mounted", false);
+                        fieldUrl = front.optString("url", fieldUrl);
+                    }
                 }
             } catch (Exception ignored) {}
             boolean finalAvailable = available;
             String finalUrl = fieldUrl;
             main.post(() -> {
                 if (!finalAvailable) {
-                    world.setStatus("SYNTHIA 5.7 FIELD NOT READY");
+                    world.setStatus("SYNTHIA RESIDENT NOT READY");
                     return;
                 }
                 WebView view = new WebView(this);
