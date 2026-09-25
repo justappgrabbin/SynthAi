@@ -22,7 +22,7 @@ This change promotes the already recovered deterministic TaskFit service from PR
 
 - **Built:** yes, source and mesh bridge are present.
 - **Preserved:** yes, in this GitHub recovery branch with donor provenance.
-- **Statically verified:** pending CI at initial commit.
+- **Statically verified:** yes — Resident Mesh Integration run [36189010656](https://github.com/justappgrabbin/SynthAi/actions/runs/36189010656) passed 46/46 tests, including the TaskFit Native Seed contract; Mobile SynthIMG run [36189013933](https://github.com/justappgrabbin/SynthAi/actions/runs/36189013933) also passed.
 - **Delivered in an APK:** no.
 - **User-access verified:** no.
 - **Phone accepted:** no.
