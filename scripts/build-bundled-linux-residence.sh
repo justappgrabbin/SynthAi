@@ -5,11 +5,11 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 ASSET_DIR="$ROOT/native-android/app/src/main/assets/runtime"
 WORK_DIR="${RUNNER_TEMP:-/tmp}/synthai-linux-residence"
 CONTAINER="synthai-arm64-residence-builder"
-PROOT_PACKAGE_URL="https://raw.githubusercontent.com/green-green-avk/build-proot-android/master/packages/proot-android-aarch64.tar.gz"
+PROOT_PACKAGE_URL="https://raw.githubusercontent.com/green-green-avk/build-proot-android/master/packages/proot-android-aarch64.tgz"
 
 rm -rf "$WORK_DIR"
 mkdir -p "$WORK_DIR" "$ASSET_DIR"
-rm -f "$ASSET_DIR/rootfs-arm64.tar.gz" "$ASSET_DIR/proot-android-aarch64.tar.gz" "$ASSET_DIR/residence-manifest.properties"
+rm -f "$ASSET_DIR/rootfs-arm64.tgz" "$ASSET_DIR/proot-android-aarch64.tgz" "$ASSET_DIR/residence-manifest.properties"
 
 cleanup() {
   docker rm -f "$CONTAINER" >/dev/null 2>&1 || true
@@ -39,22 +39,22 @@ docker create --name "$CONTAINER" --platform linux/arm64 \
       > /opt/synthai/RESIDENCE-BUILD.txt
   '
 docker start -a "$CONTAINER"
-docker export "$CONTAINER" | gzip -9 > "$ASSET_DIR/rootfs-arm64.tar.gz"
+docker export "$CONTAINER" | gzip -9 > "$ASSET_DIR/rootfs-arm64.tgz"
 echo "::endgroup::"
 
 echo "::group::Bundle Android PRoot package"
 curl --fail --location --retry 5 --retry-all-errors \
   "$PROOT_PACKAGE_URL" \
-  --output "$ASSET_DIR/proot-android-aarch64.tar.gz"
-test "$(wc -c < "$ASSET_DIR/proot-android-aarch64.tar.gz" | tr -d ' ')" -gt 100000
-tar -tzf "$ASSET_DIR/proot-android-aarch64.tar.gz" | tee /tmp/proot-package-files.txt
+  --output "$ASSET_DIR/proot-android-aarch64.tgz"
+test "$(wc -c < "$ASSET_DIR/proot-android-aarch64.tgz" | tr -d ' ')" -gt 100000
+tar -tzf "$ASSET_DIR/proot-android-aarch64.tgz" | tee /tmp/proot-package-files.txt
 grep -q '^root/bin/proot$' /tmp/proot-package-files.txt
 echo "::endgroup::"
 
-ROOTFS_SHA="$(sha256sum "$ASSET_DIR/rootfs-arm64.tar.gz" | awk '{print $1}')"
-PROOT_SHA="$(sha256sum "$ASSET_DIR/proot-android-aarch64.tar.gz" | awk '{print $1}')"
-ROOTFS_BYTES="$(wc -c < "$ASSET_DIR/rootfs-arm64.tar.gz" | tr -d ' ')"
-PROOT_BYTES="$(wc -c < "$ASSET_DIR/proot-android-aarch64.tar.gz" | tr -d ' ')"
+ROOTFS_SHA="$(sha256sum "$ASSET_DIR/rootfs-arm64.tgz" | awk '{print $1}')"
+PROOT_SHA="$(sha256sum "$ASSET_DIR/proot-android-aarch64.tgz" | awk '{print $1}')"
+ROOTFS_BYTES="$(wc -c < "$ASSET_DIR/rootfs-arm64.tgz" | tr -d ' ')"
+PROOT_BYTES="$(wc -c < "$ASSET_DIR/proot-android-aarch64.tgz" | tr -d ' ')"
 
 cat > "$ASSET_DIR/residence-manifest.properties" <<EOF
 format=synthai-apk-local-linux-v1
@@ -74,4 +74,4 @@ EOF
 
 echo "Residence assets:"
 cat "$ASSET_DIR/residence-manifest.properties"
-du -h "$ASSET_DIR/rootfs-arm64.tar.gz" "$ASSET_DIR/proot-android-aarch64.tar.gz"
+du -h "$ASSET_DIR/rootfs-arm64.tgz" "$ASSET_DIR/proot-android-aarch64.tgz"
