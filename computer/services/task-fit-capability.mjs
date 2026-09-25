@@ -54,7 +54,9 @@ export class TaskFitCapabilityService {
         kind: route.kind, description: route.description,
         evidenceIds: evidenceIds(route.evidenceIds).filter(id => ids.has(id)),
       }));
-      const canNow = missing.length === 0 && observedConstraints.length === 0;
+      const directEvidence = evidenceIds(action.evidenceIds).some(id => ids.has(id));
+      const canNow = observedConstraints.length === 0 && missing.length === 0
+        && (required.length > 0 || directEvidence);
       const canWith = !canNow && alternatives.length > 0;
       return {
         actionId: action.id, canNow, canWith, status: canNow ? 'can-now' :
@@ -70,7 +72,10 @@ export class TaskFitCapabilityService {
             ...observedConstraints.flatMap(item => evidenceIds(item.evidenceIds).filter(id => ids.has(id))),
           ]),
         ],
-        openQuestions: missing.map(id => `What observed evidence establishes capability ${id}?`),
+        openQuestions: [
+          ...missing.map(id => `What observed evidence establishes capability ${id}?`),
+          ...(required.length === 0 && !directEvidence ? ['What observed evidence establishes this action?'] : []),
+        ],
         alternatives,
       };
     });
@@ -96,7 +101,7 @@ export class TaskFitCapabilityService {
 
     const result = {
       status: 'assessed', taskId, personId,
-      workableQualities: copy(person.workableQualities ?? []),
+      workableQualities: copy((person.workableQualities ?? []).filter(substantiated)),
       findings, frozenHypothesis,
       recommendation: findings.filter(item => item.canNow || item.canWith)
         .map(item => ({
