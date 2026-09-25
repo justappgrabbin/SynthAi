@@ -57,11 +57,28 @@
       "failed": 0,
       "complete": false
     },
-    "packaging": "VERIFIED"
+    "packaging": "VERIFIED",
+    "resident2_targeted_tests": {
+      "passed": 7,
+      "failed": 0
+    }
   },
   "remaining": [
     "green full APK compile with bundled Linux residence and current Android host",
     "physical Android permission/device acceptance",
-    "bundle or provision the Prime image in the final APK startup path"
-  ]
+    "place Resident 2 image into final APK assets/residents slot"
+  ],
+  "additive_android_resident_image_v2": {
+    "filename": "Synthia-Prime-v0.5.8-Android-Resident-2.synthimg",
+    "version": "0.5.8+android-resident.2",
+    "size_bytes": 81150758,
+    "sha256": "28ef14f14c96d35b0d4730f6490f43e72a3504b79c10872f21b8cb3cc539ebf8",
+    "clone_files_verified": 1562,
+    "packaging_missing": 0,
+    "packaging_extra": 0,
+    "packaging_changed": 0,
+    "additional_patch": "src/solo/android-hand-executor.mjs",
+    "additional_test": "test/33-android-hand-token.test.mjs",
+    "hands_security": "private per-install x-synthia-hand-token"
+  }
 }
