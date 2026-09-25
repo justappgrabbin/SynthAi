@@ -56,7 +56,7 @@ jobs:
       - name: Verify residence assets before Android build
         run: |
           test -s native-android/app/src/main/assets/runtime/rootfs-arm64.tar.gz
-          test -s native-android/app/src/main/assets/runtime/proot-arm64
+          test -s native-android/app/src/main/assets/runtime/proot-android-aarch64.tar.gz
           test -s native-android/app/src/main/assets/runtime/residence-manifest.properties
           cat native-android/app/src/main/assets/runtime/residence-manifest.properties
 
@@ -69,7 +69,7 @@ jobs:
           test -s "$APK"
           unzip -l "$APK" | tee /tmp/apk-files.txt
           grep -q 'assets/runtime/rootfs-arm64.tar.gz' /tmp/apk-files.txt
-          grep -q 'assets/runtime/proot-arm64' /tmp/apk-files.txt
+          grep -q 'assets/runtime/proot-android-aarch64.tar.gz' /tmp/apk-files.txt
           grep -q 'assets/runtime/residence-manifest.properties' /tmp/apk-files.txt
           ls -lh "$APK"
           sha256sum "$APK"
