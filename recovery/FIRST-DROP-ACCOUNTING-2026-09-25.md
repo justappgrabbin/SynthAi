@@ -97,3 +97,15 @@ Recovery/reproduction closes this failure only when:
 5. that path is verified to exist
 6. the creator successfully retrieves/installs/runs the artifact
 7. the Android acceptance gate is completed
+
+## Delivery recheck — 2026-09-25 10:46 Pacific
+
+A fresh GitHub Actions artifact query for [run 36116773303](https://github.com/justappgrabbin/SynthAi/actions/runs/36116773303) returned `synthai-native-seed-linux-residence-debug-apk` (artifact ID 10854694080, 283,078,786 compressed artifact bytes) and the residence manifest. The [artifact page](https://github.com/justappgrabbin/SynthAi/actions/runs/36116773303/artifacts/10854694080) exists, reports expiry December 24, 2026, and is the **Computer/Linux host debug APK**, built before the 81,151,678-byte Prime Resident 3 image was inserted into the final 367,532,021-byte candidate. It must not be labeled the final Prime all-in-one APK.
+
+The creator later reported retrieving an APK from GitHub. That is a positive access report for *an APK*, but the filename/hash of the retrieved file has not been matched to the exact Prime all-in-one candidate. The final candidate's delivery state stays open until the retrieved APK is identified by SHA-256 and compared with `4b5012ae88b2f89309d04596f19b5c380dcf9658a17f861e2d9c7a7c1f45cf23`. The host APK can be tested as a host build without asserting Prime is bundled.
+
+PR [#13](https://github.com/justappgrabbin/SynthAi/pull/13) adds an automata cartridge magazine on top of PR #10. Resident Mesh Integration [run 36154523433](https://github.com/justappgrabbin/SynthAi/actions/runs/36154523433) passed; its artifact list was empty. The run is source/test evidence, not a new downloadable APK.
+
+## Creator-defined RLS milestone
+
+The creator explicitly holds Supabase RLS issues open until a usable app has been delivered and accepted. RLS closure is the final app-birth signal, not a pre-release shortcut. Inventory findings privately and preserve current policies; request/record the creator's authorization at that milestone before applying RLS remediation. This sequencing does not promote the app's current state to accepted.
