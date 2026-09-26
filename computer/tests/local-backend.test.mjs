@@ -95,6 +95,8 @@ async function stop(child) {
 
 test('phone acceptance re-verification clears stale local backend evidence', async () => {
   const runtime = await new BrowserComputerRuntime({ persistence: new MemoryPersistence() }).boot();
+  let unavailableEvent;
+  runtime.bus.on('local-backend:unavailable', event => { unavailableEvent = event; });
   const adapter = new LocalComputerBackendAdapter();
   adapter.verify = async () => ({
     health: { environment: 'linux-local', version: 'test', services: ['projects'] },
@@ -109,6 +111,7 @@ test('phone acceptance re-verification clears stale local backend evidence', asy
   await assert.rejects(runtime.reverifyLocalBackend(), /backend stopped/);
   assert.equal(runtime.localBackendVerified, false);
   assert.equal(runtime.localBackendHealth, null);
+  assert.match(unavailableEvent.payload.error, /backend stopped/);
 });
 
 test('local Computer backend serves the canonical runtime and persists through restart', { timeout: 45000 }, async () => {
