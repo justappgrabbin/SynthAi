@@ -188,6 +188,27 @@ export class BrowserComputerRuntime {
     return evidence;
   }
 
+  async reverifyLocalBackend() {
+    const adapter = this.requireLocalBackend();
+    try {
+      const evidence = await adapter.verify();
+      this.localBackendVerified = true;
+      this.localBackendHealth = evidence.health;
+      this.bus.emit('local-backend:reverified', {
+        endpoint: adapter.baseUrl,
+        environment: evidence.health.environment,
+        version: evidence.health.version,
+        services: evidence.health.services
+      });
+      return evidence;
+    } catch (error) {
+      this.localBackendVerified = false;
+      this.localBackendHealth = null;
+      this.bus.emit('local-backend:unavailable', { error: String(error?.message ?? error) });
+      throw error;
+    }
+  }
+
   requireLocalBackend() {
     if (!this.localBackendVerified || !this.localBackend) {
       throw new Error('local Computer backend is not verified');
