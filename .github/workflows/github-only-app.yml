@@ -85,7 +85,7 @@ jobs:
           test -f /tmp/synthai-linux-rootfs/opt/synthai/computer/backend/local-server.mjs
           test -x /tmp/synthai-linux-rootfs/usr/local/bin/node
           test -x /tmp/synthai-linux-rootfs/usr/bin/python3
-          tar -C /tmp/synthai-linux-rootfs -czf android-app/app/src/main/assets/linux-rootfs.bundle .
+          tar --hard-dereference -C /tmp/synthai-linux-rootfs -czf android-app/app/src/main/assets/linux-rootfs.bundle .
           printf '%s\n' "$GITHUB_SHA" > android-app/app/src/main/assets/linux-rootfs.version
           du -h android-app/app/src/main/assets/linux-rootfs.bundle
 
