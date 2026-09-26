@@ -12,6 +12,7 @@ on:
       - 'computer/tests/task-fit-native-convergence.test.mjs'
       - 'computer/tests/indiverse-addressed-registration.test.mjs'
       - 'computer/tests/cartridge-runtime-evidence.test.mjs'
+      - 'computer/tests/working-system-promotion.test.mjs'
       - 'computer/native/NativeSeedRuntime.mjs'
       - 'computer/runtime/automata-cartridge-magazine.mjs'
       - '.github/workflows/resident-integration-check.yml'
@@ -90,6 +91,7 @@ jobs:
           computer/tests/native-resident-images.test.mjs
           computer/tests/automata-cartridge-magazine.test.mjs
           computer/tests/cartridge-runtime-evidence.test.mjs
+          computer/tests/working-system-promotion.test.mjs
           computer/tests/research-report-automaton.test.mjs
           computer/tests/research-report-cartridge-integration.test.mjs
           computer/tests/task-fit-native-convergence.test.mjs
