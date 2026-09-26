@@ -8,6 +8,7 @@ on:
     branches:
       - main
       - integration/github-only-app-20260923
+      - recovery/computer-visible-home-smoke-20260925
     paths:
       - '.github/workflows/github-only-app.yml'
       - '.github/scripts/arm64-backend-smoke.mjs'
