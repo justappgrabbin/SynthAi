@@ -63,6 +63,7 @@ export class AutomataCartridgeMagazine {
     if (!automataRegistry?.register) throw new TypeError('AutomataCartridgeMagazine requires automata Registry');
     if (!mesh?.request) throw new TypeError('AutomataCartridgeMagazine requires mesh runtime');
     Object.assign(this, { state, bus, automataEngine, automataRegistry, mesh, clock });
+    this.promotionDestinations = new Map();
   }
 
   #ledger() {
@@ -72,6 +73,7 @@ export class AutomataCartridgeMagazine {
       lastAssembly: null,
       lastExecution: null,
       promotionQueue: {},
+      deliveryReceipts: {},
     });
   }
 
@@ -409,6 +411,65 @@ export class AutomataCartridgeMagazine {
     throw error;
   }
 
+  registerPromotionDestination(id, adapter) {
+    const destination = String(id ?? '').trim();
+    if (!destination) throw new Error('promotion destination id required');
+    if (typeof adapter?.upload !== 'function') throw new TypeError('promotion destination requires upload(candidate)');
+    this.promotionDestinations.set(destination, adapter);
+    return { id: destination, registered: true };
+  }
+
+  async deliverPromotion(queueKey) {
+    const key = String(queueKey ?? '').trim();
+    if (!key) throw new Error('promotion queue key required');
+    const ledger = this.#ledger();
+    ledger.deliveryReceipts ??= {};
+    const existing = ledger.deliveryReceipts[key];
+    if (existing) return clone(existing);
+
+    const candidate = ledger.promotionQueue?.[key];
+    if (!candidate) throw new Error('unknown promotion candidate: ' + key);
+    if (candidate.state !== 'ready-for-uploader') throw new Error('promotion candidate not ready: ' + key);
+    const adapter = this.promotionDestinations.get(candidate.destination);
+    if (!adapter) throw new Error('promotion destination unavailable: ' + candidate.destination);
+
+    const delivered = await adapter.upload(clone(candidate));
+    const location = String(delivered?.location ?? '').trim();
+    const receiptId = String(delivered?.receiptId ?? '').trim();
+    const sha256 = String(delivered?.sha256 ?? '').trim().toLowerCase();
+    if (!location || !receiptId) throw new Error('destination returned incomplete delivery receipt');
+    if (sha256 !== candidate.artifact.sha256) throw new Error('destination receipt artifact hash mismatch');
+
+    const receipt = {
+      schema: 'synthia.delivery-receipt/v1',
+      queueKey: key,
+      receiptId,
+      destination: candidate.destination,
+      location,
+      artifact: clone(candidate.artifact),
+      verification: clone(candidate.verification),
+      provenance: clone(candidate.provenance),
+      deliveredAt: this.clock(),
+      state: 'delivered',
+    };
+    ledger.deliveryReceipts[key] = receipt;
+    candidate.state = 'delivered';
+    candidate.receiptId = receiptId;
+    candidate.deliveredAt = receipt.deliveredAt;
+    const record = ledger.records[candidate.cartridgeId];
+    if (record) record.promotion = {
+      ...(record.promotion ?? {}),
+      state: 'delivered',
+      receiptId,
+      deliveredAt: receipt.deliveredAt,
+    };
+    ledger.events.push({ type: 'cartridge:promotion-delivered', id: candidate.cartridgeId, at: receipt.deliveredAt, queueKey: key, receiptId });
+    ledger.events = ledger.events.slice(-500);
+    await this.#save(ledger, 'cartridge-promotion-delivered');
+    this.bus?.emit('cartridge:promotion-delivered', clone(receipt));
+    return clone(receipt);
+  }
+
   async dislodge(id, reason = 'manual-dislodge') {
     const ledger = this.#ledger();
     const record = ledger.records[String(id)];
@@ -464,6 +525,7 @@ export class AutomataCartridgeMagazine {
       lastAssembly: clone(ledger.lastAssembly),
       lastExecution: clone(ledger.lastExecution),
       promotionQueue: clone(Object.values(ledger.promotionQueue ?? {})),
+      deliveryReceipts: clone(Object.values(ledger.deliveryReceipts ?? {})),
       events: clone((ledger.events ?? []).slice(-50)),
     };
   }
