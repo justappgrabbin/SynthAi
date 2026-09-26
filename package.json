@@ -4,6 +4,7 @@
   "type": "module",
   "version": "0.3.0-mobile",
   "scripts": {
+    "dev": "node scripts/dev-server.mjs",
     "test:computer": "node --test computer/tests/*.test.mjs",
     "build:computer": "node computer/build-web.mjs",
     "build:mobile": "node computer/build-mobile-web.mjs",
