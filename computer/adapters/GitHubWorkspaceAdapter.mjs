@@ -3,7 +3,8 @@ export class GitHubWorkspaceAdapter {
     if (typeof fetchImpl !== 'function') throw new Error('fetch implementation required');
     this.baseUrl = String(baseUrl || '').replace(/\/$/, '');
     this.token = String(token || '');
-    this.fetchImpl = fetchImpl;
+    // Call through globalThis so WebView/Chrome doesn't throw "Illegal invocation" on an unbound window.fetch.
+    this.fetchImpl = (...args) => fetchImpl.apply(globalThis, args);
   }
 
   configure({ baseUrl = this.baseUrl, token = this.token } = {}) {
