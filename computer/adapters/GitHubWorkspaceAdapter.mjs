@@ -3,7 +3,8 @@ export class GitHubWorkspaceAdapter {
     if (typeof fetchImpl !== 'function') throw new Error('fetch implementation required');
     this.baseUrl = String(baseUrl || '').replace(/\/$/, '');
     this.token = String(token || '');
-    this.fetchImpl = fetchImpl;
+    // Call through globalThis so WebView/Chrome doesn't throw "Illegal invocation" on an unbound window.fetch.
+    this.fetchImpl = (...args) => fetchImpl.apply(globalThis, args);
   }
 
   configure({ baseUrl = this.baseUrl, token = this.token } = {}) {
@@ -33,6 +34,17 @@ export class GitHubWorkspaceAdapter {
       throw error;
     }
     return data;
+  }
+
+  /**
+   * Hand a GitHub token to the Synthia Server bridge, which stores it
+   * server-side ($DATA_DIR/github-token). Deliberately not a request() action
+   * so the token never passes through the backend:request event bus.
+   */
+  async storeGitHubToken(githubToken) {
+    const value = String(githubToken || '').trim();
+    if (!value) throw new Error('GitHub token required');
+    return this.#request('POST', '/computer/github/token', { githubToken: value });
   }
 
   async request(input = {}) {

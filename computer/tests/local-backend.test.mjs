@@ -8,6 +8,7 @@ import { fileURLToPath } from 'node:url';
 import { BrowserComputerRuntime } from '../BrowserComputerRuntime.mjs';
 import { DeviceProjectWorkspace } from '../adapters/DeviceProjectWorkspace.mjs';
 import { MemoryPersistence } from '../core/kernel.mjs';
+import { LocalComputerBackendAdapter } from '../adapters/LocalComputerBackendAdapter.mjs';
 
 const SERVER = fileURLToPath(new URL('../backend/local-server.mjs', import.meta.url));
 
@@ -91,6 +92,47 @@ async function stop(child) {
     });
   });
 }
+
+test('phone acceptance re-verification recovers after a transient backend outage', async () => {
+  const runtime = await new BrowserComputerRuntime({ persistence: new MemoryPersistence() }).boot();
+  let unavailableEvent;
+  runtime.bus.on('local-backend:unavailable', event => { unavailableEvent = event; });
+  const adapter = new LocalComputerBackendAdapter();
+  adapter.rpc = async method => method === 'project.list' ? [] : null;
+  adapter.verify = async () => ({
+    health: { environment: 'linux-local', version: 'test', services: ['projects'] },
+    snapshot: { version: 'test' }
+  });
+
+  await runtime.connectLocalBackend(adapter);
+  const workspace = new DeviceProjectWorkspace({ runtime });
+  await workspace.attach();
+  assert.equal(workspace.ready, true);
+  assert.equal(runtime.localBackendVerified, true);
+  assert.equal((await runtime.reverifyLocalBackend()).health.version, 'test');
+
+  adapter.verify = async () => { throw new Error('backend stopped'); };
+  await assert.rejects(runtime.reverifyLocalBackend(), /backend stopped/);
+  assert.equal(runtime.localBackendVerified, false);
+  assert.equal(runtime.localBackendHealth, null);
+  assert.equal(runtime.state.get('computer.localBackend').status, 'UNAVAILABLE');
+  assert.match(unavailableEvent.payload.error, /backend stopped/);
+
+  workspace.detach();
+  assert.equal(workspace.ready, false);
+  const browserProject = await workspace.create({ name: 'Available during outage' });
+  assert.equal(workspace.source(browserProject.id), 'browser');
+
+  adapter.verify = async () => ({
+    health: { environment: 'linux-local', version: 'recovered', services: ['projects'] },
+    snapshot: { version: 'recovered' }
+  });
+  assert.equal((await runtime.reverifyLocalBackend()).health.version, 'recovered');
+  await workspace.attach();
+  assert.equal(workspace.ready, true);
+  assert.equal(runtime.state.get('computer.localBackend').status, 'VERIFIED');
+  assert.equal(workspace.source(browserProject.id), 'browser');
+});
 
 test('local Computer backend serves the canonical runtime and persists through restart', { timeout: 45000 }, async () => {
   const stateDir = await mkdtemp(join(tmpdir(), 'synthai-local-backend-'));

@@ -68,6 +68,17 @@
             <div id="homeSystems" class="system-list"></div>
           </article>
         </div>
+
+        <article class="panel phone-check">
+          <div class="panel-head"><div><small>PHONE ACCEPTANCE</small><h3>Verify this Computer</h3></div><span class="pill" id="phoneCheckState">PENDING</span></div>
+          <p class="muted">The Linux Computer runs inside this app on your device. Open the app again once, then run the check. Check the box when you can see and use it.</p>
+          <label><input id="creatorAccepted" type="checkbox"> I can see and use this Computer on my phone</label>
+          <div class="row">
+            <button class="primary" id="runPhoneCheck">Run phone check</button>
+            <button class="quiet" id="copyPhoneReport">Copy report</button>
+          </div>
+          <pre id="phoneReport">No phone check recorded yet.</pre>
+        </article>
       </section>
 
       <section class="view" id="build">

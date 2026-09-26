@@ -17,5 +17,6 @@ await cp(
 
 await cp(new URL('./ComputerRuntime.mjs', import.meta.url), new URL('./ComputerRuntime.mjs', to));
 await cp(new URL('./BrowserComputerRuntime.mjs', import.meta.url), new URL('./BrowserComputerRuntime.mjs', to));
+await cp(new URL('./phone-acceptance-report.mjs', import.meta.url), new URL('./phone-acceptance-report.mjs', to));
 
 console.log('SynthAI browser and mobile Computer runtimes staged');

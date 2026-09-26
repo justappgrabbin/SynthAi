@@ -18,6 +18,24 @@ if (!TOKEN && !ALLOW_UNAUTHENTICATED) {
 
 await mkdir(STATE_DIR, { recursive: true });
 
+// Embedded Synthia Server (phone Linux only). Started in parallel with the
+// Computer runtime and supervised separately: a Synthia failure must never
+// take down this backend or its /health on 17380.
+let synthia = null;
+if (process.env.SYNTHIA_EMBEDDED === '1') {
+  try {
+    const { startSynthiaSupervisor } = await import('./synthia-supervisor.mjs');
+    synthia = startSynthiaSupervisor();
+  } catch (error) {
+    console.error('SYNTHIA_SUPERVISOR_FAILED ' + String(error && error.stack || error));
+  }
+}
+const synthiaStatus = () => {
+  if (!synthia) return { embedded: process.env.SYNTHIA_EMBEDDED === '1', children: {} };
+  try { return synthia.status(); } catch (error) { return { embedded: true, error: String(error && error.message || error) }; }
+};
+process.on('exit', () => { try { synthia?.stop('SIGKILL'); } catch { /* exiting */ } });
+
 const runtime = await new ComputerRuntime({
   persistence: new FilePersistence(STATE_DIR),
   namespace: 'synthai-computer-local',
@@ -115,7 +133,8 @@ const server = createServer(async (req, res) => {
         host: HOST,
         state_dir: STATE_DIR,
         services: runtime.services.list().map(item => item.id),
-        methods: [...calls.keys()]
+        methods: [...calls.keys()],
+        synthia: synthiaStatus()
       });
     }
 
@@ -160,6 +179,7 @@ server.listen(PORT, HOST, () => {
 
 const stop = signal => {
   console.log('SYNTHAI_LOCAL_BACKEND_STOP ' + signal);
+  try { synthia?.stop('SIGTERM'); } catch { /* keep stopping */ }
   server.close(() => process.exit(0));
   setTimeout(() => process.exit(0), 1500).unref();
 };

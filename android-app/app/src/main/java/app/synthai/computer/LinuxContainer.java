@@ -19,6 +19,10 @@ import java.util.Map;
 
 final class LinuxContainer {
     static final String BASE_URL = "http://127.0.0.1:17380";
+    /** Embedded Synthia Server (Node lite) supervised by local-server.mjs. */
+    static final String SYNTHIA_URL = "http://127.0.0.1:17381";
+    /** Origin of the app WebView (MainActivity serves assets from this host). */
+    static final String WEBVIEW_ORIGIN = "https://appassets.androidplatform.net";
     private static final String TAG = "SynthAIComputer";
 
     private final Context context;
@@ -118,6 +122,16 @@ final class LinuxContainer {
         env.put("SYNTHAI_LOCAL_TOKEN", sessionSecret);
         env.put("SYNTHAI_STATE_DIR", "/var/lib/synthai");
         env.put("SYNTHAI_EVENT_LOG", "/var/lib/synthai/events.ndjson");
+        // Embedded Synthia Server: Node lite on 17381 + Python on 17382, loopback only.
+        // Auth is the same per-install session secret as the Computer backend.
+        env.put("SYNTHIA_EMBEDDED", "1");
+        env.put("HOST", "127.0.0.1");
+        env.put("SYNTHIA_NODE_PORT", "17381");
+        env.put("SYNTHIA_PY_PORT", "17382");
+        env.put("SYNTHIA_ROOT", "/opt/synthia-server");
+        env.put("TERMINAL_TOKEN", sessionSecret);
+        env.put("DATA_DIR", "/var/lib/synthai/synthia");
+        env.put("CORS_ORIGIN", WEBVIEW_ORIGIN);
         if (noSeccomp) env.put("PROOT_NO_SECCOMP", "1");
 
         process = builder.start();

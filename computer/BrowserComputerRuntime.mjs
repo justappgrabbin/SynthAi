@@ -24,6 +24,8 @@ export class BrowserComputerRuntime {
     this.localBackend = null;
     this.localBackendVerified = false;
     this.localBackendHealth = null;
+    this.embeddedSynthia = null;
+    this.githubAdapter = null;
     this.bus = new EventBus();
     this.state = new StateStore({ bus: this.bus, persistence, namespace });
     const registry = kind => new Registry({ kind, bus: this.bus });
@@ -139,6 +141,13 @@ export class BrowserComputerRuntime {
 
     const evidence = await adapter.verify();
     this.localBackend = adapter;
+    const synthiaUrl = config instanceof LocalComputerBackendAdapter ? '' : String(config.synthiaUrl || '');
+    if (synthiaUrl) {
+      // Embedded Synthia Server in the same phone Linux, authenticated with
+      // the same per-install session secret as the Computer backend.
+      this.embeddedSynthia = { baseUrl: synthiaUrl.replace(/\/+$/, '') };
+      this.githubAdapter = this.configureGitHub({ baseUrl: synthiaUrl, token: config.token || adapter.token || '' });
+    }
     this.localBackendVerified = true;
     this.localBackendHealth = evidence.health;
     this.backends.register('local-computer', adapter, { replace: true });
@@ -186,6 +195,41 @@ export class BrowserComputerRuntime {
     });
 
     return evidence;
+  }
+
+  async reverifyLocalBackend() {
+    const adapter = this.localBackend;
+    if (!adapter) throw new Error('embedded Computer has not attached');
+    try {
+      const evidence = await adapter.verify();
+      this.localBackendVerified = true;
+      this.localBackendHealth = evidence.health;
+      await this.state.set('computer.localBackend', {
+        status: 'VERIFIED',
+        environment: evidence.health.environment,
+        version: evidence.health.version,
+        endpoint: adapter.baseUrl,
+        at: Date.now()
+      }, { source: 'local-backend' });
+      this.bus.emit('local-backend:reverified', {
+        endpoint: adapter.baseUrl,
+        environment: evidence.health.environment,
+        version: evidence.health.version,
+        services: evidence.health.services
+      });
+      return evidence;
+    } catch (error) {
+      this.localBackendVerified = false;
+      this.localBackendHealth = null;
+      await this.state.set('computer.localBackend', {
+        status: 'UNAVAILABLE',
+        endpoint: adapter.baseUrl,
+        error: String(error?.message ?? error),
+        at: Date.now()
+      }, { source: 'local-backend' });
+      this.bus.emit('local-backend:unavailable', { error: String(error?.message ?? error) });
+      throw error;
+    }
   }
 
   requireLocalBackend() {

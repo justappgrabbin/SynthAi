@@ -8,6 +8,7 @@ on:
     branches:
       - main
       - integration/github-only-app-20260923
+      - recovery/computer-visible-home-smoke-20260925
     paths:
       - '.github/workflows/github-only-app.yml'
       - '.github/scripts/arm64-backend-smoke.mjs'
@@ -67,6 +68,23 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
+      - name: Check out pinned Synthia Server for the embedded rootfs
+        uses: actions/checkout@v4
+        with:
+          repository: justappgrabbin/Synthia-server
+          ref: cc22370a1c8670fb9bdec167267c098306ecf502
+          path: synthia-server
+          persist-credentials: false
+
+      - name: Verify pinned Synthia Server checkout
+        run: |
+          test "$(git -C synthia-server rev-parse HEAD)" = "cc22370a1c8670fb9bdec167267c098306ecf502"
+          rm -rf synthia-server/.git
+          test -f synthia-server/server/lite.js
+          test -f synthia-server/server/computer-github-routes.js
+          test -f synthia-server/render-server.py
+          test -f synthia-server/requirements-mobile.txt
+
       - name: Build embedded ARM64 Linux Computer rootfs
         run: |
           rm -rf /tmp/synthai-linux-rootfs
@@ -84,8 +102,11 @@ jobs:
           test -f /tmp/synthai-linux-rootfs/opt/synthai/computer/backend/local-server.mjs
           test -x /tmp/synthai-linux-rootfs/usr/local/bin/node
           test -x /tmp/synthai-linux-rootfs/usr/bin/python3
-          tar -C /tmp/synthai-linux-rootfs -czf android-app/app/src/main/assets/linux-rootfs.bundle .
-          printf '%s\n' "$GITHUB_SHA" > android-app/app/src/main/assets/linux-rootfs.version
+          test -f /tmp/synthai-linux-rootfs/opt/synthia-server/server/lite.js
+          test -f /tmp/synthai-linux-rootfs/opt/synthia-server/render-server.py
+          test -d /tmp/synthai-linux-rootfs/opt/synthia-server/node_modules/express
+          tar --hard-dereference -C /tmp/synthai-linux-rootfs -czf android-app/app/src/main/assets/linux-rootfs.bundle .
+          printf '%s-synthia-embedded-1\n' "$GITHUB_SHA" > android-app/app/src/main/assets/linux-rootfs.version
           du -h android-app/app/src/main/assets/linux-rootfs.bundle
 
       - name: Use Java 17
