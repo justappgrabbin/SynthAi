@@ -442,6 +442,14 @@ export class NativeSeedRuntime {
     return this.automataCartridges.execute(capability, input, context, options);
   }
 
+  registerPromotionDestination(id, adapter) {
+    return this.automataCartridges.registerPromotionDestination(id, adapter);
+  }
+
+  async deliverAutomataPromotion(queueKey) {
+    return this.automataCartridges.deliverPromotion(queueKey);
+  }
+
   async assessTaskFit(input) {
     const routed = await this.meshKernel.request('system:task-fit', { operation:'assess', payload:clone(input) });
     if (!routed.delivered) throw new Error('task-fit mesh service unavailable');
