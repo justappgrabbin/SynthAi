@@ -304,15 +304,29 @@ function homeIsVisible() {
   return Boolean(home?.classList.contains('active') && visible(home) && visible(heading) && visible(create));
 }
 
-function runPhoneCheck() {
+async function runPhoneCheck() {
   show('home');
+  let liveBackendStatus = $('#runtimeStatus').textContent.trim();
+  let liveBackendDetail = $('#runtimeDetail').textContent.trim();
+  if (isAndroidApp) {
+    try {
+      const evidence = await computer.reverifyLocalBackend();
+      liveBackendStatus = 'VERIFIED';
+      liveBackendDetail = `${evidence.health.environment} · ${evidence.health.services.length} registered services · ${evidence.health.version}`;
+      runtimeState(liveBackendStatus, liveBackendDetail);
+    } catch (error) {
+      liveBackendStatus = 'UNAVAILABLE';
+      liveBackendDetail = `Live backend probe failed: ${String(error?.message ?? error)}`;
+      runtimeState(liveBackendStatus, liveBackendDetail);
+    }
+  }
   requestAnimationFrame(() => requestAnimationFrame(() => {
     const allProjects = projects.list();
     const report = buildPhoneAcceptanceReport({
       androidHost: isAndroidApp,
       visibleHome: homeIsVisible(),
-      runtimeStatus: $('#runtimeStatus').textContent.trim(),
-      runtimeDetail: $('#runtimeDetail').textContent.trim(),
+      runtimeStatus: liveBackendStatus,
+      runtimeDetail: liveBackendDetail,
       services: computer.localBackendHealth?.services || [],
       projectCount: allProjects.length,
       onDeviceProjectCount: allProjects.filter(item => projects.source(item.id) === 'device').length,
