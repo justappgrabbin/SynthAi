@@ -3,26 +3,27 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#090a0c">
+  <meta name="theme-color" content="#12091f">
   <meta name="application-name" content="SynthAI Computer">
   <link rel="manifest" href="/manifest.webmanifest">
   <link rel="icon" href="/synthai-icon.svg" type="image/svg+xml">
   <title>SynthAI Computer</title>
   <link rel="stylesheet" href="/computer.css">
-  <link rel="stylesheet" href="/assets/phosphor/style.css">
-  <link rel="stylesheet" href="/computer-desktop.css">
 </head>
 <body>
   <div class="computer">
     <aside class="rail">
-      <div class="brand"><span class="brand-mark" aria-hidden="true">S</span><div><strong>SynthAI</strong><small>COMPUTER</small></div></div>
+      <div class="brand">
+        <div class="orb">S</div>
+        <div><strong>SynthAI</strong><small>Computer</small></div>
+      </div>
       <nav id="nav">
-        <button class="nav active" data-view="home"><i class="ph ph-squares-four" aria-hidden="true"></i><span>Desktop</span></button>
-        <button class="nav" data-view="files"><i class="ph ph-folder-open" aria-hidden="true"></i><span>Files</span></button>
-        <button class="nav" data-view="build"><i class="ph ph-hammer" aria-hidden="true"></i><span>Build</span></button>
-        <button class="nav" data-view="systems"><i class="ph ph-cube" aria-hidden="true"></i><span>Systems</span></button>
-        <button class="nav" data-view="activity"><i class="ph ph-pulse" aria-hidden="true"></i><span>Activity</span></button>
-        <button class="nav more-nav" data-view="github"><i class="ph ph-github-logo" aria-hidden="true"></i><span>GitHub</span></button>
+        <button class="nav active" data-view="home">⌂ <span>Home</span></button>
+        <button class="nav" data-view="build">✦ <span>Build</span></button>
+        <button class="nav" data-view="files">▤ <span>Files</span></button>
+        <button class="nav" data-view="github">⌁ <span>GitHub</span></button>
+        <button class="nav" data-view="systems">◫ <span>Systems</span></button>
+        <button class="nav" data-view="activity">↯ <span>Activity</span></button>
       </nav>
       <a class="diagnostic" href="/computer.html">Diagnostic</a>
     </aside>
@@ -30,33 +31,16 @@
     <main>
       <header class="topbar">
         <div>
-          <small class="eyebrow">SYNTHAI / COMPUTER</small>
+          <small class="eyebrow">PRIMARY OPERATING SURFACE</small>
           <h1 id="viewTitle">Computer Home</h1>
         </div>
         <div class="statusline">
           <span class="dot" id="bootDot"></span>
           <span id="bootLabel">booting</span>
         </div>
-        <button class="top-action" id="windowSwitcher" type="button" aria-label="Show open windows"><i class="ph ph-squares-four" aria-hidden="true"></i></button>
       </header>
 
       <section class="view active" id="home">
-        <div class="desktop-home">
-          <div class="window window-build-back">
-            <div class="window-bar"><span class="window-icon"><i class="ph ph-play" aria-hidden="true"></i></span><div><h2>Build</h2><small id="desktopBuildProject">Project workspace</small></div><div class="window-controls"><button type="button" data-window-action="minimize" data-target="build" aria-label="Minimize Build"><i class="ph ph-minus" aria-hidden="true"></i></button><button type="button" data-window-action="maximize" data-target="build" aria-label="Open Build"><i class="ph ph-square" aria-hidden="true"></i></button><button type="button" data-window-action="close" data-target="build" aria-label="Close Build window"><i class="ph ph-x" aria-hidden="true"></i></button></div></div>
-            <div class="window-tabs"><span class="selected">Preview</span><span>Editor</span><span>Runtime</span><span>GitHub</span></div>
-            <div class="window-preview"><div class="preview-art"><strong id="desktopPreviewName">Your next creation</strong><span>Open a project to preview its work.</span></div></div>
-          </div>
-          <button class="activity-peek" data-go="activity" type="button"><i class="ph ph-pulse" aria-hidden="true"></i><span>Activity</span><i class="ph ph-caret-right" aria-hidden="true"></i></button>
-          <div class="window window-files-front">
-            <div class="window-bar"><span class="window-icon folder-icon"><i class="ph ph-folder" aria-hidden="true"></i></span><div><h2>Files</h2><small id="desktopFileProject">Choose a project</small></div><div class="window-controls"><button type="button" data-window-action="minimize" data-target="files" aria-label="Minimize Files"><i class="ph ph-minus" aria-hidden="true"></i></button><button type="button" data-window-action="maximize" data-target="files" aria-label="Open Files"><i class="ph ph-square" aria-hidden="true"></i></button><button type="button" data-window-action="close" data-target="files" aria-label="Close Files window"><i class="ph ph-x" aria-hidden="true"></i></button></div></div>
-            <div class="window-breadcrumb"><i class="ph ph-house" aria-hidden="true"></i><span>/</span><span>Projects</span><span>/</span><strong id="desktopBreadcrumb">Workspace</strong><button type="button" class="icon-action" data-go="files" aria-label="Open project files"><i class="ph ph-dots-three" aria-hidden="true"></i></button></div>
-            <div class="desktop-file-list" id="desktopFileList"><div class="desktop-empty">Your project files will appear here.</div></div>
-            <div class="window-foot"><span id="desktopFileCount">0 items</span><button class="text-action" data-go="files" type="button">Open files <i class="ph ph-arrow-right" aria-hidden="true"></i></button></div>
-          </div>
-          <button class="desktop-create" data-go="build" type="button"><i class="ph ph-plus" aria-hidden="true"></i> New project</button>
-        </div>
-        <div class="home-legacy">
         <div class="hero">
           <div>
             <span class="pill">SynthAI Computer</span>
@@ -84,13 +68,12 @@
             <div id="homeSystems" class="system-list"></div>
           </article>
         </div>
-        </div>
       </section>
 
       <section class="view" id="build">
         <div class="builder-grid">
           <article class="panel project-panel">
-            <div class="panel-head"><div><small>PROJECT</small><h3>Build workspace</h3></div><div class="row"><span class="pill" id="projectState">no project</span><button class="quiet" id="newProjectToggle" type="button">New</button></div></div>
+            <div class="panel-head"><div><small>PROJECT</small><h3>Build workspace</h3></div><span class="pill" id="projectState">no project</span></div>
             <p id="workspaceNotice" class="muted" role="status">Waiting for the on-device Computer to start.</p>
             <label>Project name<input id="projectName" placeholder="My app"></label>
             <label>Description<input id="projectDescription" placeholder="What this project is for"></label>
@@ -171,16 +154,6 @@
       </section>
     </main>
   </div>
-  <dialog id="windowMenu" class="window-menu" aria-label="Open Computer windows">
-    <div class="window-menu-head"><strong>Open windows</strong><button type="button" id="closeWindowMenu" aria-label="Close window switcher"><i class="ph ph-x" aria-hidden="true"></i></button></div>
-    <button type="button" data-window="home"><i class="ph ph-squares-four" aria-hidden="true"></i> Desktop</button>
-    <button type="button" data-window="files"><i class="ph ph-folder-open" aria-hidden="true"></i> Files</button>
-    <button type="button" data-window="build"><i class="ph ph-hammer" aria-hidden="true"></i> Build</button>
-    <button type="button" data-window="systems"><i class="ph ph-cube" aria-hidden="true"></i> Systems</button>
-    <button type="button" data-window="activity"><i class="ph ph-pulse" aria-hidden="true"></i> Activity</button>
-    <button type="button" data-window="github"><i class="ph ph-github-logo" aria-hidden="true"></i> GitHub</button>
-  </dialog>
   <script type="module" src="/computer-app.mjs"></script>
-  <script type="module" src="/computer-desktop.mjs"></script>
 </body>
 </html>
