@@ -344,6 +344,26 @@ renderActivity();
 if (currentProjectId && projects.get(currentProjectId)) loadCurrentFile();
 if (window.SynthAIAndroidBackendError) runtimeState('UNAVAILABLE', window.SynthAIAndroidBackendError);
 
+function verifyVisibleHome() {
+  const home = $('#home');
+  const heading = home?.querySelector('h2');
+  const create = home?.querySelector('[data-go="build"]');
+  const visible = element => {
+    if (!element) return false;
+    const style = getComputedStyle(element);
+    const box = element.getBoundingClientRect();
+    return style.display !== 'none' && style.visibility === 'visible'
+      && Number(style.opacity) > 0 && box.width > 0 && box.height > 0;
+  };
+  const painted = home?.classList.contains('active')
+    && visible(home) && visible(heading) && visible(create)
+    && heading.textContent.trim().length > 0;
+  console.info('COMPUTER_HOME_VISIBLE=' + (painted ? 'true' : 'false'));
+  if (!painted) log('computer:first-paint-failed', { home: Boolean(home), heading: Boolean(heading), create: Boolean(create) });
+}
+
+requestAnimationFrame(() => requestAnimationFrame(verifyVisibleHome));
+
 if (!isAndroidApp && 'serviceWorker' in navigator) {
   navigator.serviceWorker.register('/sw.js').catch(error => log('service-worker:failed', { error: String(error?.message ?? error) }));
 }

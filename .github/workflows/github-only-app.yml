@@ -7,6 +7,7 @@ on:
   pull_request:
     branches:
       - main
+      - integration/github-only-app-20260923
     paths:
       - '.github/workflows/github-only-app.yml'
       - '.github/scripts/arm64-backend-smoke.mjs'
