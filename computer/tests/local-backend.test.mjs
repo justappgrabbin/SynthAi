@@ -8,6 +8,7 @@ import { fileURLToPath } from 'node:url';
 import { BrowserComputerRuntime } from '../BrowserComputerRuntime.mjs';
 import { DeviceProjectWorkspace } from '../adapters/DeviceProjectWorkspace.mjs';
 import { MemoryPersistence } from '../core/kernel.mjs';
+import { LocalComputerBackendAdapter } from '../adapters/LocalComputerBackendAdapter.mjs';
 
 const SERVER = fileURLToPath(new URL('../backend/local-server.mjs', import.meta.url));
 
@@ -91,6 +92,24 @@ async function stop(child) {
     });
   });
 }
+
+test('phone acceptance re-verification clears stale local backend evidence', async () => {
+  const runtime = await new BrowserComputerRuntime({ persistence: new MemoryPersistence() }).boot();
+  const adapter = new LocalComputerBackendAdapter();
+  adapter.verify = async () => ({
+    health: { environment: 'linux-local', version: 'test', services: ['projects'] },
+    snapshot: { version: 'test' }
+  });
+
+  await runtime.connectLocalBackend(adapter);
+  assert.equal(runtime.localBackendVerified, true);
+  assert.equal((await runtime.reverifyLocalBackend()).health.version, 'test');
+
+  adapter.verify = async () => { throw new Error('backend stopped'); };
+  await assert.rejects(runtime.reverifyLocalBackend(), /backend stopped/);
+  assert.equal(runtime.localBackendVerified, false);
+  assert.equal(runtime.localBackendHealth, null);
+});
 
 test('local Computer backend serves the canonical runtime and persists through restart', { timeout: 45000 }, async () => {
   const stateDir = await mkdtemp(join(tmpdir(), 'synthai-local-backend-'));
