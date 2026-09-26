@@ -1,5 +1,16 @@
 const clone = value => value === undefined ? undefined : structuredClone(value);
 
+function normalizePromotion(input = {}) {
+  if (input?.enabled !== true) return { enabled: false };
+  const destination = String(input.destination ?? '').trim();
+  const storageRef = String(input.artifact?.storageRef ?? '').trim();
+  const sha256 = String(input.artifact?.sha256 ?? '').trim().toLowerCase();
+  if (!destination) throw new Error('promotion destination required');
+  if (!storageRef) throw new Error('promotion artifact storageRef required');
+  if (!/^[a-f0-9]{64}$/.test(sha256)) throw new Error('promotion artifact sha256 required');
+  return { enabled: true, destination, artifact: { storageRef, sha256 } };
+}
+
 function normalizeManifest(input = {}) {
   const id = String(input.id ?? '').trim();
   const capability = String(input.capability ?? '').trim();
@@ -41,14 +52,7 @@ function normalizeManifest(input = {}) {
     },
     automata,
     provenance: clone(input.provenance ?? {}),
-    promotion: input.promotion?.enabled === true ? {
-      enabled: true,
-      destination: String(input.promotion.destination ?? '').trim(),
-      artifact: {
-        storageRef: String(input.promotion.artifact?.storageRef ?? '').trim(),
-        sha256: String(input.promotion.artifact?.sha256 ?? '').trim().toLowerCase(),
-      },
-    } : { enabled: false },
+    promotion: normalizePromotion(input.promotion),
   };
 }
 
