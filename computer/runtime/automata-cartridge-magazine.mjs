@@ -1,5 +1,16 @@
 const clone = value => value === undefined ? undefined : structuredClone(value);
 
+function normalizePromotion(input = {}) {
+  if (input?.enabled !== true) return { enabled: false };
+  const destination = String(input.destination ?? '').trim();
+  const storageRef = String(input.artifact?.storageRef ?? '').trim();
+  const sha256 = String(input.artifact?.sha256 ?? '').trim().toLowerCase();
+  if (!destination) throw new Error('promotion destination required');
+  if (!storageRef) throw new Error('promotion artifact storageRef required');
+  if (!/^[a-f0-9]{64}$/.test(sha256)) throw new Error('promotion artifact sha256 required');
+  return { enabled: true, destination, artifact: { storageRef, sha256 } };
+}
+
 function normalizeManifest(input = {}) {
   const id = String(input.id ?? '').trim();
   const capability = String(input.capability ?? '').trim();
@@ -41,6 +52,7 @@ function normalizeManifest(input = {}) {
     },
     automata,
     provenance: clone(input.provenance ?? {}),
+    promotion: normalizePromotion(input.promotion),
   };
 }
 
@@ -59,6 +71,7 @@ export class AutomataCartridgeMagazine {
       events: [],
       lastAssembly: null,
       lastExecution: null,
+      promotionQueue: {},
     });
   }
 
@@ -188,6 +201,7 @@ export class AutomataCartridgeMagazine {
       sidelinedAt: record.sidelinedAt,
       sidelinedReason: record.sidelinedReason,
       provenance: clone(record.manifest.provenance),
+      promotion: clone(record.promotion ?? { state: 'not-requested', queuedAt: null }),
     };
   }
 
@@ -260,6 +274,26 @@ export class AutomataCartridgeMagazine {
     return clone(assembly);
   }
 
+  #promotionCandidate(record, at) {
+    const request = record.manifest.promotion;
+    if (!request?.enabled) return null;
+    if (!request.destination) throw new Error('promotion destination required');
+    if (!request.artifact?.storageRef) throw new Error('promotion artifact storageRef required');
+    if (!/^[a-f0-9]{64}$/.test(request.artifact.sha256 ?? '')) throw new Error('promotion artifact sha256 required');
+    return {
+      schema: 'synthia.working-system-promotion/v1',
+      cartridgeId: record.id,
+      version: record.manifest.version,
+      capability: record.manifest.capability,
+      destination: request.destination,
+      artifact: clone(request.artifact),
+      provenance: clone(record.manifest.provenance),
+      verification: clone(record.verification),
+      state: 'ready-for-uploader',
+      queuedAt: at,
+    };
+  }
+
   async #markSuccess(id) {
     const ledger = this.#ledger();
     const record = ledger.records[id];
@@ -269,6 +303,14 @@ export class AutomataCartridgeMagazine {
     record.health.lastSuccessAt = this.clock();
     record.health.lastError = null;
     record.verification = { state: 'runtime-passed', lastPassedAt: record.health.lastSuccessAt };
+    const promotion = this.#promotionCandidate(record, record.health.lastSuccessAt);
+    if (promotion) {
+      ledger.promotionQueue ??= {};
+      const key = [promotion.cartridgeId, promotion.version, promotion.artifact.sha256].join(':');
+      ledger.promotionQueue[key] = promotion;
+      record.promotion = { state: promotion.state, queuedAt: promotion.queuedAt, queueKey: key };
+      ledger.events.push({ type: 'cartridge:promotion-ready', id: record.id, at: promotion.queuedAt, queueKey: key });
+    }
     record.updatedAt = this.clock();
     await this.#save(ledger, 'cartridge-health-success');
   }
@@ -421,6 +463,7 @@ export class AutomataCartridgeMagazine {
       retired: this.list().filter(item => item.status === 'retired').length,
       lastAssembly: clone(ledger.lastAssembly),
       lastExecution: clone(ledger.lastExecution),
+      promotionQueue: clone(Object.values(ledger.promotionQueue ?? {})),
       events: clone((ledger.events ?? []).slice(-50)),
     };
   }
