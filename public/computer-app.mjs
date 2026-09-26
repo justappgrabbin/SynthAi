@@ -1,6 +1,7 @@
 import { BrowserComputerRuntime } from '/computer-runtime/BrowserComputerRuntime.mjs';
 import { LocalStoragePersistence } from '/computer-runtime/core/kernel.mjs';
 import { DeviceProjectWorkspace } from '/computer-runtime/adapters/DeviceProjectWorkspace.mjs';
+import { buildPhoneAcceptanceReport } from '/computer-runtime/phone-acceptance-report.mjs';
 
 const $ = selector => document.querySelector(selector);
 const $$ = selector => [...document.querySelectorAll(selector)];
@@ -15,6 +16,8 @@ const computer = await new BrowserComputerRuntime({
 globalThis.SynthAIComputer = computer;
 const projects = new DeviceProjectWorkspace({ runtime: computer });
 const isAndroidApp = /SynthAIComputer\//.test(navigator.userAgent);
+const previousPhoneBootAt = Number(localStorage.synthaiPhoneBootAt || 0);
+localStorage.synthaiPhoneBootAt = String(Date.now());
 
 let currentProjectId = localStorage.synthaiCurrentProject || '';
 let activity = [];
@@ -287,6 +290,61 @@ $('#refreshRepos').addEventListener('click', loadRepos);
 $('#projectPicker').addEventListener('change', event => setCurrentProject(event.target.value));
 $('#clearActivity').addEventListener('click', () => { activity = []; renderActivity(); });
 
+function homeIsVisible() {
+  const home = $('#home');
+  const heading = home?.querySelector('h2');
+  const create = home?.querySelector('[data-go="build"]');
+  const visible = element => {
+    if (!element) return false;
+    const style = getComputedStyle(element);
+    const box = element.getBoundingClientRect();
+    return style.display !== 'none' && style.visibility === 'visible'
+      && Number(style.opacity) > 0 && box.width > 0 && box.height > 0;
+  };
+  return Boolean(home?.classList.contains('active') && visible(home) && visible(heading) && visible(create));
+}
+
+function runPhoneCheck() {
+  show('home');
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    const allProjects = projects.list();
+    const report = buildPhoneAcceptanceReport({
+      androidHost: isAndroidApp,
+      visibleHome: homeIsVisible(),
+      runtimeStatus: $('#runtimeStatus').textContent.trim(),
+      runtimeDetail: $('#runtimeDetail').textContent.trim(),
+      services: computer.localBackendHealth?.services || [],
+      projectCount: allProjects.length,
+      onDeviceProjectCount: allProjects.filter(item => projects.source(item.id) === 'device').length,
+      previousBootAt: previousPhoneBootAt,
+      creatorAccepted: $('#creatorAccepted').checked,
+      userAgent: navigator.userAgent,
+      platform: navigator.platform,
+      artifactSource: 'https://github.com/justappgrabbin/SynthAi/pull/24',
+    });
+    localStorage.synthaiPhoneAcceptanceReport = JSON.stringify(report);
+    $('#phoneCheckState').textContent = report.state.toUpperCase();
+    $('#phoneReport').textContent = JSON.stringify(report, null, 2);
+    log('computer:phone-check', { state: report.state, checks: report.checks });
+  }));
+}
+
+$('#runPhoneCheck').addEventListener('click', runPhoneCheck);
+$('#copyPhoneReport').addEventListener('click', async () => {
+  const text = $('#phoneReport').textContent;
+  try {
+    await navigator.clipboard.writeText(text);
+    $('#copyPhoneReport').textContent = 'Copied';
+  } catch {
+    const range = document.createRange();
+    range.selectNodeContents($('#phoneReport'));
+    getSelection().removeAllRanges();
+    getSelection().addRange(range);
+    $('#copyPhoneReport').textContent = 'Selected';
+  }
+});
+
+
 function runtimeState(status, detail) {
   console.info('LOCAL_COMPUTER_UI_STATUS=' + status);
   $('#bootDot').classList.toggle('good', status === 'VERIFIED');
@@ -345,21 +403,18 @@ if (currentProjectId && projects.get(currentProjectId)) loadCurrentFile();
 if (window.SynthAIAndroidBackendError) runtimeState('UNAVAILABLE', window.SynthAIAndroidBackendError);
 
 function verifyVisibleHome() {
-  const home = $('#home');
-  const heading = home?.querySelector('h2');
-  const create = home?.querySelector('[data-go="build"]');
-  const visible = element => {
-    if (!element) return false;
-    const style = getComputedStyle(element);
-    const box = element.getBoundingClientRect();
-    return style.display !== 'none' && style.visibility === 'visible'
-      && Number(style.opacity) > 0 && box.width > 0 && box.height > 0;
-  };
-  const painted = home?.classList.contains('active')
-    && visible(home) && visible(heading) && visible(create)
-    && heading.textContent.trim().length > 0;
+  const painted = homeIsVisible();
   console.info('COMPUTER_HOME_VISIBLE=' + (painted ? 'true' : 'false'));
-  if (!painted) log('computer:first-paint-failed', { home: Boolean(home), heading: Boolean(heading), create: Boolean(create) });
+  if (!painted) log('computer:first-paint-failed', {});
+}
+
+const savedPhoneReport = localStorage.synthaiPhoneAcceptanceReport;
+if (savedPhoneReport) {
+  try {
+    const report = JSON.parse(savedPhoneReport);
+    $('#phoneCheckState').textContent = String(report.state || 'pending').toUpperCase();
+    $('#phoneReport').textContent = JSON.stringify(report, null, 2);
+  } catch {}
 }
 
 requestAnimationFrame(() => requestAnimationFrame(verifyVisibleHome));
