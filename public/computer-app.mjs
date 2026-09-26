@@ -311,14 +311,18 @@ async function runPhoneCheck() {
   if (isAndroidApp) {
     try {
       const evidence = await computer.reverifyLocalBackend();
+      await projects.attach();
       liveBackendStatus = 'VERIFIED';
       liveBackendDetail = `${evidence.health.environment} · ${evidence.health.services.length} registered services · ${evidence.health.version}`;
       runtimeState(liveBackendStatus, liveBackendDetail);
     } catch (error) {
+      projects.detach();
       liveBackendStatus = 'UNAVAILABLE';
       liveBackendDetail = `On-device Computer check failed: ${String(error?.message ?? error)}`;
       runtimeState(liveBackendStatus, liveBackendDetail);
     }
+    renderProjects();
+    renderSystems();
   }
   requestAnimationFrame(() => requestAnimationFrame(() => {
     const allProjects = projects.list();
