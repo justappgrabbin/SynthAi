@@ -12,10 +12,16 @@ adb shell am start -n app.synthai.computer/.MainActivity || true
 for attempt in $(seq 1 120); do
   LOGS="$(adb logcat -d -s "$TAG:I" '*:S' 2>/dev/null || true)"
 
-  if grep -q 'RUNTIME_READY=true' <<<"$LOGS" && grep -q 'LOCAL_COMPUTER_UI_STATUS=UNAVAILABLE' <<<"$LOGS"; then
-    echo "Android x86_64 verification: browser boots and labels the ARM64 backend unavailable"
+  if grep -q 'RUNTIME_READY=true' <<<"$LOGS" && grep -q 'LOCAL_COMPUTER_UI_STATUS=UNAVAILABLE' <<<"$LOGS" && grep -q 'COMPUTER_HOME_VISIBLE=true' <<<"$LOGS"; then
+    echo "Android x86_64 verification: browser boots, paints Home, and labels the ARM64 backend unavailable"
     echo "$LOGS"
     exit 0
+  fi
+
+  if grep -q 'COMPUTER_HOME_VISIBLE=false' <<<"$LOGS"; then
+    echo "Android runtime verification failed: Computer Home did not paint visible content"
+    echo "$LOGS"
+    exit 1
   fi
 
   if grep -q 'ASSET_MISSING' <<<"$LOGS"; then
@@ -31,7 +37,7 @@ for attempt in $(seq 1 120); do
   sleep 1
 done
 
-echo "Android runtime verification failed: no browser boot and unavailable status markers"
+echo "Android runtime verification failed: missing browser boot, visible Home, or unavailable status markers"
 adb logcat -d -s "$TAG:I" '*:S' || true
 adb shell dumpsys activity activities | grep -A 8 -B 3 'app.synthai.computer' || true
 exit 1
