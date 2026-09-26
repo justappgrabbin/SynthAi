@@ -80,11 +80,12 @@ public final class MainActivity extends Activity {
         if (ComputerBackendService.isReady()) {
             String base = JSONObject.quote(LinuxContainer.BASE_URL);
             String secret = JSONObject.quote(ComputerBackendService.sessionSecret(this));
+            String synthia = JSONObject.quote(LinuxContainer.SYNTHIA_URL);
             String js =
                     "(()=>{" +
                     "const c=globalThis.SynthAIComputer;" +
                     "if(!c||typeof c.connectLocalBackend!=='function')return 'not-ready';" +
-                    "c.connectLocalBackend({baseUrl:" + base + ",token:" + secret + ",timeoutMs:3000})" +
+                    "c.connectLocalBackend({baseUrl:" + base + ",token:" + secret + ",synthiaUrl:" + synthia + ",timeoutMs:3000})" +
                     ".catch(e=>window.dispatchEvent(new CustomEvent('synthai-local-backend-error'," +
                     "{detail:{message:String(e&&e.message||e)}})));" +
                     "return 'connecting';})()";

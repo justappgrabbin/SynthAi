@@ -35,6 +35,17 @@ export class GitHubWorkspaceAdapter {
     return data;
   }
 
+  /**
+   * Hand a GitHub token to the Synthia Server bridge, which stores it
+   * server-side ($DATA_DIR/github-token). Deliberately not a request() action
+   * so the token never passes through the backend:request event bus.
+   */
+  async storeGitHubToken(githubToken) {
+    const value = String(githubToken || '').trim();
+    if (!value) throw new Error('GitHub token required');
+    return this.#request('POST', '/computer/github/token', { githubToken: value });
+  }
+
   async request(input = {}) {
     switch (input.action) {
       case 'status':

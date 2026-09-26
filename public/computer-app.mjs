@@ -244,7 +244,94 @@ function message(selector, text, good) {
   el.className = `message ${good === true ? 'good' : good === false ? 'bad' : ''}`;
 }
 
+// Android app: Synthia Server runs inside the phone Linux on 127.0.0.1 and is
+// authenticated with the per-install session secret, so there is no server URL
+// or server token to type. The only input is a GitHub token, which is handed to
+// the on-device Synthia Server (stored there, never in browser storage).
+const embeddedGitHub = () => Boolean(isAndroidApp && computer.embeddedSynthia && computer.githubAdapter);
+let embeddedUiApplied = false;
+
+function applyEmbeddedGitHubUi() {
+  if (!embeddedGitHub() || embeddedUiApplied) return;
+  embeddedUiApplied = true;
+  const urlInput = $('#serverUrl');
+  const tokenInput = $('#computerToken');
+  urlInput.value = computer.embeddedSynthia.baseUrl;
+  urlInput.readOnly = true;
+  const urlLabel = urlInput.closest('label');
+  if (urlLabel) urlLabel.hidden = true;
+  tokenInput.value = '';
+  tokenInput.placeholder = 'ghp_… or github_pat_… (kept on this phone only)';
+  tokenInput.autocomplete = 'off';
+  const tokenLabel = tokenInput.closest('label');
+  if (tokenLabel && tokenLabel.firstChild && tokenLabel.firstChild.nodeType === Node.TEXT_NODE) {
+    tokenLabel.firstChild.textContent = 'GitHub token';
+  }
+  const details = tokenInput.closest('details');
+  const summary = details?.querySelector('summary');
+  if (summary) summary.textContent = 'GitHub token for the on-device Synthia Server';
+  const note = details?.querySelector('p.muted');
+  if (note) note.textContent = 'Synthia Server runs inside this phone. Paste a GitHub token once; it is saved in the on-device Synthia Server data folder and used for publishing.';
+  $('#connectGitHub').textContent = 'Save token and verify';
+}
+
+function githubState(status, detail) {
+  $('#githubStatus').textContent = status;
+  $('#githubPanelState').textContent = status;
+  if (detail) $('#githubDetail').textContent = detail;
+}
+
+async function checkEmbeddedGitHub({ attempts = 1, quiet = false } = {}) {
+  let lastError = null;
+  for (let i = 0; i < attempts; i += 1) {
+    try {
+      const result = await computer.backends.request('github', { action: 'status' });
+      githubState('VERIFIED', `connected as ${result.user} via on-device Synthia Server`);
+      message('#githubMessage', `Verified GitHub connection as ${result.user}.`, true);
+      await loadRepos();
+      return true;
+    } catch (error) {
+      lastError = error;
+      const starting = !error.status; // network error: Synthia still booting
+      if (!starting || i === attempts - 1) break;
+      await new Promise(resolve => setTimeout(resolve, 3000));
+    }
+  }
+  const noToken = lastError?.status === 503 && /github_token_not_configured/.test(lastError?.message || '');
+  if (noToken) {
+    githubState('NO TOKEN', 'on-device Synthia Server is running; add a GitHub token to publish');
+    if (!quiet) message('#githubMessage', 'On-device Synthia Server is running. Paste a GitHub token and tap “Save token and verify”.', null);
+    else message('#githubMessage', 'On-device Synthia Server is running. Add a GitHub token in the GitHub view to publish.', null);
+  } else if (!lastError?.status) {
+    githubState('NOT CONNECTED', 'on-device Synthia Server is not reachable yet');
+    message('#githubMessage', `On-device Synthia Server not reachable: ${lastError?.message || 'unknown error'}`, false);
+  } else {
+    githubState('NOT CONNECTED', 'GitHub token rejected or GitHub unreachable');
+    message('#githubMessage', lastError.message, false);
+  }
+  log('github:embedded-status', { ok: false, status: lastError?.status || null, error: String(lastError?.message || '') });
+  return false;
+}
+
+async function connectEmbeddedGitHub() {
+  const githubToken = $('#computerToken').value.trim();
+  if (githubToken) {
+    githubState('SAVING');
+    try {
+      await computer.githubAdapter.storeGitHubToken(githubToken);
+      $('#computerToken').value = '';
+    } catch (error) {
+      $('#computerToken').value = '';
+      githubState('NOT CONNECTED', 'GitHub token was not accepted');
+      return message('#githubMessage', error.message, false);
+    }
+  }
+  githubState('CONNECTING');
+  return checkEmbeddedGitHub({ attempts: 3 });
+}
+
 async function connectGitHub() {
+  if (embeddedGitHub()) return connectEmbeddedGitHub();
   const baseUrl = $('#serverUrl').value.trim().replace(/\/$/, '');
   const token = $('#computerToken').value;
   if (!baseUrl || !token) return message('#githubMessage', 'Enter the optional server URL and its access token to connect GitHub.', false);
@@ -385,6 +472,10 @@ function runtimeState(status, detail) {
 }
 
 computer.bus.on('local-backend:verified', async event => {
+  if (embeddedGitHub()) {
+    applyEmbeddedGitHubUi();
+    checkEmbeddedGitHub({ attempts: 20, quiet: true }).catch(() => {});
+  }
   try {
     await projects.attach();
     runtimeState('VERIFIED', `${event.payload.environment} · ${event.payload.services.length} registered services · ${event.payload.version}`);
