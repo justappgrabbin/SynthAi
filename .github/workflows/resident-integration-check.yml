@@ -14,6 +14,8 @@ on:
       - 'computer/tests/cartridge-runtime-evidence.test.mjs'
       - 'computer/tests/working-system-promotion.test.mjs'
       - 'computer/tests/promotion-delivery-receipt.test.mjs'
+      - 'computer/tests/github-promotion-destination.test.mjs'
+      - 'computer/adapters/github-promotion-destination.mjs'
       - 'computer/native/NativeSeedRuntime.mjs'
       - 'computer/runtime/automata-cartridge-magazine.mjs'
       - '.github/workflows/resident-integration-check.yml'
@@ -94,6 +96,7 @@ jobs:
           computer/tests/cartridge-runtime-evidence.test.mjs
           computer/tests/working-system-promotion.test.mjs
           computer/tests/promotion-delivery-receipt.test.mjs
+          computer/tests/github-promotion-destination.test.mjs
           computer/tests/research-report-automaton.test.mjs
           computer/tests/research-report-cartridge-integration.test.mjs
           computer/tests/task-fit-native-convergence.test.mjs
