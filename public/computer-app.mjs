@@ -316,7 +316,7 @@ async function runPhoneCheck() {
       runtimeState(liveBackendStatus, liveBackendDetail);
     } catch (error) {
       liveBackendStatus = 'UNAVAILABLE';
-      liveBackendDetail = `Live backend probe failed: ${String(error?.message ?? error)}`;
+      liveBackendDetail = `On-device Computer check failed: ${String(error?.message ?? error)}`;
       runtimeState(liveBackendStatus, liveBackendDetail);
     }
   }
@@ -334,7 +334,7 @@ async function runPhoneCheck() {
       creatorAccepted: $('#creatorAccepted').checked,
       userAgent: navigator.userAgent,
       platform: navigator.platform,
-      artifactSource: 'https://github.com/justappgrabbin/SynthAi/pull/24',
+      artifactSource: 'https://github.com/justappgrabbin/SynthAi/pull/26',
     });
     localStorage.synthaiPhoneAcceptanceReport = JSON.stringify(report);
     $('#phoneCheckState').textContent = report.state.toUpperCase();
@@ -363,8 +363,8 @@ function runtimeState(status, detail) {
   console.info('LOCAL_COMPUTER_UI_STATUS=' + status);
   $('#bootDot').classList.toggle('good', status === 'VERIFIED');
   $('#bootDot').classList.toggle('bad', status === 'UNAVAILABLE');
-  $('#bootLabel').textContent = status === 'VERIFIED' ? 'local Computer connected'
-    : status === 'STARTING' ? 'starting local Computer' : 'browser workspace';
+  $('#bootLabel').textContent = status === 'VERIFIED' ? 'Computer running on this device'
+    : status === 'STARTING' ? 'starting embedded Computer' : 'browser workspace';
   $('#runtimeStatus').textContent = status;
   $('#runtimeDetail').textContent = detail;
   $('#runtimeEvidence').textContent = status === 'VERIFIED'
