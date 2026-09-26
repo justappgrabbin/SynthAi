@@ -188,6 +188,41 @@ export class BrowserComputerRuntime {
     return evidence;
   }
 
+  async reverifyLocalBackend() {
+    const adapter = this.localBackend;
+    if (!adapter) throw new Error('embedded Computer has not attached');
+    try {
+      const evidence = await adapter.verify();
+      this.localBackendVerified = true;
+      this.localBackendHealth = evidence.health;
+      await this.state.set('computer.localBackend', {
+        status: 'VERIFIED',
+        environment: evidence.health.environment,
+        version: evidence.health.version,
+        endpoint: adapter.baseUrl,
+        at: Date.now()
+      }, { source: 'local-backend' });
+      this.bus.emit('local-backend:reverified', {
+        endpoint: adapter.baseUrl,
+        environment: evidence.health.environment,
+        version: evidence.health.version,
+        services: evidence.health.services
+      });
+      return evidence;
+    } catch (error) {
+      this.localBackendVerified = false;
+      this.localBackendHealth = null;
+      await this.state.set('computer.localBackend', {
+        status: 'UNAVAILABLE',
+        endpoint: adapter.baseUrl,
+        error: String(error?.message ?? error),
+        at: Date.now()
+      }, { source: 'local-backend' });
+      this.bus.emit('local-backend:unavailable', { error: String(error?.message ?? error) });
+      throw error;
+    }
+  }
+
   requireLocalBackend() {
     if (!this.localBackendVerified || !this.localBackend) {
       throw new Error('local Computer backend is not verified');

@@ -20,6 +20,10 @@ export class DeviceProjectWorkspace {
     return projects;
   }
 
+  detach() {
+    this.ready = false;
+  }
+
   source(id) {
     if (this.device.has(id)) return 'device';
     if (this.browser.get(id)) return 'browser';
