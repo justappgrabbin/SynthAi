@@ -73,6 +73,18 @@
         <button id="run-instrument">Run instrument</button>
       </article>
       <article class="card output-card"><div class="card-title"><span>Live result</span><small id="run-state">ready</small></div><pre id="tray-output">Select an instrument and run it.</pre></article>
+      <article class="card tray-card">
+        <div class="card-title"><span>Tool Factory</span><small id="factory-state">ready</small></div>
+        <label>Purpose<input id="factory-purpose" type="text" placeholder="What should this tool do?" required></label>
+        <div class="tray-grid">
+          <label>Dimension<select id="factory-dimension"><option>Movement</option><option>Evolution</option><option>Being</option><option>Design</option><option>Space</option></select></label>
+          <label>Level<input id="factory-level" type="number" min="1" max="9" value="7"></label>
+        </div>
+        <button id="factory-create" type="button">Generate and mount tool</button>
+        <label>Run input<textarea id="factory-input" rows="3" placeholder="Input for the generated tool"></textarea></label>
+        <button id="factory-run" type="button" disabled>Run generated tool</button>
+        <pre id="factory-output" aria-live="polite">Configure your birth information, then create a tool.</pre>
+      </article>
     </section>
 
     <section class="panel" id="genome">
