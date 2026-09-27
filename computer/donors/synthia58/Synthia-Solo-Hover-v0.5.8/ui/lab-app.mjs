@@ -116,6 +116,45 @@ async function loadTray() {
   $('#tray-kind').innerHTML = kinds.map((kind) => `<option value="${kind}">${kind}</option>`).join('');
   refreshInstrumentList();
 }
+let generatedToolId = null;
+$('#factory-create').addEventListener('click', async () => {
+  const button = $('#factory-create');
+  generatedToolId = null;
+  $('#factory-run').disabled = true;
+  try {
+    button.disabled = true;
+    $('#factory-state').textContent = 'generating…';
+    const result = await api('/api/solo/tool-factory', {
+      method: 'POST',
+      body: JSON.stringify({ operation: 'synthesize', purpose: $('#factory-purpose').value.trim(), dimension: $('#factory-dimension').value, level: Number($('#factory-level').value) }),
+    });
+    const output = result.execution.output;
+    if (!output?.tool?.id || !['mounted', 'existing'].includes(output.status)) throw new Error(output?.reason ?? `Tool was not mounted: ${output?.status ?? 'unknown'}`);
+    generatedToolId = output.tool.id;
+    $('#factory-run').disabled = false;
+    $('#factory-state').textContent = output.status;
+    $('#factory-output').textContent = pretty(output);
+  } catch (error) {
+    $('#factory-state').textContent = 'failed';
+    $('#factory-output').textContent = `${error.name}: ${error.message}`;
+  } finally { button.disabled = false; }
+});
+$('#factory-run').addEventListener('click', async () => {
+  if (!generatedToolId) return;
+  const button = $('#factory-run');
+  try {
+    button.disabled = true;
+    $('#factory-state').textContent = 'running…';
+    const result = await api('/api/solo/tool-factory', {
+      method: 'POST', body: JSON.stringify({ operation: 'run', id: generatedToolId, input: $('#factory-input').value }),
+    });
+    $('#factory-state').textContent = 'executed';
+    $('#factory-output').textContent = pretty(result.execution.output);
+  } catch (error) {
+    $('#factory-state').textContent = 'failed';
+    $('#factory-output').textContent = `${error.name}: ${error.message}`;
+  } finally { button.disabled = false; }
+});
 $('#tray-kind').addEventListener('change', refreshInstrumentList);
 $('#tray-id').addEventListener('change', refreshMeta);
 $('#run-instrument').addEventListener('click', async () => {
