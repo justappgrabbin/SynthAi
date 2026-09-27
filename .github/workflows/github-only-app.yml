@@ -223,10 +223,12 @@ jobs:
           grep -q 'assets/licenses/linux-runtime-provenance.txt' /tmp/apk-tree.txt
           grep -q 'assets/computer-runtime/services/task-fit.mjs' /tmp/apk-tree.txt
           grep -q 'assets/computer-runtime/residents/synthia57-resident.mjs' /tmp/apk-tree.txt
-          unzip -p "$APK" assets/linux-rootfs.version | grep -q -- '-synthia-embedded-1$'
-          "$ANDROID_SDK_ROOT/build-tools/35.0.0/aapt2" dump badging "$APK" | tee /tmp/venom-badging.txt | head -5
+          unzip -p "$APK" assets/linux-rootfs.version > /tmp/venom-rootfs.version
+          grep -q -- '-synthia-embedded-1$' /tmp/venom-rootfs.version
+          "$ANDROID_SDK_ROOT/build-tools/35.0.0/aapt2" dump badging "$APK" > /tmp/venom-badging.txt
+          sed -n '1,8p' /tmp/venom-badging.txt
           grep -q "package: name='app.synthai.computer'" /tmp/venom-badging.txt
-          grep -q "application-label:'SynthAI Computer'" /tmp/venom-badging.txt
+          grep -Eq "application-label:'SynthAI Computer'|application: label='SynthAI Computer'" /tmp/venom-badging.txt
           grep -q "launchable-activity: name='app.synthai.computer.MainActivity'" /tmp/venom-badging.txt
 
       - name: Verify self-contained APK payload (hover)
@@ -235,16 +237,21 @@ jobs:
           unzip -l "$APK" | tee /tmp/hover-apk-tree.txt
           grep -q 'assets/linux-rootfs.bundle' /tmp/hover-apk-tree.txt
           unzip -p "$APK" assets/linux-rootfs.bundle | gzip -t
-          unzip -p "$APK" assets/linux-rootfs.bundle | tar -tzf - | grep -q '^./opt/synthia58/src/ui/server.mjs$'
-          unzip -p "$APK" assets/linux-rootfs.version | grep -q -- '-synthia58-hover-1$'
+          unzip -p "$APK" assets/linux-rootfs.bundle | tar -tzf - > /tmp/hover-rootfs-list.txt
+          grep -q '^./opt/synthia58/src/ui/server.mjs$' /tmp/hover-rootfs-list.txt
+          if grep -q '^./opt/synthia-server/' /tmp/hover-rootfs-list.txt; then echo "hover rootfs must not ship Synthia Server"; exit 1; fi
+          if grep -q '^./usr/bin/python3' /tmp/hover-rootfs-list.txt; then echo "hover rootfs must not ship Python"; exit 1; fi
+          unzip -p "$APK" assets/linux-rootfs.version > /tmp/hover-rootfs.version
+          grep -q -- '-synthia58-hover-1$' /tmp/hover-rootfs.version
           grep -q 'lib/arm64-v8a/libproot.so' /tmp/hover-apk-tree.txt
           grep -q 'lib/arm64-v8a/libproot-loader.so' /tmp/hover-apk-tree.txt
           grep -q 'lib/arm64-v8a/libproot-loader32.so' /tmp/hover-apk-tree.txt
           grep -q 'assets/licenses/linux-runtime-provenance.txt' /tmp/hover-apk-tree.txt
           if grep -q 'assets/computer-runtime/' /tmp/hover-apk-tree.txt; then echo "hover APK must not ship the Computer surface"; exit 1; fi
-          "$ANDROID_SDK_ROOT/build-tools/35.0.0/aapt2" dump badging "$APK" | tee /tmp/hover-badging.txt
+          "$ANDROID_SDK_ROOT/build-tools/35.0.0/aapt2" dump badging "$APK" > /tmp/hover-badging.txt
+          cat /tmp/hover-badging.txt
           grep -q "package: name='app.synthai.hover'" /tmp/hover-badging.txt
-          grep -q "application-label:'Synthia'" /tmp/hover-badging.txt
+          grep -Eq "application-label:'Synthia'|application: label='Synthia'" /tmp/hover-badging.txt
           grep -q "launchable-activity: name='app.synthai.hover.MainActivity'" /tmp/hover-badging.txt
           for perm in SYSTEM_ALERT_WINDOW FOREGROUND_SERVICE FOREGROUND_SERVICE_SPECIAL_USE POST_NOTIFICATIONS RECORD_AUDIO; do
             grep -q "uses-permission: name='android.permission.$perm'" /tmp/hover-badging.txt
