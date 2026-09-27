@@ -4,3 +4,7 @@ One Computer, not one file. The OS runtime is organized into core state/events/r
 Canonical macros: SynthAI Computer = OS; SynthAI2 = browser; SynthAI = hovering morph field; Synthia = game/world system; XynthAI = 18+ isolated system. Micro identities Prime, Venom, Echo, Celestial/Dream and Siren/Soft Core are deliberately registered with no macro assignment yet.
 
 `ComputerRuntime.boot()` is the runtime entry. `/computer.html` is only a diagnostic shell connected to it, not the OS itself.
+
+## Hover App Studio verification
+
+The existing Build surface opens the preserved Paper App Studio. The mobile Hover verification checks local file intake, function extraction, browser execution, Tool Factory, and Talk before packaging the Hover APK.
