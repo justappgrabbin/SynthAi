@@ -47,6 +47,7 @@ try {
   await page.locator('[data-open-surface="build"]').click();
   await page.locator('#build-studio').click();
   const studio = page.frameLocator('#build-frame');
+  await studio.locator('#log').getByText(/"ready": true/).waitFor();
   await studio.locator('#fileInput').setInputFiles({ name: 'double.js', mimeType: 'application/javascript', buffer: Buffer.from('function double(n) { return n * 2; }') });
   await studio.locator('#fileList').getByText('double.js').waitFor();
   await studio.locator('[data-tab="functions"]').click();
