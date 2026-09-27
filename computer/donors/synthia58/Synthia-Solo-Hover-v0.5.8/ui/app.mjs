@@ -370,6 +370,7 @@ await syncMorphAppearance();
 setInterval(() => { if (activeSurface === 'todo' && !document.hidden) loadTasks(); }, 3000);
 
 $('#build-home').addEventListener('click', () => { $('#build-frame').src = '/build/index.html'; });
+$('#build-studio').addEventListener('click', () => { $('#build-frame').src = '/studio/index.html'; });
 $('#build-tools').addEventListener('click', () => { $('#build-frame').src = '/lab.html#tray'; });
 
 if (new URLSearchParams(location.search).get('setup') === '1') {

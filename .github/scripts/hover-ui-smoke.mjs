@@ -45,6 +45,14 @@ try {
   await page.locator('#planet').click();
   await page.locator('#planet').click();
   await page.locator('[data-open-surface="build"]').click();
+  await page.locator('#build-studio').click();
+  const studio = page.frameLocator('#build-frame');
+  await studio.locator('#fileInput').setInputFiles({ name: 'double.js', mimeType: 'application/javascript', buffer: Buffer.from('function double(n) { return n * 2; }') });
+  await studio.locator('#fileList').getByText('double.js').waitFor();
+  await studio.locator('[data-tab="functions"]').click();
+  await studio.locator('#functionList').getByText('double', { exact: true }).waitFor();
+  await studio.locator('#executeBtn').click();
+  await studio.locator('#log').getByText(/"ok": true/).waitFor();
   await page.locator('#build-tools').click();
   await page.frameLocator('#build-frame').locator('#tray.active').waitFor();
   const tools = page.frameLocator('#build-frame');
