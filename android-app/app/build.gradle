@@ -14,6 +14,25 @@ android {
         versionName '0.4.0'
     }
 
+    // Two faces share the PRoot/rootfs plumbing but ship separately:
+    //   venom = the existing SynthAI Computer app (unchanged applicationId/behaviour)
+    //   hover = Synthia 5.8 Solo Hover (floating planet + Android hands)
+    flavorDimensions = ['face']
+    productFlavors {
+        venom {
+            dimension 'face'
+            applicationId 'app.synthai.computer'
+            manifestPlaceholders = [appLabel: 'SynthAI Computer']
+        }
+        hover {
+            dimension 'face'
+            applicationId 'app.synthai.hover'
+            versionCode 58
+            versionName '0.5.8-hover'
+            manifestPlaceholders = [appLabel: 'Synthia']
+        }
+    }
+
     buildTypes {
         release {
             minifyEnabled false

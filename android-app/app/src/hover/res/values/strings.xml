@@ -1,0 +1,4 @@
+<resources>
+    <string name="hover_app_name">Synthia</string>
+    <string name="accessibility_description">Allows Synthia to inspect and operate the screen only when you enable Synthia Hands in Android Accessibility settings.</string>
+</resources>

@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
-APK="android-app/app/build/outputs/apk/debug/app-debug.apk"
+# Venom face (SynthAI Computer). The APK moved when the "face" flavor dimension was added.
+APK="${APK:-android-app/app/build/outputs/apk/venom/debug/app-venom-debug.apk}"
 TAG="SynthAIComputer"
 
 adb install -r "$APK"

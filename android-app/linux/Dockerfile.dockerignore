@@ -1,0 +1,5 @@
+# Used only by android-app/linux/Dockerfile (Venom / SynthAI Computer rootfs).
+# BuildKit picks up <Dockerfile>.dockerignore automatically.
+# Keep the vendored Synthia 5.8 donor (hover face) out of the Venom image so
+# Venom's rootfs stays exactly what it was before 5.8 was vendored.
+computer/donors/synthia58
