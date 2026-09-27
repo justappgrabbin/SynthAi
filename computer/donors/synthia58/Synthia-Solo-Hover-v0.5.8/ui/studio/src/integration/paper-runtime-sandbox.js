@@ -117,7 +117,7 @@ function workerSource() {
           const payload=e.data.payload??{};
           const source=String(e.data.source||'');
           const AsyncFunction=Object.getPrototypeOf(async function(){}).constructor;
-          const fn=new AsyncFunction('payload','vfs','console','context',\`"use strict";\\n\${source}\\n\`);
+          const fn=new AsyncFunction('payload','vfs','console','context','"use strict";\n'+source+'\n');
           const returnValue=await fn(payload,api,cap.console,e.data.context||{});
           self.postMessage({id,ok:true,result:{ok:true,engine:'pure-js-worker',stdout:cap.stdout,returnValue}}); return;
         }
@@ -140,6 +140,7 @@ export class PaperRuntimeSandbox {
     this.allowHostFallback = allowHostFallback;
     this.worker = null;
     this.workerURL = null;
+    this.workerError = null;
     this.initWorker();
   }
 
@@ -153,10 +154,12 @@ export class PaperRuntimeSandbox {
       const pending=this.pending.get(msg.id);
       if(!pending) return;
       this.pending.delete(msg.id);
+      clearTimeout(pending.timer);
       msg.ok ? pending.resolve(msg.result) : pending.reject(new Error(msg.error||'SANDBOX_ERROR'));
     };
     this.worker.onerror = e => {
-      for (const {reject} of this.pending.values()) reject(new Error(e.message||'WORKER_ERROR'));
+      this.workerError = new Error(e.message||'WORKER_ERROR');
+      for (const {reject,timer} of this.pending.values()) { clearTimeout(timer); reject(this.workerError); }
       this.pending.clear();
     };
     return true;
@@ -166,9 +169,11 @@ export class PaperRuntimeSandbox {
 
   request(op, data = {}) {
     if (!this.worker) throw new Error('WORKER_UNAVAILABLE');
+    if (this.workerError) throw this.workerError;
     const id=`sandbox-${++this.seq}`;
     return new Promise((resolve,reject)=>{
-      this.pending.set(id,{resolve,reject});
+      const timer=setTimeout(()=>{this.pending.delete(id);reject(new Error('WORKER_TIMEOUT'));},10000);
+      this.pending.set(id,{resolve,reject,timer});
       this.worker.postMessage({id,op,...data});
     });
   }
@@ -203,6 +208,8 @@ export class PaperRuntimeSandbox {
   }
 
   terminate() {
+    for (const {reject,timer} of this.pending.values()) { clearTimeout(timer); reject(new Error('WORKER_TERMINATED')); }
+    this.pending.clear();
     this.worker?.terminate();
     if (this.workerURL && typeof URL !== 'undefined') URL.revokeObjectURL(this.workerURL);
     this.worker=null; this.workerURL=null;
