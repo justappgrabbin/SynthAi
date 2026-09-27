@@ -60,11 +60,22 @@ public final class OverlayService extends Service {
     private WindowManager.LayoutParams bubbleParams;
     private WindowManager.LayoutParams panelParams;
     private WebView panelWebView;
+    private HoverVoice voice;
 
     public static void hideForAction(long millis) {
         OverlayService current = instance;
         if (current == null) return;
         current.hideTemporarily(millis);
+    }
+
+    static void setIdentityEditing(boolean editing) {
+        OverlayService current = instance;
+        if (current == null || current.bubble == null) return;
+        current.bubble.setVisibility(editing ? View.GONE : View.VISIBLE);
+        if (editing && current.panel != null) current.panel.setVisibility(View.GONE);
+        if (!editing && current.panelWebView != null) {
+            current.panelWebView.evaluateJavascript("window.dispatchEvent(new Event('focus'))", null);
+        }
     }
 
     static boolean isRunning() {
@@ -104,7 +115,7 @@ public final class OverlayService extends Service {
                 dp(72), dp(72),
                 overlayType(),
                 WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
-                        | WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
+                        | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
                 PixelFormat.TRANSLUCENT);
         bubbleParams.gravity = Gravity.TOP | Gravity.START;
         bubbleParams.x = getResources().getDisplayMetrics().widthPixels - dp(88);
@@ -155,6 +166,18 @@ public final class OverlayService extends Service {
         title.setTextSize(16);
         bar.addView(title, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
 
+        Button identity = new Button(this);
+        identity.setText("Birth details");
+        identity.setAllCaps(false);
+        identity.setOnClickListener(v -> {
+            panel.setVisibility(View.GONE);
+            Intent edit = new Intent(this, IdentityActivity.class);
+            edit.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(edit);
+        });
+        bar.addView(identity, new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT, dp(44)));
+
         Button close = new Button(this);
         close.setText("×");
         close.setAllCaps(false);
@@ -165,8 +188,11 @@ public final class OverlayService extends Service {
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
 
         panelWebView = new WebView(this);
+        voice = new HoverVoice(this);
+        panelWebView.addJavascriptInterface(voice, "SynthiaVoice");
         panelWebView.setBackgroundColor(Color.TRANSPARENT);
         WebSettings settings = panelWebView.getSettings();
+        panelWebView.setFocusableInTouchMode(true);
         settings.setJavaScriptEnabled(true);
         settings.setDomStorageEnabled(true);
         settings.setMediaPlaybackRequiresUserGesture(false);
@@ -203,9 +229,10 @@ public final class OverlayService extends Service {
                 Math.min(dp(430), getResources().getDisplayMetrics().widthPixels - dp(24)),
                 Math.min(dp(760), getResources().getDisplayMetrics().heightPixels - dp(96)),
                 overlayType(),
-                WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
+                WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
                 PixelFormat.TRANSLUCENT);
         panelParams.gravity = Gravity.CENTER;
+        panelParams.softInputMode = WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
         windowManager.addView(panel, panelParams);
     }
 
@@ -220,7 +247,7 @@ public final class OverlayService extends Service {
             panel.setVisibility(View.GONE);
         } else {
             panel.setVisibility(View.VISIBLE);
-            if (panelWebView != null) panelWebView.loadUrl(RUNTIME_URL);
+            if (panelWebView != null) panelWebView.requestFocus();
         }
     }
 
@@ -262,6 +289,7 @@ public final class OverlayService extends Service {
     @Override
     public void onDestroy() {
         instance = null;
+        if (voice != null) voice.close();
         try {
             if (bubble != null) windowManager.removeView(bubble);
         } catch (Exception ignored) {}

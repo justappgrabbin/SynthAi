@@ -48,3 +48,25 @@ build. Left for a later, separately reviewed change.
 
 `android-app/linux/Dockerfile.dockerignore` excludes this folder from the
 Venom (Computer) rootfs so Venom's image is unchanged.
+
+## Hover repair, 2026-09-27
+
+The original donor baseline remains at commit `d901b3e15aa7c99a32fbb15e9b0680d77243249b`.
+The repair branch intentionally updates the shell and Solo task adapter in response to
+requested birth-entry, icon, task-queue, and Talk integration fixes. The earlier
+byte-identical statement describes the baseline, not the repaired shell. Canonical
+state resolution, dimensional operators, and morph internals are unchanged.
+
+`extras/Cynthia-Talk-v1-unmodified` remains byte-identical. Its Python app is copied
+into the Hover rootfs and called through a loopback Node endpoint without opening
+its original 0.0.0.0 listener. A separate UI copy lives under `ui/talk`; it uses that
+endpoint, escapes message text, and supports the native Android speech bridge.
+Talk retains its original topic-based responses; it is not substituted for the
+birth-configured organism. Open it from Chat → Talk or Build → Talk. Build → Tools
+opens the existing execution tray inside the panel.
+
+Assigned To Do entries now queue sequentially while the Node runtime is alive.
+The worker calls the existing organism chat pathway and persists its response as
+`review`, not task completion. It does not independently perform arbitrary phone
+or browser actions. Interrupted attempts require explicit retry. There is no
+claim of unrestricted autonomous execution or a new background job scheduler.

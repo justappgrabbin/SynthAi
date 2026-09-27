@@ -10,6 +10,17 @@ let browserPage = null;
 let browserBundle = null;
 let identityConfigured = false;
 let worldAnimation = null;
+let pendingChat = null;
+let identityContext = { personId: 'front-screen', agentId: 'synthia' };
+const draftKey = 'synthia-origin-draft-v1';
+const identityFields = $$('#identity-form input, #identity-form select');
+try {
+  const draft = JSON.parse(localStorage.getItem(draftKey) || '{}');
+  identityFields.forEach(input => { if (typeof draft[input.id] === 'string') input.value = draft[input.id]; });
+} catch {}
+$('#identity-form').addEventListener('input', () => {
+  try { localStorage.setItem(draftKey, JSON.stringify(Object.fromEntries(identityFields.map(input => [input.id, input.value])))); } catch {}
+});
 
 async function api(path, options = {}) {
   const response = await fetch(path, { headers: { 'content-type': 'application/json', ...(options.headers || {}) }, ...options });
@@ -69,10 +80,10 @@ function addMessage(who, text, trace = false) {
   return div;
 }
 
-async function sendChat(text) {
+async function sendChat(text, replay = false) {
   const trimmed = String(text || '').trim();
   if (!trimmed) return;
-  addMessage('user', trimmed);
+  if (!replay) addMessage('user', trimmed);
   const lower = trimmed.toLowerCase();
   const surfaceMatch = lower.match(/^(?:open|show|go to)\s+(browser|chat|world|to do|todo|build)$/);
   if (surfaceMatch) {
@@ -83,7 +94,7 @@ async function sendChat(text) {
   }
   try {
     if (activeSurface === 'browser' && browserBundle?.page) {
-      const result = await api('/api/solo/browser/command', { method: 'POST', body: JSON.stringify({ message: trimmed, context: { personId: 'front-screen', agentId: 'synthia' } }) });
+      const result = await api('/api/solo/browser/command', { method: 'POST', body: JSON.stringify({ message: trimmed, context: { ...identityContext } }) });
       if (result.action !== 'chat-about-page' || result.action) {
         if (result.action === 'chat-about-page' && result.chat?.utterance) addMessage('synthia', result.chat.utterance);
         else addMessage('synthia', browserResultText(result));
@@ -92,14 +103,15 @@ async function sendChat(text) {
         return;
       }
     }
-    const result = await api('/api/chat', { method: 'POST', body: JSON.stringify({ message: trimmed, context: { personId: 'front-screen', agentId: 'synthia', surface: activeSurface } }) });
+    const result = await api('/api/chat', { method: 'POST', body: JSON.stringify({ message: trimmed, context: { ...identityContext, surface: activeSurface } }) });
     addMessage('synthia', result.utterance || result.output || '(processed)');
     if (result.pipelineTrace) addMessage('', `Trace · ${result.pipelineTrace.map((x) => x.stage).join(' → ')}`, true);
     await syncMorphAppearance();
   } catch (error) {
-    if (error.code === 'BIRTH_CONFIGURATION_REQUIRED' || error.status === 409) {
+    if (error.code === 'BIRTH_CONFIGURATION_REQUIRED') {
+      pendingChat = trimmed;
       addMessage('synthia', 'I need my origin configured before I can resolve personalized state.');
-      setupDialog.showModal();
+      if (!setupDialog.open) setupDialog.showModal();
     } else addMessage('', error.message, true);
   }
 }
@@ -140,6 +152,7 @@ async function loadStatus() {
   try {
     const [status, solo] = await Promise.all([api('/api/status'), api('/api/solo/status')]);
     identityConfigured = status.personalizedReady === true;
+    if (status.identity?.configured) identityContext = { personId: status.identity.personId, agentId: status.identity.agentId };
     $('#status-dot').classList.toggle('ready', status.structurallyReady === true);
     $('#planet-label').textContent = identityConfigured ? 'Synthia · online' : 'Synthia · setup';
     if (!identityConfigured) $('#status-dot').title = 'Origin configuration required';
@@ -152,11 +165,13 @@ async function loadStatus() {
 $('#identity-form').addEventListener('submit', async (event) => {
   event.preventDefault();
   const result = $('#identity-result');
+  const submit = event.currentTarget.querySelector('[type=submit]');
+  submit.disabled = true;
   result.textContent = 'configuring…';
   try {
     const data = await api('/api/identity/configure', {
       method: 'POST', body: JSON.stringify({
-        personId: 'front-screen', agentId: 'synthia',
+        ...identityContext,
         birthDate: $('#birth-date').value, birthTime: $('#birth-time').value,
         disambiguation: $('#birth-disambiguation').value,
         place: {
@@ -167,11 +182,16 @@ $('#identity-form').addEventListener('submit', async (event) => {
       }),
     });
     identityConfigured = true;
+    identityContext = { personId: data.identity.personId, agentId: data.identity.agentId };
+    try { localStorage.removeItem(draftKey); } catch {};
     result.textContent = data.identity?.configurationId ? `configured · ${data.identity.configurationId}` : 'configured';
     $('#status-dot').classList.add('ready');
-    setTimeout(() => setupDialog.close(), 500);
+    setupDialog.close();
+    await loadStatus();
+    if (pendingChat) { const queued = pendingChat; pendingChat = null; await sendChat(queued, true); }
     await syncMorphAppearance();
   } catch (error) { result.textContent = error.message; }
+  finally { submit.disabled = false; }
 });
 
 function browserBusy(on) { $('#browser-busy').classList.toggle('on', Boolean(on)); }
@@ -256,13 +276,13 @@ $('#browser-shot').addEventListener('click', async (event) => {
 async function browserCommand(text) {
   browserBusy(true);
   try {
-    const result = await api('/api/solo/browser/command', { method: 'POST', body: JSON.stringify({ message: text, context: { personId: 'front-screen', agentId: 'synthia' } }) });
+    const result = await api('/api/solo/browser/command', { method: 'POST', body: JSON.stringify({ message: text, context: { ...identityContext } }) });
     renderBrowser(result);
     if (result.action === 'chat-about-page' && result.chat?.utterance) addMessage('synthia', result.chat.utterance);
     await syncMorphAppearance();
     return result;
   } catch (error) {
-    if (error.code === 'BIRTH_CONFIGURATION_REQUIRED') setupDialog.showModal();
+    if (error.code === 'BIRTH_CONFIGURATION_REQUIRED') { if (!setupDialog.open) setupDialog.showModal(); }
     else addMessage('', error.message, true);
   } finally { browserBusy(false); }
 }
@@ -307,9 +327,18 @@ async function loadTasks() {
       const check = document.createElement('input'); check.type = 'checkbox'; check.checked = task.done; check.addEventListener('change', async () => { await api(`/api/solo/tasks/${encodeURIComponent(task.id)}`, { method: 'PATCH', body: JSON.stringify({ done: check.checked }) }); await loadTasks(); });
       const text = document.createElement('div'); text.className = 'task-text'; text.textContent = task.text;
       const del = document.createElement('button'); del.textContent = '×'; del.addEventListener('click', async () => { await api(`/api/solo/tasks/${encodeURIComponent(task.id)}`, { method: 'DELETE' }); await loadTasks(); });
-      row.append(check, text, del); list.appendChild(row);
+      const run = document.createElement('button');
+      run.textContent = task.status === 'queued' ? 'Queued' : task.status === 'running' ? 'Working…' : 'Run';
+      run.disabled = task.done || ['queued', 'running'].includes(task.status);
+      run.addEventListener('click', async () => {
+        try { await api(`/api/solo/tasks/${encodeURIComponent(task.id)}/run`, { method: 'POST', body: '{}' }); await loadTasks(); }
+        catch (error) { $('#task-status').textContent = error.message; }
+      });
+      row.append(check, text, run, del);
+      if (task.result || task.error) { const output = document.createElement('div'); output.className = 'task-result'; output.textContent = `${task.status}: ${task.result || task.error}`; row.appendChild(output); }
+      list.appendChild(row);
     }
-  } catch {}
+  } catch (error) { $('#task-status').textContent = error.message; }
 }
 $('#todo-form').addEventListener('submit', async (event) => { event.preventDefault(); const input = $('#todo-input'); const text = input.value.trim(); if (!text) return; await api('/api/solo/tasks', { method: 'POST', body: JSON.stringify({ text, source: 'user', context: { surface: activeSurface } }) }); input.value = ''; await loadTasks(); });
 
@@ -337,3 +366,22 @@ window.addEventListener('resize', () => { if (activeSurface === 'world') loadWor
 await loadStatus();
 await loadTasks();
 await syncMorphAppearance();
+
+setInterval(() => { if (activeSurface === 'todo' && !document.hidden) loadTasks(); }, 3000);
+
+$('#build-home').addEventListener('click', () => { $('#build-frame').src = '/build/index.html'; });
+$('#build-tools').addEventListener('click', () => { $('#build-frame').src = '/lab.html#tray'; });
+
+if (new URLSearchParams(location.search).get('setup') === '1') {
+  await openSurface('chat');
+  workspace.classList.add('maximized');
+  setupDialog.showModal();
+}
+window.addEventListener('focus', loadStatus);
+
+async function openTalk() {
+  await openSurface('build');
+  $('#build-frame').src = '/talk/index.html';
+}
+$('#build-talk').addEventListener('click', openTalk);
+$('#talk-open').addEventListener('click', openTalk);

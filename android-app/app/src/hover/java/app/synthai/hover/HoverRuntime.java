@@ -150,6 +150,8 @@ final class HoverRuntime {
         env.put("PORT", String.valueOf(HoverPorts.RUNTIME_PORT));
         env.put("SYNTHIA_DATA_DIR", GUEST_DATA_DIR);
         env.put("SYNTHIA_ANDROID_BRIDGE_URL", HoverPorts.BRIDGE_URL);
+        env.put("SYNTHIA_TALK_PYTHON", "/opt/talk-venv/bin/python3");
+        env.put("SYNTHIA_TALK_APP", "/opt/synthia-talk/app.py");
         env.put("NODE_ENV", "production");
         if (noSeccomp) env.put("PROOT_NO_SECCOMP", "1");
 

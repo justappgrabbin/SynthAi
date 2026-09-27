@@ -3,6 +3,7 @@ import { readFile } from 'node:fs/promises';
 import { extname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { FederatedSynthia } from '../federated-synthia.mjs';
+import { talkReply } from '../solo/talk-adapter.mjs';
 import { SoloHoverRuntime } from '../solo/solo-runtime.mjs';
 
 const UI_ROOT = fileURLToPath(new URL('../../ui/', import.meta.url));
@@ -60,9 +61,13 @@ export async function startSynthiaFrontScreen({
 } = {}) {
   const organism = synthia ?? await FederatedSynthia.create({ persistenceDir });
   const solo = new SoloHoverRuntime({ organism, persistenceDir });
+  await solo.startTasks();
   const server = createServer(async (request, response) => {
     try {
       const url = new URL(request.url, `http://${request.headers.host ?? 'localhost'}`);
+      if (request.method === 'POST' && url.pathname === '/api/solo/talk/chat') {
+        return reply(response, 200, await talkReply(await bodyOf(request)));
+      }
       if (request.method === 'GET' && url.pathname === '/api/solo/status') {
         return reply(response, 200, { ok: true, ...(await solo.status()) });
       }
@@ -76,6 +81,10 @@ export async function startSynthiaFrontScreen({
       if (request.method === 'POST' && url.pathname === '/api/solo/tasks') {
         const body = await bodyOf(request);
         return reply(response, 200, { ok: true, task: await solo.tasks.add(body) });
+      }
+      if (request.method === 'POST' && /^\/api\/solo\/tasks\/[^/]+\/run$/.test(url.pathname)) {
+        const id = decodeURIComponent(url.pathname.split('/')[4]);
+        return reply(response, 200, { ok: true, task: await solo.queueTask(id) });
       }
       if (url.pathname.startsWith('/api/solo/tasks/') && ['PATCH','DELETE'].includes(request.method)) {
         const id = decodeURIComponent(url.pathname.slice('/api/solo/tasks/'.length));
@@ -311,7 +320,7 @@ export async function startSynthiaFrontScreen({
     server.once('error', reject);
     server.listen(port, host, resolve);
   });
-  server.on('close', () => { solo.browser.close().catch(() => {}); });
+  server.on('close', () => { solo.stopTasks(); solo.browser.close().catch(() => {}); });
   const address = server.address();
   const actualPort = typeof address === 'object' ? address.port : port;
   return Object.freeze({ server, synthia: organism, solo, url: `http://${host}:${actualPort}` });

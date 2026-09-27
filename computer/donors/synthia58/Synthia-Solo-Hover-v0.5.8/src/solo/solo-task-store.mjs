@@ -8,18 +8,26 @@ export class SoloTaskStore {
   constructor({ persistenceDir = '.synthia-state' } = {}) {
     this.path = join(persistenceDir, 'solo-hover-tasks.json');
     this.loaded = false;
+    this.loading = null;
+    this.writes = Promise.resolve();
     this.state = { schemaVersion: 1, sequence: 0, tasks: [] };
   }
 
   async load() {
     if (this.loaded) return this;
-    this.loaded = true;
+    if (this.loading) return this.loading;
+    this.loading = this.readState();
+    return this.loading;
+  }
+
+  async readState() {
     try {
       const parsed = JSON.parse(await readFile(this.path, 'utf8'));
       if (parsed?.schemaVersion === 1 && Array.isArray(parsed.tasks)) this.state = parsed;
     } catch (error) {
       if (error?.code !== 'ENOENT') throw error;
     }
+    this.loaded = true;
     return this;
   }
 
@@ -57,6 +65,9 @@ export class SoloTaskStore {
       task.text = clean;
     }
     if (Object.prototype.hasOwnProperty.call(patch, 'done')) task.done = Boolean(patch.done);
+    for (const key of ['status', 'result', 'error', 'startedAt', 'finishedAt']) {
+      if (Object.prototype.hasOwnProperty.call(patch, key)) task[key] = String(patch[key] ?? '');
+    }
     task.updatedAt = new Date().toISOString();
     await this.save();
     return freeze(clone(task));
@@ -72,10 +83,15 @@ export class SoloTaskStore {
   }
 
   async save() {
-    await mkdir(dirname(this.path), { recursive: true });
-    const tmp = `${this.path}.tmp`;
-    await writeFile(tmp, JSON.stringify(this.state, null, 2));
-    await rename(tmp, this.path);
+    const snapshot = JSON.stringify(this.state, null, 2);
+    const write = this.writes.then(async () => {
+      await mkdir(dirname(this.path), { recursive: true });
+      const tmp = `${this.path}.tmp`;
+      await writeFile(tmp, snapshot);
+      await rename(tmp, this.path);
+    });
+    this.writes = write.catch(() => {});
+    return write;
   }
 }
 

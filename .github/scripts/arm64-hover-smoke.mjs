@@ -29,7 +29,7 @@ async function main() {
   const arch = await docker('run', '--rm', '--platform', 'linux/arm64', image, 'uname', '-m');
   assert.equal(arch, 'aarch64', `expected aarch64 guest, got ${arch}`);
   await docker('run', '--rm', '--platform', 'linux/arm64', image, 'sh', '-c',
-    'test ! -e /usr/bin/python3 && test ! -e /opt/synthia-server && test -f /opt/synthia58/src/ui/server.mjs && node --version');
+    'test -x /opt/talk-venv/bin/python3 && test ! -e /opt/synthia-server && test -f /opt/synthia58/src/ui/server.mjs && node --version');
 
   container = await docker('run', '--detach', '--rm', '--platform', 'linux/arm64', '--network', 'host',
     '--volume', `${volume}:/var/lib/synthai`,
@@ -60,6 +60,13 @@ async function main() {
   assert.equal(solo.mode, 'solo-hover');
   assert.equal(solo.android?.baseUrl, 'http://127.0.0.1:8797', JSON.stringify(solo.android));
 
+  const talkResponse = await fetch(base + '/api/solo/talk/chat', {
+    method: 'POST', headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ message: 'next steps' }), signal: AbortSignal.timeout(30000),
+  });
+  assert.equal(talkResponse.status, 200);
+  assert.match((await talkResponse.json()).reply, /near.term route to success/);
+  assert.match(await get('/talk/index.html'), /Cynthia/);
   const logs = await docker('logs', container);
   assert.match(logs, /Synthia front screen: http:\/\/127\.0\.0\.1:4183/, logs);
   const data = await docker('exec', container, 'sh', '-c', 'ls -A /var/lib/synthai/synthia58 | head -20');

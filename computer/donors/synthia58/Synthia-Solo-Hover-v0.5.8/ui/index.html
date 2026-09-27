@@ -20,7 +20,7 @@
           <div><strong>Synthia</strong><small id="surface-subtitle">Chat</small></div>
         </div>
         <div class="workspace-controls">
-          <button id="setup-open" class="icon-btn" title="Identity setup">◎</button>
+          <button id="setup-open" class="icon-btn" title="Birth details" aria-label="Birth details">◎</button>
           <button id="workspace-max" class="icon-btn" title="Full screen">□</button>
           <button id="workspace-close" class="icon-btn" title="Collapse">×</button>
         </div>
@@ -40,7 +40,7 @@
             <button type="submit" class="send-btn">↑</button>
           </form>
           <div class="quick-actions">
-            <button data-quick="open browser">Browser</button>
+            <button id="talk-open" type="button">Talk</button><button data-quick="open browser">Browser</button>
             <button data-quick="show my tasks">To Do</button>
             <button data-quick="open build">Build</button>
             <button data-quick="open world">World</button>
@@ -101,22 +101,23 @@
             <div><p class="eyebrow">TO DO</p><h1>Things Synthia is holding.</h1><p>Tasks persist with the organism instead of disappearing when you change surfaces.</p></div>
           </div>
           <form id="todo-form" class="todo-form"><input id="todo-input" placeholder="Add a task…" required><button type="submit">Add</button></form>
+          <p id="task-status" role="status">Assign a task with “Run”. Synthia processes the queue while the runtime is running; results stay here for review.</p>
           <div id="todo-list" class="todo-list"></div>
         </section>
 
         <section class="surface" data-surface="build" id="surface-build">
-          <div class="build-head"><div><p class="eyebrow">BUILD</p><h2>Paper / Foundry</h2></div><a href="/lab.html" target="_blank">Open engine lab ↗</a></div>
+          <div class="build-head"><div><p class="eyebrow">BUILD</p><h2>Paper / Foundry</h2></div><div class="build-tools"><button id="build-home" type="button">Foundry</button><button id="build-tools" type="button">Tools</button><button id="build-talk" type="button">Talk</button></div></div>
           <iframe id="build-frame" src="/build/index.html" title="Synthia Build"></iframe>
         </section>
       </main>
     </section>
 
     <div id="radial" class="radial" aria-hidden="true">
-      <button class="radial-item" data-open-surface="browser" style="--i:0" title="Browser"><span>⌕</span><small>Browser</small></button>
-      <button class="radial-item" data-open-surface="chat" style="--i:1" title="Chat"><span>▣</span><small>Chat</small></button>
-      <button class="radial-item" data-open-surface="world" style="--i:2" title="World"><span>◌</span><small>World</small></button>
-      <button class="radial-item" data-open-surface="todo" style="--i:3" title="To Do"><span>✓</span><small>To Do</small></button>
-      <button class="radial-item" data-open-surface="build" style="--i:4" title="Build"><span>◇</span><small>Build</small></button>
+      <button class="radial-item" data-open-surface="browser" style="--i:0" title="Browser"><span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10" cy="10" r="6"/><path d="m15 15 5 5"/></svg></span><small>Browser</small></button>
+      <button class="radial-item" data-open-surface="chat" style="--i:1" title="Chat"><span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16v12H9l-5 4Z"/></svg></span><small>Chat</small></button>
+      <button class="radial-item" data-open-surface="world" style="--i:2" title="World"><span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg></span><small>World</small></button>
+      <button class="radial-item" data-open-surface="todo" style="--i:3" title="To Do"><span><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="3"/><path d="m8 12 3 3 5-6"/></svg></span><small>To Do</small></button>
+      <button class="radial-item" data-open-surface="build" style="--i:4" title="Build"><span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 9 5-9 5-9-5Z M3 8v9l9 5 9-5V8 M12 13v9"/></svg></span><small>Build</small></button>
     </div>
 
     <button id="planet" class="planet" aria-label="Open Synthia">
@@ -131,15 +132,15 @@
     <form method="dialog" class="dialog-close-row"><button value="cancel">×</button></form>
     <div class="setup-copy"><p class="eyebrow">PRIVATE ORIGIN</p><h2>Configure Synthia</h2><p>The organism needs the exact birth record before personalized state resolution can run.</p></div>
     <form id="identity-form" class="identity-form">
-      <label>Birth date<input id="birth-date" type="date" required></label>
-      <label>Exact local time<input id="birth-time" type="time" step="1" required></label>
+      <label>Birth date<input id="birth-date" type="text" inputmode="text" placeholder="YYYY-MM-DD" pattern="[0-9]{4}-[0-9]{2}-[0-9]{2}" autocomplete="off" required></label>
+      <label>Exact local time, including seconds<input id="birth-time" type="text" inputmode="text" placeholder="HH:MM:SS (24-hour)" pattern="[0-9]{2}:[0-9]{2}:[0-9]{2}" autocomplete="off" required></label>
       <label>Birthplace label<input id="birth-place" type="text" required></label>
       <label>IANA timezone<input id="birth-timezone" type="text" placeholder="America/Los_Angeles" required></label>
       <label>Latitude<input id="birth-latitude" type="number" min="-90" max="90" step="any" required></label>
       <label>Longitude<input id="birth-longitude" type="number" min="-180" max="180" step="any" required></label>
       <label>Clock overlap<select id="birth-disambiguation"><option value="reject">Reject ambiguous time</option><option value="earlier">Earlier occurrence</option><option value="later">Later occurrence</option></select></label>
       <button type="submit" class="primary">Configure organism</button>
-      <div id="identity-result" class="identity-result"></div>
+      <div id="identity-result" class="identity-result" role="status" aria-live="polite"></div>
     </form>
   </dialog>
 

@@ -276,3 +276,5 @@ async function loadProposals() {
 Promise.all([loadStatus(), loadIdentity(), loadTray(), loadGenome(), loadChannels()]).catch((error) => {
   $('#state-label').textContent = `offline · ${error.message}`;
 });
+
+if (location.hash === '#tray') setPanel('tray');
