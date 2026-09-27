@@ -6,6 +6,7 @@ on:
     branches:
       - 'mobile/synthimg-computer'
       - 'integration/synthia-reality-resident'
+      - 'hover/repair-input-talk-20260927'
     paths:
       - 'computer/mobile/**'
       - 'computer/runtime/**'
