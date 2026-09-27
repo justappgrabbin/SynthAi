@@ -3,6 +3,7 @@ package app.synthai.hover;
 import android.app.Service;
 import android.content.Intent;
 import android.graphics.Color;
+import android.graphics.Bitmap;
 import android.graphics.PixelFormat;
 import android.os.Build;
 import android.os.IBinder;
@@ -18,6 +19,8 @@ import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.webkit.WebResourceRequest;
+import android.webkit.WebResourceError;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
@@ -61,6 +64,8 @@ public final class OverlayService extends Service {
     private WindowManager.LayoutParams panelParams;
     private WebView panelWebView;
     private HoverVoice voice;
+    private boolean pageReady;
+    private boolean pageFailed;
 
     public static void hideForAction(long millis) {
         OverlayService current = instance;
@@ -200,12 +205,24 @@ public final class OverlayService extends Service {
         settings.setAllowContentAccess(false);
         panelWebView.setWebViewClient(new WebViewClient() {
             @Override
+            public void onPageStarted(WebView view, String url, Bitmap favicon) {
+                pageFailed = false;
+                pageReady = false;
+            }
+
+            @Override
+            public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
+                if (request.isForMainFrame()) { pageFailed = true; pageReady = false; }
+            }
+
+            @Override
             public void onPageCommitVisible(WebView view, String url) {
                 injectLightTheme(view);
             }
 
             @Override
             public void onPageFinished(WebView view, String url) {
+                pageReady = !pageFailed;
                 injectLightTheme(view);
             }
         });
@@ -247,7 +264,10 @@ public final class OverlayService extends Service {
             panel.setVisibility(View.GONE);
         } else {
             panel.setVisibility(View.VISIBLE);
-            if (panelWebView != null) panelWebView.requestFocus();
+            if (panelWebView != null) {
+                if (!pageReady) panelWebView.loadUrl(RUNTIME_URL);
+                panelWebView.requestFocus();
+            }
         }
     }
 

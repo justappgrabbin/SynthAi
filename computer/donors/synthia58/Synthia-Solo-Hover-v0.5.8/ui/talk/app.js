@@ -94,7 +94,7 @@ micBtn.addEventListener('click', ()=>{
   if(rec){
     rec.start();
   }else{
-    alert('Speech recognition not supported in this browser. Use Chrome on Android/iOS.');
+    append('ai', 'Voice input is unavailable in this Android WebView. You can type here and hear the reply.');
   }
 });
 

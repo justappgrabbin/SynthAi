@@ -27,8 +27,8 @@ android {
         hover {
             dimension 'face'
             applicationId 'app.synthai.hover'
-            versionCode 58
-            versionName '0.5.8-hover'
+            versionCode 59
+            versionName '0.5.8-hover-repair1'
             manifestPlaceholders = [appLabel: 'Synthia']
         }
     }
