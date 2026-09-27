@@ -1,0 +1,140 @@
+<div class="install-banner" id="install-banner">
+  <span>Install as app</span>
+  <div><button onclick="installApp()">Install</button><button class="dismiss" onclick="dismissBanner()">x</button></div>
+</div>
+
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal">
+    <h3 id="modal-title">Title</h3>
+    <div id="modal-body">Content</div>
+    <button class="modal-close" onclick="closeModal()">Close</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="profile-modal">
+  <div class="modal" style="max-width:340px">
+    <h3>Edit Profile</h3>
+    <div class="profile-form">
+      <label>Name</label><input type="text" id="p-name" placeholder="Your name" />
+      <label>Base</label>
+      <select id="p-base"><option value="1">Movement</option><option value="2">Evolution</option><option value="3" selected>Being</option><option value="4">Design</option><option value="5">Space</option></select>
+      <label>Tone</label>
+      <select id="p-tone"><option value="1">Smell</option><option value="2">Taste</option><option value="3">Sound</option><option value="4" selected>Touch</option><option value="5">Inner Vision</option><option value="6">Outer Vision</option></select>
+      <label>Color</label>
+      <select id="p-color"><option value="1">Fear</option><option value="2" selected>Hope</option><option value="3">Desire</option><option value="4">Need</option><option value="5">Guilt</option><option value="6">Innocence</option></select>
+    </div>
+    <button class="modal-close" onclick="saveProfile()">Save</button>
+  </div>
+</div>
+
+<div class="app">
+  <div class="top-bar">
+    <div class="logo">YOU-N-I-VERSE <span>DISEMINER</span></div>
+    <div class="profile-badge" onclick="openProfile()" id="profile-badge">Alexis</div>
+  </div>
+
+  <div class="tab-strip">
+    <div class="tab active" data-tab="3d">3D</div>
+    <div class="tab" data-tab="chat">Chat</div>
+    <div class="tab" data-tab="write">Write</div>
+    <div class="tab" data-tab="sketch">Sketch</div>
+    <div class="tab" data-tab="ports">Ports</div>
+    <div class="tab" data-tab="diseminer">DISEMINER</div>
+  </div>
+
+  <div class="content">
+    <!-- 3D ORBITAL BODY -->
+    <div class="tab-content active" id="tab-3d">
+      <canvas id="three-canvas"></canvas>
+      <div class="body-toggle">
+        <button class="body-toggle-btn action active" onclick="switchBodyImage('action')">Action</button>
+        <button class="body-toggle-btn mind" onclick="switchBodyImage('mind')">Mind</button>
+        <button class="body-toggle-btn emotion" onclick="switchBodyImage('emotion')">Emotion</button>
+      </div>
+      <div class="three-controls">
+        <button class="three-btn" onclick="resetCamera()" title="Reset view">&#x2316;</button>
+        <button class="three-btn" onclick="toggleAutoRotate()" title="Auto rotate">&#x21bb;</button>
+        <button class="three-btn" onclick="toggleAuryn()" title="Auryn">&#x1f30c;</button>
+      </div>
+      <div class="three-overlay">
+        <div class="field-name" id="three-field-name">Action Body</div>
+        <div class="field-desc" id="three-field-desc">Circulatory system &mdash; blood, flow, physical doing</div>
+      </div>
+      <div class="auryn-panel" id="auryn-panel">
+        <div class="auryn-header">
+          <div class="auryn-avatar">&#x1f30c;</div>
+          <div>
+            <div class="auryn-name">Auryn</div>
+            <div class="auryn-status">DISEMINER Weaver</div>
+          </div>
+        </div>
+        <div class="auryn-convo" id="auryn-convo"></div>
+        <div class="auryn-input-row">
+          <input class="auryn-input" id="auryn-input" placeholder="Speak to Auryn..." />
+          <button class="auryn-send" onclick="aurynSend()">Send</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- CHAT -->
+    <div class="tab-content" id="tab-chat">
+      <div class="chat-messages" id="chat-messages"></div>
+    </div>
+
+    <!-- WRITE -->
+    <div class="tab-content" id="tab-write">
+      <div class="write-toolbar">
+        <button onclick="saveWriting()">Save</button>
+        <button onclick="clearWriting()">Clear</button>
+        <button onclick="downloadWriting()">Export</button>
+      </div>
+      <textarea class="write-editor" id="write-editor" placeholder="Write, plan, brain-dump..."></textarea>
+    </div>
+
+    <!-- SKETCH -->
+    <div class="tab-content" id="tab-sketch">
+      <div class="sketch-container">
+        <canvas class="sketch-canvas" id="sketch-canvas"></canvas>
+        <div class="sketch-tools">
+          <button onclick="clearSketch()">Clear</button>
+          <button onclick="downloadSketch()">Save</button>
+          <input type="color" class="color-picker" id="sketch-color" value="#9fd5ff" />
+          <input type="range" id="sketch-width" min="1" max="20" value="3" />
+        </div>
+      </div>
+    </div>
+
+    <!-- PORTS -->
+    <div class="tab-content" id="tab-ports">
+      <div class="ports-grid" id="ports-grid"></div>
+    </div>
+
+    <!-- DISEMINER -->
+    <div class="tab-content" id="tab-diseminer">
+      <div class="diseminer-panel">
+        <div class="diseminer-header">
+          <div class="diseminer-title">DISEMINER Engine</div>
+          <div class="diseminer-subtitle">Monte Carlo Narrative Simulation | Sheldon Klein, 1965-1973</div>
+        </div>
+        <div class="diseminer-query">
+          <input class="diseminer-input" id="diseminer-input" placeholder="What is happening right now..." />
+          <button class="diseminer-run" onclick="runDiseminer()">Simulate</button>
+        </div>
+        <div class="diseminer-results" id="diseminer-results">
+          <div style="color:var(--text-dim);font-size:0.75rem;text-align:center;padding:1rem;">
+            Enter a query to run the DISEMINER Monte Carlo narrative simulation.
+          </div>
+        </div>
+        <div class="diseminer-viz">
+          <canvas id="diseminer-canvas"></canvas>
+        </div>
+        <div class="diseminer-stats" id="diseminer-stats"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="chat-input-wrap" id="chat-input-wrap">
+    <input class="chat-input" id="chat-input" placeholder="What is happening right now..." />
+    <button class="chat-send" id="chat-send">&gt;</button>
+  </div>
+</div>

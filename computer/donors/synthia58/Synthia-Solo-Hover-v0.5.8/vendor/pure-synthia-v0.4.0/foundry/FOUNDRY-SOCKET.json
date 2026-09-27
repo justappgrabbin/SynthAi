@@ -1,0 +1,14 @@
+{
+  "status": "actual-donor-mounted",
+  "source": "foundry-complete.tar.gz",
+  "generation": "Pool / Forge / Vault Vite-React",
+  "processes": [
+    {"id":"foundry-core","role":"glyph identity, metadata parsing, type detection, metadata merge"},
+    {"id":"foundry-selector","role":"fragment analysis, selection, gap detection"},
+    {"id":"foundry-builder","role":"assembly, generated fillers, validated app build"},
+    {"id":"foundry-vault","role":"IndexedDB persistence with preservation-first archive semantics"}
+  ],
+  "historicalContractNotImplemented": [
+    {"id":"foundry-overseer","reason":"not present in uploaded donor; not fabricated"}
+  ]
+}

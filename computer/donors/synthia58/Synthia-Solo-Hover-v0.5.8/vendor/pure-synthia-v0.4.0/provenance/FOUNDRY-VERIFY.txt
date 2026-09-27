@@ -1,0 +1,17 @@
+
+> foundry@0.0.0 build
+> tsc -b && vite build
+
+[36mvite v7.2.7 [32mbuilding client environment for production...[36m[39m
+transforming...
+[32m✓[39m 55 modules transformed.
+rendering chunks...
+computing gzip size...
+[2mdist/[22m[32mindex.html                 [39m[1m[2m  0.45 kB[22m[1m[22m[2m │ gzip:  0.29 kB[22m
+[2mdist/[22m[2massets/[22m[35mindex-DdSrmwBD.css  [39m[1m[2m  5.17 kB[22m[1m[22m[2m │ gzip:  1.41 kB[22m
+[2mdist/[22m[2massets/[22m[36mindex-dvOCQ8It.js   [39m[1m[2m262.78 kB[22m[1m[22m[2m │ gzip: 81.92 kB[22m
+[32m✓ built in 1.61s[39m
+
+> foundry@0.0.0 lint
+> eslint .
+

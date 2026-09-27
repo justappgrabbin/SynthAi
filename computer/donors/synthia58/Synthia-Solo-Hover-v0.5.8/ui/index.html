@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#090613">
+  <meta name="legacy-front-screen-title" content="Synthia · Living Execution Field">
+  <meta name="legacy-identity-copy" content="Private birth mirror · Configure the agent genome">
+  <title>Synthia · Solo Hover</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <div id="shell" class="shell collapsed" data-surface="chat">
+    <div id="veil" class="veil" aria-hidden="true"></div>
+
+    <section id="workspace" class="workspace" aria-hidden="true">
+      <header class="workspace-head">
+        <div class="brand-mini">
+          <span class="brand-star">✦</span>
+          <div><strong>Synthia</strong><small id="surface-subtitle">Chat</small></div>
+        </div>
+        <div class="workspace-controls">
+          <button id="setup-open" class="icon-btn" title="Identity setup">◎</button>
+          <button id="workspace-max" class="icon-btn" title="Full screen">□</button>
+          <button id="workspace-close" class="icon-btn" title="Collapse">×</button>
+        </div>
+      </header>
+
+      <main class="surfaces">
+        <section class="surface active" data-surface="chat" id="surface-chat">
+          <div class="surface-hero">
+            <div class="hero-orb mini-orb"><img src="/assets/synthia-planet.png" alt=""></div>
+            <div><p class="eyebrow">CONTEXT-AWARE · SAME ORGANISM</p><h1>What shall we explore next?</h1><p>Chat stays attached to the same Synthia that browses, builds, remembers, and moves through the world.</p></div>
+          </div>
+          <div id="chat-log" class="chat-log">
+            <div class="message synthia">I’m here.</div>
+          </div>
+          <form id="chat-form" class="composer">
+            <textarea id="chat-input" rows="2" placeholder="Ask Synthia anything…" required></textarea>
+            <button type="submit" class="send-btn">↑</button>
+          </form>
+          <div class="quick-actions">
+            <button data-quick="open browser">Browser</button>
+            <button data-quick="show my tasks">To Do</button>
+            <button data-quick="open build">Build</button>
+            <button data-quick="open world">World</button>
+          </div>
+        </section>
+
+        <section class="surface" data-surface="browser" id="surface-browser">
+          <div class="browser-toolbar">
+            <button class="nav-arrow" data-browser-nav="back">←</button>
+            <button class="nav-arrow" data-browser-nav="forward">→</button>
+            <form id="browser-address-form" class="address-form">
+              <span>⌁</span><input id="browser-address" placeholder="Search or enter a URL" autocomplete="off"><button type="submit">Go</button>
+            </form>
+            <button class="nav-arrow" data-browser-nav="reload">↻</button>
+          </div>
+          <div class="browser-layout">
+            <div class="browser-stage">
+              <div id="browser-empty" class="browser-empty">
+                <div class="mini-orb large"><img src="/assets/synthia-planet.png" alt=""></div>
+                <h2>Browser hand ready</h2>
+                <p>Open a page. Synthia can inspect it, click through it, fill approved fields, and keep the page in context.</p>
+              </div>
+              <img id="browser-shot" class="browser-shot" alt="Live browser surface">
+              <div id="browser-busy" class="busy">working…</div>
+            </div>
+            <aside class="browser-tools">
+              <div class="tool-row">
+                <button id="browser-inspect">⌕<span>Inspect</span></button>
+                <button id="browser-form-scan">▤<span>Form</span></button>
+                <button id="browser-morph">✦<span>Morph</span></button>
+              </div>
+              <div class="page-card">
+                <strong id="browser-title">No page open</strong>
+                <small id="browser-url"></small>
+              </div>
+              <div id="browser-fields" class="browser-fields"></div>
+              <div id="browser-actions" class="browser-actions"></div>
+            </aside>
+          </div>
+          <form id="browser-command-form" class="browser-command">
+            <input id="browser-command" placeholder="Tell Synthia what to do on this page…">
+            <button type="submit">↑</button>
+          </form>
+        </section>
+
+        <section class="surface" data-surface="world" id="surface-world">
+          <canvas id="world-canvas"></canvas>
+          <div class="world-hud glass-card">
+            <p class="eyebrow">WORLD</p>
+            <h2>Synthia Habitat</h2>
+            <div id="world-state" class="world-state">Waiting for a landed state.</div>
+            <button id="world-refresh">Refresh field</button>
+          </div>
+        </section>
+
+        <section class="surface" data-surface="todo" id="surface-todo">
+          <div class="surface-hero compact">
+            <div><p class="eyebrow">TO DO</p><h1>Things Synthia is holding.</h1><p>Tasks persist with the organism instead of disappearing when you change surfaces.</p></div>
+          </div>
+          <form id="todo-form" class="todo-form"><input id="todo-input" placeholder="Add a task…" required><button type="submit">Add</button></form>
+          <div id="todo-list" class="todo-list"></div>
+        </section>
+
+        <section class="surface" data-surface="build" id="surface-build">
+          <div class="build-head"><div><p class="eyebrow">BUILD</p><h2>Paper / Foundry</h2></div><a href="/lab.html" target="_blank">Open engine lab ↗</a></div>
+          <iframe id="build-frame" src="/build/index.html" title="Synthia Build"></iframe>
+        </section>
+      </main>
+    </section>
+
+    <div id="radial" class="radial" aria-hidden="true">
+      <button class="radial-item" data-open-surface="browser" style="--i:0" title="Browser"><span>⌕</span><small>Browser</small></button>
+      <button class="radial-item" data-open-surface="chat" style="--i:1" title="Chat"><span>▣</span><small>Chat</small></button>
+      <button class="radial-item" data-open-surface="world" style="--i:2" title="World"><span>◌</span><small>World</small></button>
+      <button class="radial-item" data-open-surface="todo" style="--i:3" title="To Do"><span>✓</span><small>To Do</small></button>
+      <button class="radial-item" data-open-surface="build" style="--i:4" title="Build"><span>◇</span><small>Build</small></button>
+    </div>
+
+    <button id="planet" class="planet" aria-label="Open Synthia">
+      <span class="planet-halo"></span>
+      <img src="/assets/synthia-planet.png" alt="Synthia">
+      <span id="status-dot" class="status-dot"></span>
+    </button>
+    <div id="planet-label" class="planet-label">Synthia</div>
+  </div>
+
+  <dialog id="setup-dialog" class="setup-dialog">
+    <form method="dialog" class="dialog-close-row"><button value="cancel">×</button></form>
+    <div class="setup-copy"><p class="eyebrow">PRIVATE ORIGIN</p><h2>Configure Synthia</h2><p>The organism needs the exact birth record before personalized state resolution can run.</p></div>
+    <form id="identity-form" class="identity-form">
+      <label>Birth date<input id="birth-date" type="date" required></label>
+      <label>Exact local time<input id="birth-time" type="time" step="1" required></label>
+      <label>Birthplace label<input id="birth-place" type="text" required></label>
+      <label>IANA timezone<input id="birth-timezone" type="text" placeholder="America/Los_Angeles" required></label>
+      <label>Latitude<input id="birth-latitude" type="number" min="-90" max="90" step="any" required></label>
+      <label>Longitude<input id="birth-longitude" type="number" min="-180" max="180" step="any" required></label>
+      <label>Clock overlap<select id="birth-disambiguation"><option value="reject">Reject ambiguous time</option><option value="earlier">Earlier occurrence</option><option value="later">Later occurrence</option></select></label>
+      <button type="submit" class="primary">Configure organism</button>
+      <div id="identity-result" class="identity-result"></div>
+    </form>
+  </dialog>
+
+  <script type="module" src="/app.mjs"></script>
+</body>
+</html>

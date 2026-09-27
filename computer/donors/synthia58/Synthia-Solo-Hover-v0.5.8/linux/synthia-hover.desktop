@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Synthia Solo Hover
+Comment=Synthia persistent hover organism
+Exec=sh -lc 'cd %k/.. && ./linux/open-hover.sh'
+Terminal=false
+Categories=Utility;Development;
+StartupNotify=false

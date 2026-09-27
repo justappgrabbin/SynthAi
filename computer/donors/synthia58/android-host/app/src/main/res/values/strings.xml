@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">Cynthia</string>
+    <string name="accessibility_description">Allows Cynthia to inspect and operate the screen only when you enable Cynthia Hands in Android Accessibility settings.</string>
+</resources>

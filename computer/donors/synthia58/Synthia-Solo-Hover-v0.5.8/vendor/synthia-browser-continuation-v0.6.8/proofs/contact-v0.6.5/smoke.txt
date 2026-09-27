@@ -1,0 +1,38 @@
+
+> synthia@1.0.0 smoke:contact
+> node src/contact-orchestrator-smoke-test.js
+
+--- contact → understand → act smoke ---
+[AUTOLING] Initialized - Sheldon Klein inspired linguistic fieldworker
+[DISEMINER] Initialized - Distributional-Semantics Inference Maker
+[AUTOLING] Running full pipeline on: "Hello there"
+[AUTOLING] Frame 1: Learning from "Hello there"
+[AUTOLING] H1 coined: S_1 -> Hello there
+[AUTOLING] CAN YOU SAY: Hello there
+[DISEMINER] Building distributional space from 1 documents
+[DISEMINER] Distributional space built: 2 words
+[DISEMINER] Extracting claims from: contact-1-3858070617
+[DISEMINER] Extracted 0 claims
+  basic contact: chat → Hey. What can I help you with?
+[AUTOLING] Running full pipeline on: "I need to fill out this application"
+[AUTOLING] Frame 2: Learning from "I need to fill out this application"
+[DISEMINER] Building distributional space from 1 documents
+[DISEMINER] Distributional space built: 7 words
+[DISEMINER] Extracting claims from: contact-2-335313768
+[DISEMINER] Extracted 1 claims
+  application: awaiting-human unresolved: signature
+[AUTOLING] Running full pipeline on: "I need to order dog food"
+[AUTOLING] Frame 3: Learning from "I need to order dog food"
+[DISEMINER] Building distributional space from 1 documents
+[DISEMINER] Distributional space built: 10 words
+[DISEMINER] Extracting claims from: contact-3-181033937
+[DISEMINER] Extracted 1 claims
+  purchase: open-site → search → compare-requested-constraints → select-item → prepare-cart → pause-before-payment-or-order → confirmation: purchase
+[AUTOLING] Running full pipeline on: "Create a five-second video of a red circle moving left to right"
+[AUTOLING] Frame 4: Learning from "Create a five-second video of a red circle moving left to right"
+[DISEMINER] Building distributional space from 1 documents
+[DISEMINER] Distributional space built: 19 words
+[DISEMINER] Extracting claims from: contact-4-3172535581
+[DISEMINER] Extracted 1 claims
+  strong expression: autonovel → messy → SceneGraphCompiler/RendererRouter
+--- contact smoke complete ---

@@ -1,0 +1,21 @@
+{
+  "name": "synthia",
+  "version": "1.0.0",
+  "description": "Synthia - one runtime, every piece ingested, nothing thrown away.",
+  "type": "module",
+  "main": "synthia.mjs",
+  "scripts": {
+    "chat": "node chat.mjs",
+    "serve": "node -e \"const {createServer}=require('node:http');const fs=require('node:fs');const path=require('node:path');const port=8080;const types={'.html':'text/html','.mjs':'text/javascript','.js':'text/javascript','.json':'application/json','.ts':'text/plain','.md':'text/plain'};createServer((req,res)=>{let p=decodeURIComponent(req.url.split('?')[0]);if(p==='/')p='/index.html';const full=path.join(process.cwd(),p);fs.readFile(full,(err,data)=>{if(err){res.writeHead(404);res.end('not found: '+p);return;}res.writeHead(200,{'Content-Type':types[path.extname(full)]||'application/octet-stream'});res.end(data);});}).listen(port,()=>console.log('Synthia serving on http://localhost:'+port));\"",
+    "smoke": "node src/smoke-test.js",
+    "smoke:orchestrator": "node src/orchestrator-smoke-test.js",
+    "test": "node --test",
+    "verify": "npm run smoke && npm run smoke:orchestrator && npm run smoke:visual && npm run smoke:scene && npm run smoke:contact && npm run smoke:browser && npm run smoke:navigation && npm run smoke:continuation && npm test",
+    "smoke:visual": "node src/visual-orchestrator-smoke-test.js",
+    "smoke:scene": "node src/scene-orchestrator-smoke-test.js",
+    "smoke:contact": "node src/contact-orchestrator-smoke-test.js",
+    "smoke:browser": "node src/browser-executor-smoke-test.js",
+    "smoke:navigation": "node src/browser-navigation-smoke-test.js",
+    "smoke:continuation": "node src/browser-continuation-smoke-test.js"
+  }
+}

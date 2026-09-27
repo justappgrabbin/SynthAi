@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<!-- Pure Synthia Automata — browser demo: 16 automata on the shared mesh, live tool-call grammar -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pure Synthia Automata</title>
+<style>
+  :root {
+    --ground: #1A1310;
+    --panel: #241B15;
+    --panel-2: #2C2119;
+    --edge: #4A382A;
+    --ink: #D9C98C;        /* pale gold (color 6) */
+    --ink-dim: #A6905E;
+    --ink-faint: #7A6A50;
+    --accent: #C28E3C;     /* ochre (color 2) */
+    --accent-2: #8C4A2F;   /* earth-red (color 1) */
+    --cool: #3C6E8C;       /* water-blue (color 3) */
+    --mono: "SFMono-Regular", ui-monospace, "Cascadia Mono", Menlo, Consolas, monospace;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--ground); color: var(--ink);
+    font-family: Georgia, "Times New Roman", serif; line-height: 1.45;
+  }
+  header { padding: 28px 32px 12px; border-bottom: 1px solid var(--edge); }
+  header h1 { margin: 0; font-size: 22px; letter-spacing: 0.14em; font-weight: normal; color: var(--accent); }
+  header p { margin: 6px 0 0; color: var(--ink-dim); font-size: 13px; }
+  main { padding: 20px 32px 48px; max-width: 1180px; }
+  .callbar { display: flex; gap: 10px; margin: 14px 0 10px; }
+  input[type=text] {
+    flex: 1; background: var(--panel); border: 1px solid var(--edge); color: var(--ink);
+    font-family: var(--mono); font-size: 13px; padding: 10px 12px; border-radius: 3px;
+  }
+  input[type=text]:focus { outline: 1px solid var(--accent); }
+  button {
+    background: var(--panel-2); color: var(--accent); border: 1px solid var(--edge);
+    font-family: var(--mono); font-size: 12px; padding: 9px 14px; border-radius: 3px; cursor: pointer;
+  }
+  button:hover { border-color: var(--accent); color: var(--ink); }
+  .samples { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 18px; }
+  .samples button { color: var(--ink-dim); padding: 5px 10px; font-size: 11px; }
+  .samples button:hover { color: var(--accent); }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .panel {
+    background: var(--panel); border: 1px solid var(--edge); border-radius: 3px;
+    padding: 12px 14px; min-height: 80px;
+  }
+  .panel.wide { grid-column: 1 / -1; }
+  .panel h2 {
+    margin: 0 0 8px; font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--ink-faint); font-family: var(--mono); font-weight: normal;
+  }
+  pre {
+    margin: 0; font-family: var(--mono); font-size: 12px; white-space: pre-wrap;
+    word-break: break-word; color: var(--ink);
+  }
+  table { border-collapse: collapse; width: 100%; font-family: var(--mono); font-size: 12px; }
+  th { text-align: left; color: var(--ink-faint); font-weight: normal; letter-spacing: 0.1em;
+       border-bottom: 1px solid var(--edge); padding: 4px 8px 4px 0; font-size: 10px; text-transform: uppercase; }
+  td { padding: 4px 8px 4px 0; border-bottom: 1px solid #2E2318; vertical-align: middle; }
+  .swatch {
+    display: inline-block; width: 14px; height: 14px; border-radius: 2px;
+    border: 1px solid rgba(0,0,0,0.5); vertical-align: -2px; margin-right: 6px;
+  }
+  .hash { color: var(--accent); }
+  .status-ok { color: #9CB86B; }
+  .status-bad { color: #C3643C; }
+  .toolrow { display: grid; grid-template-columns: 230px 46px 100px 1fr; gap: 8px;
+             font-family: var(--mono); font-size: 11.5px; padding: 3px 0; border-bottom: 1px solid #2E2318; }
+  .toolrow span:nth-child(2), .toolrow span:nth-child(3) { color: var(--ink-dim); }
+  .muted { color: var(--ink-faint); }
+  #err { color: #C3643C; font-family: var(--mono); font-size: 12px; margin-top: 8px; white-space: pre-wrap; }
+</style>
+</head>
+<body>
+<header>
+  <h1>PURE SYNTHIA AUTOMATA</h1>
+  <p>16 tool automata on a shared mesh · deterministic tool-call grammar · named transitions rendered as sound + color.
+     Hypotheses H1–H6 remain labeled, not asserted.</p>
+</header>
+<main>
+  <div class="callbar">
+    <input id="call" type="text" spellcheck="false"
+      value='coder "the dogs bark" at 41.2.3 --mode=exact'
+      placeholder='tool "args" at gate.line.color --flag=value then next-tool "…"'>
+    <button id="run">run ▸</button>
+  </div>
+  <div class="samples" id="samples"></div>
+  <div id="err"></div>
+
+  <div class="grid">
+    <section class="panel wide"><h2>parse tree</h2><pre id="parse" class="muted">—</pre></section>
+    <section class="panel wide"><h2>trace · state → state via named transition</h2><div id="trace" class="muted">—</div></section>
+    <section class="panel"><h2>complexity ledger</h2><pre id="ledger" class="muted">—</pre></section>
+    <section class="panel"><h2>derivation hash · replay</h2><pre id="hash" class="muted">—</pre></section>
+    <section class="panel wide"><h2>mesh metrics · 5 projections</h2><div id="mesh" class="muted">—</div></section>
+    <section class="panel wide"><h2>the 16 automata</h2><div id="tools"></div></section>
+  </div>
+</main>
+
+<script type="module">
+// ES modules over file:// are allowed by Firefox/Safari but blocked by
+// Chromium's null-origin CORS policy. Dynamic import lets us catch that and
+// say so instead of failing silently.
+const $ = (id) => document.getElementById(id);
+let SynthiaAutomata, parseChain;
+try {
+  ({ SynthiaAutomata } = await import('./src/engine/synthia.js'));
+  ({ parseChain } = await import('./src/grammar/parser.js'));
+} catch (err) {
+  $('err').textContent =
+    'This browser blocked the ES-module import from file:// (' + err.message + ').\n' +
+    'Open this page in Firefox or Safari, or serve the folder statically ' +
+    '(e.g. `python3 -m http.server`) and visit http://localhost:8000/index.html';
+  throw err;
+}
+
+const engine = new SynthiaAutomata();
+const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+const SAMPLES = [
+  ['grammar coding', 'coder "the dogs bark" at 41.2.3 --mode=exact'],
+  ['analogy', 'klein-analogy "boy girl woman" --mode=exact'],
+  ['2-chain', 'success \'{"operation":"define","personId":"ada","purpose":{"statement":"practice daily","indicators":[{"id":"practice","name":"practice"}]}}\' then conversation "summarize"'],
+  ['3-chain', 'autoling "the dogs bark" then diseminer "the dogs bark" then conversation "summarize"'],
+  ['autoling pipeline', 'autoling "the dogs bark loudly"'],
+  ['distributional observe', 'diseminer "the quick brown fox jumps over the lazy dog"'],
+  ['morph-mir ingest', 'morph-mir ingest \'{"name":"a.txt","content":"hello world"}\''],
+];
+for (const [label, call] of SAMPLES) {
+  const b = document.createElement('button');
+  b.textContent = label;
+  b.title = call;
+  b.onclick = () => { $('call').value = call; runCall(); };
+  $('samples').appendChild(b);
+}
+
+// registry table
+$('tools').innerHTML = engine.listTools().map((t) =>
+  `<div class="toolrow"><span>${esc(t.id)}</span><span>gate ${t.gate}</span><span>${esc(t.dimension)}</span><span class="muted">${esc(t.automatonForm)}</span></div>`
+).join('');
+
+function renderTree(node, depth = 0) {
+  if (!node) return '';
+  const pad = '  '.repeat(depth);
+  const label = node.node
+    + (node.node === 'flag' ? ` --${node.name}=${JSON.stringify(node.value)}`
+      : node.node === 'address' ? ` ${['gate', 'line', 'color', 'tone', 'base'].filter((f) => node[f] != null).map((f) => node[f]).join('.')}`
+      : node.value !== undefined ? ` ${JSON.stringify(node.value)}` : '')
+    + (node.resolved ? ` → ${node.resolved}` : '');
+  const kids = (node.children || []).map((c) => renderTree(c, depth + 1)).join('');
+  return `${pad}${label}\n${kids}`;
+}
+
+function renderTrace(derivation) {
+  const rows = [];
+  for (const r of derivation.chainResults) {
+    rows.push(`<tr><td colspan="5" style="color:var(--accent);padding-top:10px">▸ ${esc(r.tool)} — ${r.routed ? 'packet routed onward' : 'terminal call'} · accepted=${r.accepted}</td></tr>`);
+    for (const s of r.trace) {
+      rows.push(`<tr>
+        <td class="muted">${esc(s.from)}</td>
+        <td>${esc(s.transition)}</td>
+        <td class="muted">${esc(s.to)}</td>
+        <td>${s.sound.freq.toFixed(2)} Hz</td>
+        <td><span class="swatch" style="background:${s.color.hex}"></span>${s.color.hex}</td>
+      </tr>`);
+    }
+  }
+  $('trace').innerHTML = `<table>
+    <tr><th>from</th><th>transition</th><th>to</th><th>sound</th><th>color</th></tr>
+    ${rows.join('')}</table>`;
+}
+
+function renderMesh() {
+  const m = engine.meshMetrics();
+  const rows = Object.entries(m.projections).map(([name, p]) =>
+    `<tr><td>${name}</td><td>${p.nodes}</td><td>${p.edges}</td><td>${p.avgDegree.toFixed(2)}</td></tr>`).join('');
+  $('mesh').innerHTML = `<pre>automata: ${m.automata} · ring connections: ${m.connections}</pre>
+    <table><tr><th>projection</th><th>nodes</th><th>edges</th><th>avg degree</th></tr>${rows}</table>`;
+}
+
+function runCall() {
+  const input = $('call').value.trim();
+  $('err').textContent = '';
+  if (!input) return;
+  try {
+    const parsed = parseChain(input);
+    $('parse').className = '';
+    $('parse').textContent = parsed.calls.map((c) => renderTree(c.ast)).join('') +
+      `\nchainLength: ${parsed.chainLength}`;
+
+    const d = engine.call(input);
+    renderTrace(d);
+    $('ledger').className = '';
+    $('ledger').textContent = JSON.stringify(d.ledger, null, 2);
+
+    // replay re-runs this engine's full input history on a fresh engine, so
+    // any derivation recorded here must reproduce hash-identically (spec §12).
+    const replay = engine.replay(d.toJSON());
+    $('hash').className = '';
+    $('hash').innerHTML =
+      `derivation ${esc(d.id)}\nhash <span class="hash">${d.hash}</span>\n` +
+      `replay <span class="${replay.hashMatch ? 'status-ok' : 'status-bad'}">${replay.status}</span>` +
+      (replay.hashMatch ? '' : `\n<span class="muted">original ${replay.original} · replayed ${replay.replayed}</span>`);
+
+    // record the chain's footprint into the mesh projections
+    for (let k = 0; k < d.chainResults.length - 1; k++) {
+      const a = d.chainResults[k];
+      const b = d.chainResults[k + 1];
+      engine.mesh.addEdge('causal', `${a.tool}:${a.finalState}`, `${b.tool}:${b.trace[0].to}`, 'chain', { derivation: d.id });
+      engine.mesh.addEdge('dependency', `${b.tool}:${b.finalState}`, `${a.tool}:${a.finalState}`, 'consumes-packet', { derivation: d.id });
+    }
+    renderMesh();
+  } catch (err) {
+    $('err').textContent = `${err.name}: ${err.message}`;
+  }
+}
+
+$('run').onclick = runCall;
+$('call').addEventListener('keydown', (e) => { if (e.key === 'Enter') runCall(); });
+renderMesh();
+runCall();
+</script>
+</body>
+</html>

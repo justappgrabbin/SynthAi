@@ -1,0 +1,15 @@
+{
+  "n_frames": 10,
+  "mid_hole_morph": 0.6520382131031862,
+  "mid_hole_naive": 0.5135142282873162,
+  "mid_stripe_morph": 559.0,
+  "mid_stripe_naive": 386.0,
+  "idle_stripe": 792.0,
+  "reach_stripe": 566.0,
+  "endpoint_l1_to_B": 0.0,
+  "edge_json": true,
+  "edge_npz": true,
+  "edge_quality": 0.8450788948583206,
+  "edge_observations": 4,
+  "edge_easing": "smoothstep"
+}

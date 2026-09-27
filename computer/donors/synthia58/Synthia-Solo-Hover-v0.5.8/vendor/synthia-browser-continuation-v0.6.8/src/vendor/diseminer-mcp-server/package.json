@@ -1,0 +1,33 @@
+{
+  "name": "diseminer-mcp-server",
+  "version": "1.0.0",
+  "description": "Deterministic archetypal narrative engine — DISEMINER MCP Server",
+  "main": "dist/diseminer-mcp-server.js",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/diseminer-mcp-server.js",
+    "dev": "tsc --watch",
+    "test": "node --test dist/**/*.test.js",
+    "client": "node dist/mcp-client.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.3.0"
+  },
+  "keywords": [
+    "mcp",
+    "human-design",
+    "iching",
+    "deterministic",
+    "narrative",
+    "klein-tools",
+    "ato",
+    "xnor"
+  ],
+  "author": "Synthia OS",
+  "license": "MIT"
+}

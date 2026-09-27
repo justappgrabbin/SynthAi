@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "CommonJS",
+    "moduleResolution": "Node",
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowJs": true,
+    "checkJs": false,
+    "noEmit": true
+  },
+  "files": [
+    "../runtime/EventMesh.ts",
+    "../runtime/ToolBase.ts",
+    "../runtime/SynthiaSubstrate.ts",
+    "../runtime/SurfaceTransformEngine.ts",
+    "../runtime/StyleControlEngine.ts",
+    "../runtime/DeepStructureLearner.ts",
+    "../runtime/InteractiveLearner.ts"
+  ]
+}

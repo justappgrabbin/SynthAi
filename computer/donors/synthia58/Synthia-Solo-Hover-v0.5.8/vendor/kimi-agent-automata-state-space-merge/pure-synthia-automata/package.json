@@ -1,0 +1,11 @@
+{
+  "name": "pure-synthia-automata",
+  "version": "1.0.0",
+  "description": "Deterministic, browser-native JS automata system — 16 Synthia tools on a shared mesh.",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "demo": "node demo.mjs",
+    "test": "node tests/run.mjs && node test/merged.smoke.mjs"
+  }
+}

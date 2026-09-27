@@ -1,0 +1,6 @@
+Player: Hello, shopkeeper.
+Shopkeeper: Greetings! What can I get for you today?
+Player: I need a sword.
+Shopkeeper: That will be 50 gold.
+Player: Here you go.
+Shopkeeper: Pleasure doing business with you!

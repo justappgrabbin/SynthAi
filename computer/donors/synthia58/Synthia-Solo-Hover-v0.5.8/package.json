@@ -1,0 +1,17 @@
+{
+  "name": "synthia-integrated-automata",
+  "version": "0.5.8",
+  "description": "Synthia solo hover organism shell with canonical v0.5.7 morph/state core, live browser hand, chat, world, tasks, and build surfaces.",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "start": "node src/ui/server.mjs",
+    "test": "node --test --test-concurrency=1 test/*.test.mjs",
+    "verify": "node scripts/verify.mjs",
+    "demo": "node scripts/demo.mjs",
+    "start:hover": "node src/ui/server.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

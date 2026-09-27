@@ -1,0 +1,16 @@
+{
+  "name": "synthia-core",
+  "version": "1.0.0",
+  "description": "Synthia learning layer + ATO engine as one booted organism",
+  "type": "module",
+  "main": "./src/SynthiaCore.mjs",
+  "exports": {
+    ".": "./src/SynthiaCore.mjs",
+    "./ato": "./ato-core/src/index.mjs",
+    "./learning": "./learning/pure-synthia-learning-core.mjs"
+  },
+  "scripts": {
+    "demo": "node examples/demo.mjs",
+    "test": "node --test tests/synthia-core.test.mjs"
+  }
+}

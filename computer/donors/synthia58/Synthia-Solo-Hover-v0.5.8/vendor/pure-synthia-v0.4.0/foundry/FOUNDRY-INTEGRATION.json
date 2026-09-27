@@ -1,0 +1,24 @@
+{
+  "donor": "foundry-complete.tar.gz",
+  "actualGeneration": "Pool / Forge / Vault Vite-React Foundry",
+  "processes": [
+    "foundry-core",
+    "foundry-selector",
+    "foundry-builder",
+    "foundry-vault"
+  ],
+  "legacySocketNotPresentInDonor": ["foundry-overseer"],
+  "repairs": [
+    "implemented Pool -> staged -> Forge handoff",
+    "changed hard delete operations to preservation-first archive semantics",
+    "added simple structural validation instead of unconditional passed status",
+    "fixed TypeScript/React lint blockers",
+    "built production dist successfully"
+  ],
+  "nonClaims": [
+    "No real LLM is present; fragment analysis is heuristic.",
+    "No true Overseer/rollback process exists in this donor.",
+    "Vault persistence requires browser IndexedDB.",
+    "Export is JSON tree download, not a ZIP exporter."
+  ]
+}

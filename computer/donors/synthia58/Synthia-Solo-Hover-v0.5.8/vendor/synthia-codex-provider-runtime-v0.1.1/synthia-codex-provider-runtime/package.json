@@ -1,0 +1,12 @@
+{
+  "name": "synthia-codex-provider-runtime",
+  "version": "0.1.1",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
