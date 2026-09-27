@@ -53,7 +53,9 @@ try {
   await studio.locator('[data-tab="functions"]').click();
   await studio.locator('#functionList').getByText('double', { exact: true }).waitFor();
   await studio.locator('#executeBtn').click();
-  await studio.locator('#log').getByText(/"ok": true/).waitFor();
+  await page.waitForTimeout(1200);
+  const studioExecution = await studio.locator('#log').textContent();
+  assert.match(studioExecution, /"ok": true/, `Studio execution result: ${studioExecution}`);
   await page.locator('#build-tools').click();
   await page.frameLocator('#build-frame').locator('#tray.active').waitFor();
   const tools = page.frameLocator('#build-frame');
