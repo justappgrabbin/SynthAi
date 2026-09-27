@@ -80,6 +80,7 @@ jobs:
         uses: docker/setup-buildx-action@v3
 
       - name: Check out pinned Synthia Server for the embedded rootfs
+        if: ${{ !startsWith(github.ref_name, 'hover/repair-') }}
         uses: actions/checkout@v4
         with:
           repository: justappgrabbin/Synthia-server
@@ -88,6 +89,7 @@ jobs:
           persist-credentials: false
 
       - name: Verify pinned Synthia Server checkout
+        if: ${{ !startsWith(github.ref_name, 'hover/repair-') }}
         run: |
           test "$(git -C synthia-server rev-parse HEAD)" = "cc22370a1c8670fb9bdec167267c098306ecf502"
           rm -rf synthia-server/.git
@@ -97,6 +99,7 @@ jobs:
           test -f synthia-server/requirements-mobile.txt
 
       - name: Build embedded ARM64 Linux Computer rootfs
+        if: ${{ !startsWith(github.ref_name, 'hover/repair-') }}
         run: |
           rm -rf /tmp/synthai-linux-rootfs
           docker buildx build \
@@ -215,9 +218,15 @@ jobs:
 
       - name: Build self-contained debug APKs (venom + hover faces)
         working-directory: android-app
-        run: gradle --no-daemon :app:assembleVenomDebug :app:assembleHoverDebug
+        run: |
+          if [[ "$GITHUB_REF_NAME" == hover/repair-* ]]; then
+            gradle --no-daemon :app:assembleHoverDebug
+          else
+            gradle --no-daemon :app:assembleVenomDebug :app:assembleHoverDebug
+          fi
 
       - name: Verify self-contained APK payload (venom)
+        if: ${{ !startsWith(github.ref_name, 'hover/repair-') }}
         run: |
           APK=android-app/app/build/outputs/apk/venom/debug/app-venom-debug.apk
           unzip -l "$APK" | tee /tmp/apk-tree.txt
@@ -284,16 +293,19 @@ jobs:
           arch: x86_64
           profile: pixel_6
           disable-animations: true
-          script: bash .github/scripts/android-smoke.sh && bash .github/scripts/android-hover-smoke.sh
+          script: |
+            if [[ "$GITHUB_REF_NAME" != hover/repair-* ]]; then bash .github/scripts/android-smoke.sh; fi
+            bash .github/scripts/android-hover-smoke.sh
 
       - name: Record APK checksums
         run: |
           cd android-app/app/build/outputs/apk
-          (cd venom/debug && sha256sum app-venom-debug.apk | tee app-venom-debug.apk.sha256)
+          if [[ -f venom/debug/app-venom-debug.apk ]]; then (cd venom/debug && sha256sum app-venom-debug.apk | tee app-venom-debug.apk.sha256); fi
           (cd hover/debug && sha256sum app-hover-debug.apk | tee app-hover-debug.apk.sha256)
-          ls -l venom/debug hover/debug
+          ls -l hover/debug
 
       - name: Upload installable self-contained APK (venom)
+        if: ${{ !startsWith(github.ref_name, 'hover/repair-') }}
         uses: actions/upload-artifact@v4
         with:
           name: SynthAI-Computer-self-contained-debug
