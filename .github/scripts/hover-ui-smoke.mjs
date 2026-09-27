@@ -47,6 +47,15 @@ try {
   await page.locator('[data-open-surface="build"]').click();
   await page.locator('#build-tools').click();
   await page.frameLocator('#build-frame').locator('#tray.active').waitFor();
+  const tools = page.frameLocator('#build-frame');
+  await tools.locator('#factory-purpose').fill('AutoLing resident language architecture');
+  await tools.locator('#factory-dimension').selectOption('Design');
+  await tools.locator('#factory-create').click();
+  await tools.locator('#factory-state').getByText('mounted').waitFor();
+  await tools.locator('#factory-input').fill('quality-aware language system');
+  await tools.locator('#factory-run').click();
+  await tools.locator('#factory-state').getByText('executed').waitFor();
+  await tools.locator('#factory-output').getByText('quality').waitFor();
   await page.locator('#build-talk').click();
   await page.frameLocator('#build-frame').locator('#msg').fill('next steps');
   await page.frameLocator('#build-frame').locator('button[type=submit]').click();
