@@ -1,6 +1,7 @@
 import { bootstrapCurrentSynthiaSwarm } from '../vendor/pure-synthia-v0.4.0/src/synthia/swarm/bootstrap.mjs';
 import { MemoryCheckpointStore } from '../vendor/pure-synthia-v0.4.0/src/synthia/swarm/checkpointStores.mjs';
 import { FileRuntimeStore } from './persistence/file-runtime-store.mjs';
+import { FutureFeatureTestingRegistry } from './governance/future-feature-testing-registry.mjs';
 import { BirthMirrorRuntime } from './identity/birth-mirror-runtime.mjs';
 import { resolveZonedBirthInstant } from './identity/birth-location-provider.mjs';
 import { MirrorExpressionOrgan } from './identity/mirror-expression-organ.mjs';
@@ -53,6 +54,9 @@ export class FederatedSynthia {
     this.persistenceQueue = Promise.resolve();
     this.persistenceFailure = null;
     this.persistenceStatus = Object.freeze({ configured: Boolean(runtimeStore), durable: false, restored: false });
+    this.futureFeatureTesting = new FutureFeatureTestingRegistry({
+      onChange: () => this.#queueFutureFeatureTestingPersistence(),
+    });
     this.restoringPersistentState = true;
     this.baseline = baseline;
     this.swarm = baseline.swarm;
@@ -202,6 +206,26 @@ export class FederatedSynthia {
       });
   }
 
+  #queueFutureFeatureTestingPersistence() {
+    if (!this.runtimeStore || this.restoringPersistentState) return;
+    const payload = this.futureFeatureTesting.snapshot();
+    this.persistenceQueue = this.persistenceQueue
+      .then(() => this.runtimeStore.put('governance:future-feature-testing', payload))
+      .then(async () => {
+        const audit = await this.runtimeStore.audit();
+        this.persistenceStatus = Object.freeze({
+          ...this.persistenceStatus,
+          ...audit,
+          restored: true,
+          futureFeatureTestingPersisted: true,
+          futureFeatureSubmissions: payload.submissions.length,
+        });
+      })
+      .catch((error) => {
+        this.persistenceFailure = error;
+      });
+  }
+
   #assertPersonalized(context = {}) {
     if (this.birthMirror.configuration?.configured) return;
     if (!this.requireBirthConfiguration || context.diagnosticMode === true) return;
@@ -294,6 +318,8 @@ export class FederatedSynthia {
         restored: true,
         birthMirrorPersisted: true,
         agentChartsPersisted: this.semanticGenome.agentCharts.size,
+        futureFeatureTestingPersisted: true,
+        futureFeatureSubmissions: this.futureFeatureTesting.list().length,
       });
     }
     return Object.freeze({
@@ -470,6 +496,7 @@ export class FederatedSynthia {
     const storedCharts = await this.runtimeStore.get('semantic-genome:agent-charts');
     const storedBirthMirror = await this.runtimeStore.get('identity:birth-mirror');
     const storedTemporalExperience = await this.runtimeStore.get('semantic-genome:temporal-experience');
+    const storedFutureFeatureTesting = await this.runtimeStore.get('governance:future-feature-testing');
     if (storedCharts != null && !Array.isArray(storedCharts)) {
       throw new TypeError('persisted semantic-genome:agent-charts must be an array');
     }
@@ -493,9 +520,15 @@ export class FederatedSynthia {
     if (storedTemporalExperience != null) {
       this.semanticGenome.restoreTemporalExperience(storedTemporalExperience);
     }
+    if (storedFutureFeatureTesting != null) {
+      this.futureFeatureTesting.restore(storedFutureFeatureTesting);
+    }
     this.restoringPersistentState = false;
     if (!storedCharts) {
       await this.runtimeStore.put('semantic-genome:agent-charts', this.#serializableAgentCharts());
+    }
+    if (!storedFutureFeatureTesting) {
+      await this.runtimeStore.put('governance:future-feature-testing', this.futureFeatureTesting.snapshot());
     }
     const audit = await this.runtimeStore.audit();
     this.persistenceStatus = Object.freeze({
@@ -507,6 +540,9 @@ export class FederatedSynthia {
       birthMirrorPersisted: Boolean(storedBirthMirror),
       temporalHistoricalStatesRestored: storedTemporalExperience?.landings?.length ?? 0,
       temporalMeshTracesRestored: storedTemporalExperience?.meshTraces?.length ?? 0,
+      futureFeatureTestingRestored: Boolean(storedFutureFeatureTesting),
+      futureFeatureTestingPersisted: true,
+      futureFeatureSubmissions: this.futureFeatureTesting.list().length,
     });
     return this.persistenceStatus;
   }
@@ -648,6 +684,14 @@ export class FederatedSynthia {
       if (input.operation === 'dismiss') return this.system.proposals.dismiss(input.proposalId, input.reason, { actor: input.actor ?? 'user' });
       if (input.operation === 'rollback') return this.system.proposals.rollback(input.proposalId);
       return this.system.proposals.pending(input.flow, input.personId);
+    }));
+    governance.register(runnable('future-feature-testing', ['register-submission', 'set-testing-consent', 'revoke-testing-consent', 'check-testing-consent', 'record-test-use'], (input = {}) => {
+      if (input.operation === 'register') return this.futureFeatureTesting.registerSubmission(input.submission ?? input);
+      if (input.operation === 'consent') return this.futureFeatureTesting.setConsent(input.submissionId, input.ownerId, input.consent ?? {}, { reason: input.reason ?? null });
+      if (input.operation === 'revoke') return this.futureFeatureTesting.revoke(input.submissionId, input.ownerId, input.reason ?? null);
+      if (input.operation === 'eligibility') return this.futureFeatureTesting.eligibility(input.submissionIds ?? [input.submissionId], input.purpose ?? {});
+      if (input.operation === 'record-test-use') return this.futureFeatureTesting.recordTestUse(input);
+      return this.futureFeatureTesting.snapshot();
     }));
 
     const swarm = new RelationalMesh({ id: 'swarm', dimension: 'Being' });
@@ -1153,6 +1197,24 @@ export class FederatedSynthia {
 
   async ingestBook(spec, context = {}) { return this.#cultivate('book-ingest', spec, context); }
 
+  registerFutureFeatureSubmission(submission = {}) {
+    return this.futureFeatureTesting.registerSubmission(submission);
+  }
+
+  setFutureFeatureTestingConsent(submissionId, ownerId, consent = {}, options = {}) {
+    return this.futureFeatureTesting.setConsent(submissionId, ownerId, consent, options);
+  }
+
+  revokeFutureFeatureTestingConsent(submissionId, ownerId, reason = null) {
+    return this.futureFeatureTesting.revoke(submissionId, ownerId, reason);
+  }
+
+  recordFutureFeatureTestUse(input = {}) {
+    return this.futureFeatureTesting.recordTestUse(input);
+  }
+
+  futureFeatureTestingSnapshot() { return this.futureFeatureTesting.snapshot(); }
+
   trainingSnapshot() { return this.system.trainingSnapshot(); }
 
   instrument(id) { return this.system.instrument(id); }
@@ -1168,6 +1230,7 @@ export class FederatedSynthia {
       sharedNeuralOrgans: NEURAL_ORGAN_SPECS,
       semanticGenome: this.semanticGenome.snapshot(),
       dimensionPerspectives: this.dimensionPerspectives.snapshot(),
+      futureFeatureTesting: this.futureFeatureTesting.snapshot(),
       canonicalMorph: this.canonicalMorph.snapshot(),
     });
   }
@@ -1283,6 +1346,7 @@ export class FederatedSynthia {
     const roleSnapshot = this.roleResolver.snapshot();
     const genomeSnapshot = this.semanticGenome.snapshot();
     const dnaPerceptionSnapshot = this.dnaPerception.snapshot();
+    const futureFeatureTestingSnapshot = this.futureFeatureTesting.snapshot();
     const identitySnapshot = this.birthMirror.publicSnapshot();
     const morphSnapshot = this.canonicalMorph.snapshot();
     const integrationChecks = {
@@ -1317,6 +1381,9 @@ export class FederatedSynthia {
         && this.trayCatalog().length > 0,
       frontScreenSurface: typeof this.chat === 'function' && typeof this.executeArtifact === 'function',
       semanticGenomeLive: typeof this.semanticGenome?.activate === 'function',
+      futureFeatureTestingConsent: futureFeatureTestingSnapshot.defaultPrivate === true
+        && futureFeatureTestingSnapshot.consentIsPerSubmission === true
+        && futureFeatureTestingSnapshot.revocationBlocksFutureUse === true,
       persistentAspectPrimitives768: genomeSnapshot.persistentAspectPrimitives === 768,
       sixAspectDyadsPerCodon: genomeSnapshot.hexagramCodons === 64
         && [...this.semanticGenome.codons.values()].every((codon) => codon.dyads.length === 6 && codon.aspects.length === 12),
@@ -1399,6 +1466,7 @@ export class FederatedSynthia {
       channelBody: channelSnapshot,
       semanticGenome: genomeSnapshot,
       dnaPerception: dnaPerceptionSnapshot,
+      futureFeatureTesting: futureFeatureTestingSnapshot,
       canonicalMorph: morphSnapshot,
       identity: identitySnapshot,
       federation,
