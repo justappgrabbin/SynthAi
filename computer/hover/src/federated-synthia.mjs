@@ -712,6 +712,23 @@ export class FederatedSynthia {
     }
   }
 
+  attachResident17(resident) {
+    if (this.atoMesh) throw new Error('ATO resident already attached');
+    const mesh = new RelationalMesh({ id: 'ato17', dimension: 'Being' });
+    mesh.register(runnable('process', ['ingest', 'interpret', 'ato-route'], (input) => resident.process(input)), { defaultNode: true });
+    mesh.register(runnable('grow-tool', ['grow-tool'], (input) => resident.growTool(input)));
+    mesh.register(runnable('register-program', ['register-program'], (input) => resident.registerProgram(input)));
+    mesh.register(runnable('run-program', ['run-program'], (input) => resident.runProgram(input.id, input.value, input.context)));
+    mesh.register(runnable('business', ['evaluate-opportunities'], (input) => resident.evaluateBusiness(input.opportunities, input.context)));
+    this.#wireLocalCoordination(mesh);
+    this.federation.register(mesh);
+    this.federation.connect('organism', 'ato17', { relation: 'shares-chat-intake', types: ['chat-intake'] });
+    this.federation.connect('ato17', 'semantic', { relation: 'shares-ato-interpretation', types: ['ato-interpretation'] });
+    this.resident17 = resident;
+    this.atoMesh = mesh;
+    return mesh;
+  }
+
   async #integrateCenters({ source, type, payload, address, parentId = null, relationalContext = {} }) {
     const gate = Number(address?.gate ?? payload?.canonicalAddress?.gate ?? 1);
     const centers = this.centerBody.centerForGate(gate);
@@ -819,15 +836,24 @@ export class FederatedSynthia {
   async chat(message, context = {}) {
     const personalized = await this.#personalize(message, context, 'conversation');
     context = personalized.context;
-    // The mounted v1.7 ATO organ participates in the same chat request and
-    // persists its state before the established seven-stage Klein pipeline.
-    const atoResult = this.resident17 ? await this.resident17.process(String(message)) : null;
+    const organism = await this.localMeshes.organism.run('pure-synthia', message, { ...context, surface: 'conversation' });
+    const addressed = personalized.expression?.address ?? organism.output.address;
+    const atoTransfer = this.atoMesh ? await this.federation.transfer({
+      from: { mesh: 'organism', node: 'pure-synthia' }, to: { mesh: 'ato17', node: 'process' },
+      type: 'chat-intake', payload: String(message), address: addressed,
+      relationalContext: { personId: context.personId ?? 'default-person', sourceEventId: organism.event.id },
+    }) : null;
+    const atoResult = atoTransfer?.receipt.output ?? null;
     const atoObservation = atoResult && {
       response: atoResult.response,
       route: safe(atoResult.route ?? null),
     };
-    const organism = await this.localMeshes.organism.run('pure-synthia', message, { ...context, surface: 'conversation' });
-    const addressed = personalized.expression?.address ?? organism.output.address;
+    if (atoTransfer) await this.federation.transfer({
+      from: { mesh: 'ato17', node: 'process' }, to: { mesh: 'semantic', node: 'semantic-context' },
+      type: 'ato-interpretation', payload: atoObservation, address: addressed,
+      parentId: atoTransfer.envelope.id,
+      relationalContext: { sourceId: atoResult.intake?.source?.id ?? null },
+    });
     const cognition = await this.federation.transfer({
       from: { mesh: 'organism', node: 'pure-synthia' },
       to: { mesh: 'semantic', node: 'chat-pipeline' },

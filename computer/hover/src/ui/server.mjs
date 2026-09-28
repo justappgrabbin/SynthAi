@@ -63,7 +63,7 @@ export async function startSynthiaFrontScreen({
   const organism = synthia ?? await FederatedSynthia.create({ persistenceDir });
   const solo = new SoloHoverRuntime({ organism, persistenceDir });
   const resident17 = await createSynthia17Resident({ persistenceDir });
-  organism.resident17 = resident17;
+  organism.attachResident17(resident17);
   await solo.startTasks();
   const server = createServer(async (request, response) => {
     try {
@@ -83,23 +83,31 @@ export async function startSynthiaFrontScreen({
       if (url.pathname === '/api/solo/organism/process' && request.method === 'POST') {
         const { input } = await bodyOf(request);
         if (!String(input ?? '').trim()) throw new TypeError('Organism input is required');
-        return reply(response, 200, { ok: true, result: await resident17.process(String(input)) });
+        const { output } = await organism.atoMesh.run('process', String(input));
+        return reply(response, 200, { ok: true, result: output });
       }
       if (url.pathname === '/api/solo/organism/grow' && request.method === 'POST') {
         const requestBody = await bodyOf(request);
         if (!String(requestBody.purpose ?? '').trim()) throw new TypeError('Tool purpose is required');
-        const result = await resident17.growTool(requestBody);
+        const { output: result } = await organism.atoMesh.run('grow-tool', requestBody);
         return reply(response, 200, { ok: true, result: { id: result.automaton?.id, fieldTool: result.fieldTool, generationStatus: result.generationStatus } });
       }
       if (url.pathname === '/api/solo/organism/business' && request.method === 'POST') {
         const { opportunities, context } = await bodyOf(request);
         if (!Array.isArray(opportunities) || !opportunities.length) throw new TypeError('Business opportunities are required');
-        return reply(response, 200, { ok: true, result: await resident17.evaluateBusiness(opportunities, context) });
+        const { output } = await organism.atoMesh.run('business', { opportunities, context });
+        return reply(response, 200, { ok: true, result: output });
       }
       if (url.pathname === '/api/solo/organism/program' && request.method === 'POST') {
         const body = await bodyOf(request);
-        if (body.operation === 'register') return reply(response, 200, { ok: true, result: await resident17.registerProgram(body.program) });
-        if (body.operation === 'run') return reply(response, 200, { ok: true, result: await resident17.runProgram(body.id, body.input, body.context) });
+        if (body.operation === 'register') {
+          const { output } = await organism.atoMesh.run('register-program', body.program);
+          return reply(response, 200, { ok: true, result: output });
+        }
+        if (body.operation === 'run') {
+          const { output } = await organism.atoMesh.run('run-program', { id: body.id, value: body.input, context: body.context });
+          return reply(response, 200, { ok: true, result: output });
+        }
         throw new TypeError('Program operation must be register or run');
       }
       if (request.method === 'POST' && url.pathname === '/api/solo/tool-factory') {

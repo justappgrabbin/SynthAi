@@ -23,7 +23,7 @@ test('front screen serves live status, chat, and the independently callable exec
   assert.equal(status.ok, true);
   assert.equal(status.ready, false);
   assert.equal(status.identity.configured, false);
-  assert.equal(status.counts.meshes, 51);
+  assert.equal(status.counts.meshes, 52);
   assert.equal(status.counts.channels, 36);
   assert.equal(status.counts.centers, 9);
   assert.equal(status.counts.codons, 64);
@@ -93,6 +93,10 @@ test('front screen serves live status, chat, and the independently callable exec
   assert.equal(chat.ok, true);
   assert.equal(chat.pipelineTrace.length, 7);
   assert.ok(chat.atoObservation?.response);
+  const transfers = started.synthia.federation.transfers;
+  assert.ok(transfers.some((entry) => entry.envelope.to.mesh === 'ato17' && entry.receipt.consumed));
+  assert.ok(transfers.some((entry) => entry.envelope.from.mesh === 'ato17' && entry.envelope.to.mesh === 'semantic' && entry.receipt.consumed));
+  assert.ok(started.resident17.status().sources >= 1);
   assert.equal(chat.coordination.participants.length, 2);
   assert.equal(chat.swarmExecution.executions[0].workerId, 'birth-mirror-expression-organ');
   assert.equal(chat.semanticGenome.address.gate, chat.swarmExpression.address.gate);
