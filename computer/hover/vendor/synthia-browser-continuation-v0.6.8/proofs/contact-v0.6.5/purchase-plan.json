@@ -1,0 +1,14 @@
+{
+  "input": "I need to order dog food",
+  "route": "browser",
+  "task": "purchase-workflow",
+  "steps": [
+    "open-site",
+    "search",
+    "compare-requested-constraints",
+    "select-item",
+    "prepare-cart",
+    "pause-before-payment-or-order"
+  ],
+  "finalConfirmation": "purchase"
+}

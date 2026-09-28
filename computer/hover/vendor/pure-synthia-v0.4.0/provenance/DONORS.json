@@ -1,0 +1,37 @@
+{
+  "current_tethered_donor": {
+    "basename": "Synthia-OS-Acode-Morph-v0.9.3-BEST-OF-LIVING-ORGANISM-VERIFIED (1).zip",
+    "bytes": 59269155,
+    "sha256": "fb4da41c27838139a3d6c0d0317f4eb3e7f30ce9973c43d01006ea85f48839bb"
+  },
+  "awake_continuity_donor": {
+    "basename": "Pure-Synthia-Awake-Standalone.zip",
+    "bytes": 121782,
+    "sha256": "91cc6971e835762ba336fa3af0950b213ae56666d1a1c6a6e8063d047e9cea36"
+  },
+  "morph_donor": {
+    "basename": "morph_engine_js.zip",
+    "bytes": 11461,
+    "sha256": "546275620317ab966736d52cebd645ef892cc53a020512e50b1d3681de0768f3"
+  },
+  "android_shell": {
+    "basename": "synthia-os-android.zip",
+    "bytes": 21317,
+    "sha256": "303e2e3ce942556bfa939eb7046533583b5f42449ed9c60a8a7f20970bca4552"
+  },
+  "mcp_build_pipeline": {
+    "basename": "synthia-mcp-build-pipeline-fixed.zip",
+    "bytes": 7257,
+    "sha256": "17533197fe95733ca12fdca89a88482a5bea077f73293a98d1634be96d4a5c34"
+  },
+  "selfhosted_bridge": {
+    "basename": "selfhostedBridge.js",
+    "bytes": 1643,
+    "sha256": "2fbd68ead1aaefe2a4da21e3a1469e72851b8b63e90a0479574defd3e0655897"
+  },
+  "selfhosted_apk": {
+    "basename": "synthia-phone-selfhosted-final-debug.apk",
+    "bytes": 52108755,
+    "sha256": "971a476a9b290d0eb450b098daa844e05a5f54e163795e1e1fa671d7b17e2c80"
+  }
+}

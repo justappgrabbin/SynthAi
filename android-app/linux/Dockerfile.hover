@@ -9,8 +9,8 @@ RUN rm -rf /usr/local/lib/node_modules/npm /usr/local/bin/npm /usr/local/bin/npx
            /opt/yarn-* /usr/local/bin/yarn /usr/local/bin/yarnpkg \
     && apk add --no-cache ca-certificates tzdata python3 py3-pip
 
-# Byte-identical copy of the vendored 5.8 app (see computer/donors/synthia58/README.synthai-vendor.md).
-COPY computer/donors/synthia58/Synthia-Solo-Hover-v0.5.8 /opt/synthia58
+# Canonical Hover app; preserved donor remains under computer/donors for provenance.
+COPY computer/hover /opt/synthia58
 
 COPY computer/donors/synthia58/extras/Cynthia-Talk-v1-unmodified /opt/synthia-talk
 RUN python3 -m venv /opt/talk-venv \

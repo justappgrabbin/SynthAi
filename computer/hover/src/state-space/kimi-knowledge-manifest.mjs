@@ -1,0 +1,36 @@
+// Textual knowledge carried by the supplied Kimi state-space package.
+export const KIMI_KNOWLEDGE_FILES = Object.freeze([
+  'plan.md',
+  'pure-synthia-automata/README.md',
+  'pure-synthia-automata/docs/FRAGMENT_ALGEBRA_SPEC.md',
+  'pure-synthia-automata/docs/HANDOFF_INTEGRATION.md',
+  'pure-synthia-automata/docs/IMPLEMENTATION_CONTRACT.md',
+  'pure-synthia-automata/docs/MAPPING_AUDIT.md',
+  'pure-synthia-automata/docs/MERGE_NOTES.md',
+  'pure-synthia-automata/docs/PROCESSING_HIERARCHY.md',
+  'pure-synthia-automata/docs/SOURCE_MATRIX.md',
+  'pure-synthia-automata/docs/SPEC_PERSONAL_NETWORK_SCALE.md',
+  'pure-synthia-automata/docs/STATE_SPACE_SPEC.md',
+  'pure-synthia-automata/docs/corpus/adler-yijing-guide.md',
+  'pure-synthia-automata/docs/corpus/black-book-5.md',
+  'pure-synthia-automata/docs/corpus/black-book-chains-colors.md',
+  'pure-synthia-automata/docs/corpus/daoust-occult-iching.md',
+  'pure-synthia-automata/docs/corpus/datasets-report.md',
+  'pure-synthia-automata/docs/corpus/existing-inventory.md',
+  'pure-synthia-automata/docs/corpus/generative-grammar-master.md',
+  'pure-synthia-automata/docs/corpus/govinda-inner-structure.md',
+  'pure-synthia-automata/docs/corpus/moog-cosmic-way.md',
+  'pure-synthia-automata/docs/corpus/moore-trigrams-of-han.md',
+  'pure-synthia-automata/docs/corpus/pure-synthia-state-calculus-compendium.md',
+  'pure-synthia-automata/docs/corpus/raw-sentence-breakdown.txt',
+  'pure-synthia-automata/docs/corpus/reifler-new-interpretation.md',
+  'pure-synthia-automata/docs/corpus/science-new-golden-age.md',
+  'pure-synthia-automata/docs/corpus/super-iching.md',
+  'pure-synthia-automata/docs/corpus/unique-pieces-survey-2.md',
+  'pure-synthia-automata/docs/corpus/wen-oracle.md',
+  'pure-synthia-automata/docs/corpus/yijing1-2.md',
+  'pure-synthia-automata/docs/corpus/zhouyi-bronze-age.md',
+]);
+
+export default KIMI_KNOWLEDGE_FILES;
+

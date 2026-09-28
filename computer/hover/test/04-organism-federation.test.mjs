@@ -1,0 +1,64 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { configuredSynthia } from './helpers.mjs';
+
+test('Pure Synthia and execution are one living mesh-of-meshes with real hands', async (t) => {
+  const fixture = await configuredSynthia('federated-test');
+  t.after(fixture.cleanup);
+  const { synthia } = fixture;
+  assert.equal(synthia.baselineProcessCount, 47);
+  assert.ok(synthia.swarm.snapshot().processCount > 47);
+  assert.equal(synthia.synthia.meshRuntime.engine, synthia.system.engine);
+  assert.equal(synthia.federation.meshes.size, 51);
+  assert.ok(synthia.swarm.find('execute-app').length > 0);
+  assert.equal(synthia.hands().integratedHands.length, 68);
+  assert.equal(synthia.hands().stateSpaceInstruments.length, 126);
+  assert.equal(synthia.hands().nineCenters.length, 9);
+  assert.equal(synthia.hands().channelMeshes.length, 36);
+  assert.equal(synthia.hands().sharedNeuralOrgans.length, 4);
+  assert.ok(synthia.hands().integratedHands.every((hand) => hand.independentlyCallable));
+  assert.ok(Object.values(synthia.localMeshes).every((mesh) => mesh.snapshot().edges.length > 0));
+
+  const standalone = synthia.instrument('autoling');
+  assert.ok(standalone);
+  assert.equal(standalone.run({ operation: 'pipeline', text: 'player moves' }).accepted, true);
+
+  const chat = await synthia.chat('The player moves toward the goal.', { personId: 'federated-test' });
+  assert.equal(chat.ok, true);
+  assert.equal(chat.pipelineTrace.length, 7);
+  const federation = synthia.federation.audit();
+  assert.ok(federation.transfers >= 4);
+  assert.equal(federation.transfers, federation.consumedTransfers);
+  assert.ok(synthia.contextMemory.get('learning').length > 0);
+  assert.ok(synthia.contextMemory.get('governance').length > 0);
+  assert.ok(synthia.contextMemory.get('organism').length > 0);
+
+  const audit = synthia.wiringAudit();
+  assert.equal(audit.ok, true);
+  assert.equal(audit.oneSemanticEngine, true);
+  assert.equal(audit.meshOfMeshes, true);
+  assert.equal(audit.crossMeshContextConsumption, true);
+  assert.equal(audit.localMeshCoordination, true);
+  assert.equal(audit.independentHands, true);
+  assert.equal(audit.chatPipeline, true);
+  assert.equal(audit.meshCoordinator, true);
+  assert.ok(audit.meshCoordinatorRuns > 0);
+  assert.equal(audit.exactAddressRecall, true);
+  assert.equal(audit.executionTray, true);
+  assert.equal(audit.frontScreenSurface, true);
+  assert.equal(audit.primitiveSystemPromoted, true);
+  assert.equal(audit.autonomyLoop, true);
+  assert.equal(audit.nineCenterBody, true);
+  assert.equal(audit.channelMeshBody, true);
+  assert.equal(audit.canonicalGateGraph, true);
+  assert.equal(audit.fourNeuralOrgans, true);
+  assert.equal(audit.dimensionRelativeChannelInteractions, true);
+  assert.equal(audit.fiveLevelStateSpaceLive, true);
+  assert.equal(audit.stateSpaceBlended, true);
+  assert.equal(audit.allStateSpaceInstrumentsMounted, true);
+  assert.equal(audit.allSynthiaIsCultivation, true);
+  assert.equal(audit.birthMirrorConfigured, true);
+  assert.equal(audit.birthMirrorSwarmOrgan, true);
+  assert.equal(audit.birthMirrorPersistence, true);
+  assert.equal(audit.federation.links, 2550);
+});

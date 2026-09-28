@@ -1,0 +1,22 @@
+{
+  "artifact": "Pure-Synthia-v0.4.0-FINISHED-BASELINE",
+  "canonicalAddress": "NorthNode:Evolution:G17.L1.C1.T1.B1:209°40′18″:Desc:Leo:H5",
+  "parts": {
+    "planetary": "NorthNode",
+    "dimension": "Evolution",
+    "gate": 17,
+    "line": 1,
+    "color": 1,
+    "tone": 1,
+    "base": 1,
+    "degree": 209,
+    "minute": 40,
+    "second": 18,
+    "arcAxis": "Desc",
+    "zodiac": "Leo",
+    "house": 5
+  },
+  "resolverInput": "Pure-Synthia-v0.4.0-FINISHED-BASELINE",
+  "resolver": "current-package canonicalState.resolve()",
+  "status": "verified"
+}

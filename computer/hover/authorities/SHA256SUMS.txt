@@ -1,0 +1,12 @@
+feb74171d99a011307f8b497247ae732e02fd9cbdc0f0e32aea9d65444f23468  originals/01-SynthAI-Exact-Address-Recall-PATCH.zip
+22944ae853ca73dc7ac5c1b9cdf06af6e560b7dab6140975b3df3f610a5d7095  originals/02-synthia-core-v1.0.0.zip
+1def70a163b159a05851465b0cdec49b4c62a2356b1ec4e526554cbbbc91e9c0  originals/03-Synthia-Codex-Provider-Runtime-v0.1.1.zip
+cee899ef720a0e1776f525c959b6e12404a74dd3b4547da7caf34dff5febcc46  originals/04-Pure-Synthia-Trainable-Assembly-v0.4.2.zip
+4b407881be4324860d09e3c743b5d518d35b8f0daa0831545a6c7e2b3c62c6af  originals/05-Synthia-Universal-Execution-Spine-v0.4.0.zip
+fa3344dac6f8c4b2e838b9146ca5c6d339e1fc4ec0bb7aa15c3259724beff3fd  originals/06-Kimi_Agent_Automata-State-Space-Merge-1-.zip
+46271c91b9e7ef7ead5dd49063b01926812bc16929a8ddfa721c176f794da56d  black-book-dimension-perspectives/01-movement.png
+eb35f1a51b7df6fc481ed0b2a9c2eace8382370029b792db668478a688da6b62  black-book-dimension-perspectives/02-evolution.png
+ddfbb905976a96d5f7a207db259c3cc7a406b3217cfa011a671b8e72d2a74d6c  black-book-dimension-perspectives/03-being.png
+ac65aa6ae2efa07811770fe17e64bb12765bfc3decc14fb01438e193ebc42adc  black-book-dimension-perspectives/04-design.png
+5ea29a99f2d967244bb2d72c64d65472f3cd170088f94e778d3434bd9def1a2c  black-book-dimension-perspectives/05-space.png
+e2f4f41cebd393a6b58cdbe43ad7ba9119bdb7c5c4af3d1f334ff2ff1641af39  black-book-dimension-perspectives/black-book-user-supplied-reference.pdf

@@ -1,0 +1,47 @@
+{
+  "package": "synthia-core",
+  "version": "1.0.0",
+  "created": "2026-09-09",
+  "policy": "additive-no-canonical-overwrite",
+
+  "authorities": [
+    "Pure-Synthia-Trainable-Assembly-v0.4.1.zip",
+    "Synthia-Universal-Execution-Spine-v0.4.0.zip",
+    "ato-core.zip"
+  ],
+
+  "components": {
+    "ato-core": {
+      "source": "ato-core.zip",
+      "version": "ato-core.v0.4.0 (shell-bridge build)",
+      "what": "Klein ATO engine — the actual executable system. Automaton class, AutomataMesh, StateSpaceKernel, DiseminerMemory, AutoLingMemory, AutoNovelMemory, FeatureSpace, boolean-ato operators (XOR/XNOR/Hamming), bootstrapATO, bootstrapKleinTools, families (8 primary automatons), emergence registry, success ledger, workspace, companion, autonomy",
+      "note": "This is the muscle. Without this there are no tools, only descriptions."
+    },
+    "learning": {
+      "source": "Pure-Synthia-Trainable-Assembly-v0.4.1.zip",
+      "what": "PureSynthiaLearningCore — StateRegistry (native+current address, sayings, provenance), TrainingJournal (route scoring), ScientistLoop (question/hypothesis/evidence/experiment), SentenceMesh (contact language), BookIngestBridge",
+      "note": "Synthia's memory and growth organs. Training accumulates over sessions."
+    },
+    "SynthiaCore": {
+      "source": "built here 2026-09-09",
+      "what": "Wiring file. Boots learning layer + ATO mesh together. Synthia IS the resolver — DiseminerMemory + StateSpaceKernel derive gate placement from incoming text. water(text) accumulates co-occurrence evidence. admit(piece) places pieces by Synthia's current state. contact(a,b) produces SentenceMesh language from two admitted entities.",
+      "seedAddress": { "entityId": "synthia", "dimension": "Being", "gate": 1, "saying": "I Am" }
+    }
+  },
+
+  "what_is_NOT_here": [
+    "Synthia-Universal-Execution-Spine-v0.4.0 — the canonical 13-field address system and DAG executor. Import separately when needed for full address resolution.",
+    "Foreman Residence — the computer/executor layer. Mount SynthiaCore as the resident authority inside SynthiaForemanResidence.",
+    "Four-Layer Bridge — Resonance, HumanDesign chart math, YOU-N-I-VERSE. These are peer layers, not internal to Synthia.",
+    "Codex Provider Runtime — model routing (delegate to external LLM). Optional layer on top.",
+    "Tri-Runtime — Apple/Android/Windows target bodies. Execution host, not organism.",
+    "Adaya/ORGANISM PWA — the mobile residence. Separate.",
+    "Chart engine (sidereal/draconic/tropical) — from chart-instruments build. Plugs into Four-Layer Bridge HumanDesign layer."
+  ],
+
+  "automaton_loop_reference": {
+    "source": "automaton-loop.mjs",
+    "what": "Conway-style Think→Act→Observe→Persist loop with FuxiEncoder, ATOEngine (semantic triple + line flip), ToolFactory (only builds on channels), HD scoring (S+A, CRS), 5-dimension operator coherence regulation. Reference implementation showing the intended runtime behavior.",
+    "status": "reference — the patterns here (ToolFactory.hasChannel, coherenceOf, regulateOperators) should inform how SynthiaCore's admit() and call() evolve"
+  }
+}

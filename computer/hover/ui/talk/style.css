@@ -1,0 +1,17 @@
+*{box-sizing:border-box}
+body{margin:0;background:#0b0b12;color:#e9e9f1;font-family:system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif}
+.app{max-width:820px;margin:0 auto;padding:12px}
+header{display:flex;align-items:center;justify-content:space-between}
+h1{font-weight:800;letter-spacing:0.3px}
+h1 span{font-size:0.6em;opacity:0.7}
+#log{height:64vh;overflow:auto;padding:8px;border:1px solid #222;border-radius:12px;background:linear-gradient(180deg,#101018,#0b0b12)}
+.row{margin:10px 0;padding:10px;border-radius:12px}
+.row.user{background:#151525;border:1px solid #2a2a44}
+.row.ai{background:#121a14;border:1px solid #224422}
+.row b{display:block;margin-bottom:4px;opacity:0.8}
+form{display:flex;gap:8px;margin-top:10px}
+input{flex:1;padding:12px 14px;border-radius:12px;border:1px solid #2a2a44;background:#0f0f19;color:#e9e9f1}
+button{padding:12px 14px;border-radius:12px;border:1px solid #2a2a44;background:#1e1e30;color:#fff;cursor:pointer}
+button:hover{filter:brightness(1.1)}
+dialog{border:1px solid #2a2a44;border-radius:12px;background:#0f0f19;color:#fff;padding:16px}
+select{width:100%;padding:10px;border-radius:10px;background:#151525;color:#fff;border:1px solid #2a2a44}

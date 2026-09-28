@@ -58,7 +58,7 @@ jobs:
       - name: Verify Hover birth entry, task queue and embedded Talk
         run: |
           python -m pip install -r computer/donors/synthia58/extras/Cynthia-Talk-v1-unmodified/requirements.txt
-          node --test --test-concurrency=1 computer/donors/synthia58/Synthia-Solo-Hover-v0.5.8/test/09-front-screen.test.mjs computer/donors/synthia58/Synthia-Solo-Hover-v0.5.8/test/11-birth-mirror-runtime.test.mjs computer/donors/synthia58/Synthia-Solo-Hover-v0.5.8/test/20-hover-task-worker.test.mjs
+          node --test --test-concurrency=1 computer/hover/test/09-front-screen.test.mjs computer/hover/test/11-birth-mirror-runtime.test.mjs computer/hover/test/20-hover-task-worker.test.mjs
           npm install --prefix /tmp/hover-ui-test playwright@1.58.2
           /tmp/hover-ui-test/node_modules/.bin/playwright install --with-deps chromium
           node .github/scripts/hover-ui-smoke.mjs
@@ -148,7 +148,7 @@ jobs:
           test ! -e /tmp/synthia-hover-rootfs/opt/synthia-server
           test ! -e /tmp/synthia-hover-rootfs/opt/synthai
           # Vendored 5.8 app must be byte-identical inside the rootfs.
-          diff -r computer/donors/synthia58/Synthia-Solo-Hover-v0.5.8 /tmp/synthia-hover-rootfs/opt/synthia58
+          diff -r computer/hover /tmp/synthia-hover-rootfs/opt/synthia58
           tar --hard-dereference -C /tmp/synthia-hover-rootfs -czf android-app/app/src/hover/assets/linux-rootfs.bundle .
           printf '%s-synthia58-hover-1\n' "$GITHUB_SHA" > android-app/app/src/hover/assets/linux-rootfs.version
           du -h android-app/app/src/hover/assets/linux-rootfs.bundle

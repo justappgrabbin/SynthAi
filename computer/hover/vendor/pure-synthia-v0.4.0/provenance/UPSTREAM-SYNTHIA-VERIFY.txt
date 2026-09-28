@@ -1,0 +1,612 @@
+TAP version 13
+# Subtest: Acode hosts bind as four separate action tools
+ok 1 - Acode hosts bind as four separate action tools
+  ---
+  duration_ms: 15.911986
+  type: 'test'
+  ...
+# Subtest: hands execute only after the existing autonomy permission agrees
+ok 2 - hands execute only after the existing autonomy permission agrees
+  ---
+  duration_ms: 0.786879
+  type: 'test'
+  ...
+# Subtest: artifact retrieval refuses requests without a complete digest
+ok 3 - artifact retrieval refuses requests without a complete digest
+  ---
+  duration_ms: 0.537706
+  type: 'test'
+  ...
+# Subtest: only active action tools consume the 26 body slots
+ok 4 - only active action tools consume the 26 body slots
+  ---
+  duration_ms: 30.500449
+  type: 'test'
+  ...
+# Subtest: a capable sovereign tool can decline without executing
+ok 5 - a capable sovereign tool can decline without executing
+  ---
+  duration_ms: 1.018274
+  type: 'test'
+  ...
+# Subtest: hands do not imply that the browser host is available
+ok 6 - hands do not imply that the browser host is available
+  ---
+  duration_ms: 0.877959
+  type: 'test'
+  ...
+# Subtest: an available host still needs per-task permission
+ok 7 - an available host still needs per-task permission
+  ---
+  duration_ms: 0.522451
+  type: 'test'
+  ...
+# Subtest: DEG learner extracts reusable production rules from a tiny generic dataset
+ok 8 - DEG learner extracts reusable production rules from a tiny generic dataset
+  ---
+  duration_ms: 25.257646
+  type: 'test'
+  ...
+# Subtest: DEG production rules can generate a new graph without Geo-DEG
+ok 9 - DEG production rules can generate a new graph without Geo-DEG
+  ---
+  duration_ms: 3.979647
+  type: 'test'
+  ...
+# Subtest: DEG Automaton can live by itself on its own mesh
+ok 10 - DEG Automaton can live by itself on its own mesh
+  ---
+  duration_ms: 1.078939
+  type: 'test'
+  ...
+# Subtest: Geo-DEG geometry can live by itself and consume a grammar data contract
+ok 11 - Geo-DEG geometry can live by itself and consume a grammar data contract
+  ---
+  duration_ms: 3.155463
+  type: 'test'
+  ...
+# Subtest: Geo-DEG exposes similarity neighborhoods, routes, composition, and diffusion
+ok 12 - Geo-DEG exposes similarity neighborhoods, routes, composition, and diffusion
+  ---
+  duration_ms: 2.433937
+  type: 'test'
+  ...
+# Subtest: shared roof connects DEG output to Geo-DEG without merging their state
+ok 13 - shared roof connects DEG output to Geo-DEG without merging their state
+  ---
+  duration_ms: 5.082782
+  type: 'test'
+  ...
+# Subtest: DEG and Geo-DEG advertise separate independent ATO manifests
+ok 14 - DEG and Geo-DEG advertise separate independent ATO manifests
+  ---
+  duration_ms: 0.365881
+  type: 'test'
+  ...
+# Subtest: Settings exposes the grammar systems without turning them into Morph
+ok 15 - Settings exposes the grammar systems without turning them into Morph
+  ---
+  duration_ms: 1.912185
+  type: 'test'
+  ...
+# (node:6894) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///mnt/data/wired_upstream_verify/src/synthia/semantic-mesh/engine/synthia.js is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /mnt/data/wired_upstream_verify/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: living mesh activates all five distinct graph projections and the canonical tool population
+ok 16 - living mesh activates all five distinct graph projections and the canonical tool population
+  ---
+  duration_ms: 13.199836
+  type: 'test'
+  ...
+# Subtest: cue processing records semantic triples, all five phase stages, and canonical-address bridging
+ok 17 - cue processing records semantic triples, all five phase stages, and canonical-address bridging
+  ---
+  duration_ms: 25.48514
+  type: 'test'
+  ...
+# Subtest: public anticipatory memory never exposes private coordinates or raw content
+ok 18 - public anticipatory memory never exposes private coordinates or raw content
+  ---
+  duration_ms: 8.403494
+  type: 'test'
+  ...
+# Subtest: independent current nodes join by proxy without transferring owned state into the shared snapshot
+ok 19 - independent current nodes join by proxy without transferring owned state into the shared snapshot
+  ---
+  duration_ms: 5.444016
+  type: 'test'
+  ...
+# Subtest: actual repeated information crossings promote an emergent channel
+ok 20 - actual repeated information crossings promote an emergent channel
+  ---
+  duration_ms: 8.247331
+  type: 'test'
+  ...
+# Subtest: semantic growth delegates to the active Integrated Tool Factory instead of the preserved Kimi factory
+ok 21 - semantic growth delegates to the active Integrated Tool Factory instead of the preserved Kimi factory
+  ---
+  duration_ms: 19.473226
+  type: 'test'
+  ...
+# Subtest: the experiment stack is represented as one mesh node rather than owning the semantic mesh
+ok 22 - the experiment stack is represented as one mesh node rather than owning the semantic mesh
+  ---
+  duration_ms: 500.130233
+  type: 'test'
+  ...
+# Subtest: Morph Chat remains usable when optional DEG and Geo-DEG tools are absent
+ok 23 - Morph Chat remains usable when optional DEG and Geo-DEG tools are absent
+  ---
+  duration_ms: 64.418927
+  type: 'test'
+  ...
+# Subtest: Morph Chat can discover and call DEG alone through an external tool mesh
+ok 24 - Morph Chat can discover and call DEG alone through an external tool mesh
+  ---
+  duration_ms: 45.008438
+  type: 'test'
+  ...
+# Subtest: Morph Chat can discover Geo-DEG alone without taking ownership of its geometry
+ok 25 - Morph Chat can discover Geo-DEG alone without taking ownership of its geometry
+  ---
+  duration_ms: 36.916339
+  type: 'test'
+  ...
+# Subtest: Morph Chat can chain DEG output into Geo-DEG by message data without merging state
+ok 26 - Morph Chat can chain DEG output into Geo-DEG by message data without merging state
+  ---
+  duration_ms: 24.656463
+  type: 'test'
+  ...
+# Subtest: Morph runtime has no direct implementation import of DEG or Geo-DEG
+ok 27 - Morph runtime has no direct implementation import of DEG or Geo-DEG
+  ---
+  duration_ms: 1.840884
+  type: 'test'
+  ...
+# Subtest: Residence composition root attaches grammar tools without importing them into Morph
+ok 28 - Residence composition root attaches grammar tools without importing them into Morph
+  ---
+  duration_ms: 0.2756
+  type: 'test'
+  ...
+# Subtest: v0.6 substrate preserves originals and diagnoses the same intake
+ok 29 - v0.6 substrate preserves originals and diagnoses the same intake
+  ---
+  duration_ms: 27.839684
+  type: 'test'
+  ...
+# Subtest: duplicate intake records a sighting without replacing the original
+ok 30 - duplicate intake records a sighting without replacing the original
+  ---
+  duration_ms: 5.818378
+  type: 'test'
+  ...
+# Subtest: MCP gateway edits a workboard copy, never the immutable original
+ok 31 - MCP gateway edits a workboard copy, never the immutable original
+  ---
+  duration_ms: 5.665551
+  type: 'test'
+  ...
+# Subtest: Morph Chat is an independent ATO and keeps Klein tools independent
+ok 32 - Morph Chat is an independent ATO and keeps Klein tools independent
+  ---
+  duration_ms: 44.066687
+  type: 'test'
+  ...
+# Subtest: normal conversation fires a VQ trace and returns non-echo language
+ok 33 - normal conversation fires a VQ trace and returns non-echo language
+  ---
+  duration_ms: 43.078249
+  type: 'test'
+  ...
+# Subtest: perspective is proportional and plural rather than one fixed view
+ok 34 - perspective is proportional and plural rather than one fixed view
+  ---
+  duration_ms: 79.792313
+  type: 'test'
+  ...
+# Subtest: coding conversation produces executable-oriented code and grammar analysis
+ok 35 - coding conversation produces executable-oriented code and grammar analysis
+  ---
+  duration_ms: 23.70442
+  type: 'test'
+  ...
+# Subtest: multi-turn session memory is carried into later responses
+ok 36 - multi-turn session memory is carried into later responses
+  ---
+  duration_ms: 24.115027
+  type: 'test'
+  ...
+# Subtest: final wording provider is replaceable without replacing Morph cognition
+ok 37 - final wording provider is replaceable without replacing Morph cognition
+  ---
+  duration_ms: 20.371349
+  type: 'test'
+  ...
+# Subtest: provider failure falls back to the local Morph realization
+ok 38 - provider failure falls back to the local Morph realization
+  ---
+  duration_ms: 24.893181
+  type: 'test'
+  ...
+# Subtest: Residence UI exposes separate Morph and Morph Chat routes with cached panels
+ok 39 - Residence UI exposes separate Morph and Morph Chat routes with cached panels
+  ---
+  duration_ms: 0.678191
+  type: 'test'
+  ...
+# Subtest: user-supplied visual Morph Engine remains standalone behind the shell bridge
+ok 40 - user-supplied visual Morph Engine remains standalone behind the shell bridge
+  ---
+  duration_ms: 0.921054
+  type: 'test'
+  ...
+# Subtest: integrated factory generates, mounts, and runs a native ATO tool
+ok 41 - integrated factory generates, mounts, and runs a native ATO tool
+  ---
+  duration_ms: 8.597271
+  type: 'test'
+  ...
+# Subtest: Synthia synthesis runtime exposes the end-to-end MVP path
+ok 42 - Synthia synthesis runtime exposes the end-to-end MVP path
+  ---
+  duration_ms: 13.40875
+  type: 'test'
+  ...
+# Subtest: all eight structural synthesis levels are executable
+ok 43 - all eight structural synthesis levels are executable
+  ---
+  duration_ms: 17.125548
+  type: 'test'
+  ...
+# Subtest: semantic completion preserves supplied coordinate fields
+ok 44 - semantic completion preserves supplied coordinate fields
+  ---
+  duration_ms: 4.400436
+  type: 'test'
+  ...
+# Subtest: meaning-first sentence realization remains available as an output layer
+ok 45 - meaning-first sentence realization remains available as an output layer
+  ---
+  duration_ms: 0.742204
+  type: 'test'
+  ...
+# (node:6949) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///mnt/data/wired_upstream_verify/src/synthia/semantic-mesh/automata/automaton.js is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /mnt/data/wired_upstream_verify/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: native grammar exposes exactly 64 primitive slots without inventing unresolved complements
+ok 46 - native grammar exposes exactly 64 primitive slots without inventing unresolved complements
+  ---
+  duration_ms: 2.916873
+  type: 'test'
+  ...
+# Subtest: primitive teaching extends the finite basis without changing its 64-slot size
+ok 47 - primitive teaching extends the finite basis without changing its 64-slot size
+  ---
+  duration_ms: 1.253258
+  type: 'test'
+  ...
+# Subtest: P/D/G/L/C/T/B jobs remain invariant across Human Design and code domain labels
+ok 48 - P/D/G/L/C/T/B jobs remain invariant across Human Design and code domain labels
+  ---
+  duration_ms: 3.061109
+  type: 'test'
+  ...
+# Subtest: relationship grammar classifies resonance, harmony, and dissonance and rejects scale teleporting
+ok 49 - relationship grammar classifies resonance, harmony, and dissonance and rejects scale teleporting
+  ---
+  duration_ms: 0.894374
+  type: 'test'
+  ...
+# Subtest: scale engine provides the same FOLD/UNFOLD/UP/DOWN/CROSS/PIVOT operators independent of domain
+ok 50 - scale engine provides the same FOLD/UNFOLD/UP/DOWN/CROSS/PIVOT operators independent of domain
+  ---
+  duration_ms: 0.511478
+  type: 'test'
+  ...
+# Subtest: reality correction preserves unresolved as distinct from contradicted and remembers observation
+ok 51 - reality correction preserves unresolved as distinct from contradicted and remembers observation
+  ---
+  duration_ms: 2.19897
+  type: 'test'
+  ...
+# Subtest: one native control loop handles Human Design, language, and code domains
+ok 52 - one native control loop handles Human Design, language, and code domains
+  ---
+  duration_ms: 1.27144
+  type: 'test'
+  ...
+# Subtest: live Synthia mesh invokes the addressed native grammar and existing AutoLing boundary
+ok 53 - live Synthia mesh invokes the addressed native grammar and existing AutoLing boundary
+  ---
+  duration_ms: 37.216436
+  type: 'test'
+  ...
+# Subtest: native grammar and its internal organs are addressed, identified, and live on the integration graph
+ok 54 - native grammar and its internal organs are addressed, identified, and live on the integration graph
+  ---
+  duration_ms: 0.790339
+  type: 'test'
+  ...
+# (node:6950) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///mnt/data/wired_upstream_verify/src/synthia/semantic-mesh/engine/synthia.js is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /mnt/data/wired_upstream_verify/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: browser Human Design GNN reproduces the trained PyTorch checkpoint fixture
+ok 55 - browser Human Design GNN reproduces the trained PyTorch checkpoint fixture
+  ---
+  duration_ms: 31.504897
+  type: 'test'
+  ...
+# Subtest: trained Human Design GNN remains an independent callable node
+ok 56 - trained Human Design GNN remains an independent callable node
+  ---
+  duration_ms: 11.534564
+  type: 'test'
+  ...
+# Subtest: perspective connection field keeps one 64-node state with 36 links per node across five projections
+ok 57 - perspective connection field keeps one 64-node state with 36 links per node across five projections
+  ---
+  duration_ms: 14.706485
+  type: 'test'
+  ...
+# Subtest: generative process preserves its donor hierarchy while using the verified 36-edge HD graph as the active adapter
+ok 58 - generative process preserves its donor hierarchy while using the verified 36-edge HD graph as the active adapter
+  ---
+  duration_ms: 23.457149
+  type: 'test'
+  ...
+# Subtest: all 36 architecture-generator families execute and its neural layer modulates rather than owns capabilities
+ok 59 - all 36 architecture-generator families execute and its neural layer modulates rather than owns capabilities
+  ---
+  duration_ms: 5.973375
+  type: 'test'
+  ...
+# Subtest: architecture generator is a sovereign mesh capability, not a capability registry replacement
+ok 60 - architecture generator is a sovereign mesh capability, not a capability registry replacement
+  ---
+  duration_ms: 4.004864
+  type: 'test'
+  ...
+# Subtest: current Synthia runtime mounts neural functions as independent living-mesh nodes and cue events actually reach the connection field
+ok 61 - current Synthia runtime mounts neural functions as independent living-mesh nodes and cue events actually reach the connection field
+  ---
+  duration_ms: 81.551424
+  type: 'test'
+  ...
+# Subtest: verified runtime outcomes feed channel emergence state without exposing another node's internal state
+ok 62 - verified runtime outcomes feed channel emergence state without exposing another node's internal state
+  ---
+  duration_ms: 39.152494
+  type: 'test'
+  ...
+# Subtest: Micro-State-Space template keeps explicit legal transitions and PUCT memory
+ok 63 - Micro-State-Space template keeps explicit legal transitions and PUCT memory
+  ---
+  duration_ms: 6.026248
+  type: 'test'
+  ...
+# Subtest: Composition predictor learns from executed quality/cost outcomes
+ok 64 - Composition predictor learns from executed quality/cost outcomes
+  ---
+  duration_ms: 3.988714
+  type: 'test'
+  ...
+# Subtest: exploration controller has distinct exploit, uncertainty, novelty, and value-free modes
+ok 65 - exploration controller has distinct exploit, uncertainty, novelty, and value-free modes
+  ---
+  duration_ms: 0.431624
+  type: 'test'
+  ...
+# Subtest: task assignment keeps workers separate, detects resource collisions, and releases stalls
+ok 66 - task assignment keeps workers separate, detects resource collisions, and releases stalls
+  ---
+  duration_ms: 1.224351
+  type: 'test'
+  ...
+# Subtest: Autolab-style experiment abstraction exposes Variable, Action, Module, and Recipe without Python runtime
+ok 67 - Autolab-style experiment abstraction exposes Variable, Action, Module, and Recipe without Python runtime
+  ---
+  duration_ms: 3.317815
+  type: 'test'
+  ...
+# Subtest: Generative Experiment Orchestrator executes DEG → Geo-DEG → predictor → PUCT → assignment → execution → learning
+ok 68 - Generative Experiment Orchestrator executes DEG → Geo-DEG → predictor → PUCT → assignment → execution → learning
+  ---
+  duration_ms: 71.034711
+  type: 'test'
+  ...
+# Subtest: orchestrator is an ATO but DEG and Geo-DEG remain external independent automatons
+ok 69 - orchestrator is an ATO but DEG and Geo-DEG remain external independent automatons
+  ---
+  duration_ms: 25.028038
+  type: 'test'
+  ...
+# Subtest: orchestrator source has no direct implementation imports of DEG or Geo-DEG
+ok 70 - orchestrator source has no direct implementation imports of DEG or Geo-DEG
+  ---
+  duration_ms: 0.936549
+  type: 'test'
+  ...
+# Subtest: legacy front-door logic is replaced rather than hidden
+ok 71 - legacy front-door logic is replaced rather than hidden
+  ---
+  duration_ms: 1.149138
+  type: 'test'
+  ...
+# Subtest: canonical state projection derives from the ATO StateSpaceKernel, not a second text hash
+ok 72 - canonical state projection derives from the ATO StateSpaceKernel, not a second text hash
+  ---
+  duration_ms: 35.142579
+  type: 'test'
+  ...
+# Subtest: catalog resolves one artifact by address, capability, or transition output
+ok 73 - catalog resolves one artifact by address, capability, or transition output
+  ---
+  duration_ms: 3.236483
+  type: 'test'
+  ...
+# Subtest: remote materialization requires verification and Morph agreement before activation
+ok 74 - remote materialization requires verification and Morph agreement before activation
+  ---
+  duration_ms: 2.517099
+  type: 'test'
+  ...
+# Subtest: a verified download remains inactive when Morph declines
+ok 75 - a verified download remains inactive when Morph declines
+  ---
+  duration_ms: 1.438698
+  type: 'test'
+  ...
+# Subtest: catalog survives a fresh runtime through its local store
+ok 76 - catalog survives a fresh runtime through its local store
+  ---
+  duration_ms: 0.625629
+  type: 'test'
+  ...
+# Subtest: remote transition output is wired into the main resolver and executes sovereignly
+ok 77 - remote transition output is wired into the main resolver and executes sovereignly
+  ---
+  duration_ms: 5.212155
+  type: 'test'
+  ...
+# Subtest: resonance recomposes the field instead of queuing a 27th tool
+ok 78 - resonance recomposes the field instead of queuing a 27th tool
+  ---
+  duration_ms: 2.399614
+  type: 'test'
+  ...
+# Subtest: a goal may express a sparse mixed field without filling 26 positions
+ok 79 - a goal may express a sparse mixed field without filling 26 positions
+  ---
+  duration_ms: 1.786954
+  type: 'test'
+  ...
+# (node:6993) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///mnt/data/wired_upstream_verify/src/synthia/semantic-mesh/engine/synthia.js is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /mnt/data/wired_upstream_verify/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: component intake addresses first and distinguishes checked-empty from unresolved
+ok 80 - component intake addresses first and distinguishes checked-empty from unresolved
+  ---
+  duration_ms: 6.817237
+  type: 'test'
+  ...
+# Subtest: Asset Graph detects a missing relationship and clears it when connected
+ok 81 - Asset Graph detects a missing relationship and clears it when connected
+  ---
+  duration_ms: 66.461996
+  type: 'test'
+  ...
+# Subtest: people, places, and things learn relationship resonance without sharing private state
+ok 82 - people, places, and things learn relationship resonance without sharing private state
+  ---
+  duration_ms: 41.49146
+  type: 'test'
+  ...
+# Subtest: Morph change path requires sandboxed suggestion approval before apply
+ok 83 - Morph change path requires sandboxed suggestion approval before apply
+  ---
+  duration_ms: 19.699257
+  type: 'test'
+  ...
+# Subtest: Idle Suggestion Scout stops at the inbox
+ok 84 - Idle Suggestion Scout stops at the inbox
+  ---
+  duration_ms: 3.101395
+  type: 'test'
+  ...
+# Subtest: the app source contains no donor warehouse or restored donor tree
+ok 85 - the app source contains no donor warehouse or restored donor tree
+  ---
+  duration_ms: 1.561145
+  type: 'test'
+  ...
+# (node:6999) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///mnt/data/wired_upstream_verify/src/synthia/semantic-mesh/automata/automaton.js is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /mnt/data/wired_upstream_verify/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: canonical intake derives a transition descriptor for every addressed component
+ok 86 - canonical intake derives a transition descriptor for every addressed component
+  ---
+  duration_ms: 2.718168
+  type: 'test'
+  ...
+# Subtest: inverse transition index finds capability by the state it produces
+ok 87 - inverse transition index finds capability by the state it produces
+  ---
+  duration_ms: 1.293503
+  type: 'test'
+  ...
+# Subtest: resolver recursively satisfies prerequisite transitions
+ok 88 - resolver recursively satisfies prerequisite transitions
+  ---
+  duration_ms: 2.280375
+  type: 'test'
+  ...
+# Subtest: resolver executes the planned chain and verifies the desired state
+ok 89 - resolver executes the planned chain and verifies the desired state
+  ---
+  duration_ms: 1.022001
+  type: 'test'
+  ...
+# Subtest: live Synthia mounts Transition Resolver and indexes known core transformations
+ok 90 - live Synthia mounts Transition Resolver and indexes known core transformations
+  ---
+  duration_ms: 5.335406
+  type: 'test'
+  ...
+# Subtest: unreachable desired states stay unresolved instead of inventing a capability
+ok 91 - unreachable desired states stay unresolved instead of inventing a capability
+  ---
+  duration_ms: 0.463022
+  type: 'test'
+  ...
+# Subtest: successful transition outcomes reinforce capability-to-state resonance
+ok 92 - successful transition outcomes reinforce capability-to-state resonance
+  ---
+  duration_ms: 0.636306
+  type: 'test'
+  ...
+# Subtest: VQ-VAE + semantic completion remains a tiny firing identity model
+ok 93 - VQ-VAE + semantic completion remains a tiny firing identity model
+  ---
+  duration_ms: 19.060075
+  type: 'test'
+  ...
+# Subtest: unlearned traces remain sparse and fire nothing
+ok 94 - unlearned traces remain sparse and fire nothing
+  ---
+  duration_ms: 8.870237
+  type: 'test'
+  ...
+# Subtest: a learned VQ trace activates the bound ATO and reaches Tool Factory
+ok 95 - a learned VQ trace activates the bound ATO and reaches Tool Factory
+  ---
+  duration_ms: 8.812295
+  type: 'test'
+  ...
+# Subtest: semantic completion preserves every known coordinate exactly
+ok 96 - semantic completion preserves every known coordinate exactly
+  ---
+  duration_ms: 5.149052
+  type: 'test'
+  ...
+# Subtest: the synthesized tool produced by trace activation is executable
+ok 97 - the synthesized tool produced by trace activation is executable
+  ---
+  duration_ms: 3.055597
+  type: 'test'
+  ...
+1..97
+# tests 97
+# suites 0
+# pass 97
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 2819.954402

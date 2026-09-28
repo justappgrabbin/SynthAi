@@ -1,0 +1,39 @@
+{
+  "name": "Synthia Morph Reskin",
+  "version": "0.1.0",
+  "built_at": "2026-09-02",
+  "architecture": "House behavior/physics -> articulated rig -> Morph surface/sprite skin",
+  "donors": {
+    "morph_engine.zip": {
+      "sha256": "3ec6b0c97de7c137c511e020cbb5fea6a908118f0ba3ce7fd4f39c6d13622bae"
+    },
+    "morph_engine_js.zip": {
+      "sha256": "546275620317ab966736d52cebd645ef892cc53a020512e50b1d3681de0768f3"
+    },
+    "synthia-morph-engine-v0.6-personal-vault.zip": {
+      "sha256": "d97f48ad5c7e28885c49c45e0ccdd02242e64866ec875fd87455d28942184099"
+    },
+    "youniverse_house.html": {
+      "sha256": "2567e1a735c1831030934568400145ceac032565abb57fbc5c4099af88746555"
+    }
+  },
+  "preserved_exact": [
+    "runtime/morph-engine.js",
+    "original-modules/SpriteRuntime.mjs",
+    "original-modules/SpriteMorpher.mjs",
+    "original-modules/GameMorpher.mjs",
+    "reference/original-youniverse-house.html"
+  ],
+  "new_bridge": [
+    "runtime/sprite-runtime.classic.js",
+    "runtime/reskin-controller.js",
+    "youniverse_house_morphed.html",
+    "offline-reskin-demo.html"
+  ],
+  "verification": {
+    "integration": "proof/integration-verify.log",
+    "physical_morph_demo": "proof/morph-demo.log",
+    "html_inline_syntax": "passed",
+    "runtime_syntax": "passed"
+  }
+}

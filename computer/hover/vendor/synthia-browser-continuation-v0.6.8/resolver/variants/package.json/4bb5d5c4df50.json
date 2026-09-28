@@ -1,0 +1,13 @@
+{
+  "name": "synthia-runtime",
+  "version": "0.2.0",
+  "private": true,
+  "type": "commonjs",
+  "scripts": {
+    "smoke": "tsx smoke-test.ts"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.4",
+    "tsx": "^4.16.2"
+  }
+}
