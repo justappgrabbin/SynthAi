@@ -58,6 +58,7 @@ export { startSynthiaFrontScreen } from './ui/server.mjs';
 export * from './pipeline/adapters.mjs';
 export { ObservationEngine } from './governance/observation-engine.mjs';
 export { ProposalLedger } from './governance/proposal-ledger.mjs';
+export { FutureFeatureTestingRegistry, FUTURE_FEATURE_CONSENT_KEYS } from './governance/future-feature-testing-registry.mjs';
 export { ChartTiming } from './governance/chart-timing.mjs';
 export { DeletionGuard, CANONICAL_COMPONENTS } from './governance/deletion-guard.mjs';
 export { FileRuntimeStore, RuntimePersistenceError } from './persistence/file-runtime-store.mjs';
