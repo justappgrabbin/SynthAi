@@ -5,6 +5,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import { FederatedSynthia } from '../federated-synthia.mjs';
 import { talkReply } from '../solo/talk-adapter.mjs';
 import { SoloHoverRuntime } from '../solo/solo-runtime.mjs';
+import { createSynthia17Resident } from '../solo/synthia17-resident.mjs';
 
 const UI_ROOT = fileURLToPath(new URL('../../ui/', import.meta.url));
 const MIME = Object.freeze({
@@ -61,6 +62,7 @@ export async function startSynthiaFrontScreen({
 } = {}) {
   const organism = synthia ?? await FederatedSynthia.create({ persistenceDir });
   const solo = new SoloHoverRuntime({ organism, persistenceDir });
+  const resident17 = await createSynthia17Resident({ persistenceDir });
   await solo.startTasks();
   const server = createServer(async (request, response) => {
     try {
@@ -70,6 +72,34 @@ export async function startSynthiaFrontScreen({
       }
       if (request.method === 'GET' && url.pathname === '/api/solo/status') {
         return reply(response, 200, { ok: true, ...(await solo.status()) });
+      }
+      if (url.pathname === '/api/solo/organism/status' && request.method === 'GET') {
+        return reply(response, 200, { ok: true, diagnostics: resident17.status() });
+      }
+      if (url.pathname === '/api/solo/organism/tools' && request.method === 'POST') {
+        return reply(response, 200, { ok: true, result: resident17.activeTools(await bodyOf(request)) });
+      }
+      if (url.pathname === '/api/solo/organism/process' && request.method === 'POST') {
+        const { input } = await bodyOf(request);
+        if (!String(input ?? '').trim()) throw new TypeError('Organism input is required');
+        return reply(response, 200, { ok: true, result: await resident17.process(String(input)) });
+      }
+      if (url.pathname === '/api/solo/organism/grow' && request.method === 'POST') {
+        const requestBody = await bodyOf(request);
+        if (!String(requestBody.purpose ?? '').trim()) throw new TypeError('Tool purpose is required');
+        const result = await resident17.growTool(requestBody);
+        return reply(response, 200, { ok: true, result: { id: result.automaton?.id, fieldTool: result.fieldTool, generationStatus: result.generationStatus } });
+      }
+      if (url.pathname === '/api/solo/organism/business' && request.method === 'POST') {
+        const { opportunities, context } = await bodyOf(request);
+        if (!Array.isArray(opportunities) || !opportunities.length) throw new TypeError('Business opportunities are required');
+        return reply(response, 200, { ok: true, result: await resident17.evaluateBusiness(opportunities, context) });
+      }
+      if (url.pathname === '/api/solo/organism/program' && request.method === 'POST') {
+        const body = await bodyOf(request);
+        if (body.operation === 'register') return reply(response, 200, { ok: true, result: await resident17.registerProgram(body.program) });
+        if (body.operation === 'run') return reply(response, 200, { ok: true, result: await resident17.runProgram(body.id, body.input, body.context) });
+        throw new TypeError('Program operation must be register or run');
       }
       if (request.method === 'POST' && url.pathname === '/api/solo/tool-factory') {
         if (!organism.birthMirror.configuration?.configured) {
@@ -351,7 +381,7 @@ export async function startSynthiaFrontScreen({
   server.on('close', () => { solo.stopTasks(); solo.browser.close().catch(() => {}); });
   const address = server.address();
   const actualPort = typeof address === 'object' ? address.port : port;
-  return Object.freeze({ server, synthia: organism, solo, url: `http://${host}:${actualPort}` });
+  return Object.freeze({ server, synthia: organism, solo, resident17, url: `http://${host}:${actualPort}` });
 }
 
 const isMain = process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href;
