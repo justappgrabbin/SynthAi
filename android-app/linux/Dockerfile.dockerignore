@@ -3,3 +3,6 @@
 # Keep the vendored Synthia 5.8 donor (hover face) out of the Venom image so
 # Venom's rootfs stays exactly what it was before 5.8 was vendored.
 computer/donors/synthia58
+
+# Hover app has its own rootfs and is excluded from the Venom image.
+computer/hover

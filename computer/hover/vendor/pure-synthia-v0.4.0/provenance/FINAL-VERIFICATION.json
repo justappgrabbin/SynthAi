@@ -1,0 +1,38 @@
+{
+  "version": "synthia.finished-baseline.v0.4.0",
+  "finish_layer": {
+    "tests": 10,
+    "pass": 10,
+    "fail": 0,
+    "hard_kill_sigkill_recovery": true,
+    "disk_backed_fresh_boot_restore": true,
+    "replaceable_world_port": true,
+    "full_cross_organ_wiring": true
+  },
+  "upstream_donor_regression": {
+    "tests": 111,
+    "pass": 111,
+    "fail": 0,
+    "donor": "Synthia-OS-Acode-Morph-v0.9.3-BEST-OF-LIVING-ORGANISM-VERIFIED (1).zip"
+  },
+  "process_counts": {
+    "bootstrap_internal": 47,
+    "with_yni_four_hands_and_selfhosted_linux": 52,
+    "visible_identity_count": 1
+  },
+  "android_residence": {
+    "rootfs_arm64_tar_gz_integrity": true,
+    "rootfs_arm_tar_gz_integrity": true,
+    "rootfs_expected_names_present": true,
+    "embedded_finished_baseline": true,
+    "target_sdk": 35,
+    "signature_scheme": "v2 debug/test",
+    "first_boot_network_dependency": "Node/npm and server packages are installed by existing Android bootstrap if absent",
+    "production_release_signer": false
+  },
+  "world": {
+    "final_habitat_locked": false,
+    "practice_world_socket_open": true,
+    "world_port_process": "practice-world-port"
+  }
+}

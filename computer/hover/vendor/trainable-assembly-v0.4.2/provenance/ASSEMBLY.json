@@ -1,0 +1,7 @@
+{
+  "assembly":"Pure-Synthia-Trainable-Assembly-v0.4.1",
+  "created":"2026-09-05T17:56:26Z",
+  "authorities":["Pure-Synthia-v0.4.0-FINISHED-BASELINE.zip","Synthia-Universal-Execution-Spine-v0.4.0.zip"],
+  "donors":["Synthia-browser-artifact-handoff-v0.6.9(7).zip","klein-mesh-game-engine-v5.1-FIXED(2).zip","klein-language-contact-model(4).zip","autonove-video-cognition(2).ts","synthia-video-perception-center(2).ts","video-diffusion-backbone.ts"],
+  "policy":"additive-no-canonical-overwrite"
+}

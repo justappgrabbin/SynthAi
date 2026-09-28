@@ -1,0 +1,34 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Cynthia‑Talk v1</title>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <h1>Cynthia‑Talk <span>v1</span></h1>
+      <button id="voicesBtn" title="Pick voice">🎙️ Voices</button>
+    </header>
+
+    <main id="log"></main>
+
+    <form id="chatForm">
+      <input id="name" placeholder="Your name (optional)" />
+      <input id="msg" placeholder="Ask about Human Design, I Ching, resonance, quantum, relationships..." autofocus />
+      <button type="submit">Send</button>
+      <button id="micBtn" type="button">🎤 Speak</button>
+    </form>
+  </div>
+
+  <dialog id="voicePicker">
+    <h3>Choose a voice</h3>
+    <select id="voiceSelect"></select>
+    <button id="closeVoice">Close</button>
+  </dialog>
+
+  <script src="app.js"></script>
+</body>
+</html>

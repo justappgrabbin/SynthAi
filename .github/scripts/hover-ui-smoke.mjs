@@ -3,7 +3,7 @@ import { mkdtemp, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { startSynthiaFrontScreen } from '../../computer/donors/synthia58/Synthia-Solo-Hover-v0.5.8/src/ui/server.mjs';
+import { startSynthiaFrontScreen } from '../../computer/hover/src/ui/server.mjs';
 const { chromium } = await import(pathToFileURL(process.env.HOVER_PLAYWRIGHT || '/tmp/hover-ui-test/node_modules/playwright/index.mjs'));
 const dir = await mkdtemp(join(tmpdir(), 'hover-ui-'));
 const app = await startSynthiaFrontScreen({ port: 0, persistenceDir: dir });

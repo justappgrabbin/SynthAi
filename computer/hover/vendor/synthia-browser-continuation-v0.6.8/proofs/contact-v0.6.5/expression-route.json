@@ -1,0 +1,7 @@
+{
+  "input": "Create a five-second video of a red circle moving left to right",
+  "route": "expression",
+  "compositionRole": "autonovel",
+  "morphRole": "messy",
+  "materializer": "SceneGraphCompiler/RendererRouter"
+}
