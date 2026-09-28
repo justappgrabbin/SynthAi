@@ -85,6 +85,47 @@
         <button id="factory-run" type="button" disabled>Run generated tool</button>
         <pre id="factory-output" aria-live="polite">Configure your birth information, then create a tool.</pre>
       </article>
+      <article class="card tray-card" id="resident17-card">
+        <div class="card-title"><span>Synthia · ATO organism</span><small id="resident17-state">loading</small></div>
+        <p>The preserved v1.7 organism runs here with its own saved state, addressed tools, and executable programs.</p>
+        <label>Work to process<textarea id="resident17-input" rows="3"></textarea></label>
+        <button id="resident17-process" type="button">Run through organism</button>
+        <div class="tray-grid">
+          <label>New tool purpose<input id="resident17-purpose" type="text"></label>
+          <label>Dimension<select id="resident17-dimension"><option>Movement</option><option>Evolution</option><option>Being</option><option>Design</option><option>Space</option></select></label>
+        </div>
+        <button id="resident17-grow" type="button">Grow addressed ATO tool</button>
+        <div class="tray-grid">
+          <label>Program name<input id="resident17-program-id" type="text"></label>
+          <label>Tool steps, comma separated<input id="resident17-program-steps" type="text"></label>
+        </div>
+        <button id="resident17-register" type="button">Save program</button>
+        <label>Program input<textarea id="resident17-program-input" rows="2"></textarea></label>
+        <button id="resident17-run" type="button">Run saved program</button>
+        <pre id="resident17-output" aria-live="polite">The organism's live result appears here.</pre>
+      </article>
+      <article class="card tray-card">
+        <div class="card-title"><span>Business orientation</span><small id="business-state">ready</small></div>
+        <p>Compare opportunities against your actual costs, timing, evidence, and readiness. This records decisions; it does not collect payments.</p>
+        <div class="tray-grid">
+          <label>Opportunity<input id="business-title" type="text"></label>
+          <label>Expected revenue<input id="business-revenue" type="number" min="0" step="any"></label>
+          <label>Upfront cost<input id="business-cost" type="number" min="0" step="any"></label>
+          <label>Hours of work<input id="business-hours" type="number" min="0.25" step="any"></label>
+          <label>Hours to cash<input id="business-time" type="number" min="0" step="any"></label>
+          <label>Evidence confidence (0–1)<input id="business-evidence" type="number" min="0" max="1" step="0.1"></label>
+          <label>Ready to deliver (0–1)<input id="business-readiness" type="number" min="0" max="1" step="0.1"></label>
+          <label>Risk estimate (0–1)<input id="business-risk" type="number" min="0" max="1" step="0.1"></label>
+        </div>
+        <button id="business-add" type="button">Add opportunity</button>
+        <div id="business-list" class="instrument-meta"></div>
+        <div class="tray-grid">
+          <label>Available cash<input id="business-cash" type="number" min="0" step="any"></label>
+          <label>Deadline in hours<input id="business-deadline" type="number" min="1" step="any"></label>
+        </div>
+        <button id="business-evaluate" type="button">Compare opportunities</button>
+        <pre id="business-output" aria-live="polite">Add real opportunities to compare.</pre>
+      </article>
     </section>
 
     <section class="panel" id="genome">

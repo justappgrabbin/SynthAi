@@ -155,6 +155,71 @@ $('#factory-run').addEventListener('click', async () => {
     $('#factory-output').textContent = `${error.name}: ${error.message}`;
   } finally { button.disabled = false; }
 });
+
+async function residentAction(buttonId, stateId, outputId, action) {
+  const button = $(buttonId);
+  try {
+    button.disabled = true;
+    $(stateId).textContent = 'working…';
+    const result = await action();
+    $(outputId).textContent = pretty(result);
+    $(stateId).textContent = result?.ok === false ? result.status || 'failed' : 'complete';
+  } catch (error) {
+    $(stateId).textContent = 'failed';
+    $(outputId).textContent = `${error.name}: ${error.message}`;
+  } finally { button.disabled = false; }
+}
+const residentPost = (path, body) => api(`/api/solo/organism/${path}`, { method: 'POST', body: JSON.stringify(body) });
+api('/api/solo/organism/status').then(({ diagnostics }) => {
+  $('#resident17-state').textContent = `${diagnostics.stateToolField.registeredTools} tools · ${diagnostics.stateToolField.programs} programs`;
+}).catch((error) => { $('#resident17-state').textContent = `offline · ${error.message}`; });
+$('#resident17-process').addEventListener('click', () => residentAction('#resident17-process', '#resident17-state', '#resident17-output', async () => {
+  const input = $('#resident17-input').value.trim();
+  if (!input) throw new Error('Enter work for the organism.');
+  return (await residentPost('process', { input })).result;
+}));
+$('#resident17-grow').addEventListener('click', () => residentAction('#resident17-grow', '#resident17-state', '#resident17-output', async () => {
+  const purpose = $('#resident17-purpose').value.trim();
+  if (!purpose) throw new Error('Enter a tool purpose.');
+  return (await residentPost('grow', { purpose, input: purpose, dimension: $('#resident17-dimension').value })).result;
+}));
+$('#resident17-register').addEventListener('click', () => residentAction('#resident17-register', '#resident17-state', '#resident17-output', async () => {
+  const id = $('#resident17-program-id').value.trim();
+  const steps = $('#resident17-program-steps').value.split(',').map((step) => step.trim()).filter(Boolean);
+  if (!id || !steps.length) throw new Error('Enter a program name and at least one tool ID.');
+  return (await residentPost('program', { operation: 'register', program: { id, steps } })).result;
+}));
+$('#resident17-run').addEventListener('click', () => residentAction('#resident17-run', '#resident17-state', '#resident17-output', async () => {
+  const id = $('#resident17-program-id').value.trim();
+  if (!id) throw new Error('Enter the saved program name.');
+  const value = $('#resident17-program-input').value.trim();
+  let input = value;
+  if (value.startsWith('{') || value.startsWith('[')) input = JSON.parse(value);
+  return (await residentPost('program', { operation: 'run', id, input })).result;
+}));
+
+const businessOpportunities = [];
+$('#business-add').addEventListener('click', () => {
+  const title = $('#business-title').value.trim();
+  const fields = ['revenue', 'cost', 'hours', 'time', 'evidence', 'readiness', 'risk'];
+  const numbers = fields.map((key) => Number($(`#business-${key}`).value));
+  if (!title || fields.some((key) => $(`#business-${key}`).value === '') || numbers.some((n) => !Number.isFinite(n)) || numbers.slice(0, 4).some((n) => n < 0) || numbers[2] <= 0 || numbers.slice(4).some((n) => n < 0 || n > 1)) {
+    $('#business-state').textContent = 'enter valid costs, timing, evidence, readiness, and risk';
+    return;
+  }
+  const [expectedRevenue, upfrontCost, timeHours, timeToCashHours, evidence, readiness, risk] = numbers;
+  businessOpportunities.push({ id: `opportunity-${Date.now()}-${businessOpportunities.length}`, title, expectedRevenue, upfrontCost, timeHours, timeToCashHours, evidence, readiness, risk });
+  $('#business-list').textContent = businessOpportunities.map((item) => item.title).join(' · ');
+  $('#business-state').textContent = `${businessOpportunities.length} opportunities`;
+});
+$('#business-evaluate').addEventListener('click', () => residentAction('#business-evaluate', '#business-state', '#business-output', async () => {
+  if (!businessOpportunities.length) throw new Error('Add an opportunity first.');
+  const context = {};
+  if ($('#business-cash').value !== '') context.cashAvailable = Number($('#business-cash').value);
+  if ($('#business-deadline').value !== '') context.deadlineHours = Number($('#business-deadline').value);
+  const { decision, explanation } = (await residentPost('business', { opportunities: businessOpportunities, context })).result;
+  return { ranking: decision.ranked.map((item) => ({ title: item.title, score: item.score, economics: item.economics, risks: item.risks, approvalRequired: item.approvalRequired })), explanation };
+}));
 $('#tray-kind').addEventListener('change', refreshInstrumentList);
 $('#tray-id').addEventListener('change', refreshMeta);
 $('#run-instrument').addEventListener('click', async () => {
