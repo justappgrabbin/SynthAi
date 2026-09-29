@@ -75,7 +75,7 @@ export class SoloHoverRuntime {
   }
 
   setSurface(surface) {
-    const allowed = new Set(['browser', 'chat', 'world', 'todo', 'build']);
+    const allowed = new Set(['browser', 'chat', 'world', 'todo', 'android', 'build']);
     if (!allowed.has(surface)) throw new Error(`unknown surface: ${surface}`);
     this.activeSurface = surface;
     return this.activeSurface;
