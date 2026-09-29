@@ -15,6 +15,23 @@
     };
   }
 
+  if (!Object.getOwnPropertyDescriptors) {
+    Object.getOwnPropertyDescriptors = function (obj) {
+      var out = {};
+      var names = Object.getOwnPropertyNames(Object(obj));
+      for (var i = 0; i < names.length; i += 1) {
+        out[names[i]] = Object.getOwnPropertyDescriptor(obj, names[i]);
+      }
+      if (Object.getOwnPropertySymbols) {
+        var symbols = Object.getOwnPropertySymbols(obj);
+        for (var j = 0; j < symbols.length; j += 1) {
+          out[symbols[j]] = Object.getOwnPropertyDescriptor(obj, symbols[j]);
+        }
+      }
+      return out;
+    };
+  }
+
   if (!Object.fromEntries) {
     Object.fromEntries = function (entries) {
       var out = {};
