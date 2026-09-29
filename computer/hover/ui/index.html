@@ -45,6 +45,7 @@
             <button data-quick="open build">Build</button>
             <button data-quick="open world">World</button>
             <button data-quick="open android">Android</button>
+            <button data-quick="open mac">Mac</button>
           </div>
         </section>
 
@@ -125,6 +126,25 @@
           <div id="android-apps" class="android-app-grid"><div class="android-empty">Reading Android launcher apps…</div></div>
         </section>
 
+        <section class="surface" data-surface="mac" id="surface-mac">
+          <div class="surface-hero compact">
+            <div><p class="eyebrow">MAC RUNTIME</p><h1>One Synthia, another body.</h1><p>Pair the Mac residence once. Synthia can then inspect the Mac app catalog and open Mac apps or web destinations from this same interface.</p></div>
+          </div>
+          <form id="mac-pair-form" class="mac-pair-form">
+            <label>Mac bridge<input id="mac-host" type="url" placeholder="http://your-mac.local:8798" autocomplete="off" required></label>
+            <label>Pairing token<input id="mac-token" type="password" autocomplete="off" required></label>
+            <button type="submit">Connect Mac</button>
+          </form>
+          <div id="mac-state" class="android-store-state">Mac residence is not paired yet.</div>
+          <div class="mac-actions">
+            <button data-mac-web="https://chatgpt.com/">ChatGPT web</button>
+            <button data-mac-web="https://claude.ai/">Claude web</button>
+            <button data-mac-web="https://manus.im/">Manus web</button>
+          </div>
+          <div class="android-app-head"><p class="eyebrow">MAC APPS</p><span id="mac-app-count"></span></div>
+          <div id="mac-apps" class="android-app-grid"><div class="android-empty">Pair a Mac to read its applications.</div></div>
+        </section>
+
         <section class="surface" data-surface="build" id="surface-build">
           <div class="build-head"><div><p class="eyebrow">BUILD</p><h2>Paper / Foundry</h2></div><div class="build-tools"><button id="build-home" type="button">Foundry</button><button id="build-studio" type="button">App Studio</button><button id="build-tools" type="button">Tools</button><button id="build-talk" type="button">Talk</button></div></div>
           <iframe id="build-frame" src="/build/index.html" title="Synthia Build"></iframe>
@@ -138,7 +158,8 @@
       <button class="radial-item" data-open-surface="world" style="--i:2" title="World"><span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg></span><small>World</small></button>
       <button class="radial-item" data-open-surface="todo" style="--i:3" title="To Do"><span><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="3"/><path d="m8 12 3 3 5-6"/></svg></span><small>To Do</small></button>
       <button class="radial-item" data-open-surface="android" style="--i:4" title="Android"><span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 8h10a3 3 0 0 1 3 3v7H4v-7a3 3 0 0 1 3-3Z"/><path d="m8 8-2-3m10 3 2-3M8 13h.01M16 13h.01"/></svg></span><small>Android</small></button>
-      <button class="radial-item" data-open-surface="build" style="--i:5" title="Build"><span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 9 5-9 5-9-5Z M3 8v9l9 5 9-5V8 M12 13v9"/></svg></span><small>Build</small></button>
+      <button class="radial-item" data-open-surface="mac" style="--i:5" title="Mac"><span><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="12" rx="2"/><path d="M9 20h6M12 16v4"/></svg></span><small>Mac</small></button>
+      <button class="radial-item" data-open-surface="build" style="--i:6" title="Build"><span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 9 5-9 5-9-5Z M3 8v9l9 5 9-5V8 M12 13v9"/></svg></span><small>Build</small></button>
     </div>
 
     <button id="planet" class="planet" aria-label="Open Synthia">
