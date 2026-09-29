@@ -15,8 +15,8 @@ const body = source.slice(imports.length);
 const wrapped = imports +
   "import './android7-polyfills.js';\n\n" +
   ";(async function () {\n" + body + "\n})().catch(function (error) {\n" +
-  "  try { console.error('SynthAI Android 7 boot failed', error); } catch (_) {}\n" +
   "  var message = String(error && (error.stack || error.message) || error || 'unknown boot error');\n" +
+  "  try { console.error('SynthAI Android 7 boot failed: ' + message); } catch (_) {}\n" +
   "  window.SynthAIAndroid7BootError = message;\n" +
   "  var evidence = document.getElementById('runtimeEvidence');\n" +
   "  if (evidence) evidence.textContent = 'Computer boot failed: ' + message;\n" +
