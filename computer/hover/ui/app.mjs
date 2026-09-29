@@ -75,6 +75,8 @@ $('#setup-open').addEventListener('click', () => setupDialog.showModal());
 $('#build-home').addEventListener('click', () => { $('#build-frame').src = '/build/index.html'; });
 $('#build-studio').addEventListener('click', () => { $('#build-frame').src = '/studio/index.html'; });
 $('#build-tools').addEventListener('click', () => { $('#build-frame').src = '/lab.html#tray'; });
+$('#build-talk').addEventListener('click', openTalk);
+$('#talk-open').addEventListener('click', openTalk);
 
 function addMessage(who, text, trace = false) {
   const div = document.createElement('div');
@@ -514,5 +516,3 @@ async function openTalk() {
   await openSurface('build');
   $('#build-frame').src = '/talk/index.html';
 }
-$('#build-talk').addEventListener('click', openTalk);
-$('#talk-open').addEventListener('click', openTalk);
