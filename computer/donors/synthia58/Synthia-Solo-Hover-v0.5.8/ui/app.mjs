@@ -104,7 +104,19 @@ async function sendChat(text, replay = false) {
       }
     }
     const result = await api('/api/chat', { method: 'POST', body: JSON.stringify({ message: trimmed, context: { ...identityContext, surface: activeSurface } }) });
-    addMessage('synthia', result.utterance || result.output || '(processed)');
+    let visible = result.utterance || result.reply || result.message || result.text || result.output || '';
+    // The resolved condition/state is runtime context, not a chat message. If /api/chat
+    // hands the UI that internal packet, keep it behind the glass and ask preserved Talk
+    // for the human-facing response instead.
+    const looksInternal = typeof visible === 'object' || (typeof visible === 'string' && /^\\s*[\\[{]/.test(visible) && /(?:conditionStateId|sensoryExpression|voiceControls|fixedEmotionAssigned|chromaticExpression)/.test(visible));
+    if (looksInternal || !String(visible || '').trim()) {
+      try {
+        const talk = await api('/api/solo/talk/chat', { method: 'POST', body: JSON.stringify({ message: trimmed }) });
+        visible = talk.reply || talk.utterance || talk.message || '';
+      } catch {}
+    }
+    if (typeof visible === 'object') visible = visible.reply || visible.utterance || visible.message || visible.text || '';
+    addMessage('synthia', String(visible || 'I processed that, but I do not have a human-facing reply yet.'));
     if (result.pipelineTrace) addMessage('', `Trace · ${result.pipelineTrace.map((x) => x.stage).join(' → ')}`, true);
     await syncMorphAppearance();
   } catch (error) {
