@@ -94,6 +94,7 @@ final class SynthiaAppDelegate: NSObject, NSApplicationDelegate, WKNavigationDel
         env["PORT"] = String(port)
         env["SYNTHIA_DATA_DIR"] = state.path
         env["HOME"] = support.path
+        env["SYNTHIA_TALK_PYTHON"] = resources.appendingPathComponent("runtime/talk-python-shim").path
         process.environment = env
         process.standardOutput = handle
         process.standardError = handle
