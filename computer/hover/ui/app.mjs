@@ -47,11 +47,12 @@ async function openSurface(name) {
   openMenu(false);
   workspace.setAttribute('aria-hidden', 'false');
   $$('.surface').forEach((surface) => surface.classList.toggle('active', surface.dataset.surface === name));
-  $('#surface-subtitle').textContent = ({ browser: 'Browser', chat: 'Chat', world: 'World', todo: 'To Do', build: 'Build' })[name] || name;
+  $('#surface-subtitle').textContent = ({ browser: 'Browser', chat: 'Chat', world: 'World', todo: 'To Do', android: 'Android', build: 'Build' })[name] || name;
   await api('/api/solo/surface', { method: 'POST', body: JSON.stringify({ surface: name }) }).catch(() => {});
   if (name === 'todo') await loadTasks();
   if (name === 'world') await loadWorld();
   if (name === 'browser') await loadBrowserState();
+  if (name === 'android') await loadAndroidSurface();
 }
 
 function collapse() {
@@ -85,9 +86,10 @@ async function sendChat(text, replay = false) {
   if (!trimmed) return;
   if (!replay) addMessage('user', trimmed);
   const lower = trimmed.toLowerCase();
-  const surfaceMatch = lower.match(/^(?:open|show|go to)\s+(browser|chat|world|to do|todo|build)$/);
+  const surfaceMatch = lower.match(/^(?:open|show|go to)\s+(browser|chat|world|to do|todo|android|apps|play store|build)$/);
   if (surfaceMatch) {
-    const target = surfaceMatch[1] === 'to do' ? 'todo' : surfaceMatch[1];
+    const requested = surfaceMatch[1];
+    const target = requested === 'to do' ? 'todo' : ['apps', 'play store'].includes(requested) ? 'android' : requested;
     addMessage('synthia', `Opening ${target === 'todo' ? 'To Do' : target}.`);
     await openSurface(target);
     return;
@@ -372,6 +374,70 @@ setInterval(() => { if (activeSurface === 'todo' && !document.hidden) loadTasks(
 $('#build-home').addEventListener('click', () => { $('#build-frame').src = '/build/index.html'; });
 $('#build-studio').addEventListener('click', () => { $('#build-frame').src = '/studio/index.html'; });
 $('#build-tools').addEventListener('click', () => { $('#build-frame').src = '/lab.html#tray'; });
+
+function androidAppButton(app) {
+  const button = document.createElement('button');
+  button.className = 'android-app';
+  button.type = 'button';
+  const label = document.createElement('strong');
+  label.textContent = app.label || app.packageName;
+  const pkg = document.createElement('small');
+  pkg.textContent = app.packageName;
+  button.append(label, pkg);
+  button.addEventListener('click', async () => {
+    try { await api('/api/solo/android/open-app', { method: 'POST', body: JSON.stringify({ packageName: app.packageName }) }); }
+    catch (error) { $('#android-store-state').textContent = error.message; }
+  });
+  return button;
+}
+
+async function loadAndroidSurface() {
+  const state = $('#android-store-state');
+  const grid = $('#android-apps');
+  try {
+    const [store, apps] = await Promise.all([
+      api('/api/solo/android/store-status'),
+      api('/api/solo/android/apps'),
+    ]);
+    state.textContent = store.installed
+      ? 'Google Play is available on this device.'
+      : 'Google Play app is not installed here. Store actions will open play.google.com instead.';
+    $('#android-app-count').textContent = `${apps.count ?? apps.apps?.length ?? 0} launchable`;
+    grid.innerHTML = '';
+    for (const app of apps.apps || []) grid.appendChild(androidAppButton(app));
+    if (!grid.children.length) grid.innerHTML = '<div class="android-empty">No launchable Android apps were returned.</div>';
+  } catch (error) {
+    state.textContent = `Android bridge: ${error.message}`;
+    grid.innerHTML = '<div class="android-empty">Synthia Android bridge is not reachable yet.</div>';
+  }
+}
+
+async function openStore({ packageName = '', query = '' } = {}) {
+  try {
+    const result = await api('/api/solo/android/store', {
+      method: 'POST',
+      body: JSON.stringify({ packageName, query }),
+    });
+    $('#android-store-state').textContent = result.destination === 'google-play-web'
+      ? 'Opened Google Play on the web.'
+      : 'Opened Google Play.';
+  } catch (error) { $('#android-store-state').textContent = error.message; }
+}
+
+$('#android-store-open').addEventListener('click', () => openStore());
+$('#android-refresh').addEventListener('click', loadAndroidSurface);
+$('#android-search-form').addEventListener('submit', async (event) => {
+  event.preventDefault();
+  const query = $('#android-search').value.trim();
+  if (query) await openStore({ query });
+});
+$('[data-store-package]').forEach((button) => button.addEventListener('click', () => openStore({ packageName: button.dataset.storePackage })));
+$('[data-web-url]').forEach((button) => button.addEventListener('click', async () => {
+  try {
+    await api('/api/solo/android/open-url', { method: 'POST', body: JSON.stringify({ url: button.dataset.webUrl }) });
+    $('#android-store-state').textContent = 'Opened the web version in Android.';
+  } catch (error) { $('#android-store-state').textContent = error.message; }
+}));
 
 if (new URLSearchParams(location.search).get('setup') === '1') {
   await openSurface('chat');
