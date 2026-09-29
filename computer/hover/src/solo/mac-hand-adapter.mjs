@@ -90,6 +90,16 @@ export class MacHandBridge {
   }
 
   async status() {
+    if (!this.token) {
+      return freeze({
+        available: false,
+        reachable: false,
+        paired: false,
+        baseUrl: this.baseUrl,
+        error: 'Mac is not paired yet',
+        code: 'MAC_NOT_PAIRED',
+      });
+    }
     try {
       const status = await this.request('/status');
       return freeze({ available: true, reachable: true, paired: Boolean(this.token), baseUrl: this.baseUrl, ...status });
