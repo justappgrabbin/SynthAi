@@ -4,7 +4,7 @@ const to = new URL('../public/computer-runtime/', import.meta.url);
 await rm(to, { recursive: true, force: true });
 await mkdir(to, { recursive: true });
 
-for (const dir of ['core', 'runtime', 'adapters', 'micros', 'mobile', 'worlds', 'residents', 'services']) {
+for (const dir of ['core', 'runtime', 'adapters', 'micros', 'mobile', 'worlds', 'residents', 'services', 'kimi-client']) {
   await cp(new URL(`./${dir}/`, import.meta.url), new URL(`./${dir}/`, to), { recursive: true });
 }
 
@@ -18,4 +18,4 @@ await cp(
 await cp(new URL('./ComputerRuntime.mjs', import.meta.url), new URL('./ComputerRuntime.mjs', to));
 await cp(new URL('./BrowserComputerRuntime.mjs', import.meta.url), new URL('./BrowserComputerRuntime.mjs', to));
 
-console.log('SynthAI browser and mobile Computer runtimes staged');
+console.log('SynthAI browser/mobile runtime staged with Kimi client + Klein/state/execution engines');
