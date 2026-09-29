@@ -58,7 +58,7 @@ jobs:
       - name: Verify Hover birth entry, task queue and embedded Talk
         run: |
           python -m pip install -r computer/donors/synthia58/extras/Cynthia-Talk-v1-unmodified/requirements.txt
-          node --test --test-concurrency=1 computer/hover/test/09-front-screen.test.mjs computer/hover/test/11-birth-mirror-runtime.test.mjs computer/hover/test/20-hover-task-worker.test.mjs computer/hover/test/21-android-store-surface.test.mjs
+          node --test --test-concurrency=1 computer/hover/test/09-front-screen.test.mjs computer/hover/test/11-birth-mirror-runtime.test.mjs computer/hover/test/20-hover-task-worker.test.mjs computer/hover/test/21-android-store-surface.test.mjs computer/hover/test/22-multi-runtime.test.mjs
           npm install --prefix /tmp/hover-ui-test playwright@1.58.2
           /tmp/hover-ui-test/node_modules/.bin/playwright install --with-deps chromium
           node .github/scripts/hover-ui-smoke.mjs
