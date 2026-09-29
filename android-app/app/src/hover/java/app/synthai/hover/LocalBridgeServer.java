@@ -20,6 +20,7 @@ import java.util.concurrent.Executors;
 public final class LocalBridgeServer {
     private final Context context;
     private final int port;
+    private final AndroidRuntimeBridge androidRuntime;
     private final ExecutorService pool = Executors.newCachedThreadPool();
     private volatile ServerSocket socket;
     private volatile boolean running;
@@ -27,6 +28,7 @@ public final class LocalBridgeServer {
     public LocalBridgeServer(Context context, int port) {
         this.context = context.getApplicationContext();
         this.port = port;
+        this.androidRuntime = new AndroidRuntimeBridge(this.context);
     }
 
     public synchronized void start() {
@@ -110,7 +112,27 @@ public final class LocalBridgeServer {
                         .put("baseUrl", "http://127.0.0.1:" + port)
                         .put("accessibilityEnabled", hands != null)
                         .put("overlayAllowed", Settings.canDrawOverlays(context))
-                        .put("runtimeUrl", HoverPorts.RUNTIME_URL));
+                        .put("runtimeUrl", HoverPorts.RUNTIME_URL)
+                        .put("android", androidRuntime.status()));
+            }
+
+            // Host Android is available even when Accessibility hands are not enabled.
+            if ("GET".equals(method) && "/android/status".equals(path)) {
+                return ok(androidRuntime.status());
+            }
+            if ("GET".equals(method) && "/android/apps".equals(path)) {
+                return ok(androidRuntime.apps());
+            }
+            if ("POST".equals(method) && "/android/open".equals(path)) {
+                return ok(androidRuntime.openApp(body.optString("packageName", "")));
+            }
+            if ("POST".equals(method) && "/android/store".equals(path)) {
+                return ok(androidRuntime.openStore(
+                        body.optString("packageName", ""),
+                        body.optString("query", "")));
+            }
+            if ("POST".equals(method) && "/android/ai".equals(path)) {
+                return ok(androidRuntime.openAi(body.optString("provider", "")));
             }
 
             if (hands == null && !("/open-app".equals(path))) {
@@ -148,14 +170,7 @@ public final class LocalBridgeServer {
                 return ok(result("global", accepted));
             }
             if ("POST".equals(method) && "/open-app".equals(path)) {
-                String packageName = body.optString("packageName", "").trim();
-                if (packageName.isEmpty()) return error(400, "packageName is required");
-                Intent launch = context.getPackageManager().getLaunchIntentForPackage(packageName);
-                if (launch == null) return error(404, "No launchable app found for " + packageName);
-                launch.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                context.startActivity(launch);
-                return ok(new JSONObject().put("ok", true).put("action", "open-app")
-                        .put("packageName", packageName).put("accepted", true));
+                return ok(androidRuntime.openApp(body.optString("packageName", "")));
             }
 
             return error(404, "Unknown bridge route: " + method + " " + path);
