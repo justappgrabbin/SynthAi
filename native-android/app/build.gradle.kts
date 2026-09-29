@@ -8,7 +8,7 @@ android {
 
     defaultConfig {
         applicationId = "org.synthai.computer.t7"
-        minSdk = 28
+        minSdk = 24
         targetSdk = 35
         versionCode = 2
         versionName = "0.2.0-android-resident"

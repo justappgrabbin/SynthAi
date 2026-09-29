@@ -14,6 +14,9 @@ import android.os.Handler;
 import android.os.Looper;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.webkit.JavascriptInterface;
+import android.webkit.WebResourceRequest;
+import android.webkit.WebResourceError;
 import android.app.AlertDialog;
 import android.widget.Button;
 import android.widget.EditText;
@@ -48,6 +51,16 @@ public final class MainActivity extends Activity {
     private File mirrorFile;
     private WebView fieldView;
     private LocalWebServer mobileServer;
+    private boolean computerReady;
+
+    public final class MobileBridge {
+        @JavascriptInterface public void ready() {
+            main.post(() -> {
+                computerReady = true;
+                world.setStatus("MOBILE COMPUTER ACTIVE · LOCAL");
+            });
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -147,15 +160,31 @@ public final class MainActivity extends Activity {
             WebView view = new WebView(this);
             view.getSettings().setJavaScriptEnabled(true);
             view.getSettings().setDomStorageEnabled(true);
-            view.setWebViewClient(new WebViewClient());
+            computerReady = false;
+            view.addJavascriptInterface(new MobileBridge(), "SynthiaHost");
+            view.setWebViewClient(new WebViewClient() {
+                @Override public void onReceivedError(WebView web, WebResourceRequest request, WebResourceError error) {
+                    if (request.isForMainFrame()) main.post(() -> fallbackFromComputer(view));
+                }
+            });
             fieldView = view;
             setContentView(view);
             view.loadUrl(url);
+            main.postDelayed(() -> { if (fieldView == view && !computerReady) fallbackFromComputer(view); }, 20000);
             resident.record("computer.open", new JSONObject());
         } catch (Exception error) {
             world.setStatus("MOBILE COMPUTER BOOT ERROR");
             openKernelField();
         }
+    }
+
+    private void fallbackFromComputer(WebView view) {
+        if (fieldView != view) return;
+        fieldView = null;
+        setContentView(world);
+        view.destroy();
+        world.setStatus("NATIVE FIELD · WEBVIEW TOO OLD OR UNAVAILABLE");
+        openKernelField();
     }
 
     private void openKernelField() {
