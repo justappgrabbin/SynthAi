@@ -2,7 +2,10 @@
 
 This Android 9+ debug build boots its native resident kernel in the APK. It
 persists wake, app launch, store, and address events under app-private storage.
-The field shows the current snapshot and accepts a JSON address. Installed
+FIELD opens the bundled mobile SynthIMG Computer through a loopback server
+inside the APK. Its address activation, image loader, IndexedDB, and service
+worker run on the device. If the web bundle cannot start, the native field
+shows the kernel snapshot and accepts a JSON address. Installed
 Android launcher apps appear in the world and can be opened. The Play Store
 button opens the installed Google Play application, or its web storefront when
 the application is absent. A device without Google Play services cannot be
@@ -10,7 +13,7 @@ made Play-certified by this APK.
 
 The existing Synthia 5.7 package importer and Termux bridge remain in source
 for integration, but this build does not bundle Synthia 5.8, a Linux container,
-an on-device LLM, or the full Node service. The local resident kernel and app
+an on-device LLM, or the full Node service. The bundled mobile Computer and app
 discovery work without Termux, a cloud endpoint, or login. The optional 5.7
 integration is not included in the demo's startup path.
 

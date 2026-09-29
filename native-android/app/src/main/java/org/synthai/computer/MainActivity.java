@@ -47,6 +47,7 @@ public final class MainActivity extends Activity {
     private List<PhoneWorldView.AppPlace> appPlaces = new ArrayList<>();
     private File mirrorFile;
     private WebView fieldView;
+    private LocalWebServer mobileServer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,6 +55,7 @@ public final class MainActivity extends Activity {
         client = new NativeSeedClient("http://127.0.0.1:17757");
         journal = new EventJournal(this);
         resident = new LocalRuntime(this);
+        mobileServer = new LocalWebServer(this);
         prefs = getSharedPreferences("synthai-native", MODE_PRIVATE);
         world = new PhoneWorldView(this);
         world.setListener(this::enterApp);
@@ -140,6 +142,23 @@ public final class MainActivity extends Activity {
     }
 
     private void openSynthiaField() {
+        try {
+            String url = mobileServer.start();
+            WebView view = new WebView(this);
+            view.getSettings().setJavaScriptEnabled(true);
+            view.getSettings().setDomStorageEnabled(true);
+            view.setWebViewClient(new WebViewClient());
+            fieldView = view;
+            setContentView(view);
+            view.loadUrl(url);
+            resident.record("computer.open", new JSONObject());
+        } catch (Exception error) {
+            world.setStatus("MOBILE COMPUTER BOOT ERROR");
+            openKernelField();
+        }
+    }
+
+    private void openKernelField() {
         ScrollView scroll = new ScrollView(this);
         LinearLayout column = new LinearLayout(this);
         column.setOrientation(LinearLayout.VERTICAL);
@@ -169,6 +188,13 @@ public final class MainActivity extends Activity {
         });
         column.addView(activate);
         new AlertDialog.Builder(this).setView(scroll).setPositiveButton("Back to world", null).show();
+    }
+
+    @Override protected void onDestroy() {
+        if (fieldView != null) fieldView.destroy();
+        mobileServer.close();
+        io.shutdownNow();
+        super.onDestroy();
     }
 
     private void openPlayStore() {

@@ -38,6 +38,12 @@ jobs:
       - name: Check native seed server syntax
         run: node --check computer/native/native-seed-server.mjs
 
+      - name: Stage mobile Computer runtime inside Android assets
+        run: |
+          node computer/build-mobile-web.mjs
+          mkdir -p native-android/app/src/main/assets/mobile
+          cp -R mobile-web/. native-android/app/src/main/assets/mobile/
+
       - name: Build native debug APK
         run: gradle -p native-android :app:assembleDebug --stacktrace
 
