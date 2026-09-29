@@ -33,8 +33,26 @@ jobs:
           echo 'bd7321eaa1a7602fbe0bb87302df2d79d87835cf4363fbdd17c350dbb485c2af  /tmp/node-mobile.zip' | sha256sum -c -
           python computer/android/prepare-node.py /tmp/node-mobile.zip
       - run: gradle -p computer/android :app:assembleDebug --stacktrace
+      - name: Verify and prepare APK handoff
+        run: |
+          APK=computer/android/app/build/outputs/apk/debug/app-debug.apk
+          test -s "$APK"
+          unzip -t "$APK" > /tmp/computer-apk-zip-check.txt
+          sha256sum "$APK"
+          mkdir -p /tmp/computer-apk-parts
+          split -b 24m -d -a 2 "$APK" /tmp/computer-apk-parts/synthia-computer.apk.part-
       - uses: actions/upload-artifact@v4
         with:
           name: synthia-computer-android-debug
           path: computer/android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v4
+        with:
+          name: synthia-computer-apk-part-00
+          path: /tmp/computer-apk-parts/synthia-computer.apk.part-00
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v4
+        with:
+          name: synthia-computer-apk-part-01
+          path: /tmp/computer-apk-parts/synthia-computer.apk.part-01
           if-no-files-found: error
