@@ -1,6 +1,7 @@
 import { SoloTaskStore } from './solo-task-store.mjs';
 import { SoloBrowserHand } from './browser-hand-adapter.mjs';
 import { AndroidHandBridge } from './android-hand-adapter.mjs';
+import { MacHandBridge } from './mac-hand-adapter.mjs';
 
 export class SoloHoverRuntime {
   constructor({ organism, persistenceDir = '.synthia-state' } = {}) {
@@ -9,6 +10,7 @@ export class SoloHoverRuntime {
     this.tasks = new SoloTaskStore({ persistenceDir });
     this.browser = new SoloBrowserHand({ persistenceDir });
     this.android = new AndroidHandBridge();
+    this.mac = new MacHandBridge();
     this.activeSurface = 'chat';
     this.working = false;
     this.stopped = false;
@@ -24,6 +26,7 @@ export class SoloHoverRuntime {
       taskWorker: { working: this.working, error: this.workerError },
       browser: this.browser.status(),
       android: await this.android.status(),
+      mac: await this.mac.status(),
       morph: this.organism.canonicalMorph.snapshot(),
       identityStatus: this.organism.identityStatus(),
       canonicalAddressOrder: audit?.canonicalMorph?.canon?.addressOrder ?? this.organism.canonicalMorph.snapshot()?.canon?.addressOrder ?? null,
@@ -75,7 +78,7 @@ export class SoloHoverRuntime {
   }
 
   setSurface(surface) {
-    const allowed = new Set(['browser', 'chat', 'world', 'todo', 'build']);
+    const allowed = new Set(['browser', 'chat', 'world', 'todo', 'android', 'mac', 'build']);
     if (!allowed.has(surface)) throw new Error(`unknown surface: ${surface}`);
     this.activeSurface = surface;
     return this.activeSurface;

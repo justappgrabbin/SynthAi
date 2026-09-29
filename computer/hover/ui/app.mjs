@@ -47,11 +47,13 @@ async function openSurface(name) {
   openMenu(false);
   workspace.setAttribute('aria-hidden', 'false');
   $$('.surface').forEach((surface) => surface.classList.toggle('active', surface.dataset.surface === name));
-  $('#surface-subtitle').textContent = ({ browser: 'Browser', chat: 'Chat', world: 'World', todo: 'To Do', build: 'Build' })[name] || name;
+  $('#surface-subtitle').textContent = ({ browser: 'Browser', chat: 'Chat', world: 'World', todo: 'To Do', android: 'Android', mac: 'Mac', build: 'Build' })[name] || name;
   await api('/api/solo/surface', { method: 'POST', body: JSON.stringify({ surface: name }) }).catch(() => {});
   if (name === 'todo') await loadTasks();
   if (name === 'world') await loadWorld();
   if (name === 'browser') await loadBrowserState();
+  if (name === 'android') await loadAndroidSurface();
+  if (name === 'mac') await loadMacSurface();
 }
 
 function collapse() {
@@ -85,9 +87,10 @@ async function sendChat(text, replay = false) {
   if (!trimmed) return;
   if (!replay) addMessage('user', trimmed);
   const lower = trimmed.toLowerCase();
-  const surfaceMatch = lower.match(/^(?:open|show|go to)\s+(browser|chat|world|to do|todo|build)$/);
+  const surfaceMatch = lower.match(/^(?:open|show|go to)\s+(browser|chat|world|to do|todo|android|apps|play store|mac|mac runtime|build)$/);
   if (surfaceMatch) {
-    const target = surfaceMatch[1] === 'to do' ? 'todo' : surfaceMatch[1];
+    const requested = surfaceMatch[1];
+    const target = requested === 'to do' ? 'todo' : ['apps', 'play store'].includes(requested) ? 'android' : requested === 'mac runtime' ? 'mac' : requested;
     addMessage('synthia', `Opening ${target === 'todo' ? 'To Do' : target}.`);
     await openSurface(target);
     return;
@@ -373,16 +376,167 @@ $('#build-home').addEventListener('click', () => { $('#build-frame').src = '/bui
 $('#build-studio').addEventListener('click', () => { $('#build-frame').src = '/studio/index.html'; });
 $('#build-tools').addEventListener('click', () => { $('#build-frame').src = '/lab.html#tray'; });
 
+async function openTalk() {
+  $('#build-frame').src = '/talk/index.html';
+  if (activeSurface !== 'build') await openSurface('build');
+}
+$('#build-talk').addEventListener('click', openTalk);
+$('#talk-open').addEventListener('click', openTalk);
+
+function androidAppButton(app) {
+  const button = document.createElement('button');
+  button.className = 'android-app';
+  button.type = 'button';
+  const label = document.createElement('strong');
+  label.textContent = app.label || app.packageName;
+  const pkg = document.createElement('small');
+  pkg.textContent = app.packageName;
+  button.append(label, pkg);
+  button.addEventListener('click', async () => {
+    try { await api('/api/solo/android/open-app', { method: 'POST', body: JSON.stringify({ packageName: app.packageName }) }); }
+    catch (error) { $('#android-store-state').textContent = error.message; }
+  });
+  return button;
+}
+
+async function loadAndroidSurface() {
+  const state = $('#android-store-state');
+  const grid = $('#android-apps');
+  try {
+    const [store, apps] = await Promise.all([
+      api('/api/solo/android/store-status'),
+      api('/api/solo/android/apps'),
+    ]);
+    state.textContent = store.installed
+      ? 'Google Play is available on this device.'
+      : 'Google Play app is not installed here. Store actions will open play.google.com instead.';
+    $('#android-app-count').textContent = `${apps.count ?? apps.apps?.length ?? 0} launchable`;
+    grid.innerHTML = '';
+    for (const app of apps.apps || []) grid.appendChild(androidAppButton(app));
+    if (!grid.children.length) grid.innerHTML = '<div class="android-empty">No launchable Android apps were returned.</div>';
+  } catch (error) {
+    state.textContent = `Android bridge: ${error.message}`;
+    grid.innerHTML = '<div class="android-empty">Synthia Android bridge is not reachable yet.</div>';
+  }
+}
+
+async function openStore({ packageName = '', query = '' } = {}) {
+  try {
+    const result = await api('/api/solo/android/store', {
+      method: 'POST',
+      body: JSON.stringify({ packageName, query }),
+    });
+    $('#android-store-state').textContent = result.destination === 'google-play-web'
+      ? 'Opened Google Play on the web.'
+      : 'Opened Google Play.';
+  } catch (error) { $('#android-store-state').textContent = error.message; }
+}
+
+$('#android-store-open').addEventListener('click', () => openStore());
+$('#android-refresh').addEventListener('click', loadAndroidSurface);
+$('#android-search-form').addEventListener('submit', async (event) => {
+  event.preventDefault();
+  const query = $('#android-search').value.trim();
+  if (query) await openStore({ query });
+});
+$$('[data-store-package]').forEach((button) => button.addEventListener('click', () => openStore({ packageName: button.dataset.storePackage })));
+$$('[data-web-url]').forEach((button) => button.addEventListener('click', async () => {
+  try {
+    await api('/api/solo/android/open-url', { method: 'POST', body: JSON.stringify({ url: button.dataset.webUrl }) });
+    $('#android-store-state').textContent = 'Opened the web version in Android.';
+  } catch (error) { $('#android-store-state').textContent = error.message; }
+}));
+
+
+const macPairKey = 'synthia-mac-pair-v1';
+
+function macAppButton(remoteApp) {
+  const button = document.createElement('button');
+  button.className = 'android-app';
+  button.type = 'button';
+  const label = document.createElement('strong');
+  label.textContent = remoteApp.name || remoteApp.bundleId || 'Mac app';
+  const detail = document.createElement('small');
+  detail.textContent = remoteApp.bundleId || 'macOS application';
+  button.append(label, detail);
+  button.addEventListener('click', async () => {
+    try {
+      await api('/api/solo/mac/open-app', { method: 'POST', body: JSON.stringify({
+        name: remoteApp.name || '',
+        bundleId: remoteApp.bundleId || '',
+      }) });
+      $('#mac-state').textContent = `Opened ${remoteApp.name || remoteApp.bundleId} on the Mac.`;
+    } catch (error) { $('#mac-state').textContent = error.message; }
+  });
+  return button;
+}
+
+async function configureMacFromFields({ quiet = false } = {}) {
+  const baseUrl = $('#mac-host').value.trim();
+  const token = $('#mac-token').value.trim();
+  if (!baseUrl || !token) return false;
+  await api('/api/solo/mac/configure', {
+    method: 'POST',
+    body: JSON.stringify({ baseUrl, token }),
+  });
+  try { localStorage.setItem(macPairKey, JSON.stringify({ baseUrl, token })); } catch {}
+  if (!quiet) $('#mac-state').textContent = 'Mac residence configured. Checking connection…';
+  return true;
+}
+
+async function loadMacSurface() {
+  const state = $('#mac-state');
+  const grid = $('#mac-apps');
+  try {
+    if (!$('#mac-host').value || !$('#mac-token').value) {
+      try {
+        const saved = JSON.parse(localStorage.getItem(macPairKey) || '{}');
+        if (saved.baseUrl) $('#mac-host').value = saved.baseUrl;
+        if (saved.token) $('#mac-token').value = saved.token;
+      } catch {}
+    }
+    if (!$('#mac-host').value || !$('#mac-token').value) {
+      state.textContent = 'Mac residence is not paired yet.';
+      grid.innerHTML = '<div class="android-empty">Enter the bridge address and pairing token shown by Synthia on the Mac.</div>';
+      $('#mac-app-count').textContent = '';
+      return;
+    }
+    await configureMacFromFields({ quiet: true });
+    const [status, apps] = await Promise.all([
+      api('/api/solo/mac/status'),
+      api('/api/solo/mac/apps'),
+    ]);
+    state.textContent = status.reachable
+      ? `Connected to ${status.hostname || 'Mac'} · ${status.arch || 'macOS'}`
+      : (status.error || 'Mac residence is not reachable.');
+    $('#mac-app-count').textContent = `${apps.count ?? apps.apps?.length ?? 0} available`;
+    grid.innerHTML = '';
+    for (const remoteApp of apps.apps || []) grid.appendChild(macAppButton(remoteApp));
+    if (!grid.children.length) grid.innerHTML = '<div class="android-empty">No Mac applications were returned.</div>';
+  } catch (error) {
+    state.textContent = `Mac residence: ${error.message}`;
+    grid.innerHTML = '<div class="android-empty">Pair the Mac host, then retry.</div>';
+  }
+}
+
+$('#mac-pair-form').addEventListener('submit', async (event) => {
+  event.preventDefault();
+  try {
+    await configureMacFromFields();
+    await loadMacSurface();
+  } catch (error) { $('#mac-state').textContent = error.message; }
+});
+
+$$('[data-mac-web]').forEach((button) => button.addEventListener('click', async () => {
+  try {
+    await api('/api/solo/mac/open-url', { method: 'POST', body: JSON.stringify({ url: button.dataset.macWeb }) });
+    $('#mac-state').textContent = 'Opened on the paired Mac.';
+  } catch (error) { $('#mac-state').textContent = error.message; }
+}));
+
 if (new URLSearchParams(location.search).get('setup') === '1') {
   await openSurface('chat');
   workspace.classList.add('maximized');
   setupDialog.showModal();
 }
 window.addEventListener('focus', loadStatus);
-
-async function openTalk() {
-  await openSurface('build');
-  $('#build-frame').src = '/talk/index.html';
-}
-$('#build-talk').addEventListener('click', openTalk);
-$('#talk-open').addEventListener('click', openTalk);

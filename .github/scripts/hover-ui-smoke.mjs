@@ -16,7 +16,7 @@ try {
   await page.locator('#planet').click();
   const buttons = page.locator('.radial-item');
   await page.waitForTimeout(400);
-  const boxes = await Promise.all(Array.from({ length: 5 }, (_, i) => buttons.nth(i).boundingBox()));
+  const boxes = await Promise.all(Array.from({ length: 7 }, (_, i) => buttons.nth(i).boundingBox()));
   for (let i = 0; i < boxes.length; i++) {
     const a = boxes[i];
     assert.ok(a && a.x >= 0 && a.y >= 0 && a.x + a.width <= 360 && a.y + a.height <= 640);

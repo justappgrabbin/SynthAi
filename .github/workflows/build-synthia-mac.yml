@@ -1,0 +1,82 @@
+name: Build Synthia Mac Multi-Runtime
+
+on:
+  push:
+    branches:
+      - 'hover/**'
+    paths:
+      - '.github/workflows/build-synthia-mac.yml'
+      - 'computer/hover/**'
+      - 'desktop/mac/**'
+  workflow_dispatch:
+
+concurrency:
+  group: synthia-mac-${{ github.ref_name }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build-mac-runtime:
+    runs-on: macos-14
+    timeout-minutes: 35
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Use Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Verify Mac residence protocol
+        run: node --test --test-concurrency=1 computer/hover/test/22-multi-runtime.test.mjs
+
+      - name: Build universal Synthia Mac residence
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          APP="$RUNNER_TEMP/Synthia.app"
+          OUT="$GITHUB_WORKSPACE/dist"
+          rm -rf "$APP" "$OUT"
+          mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources/runtime" "$APP/Contents/Resources/mac" "$OUT"
+
+          cp desktop/mac/Info.plist "$APP/Contents/Info.plist"
+          cp desktop/mac/mac-bridge.mjs "$APP/Contents/Resources/mac/mac-bridge.mjs"
+          rsync -a --exclude='.synthia-state' computer/hover/ "$APP/Contents/Resources/synthia/"
+
+          xcrun swiftc -O -target x86_64-apple-macos13 \
+            -framework Cocoa -framework WebKit \
+            desktop/mac/SynthiaHost.swift -o "$RUNNER_TEMP/Synthia-x64"
+          xcrun swiftc -O -target arm64-apple-macos13 \
+            -framework Cocoa -framework WebKit \
+            desktop/mac/SynthiaHost.swift -o "$RUNNER_TEMP/Synthia-arm64"
+          lipo -create "$RUNNER_TEMP/Synthia-x64" "$RUNNER_TEMP/Synthia-arm64" -output "$APP/Contents/MacOS/Synthia"
+
+          NODE_VERSION="$(node -p "process.versions.node")"
+          curl -fsSL "https://nodejs.org/dist/v$NODE_VERSION/node-v$NODE_VERSION-darwin-x64.tar.gz" -o "$RUNNER_TEMP/node-x64.tgz"
+          curl -fsSL "https://nodejs.org/dist/v$NODE_VERSION/node-v$NODE_VERSION-darwin-arm64.tar.gz" -o "$RUNNER_TEMP/node-arm64.tgz"
+          tar -xzf "$RUNNER_TEMP/node-x64.tgz" -C "$RUNNER_TEMP"
+          tar -xzf "$RUNNER_TEMP/node-arm64.tgz" -C "$RUNNER_TEMP"
+          cp "$RUNNER_TEMP/node-v$NODE_VERSION-darwin-x64/bin/node" "$APP/Contents/Resources/runtime/node-x64"
+          cp "$RUNNER_TEMP/node-v$NODE_VERSION-darwin-arm64/bin/node" "$APP/Contents/Resources/runtime/node-arm64"
+          chmod +x "$APP/Contents/MacOS/Synthia" "$APP/Contents/Resources/runtime/node-x64" "$APP/Contents/Resources/runtime/node-arm64"
+
+          codesign --force --deep --sign - "$APP"
+          "$APP/Contents/MacOS/Synthia" --self-test
+          file "$APP/Contents/MacOS/Synthia"
+          lipo -info "$APP/Contents/MacOS/Synthia"
+
+          ditto -c -k --sequesterRsrc --keepParent "$APP" "$OUT/Synthia-Mac-MultiRuntime.zip"
+          shasum -a 256 "$OUT/Synthia-Mac-MultiRuntime.zip" | tee "$OUT/Synthia-Mac-MultiRuntime.zip.sha256"
+
+      - name: Upload Synthia Mac runtime
+        uses: actions/upload-artifact@v4
+        with:
+          name: Synthia-Mac-MultiRuntime
+          path: |
+            dist/Synthia-Mac-MultiRuntime.zip
+            dist/Synthia-Mac-MultiRuntime.zip.sha256
+          if-no-files-found: error
