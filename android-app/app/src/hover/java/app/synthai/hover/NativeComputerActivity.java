@@ -1,6 +1,8 @@
 package app.synthai.hover;
 
 import android.app.Activity;
+import android.content.Intent;
+import android.content.pm.ResolveInfo;
 import android.os.Bundle;
 import android.graphics.Color;
 import android.view.ViewGroup;
@@ -19,6 +21,7 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 
 /** Native Android 7 front door for the same local Synthia runtime and Realm. */
 public final class NativeComputerActivity extends Activity {
@@ -71,6 +74,18 @@ public final class NativeComputerActivity extends Activity {
         Button refresh = button("Refresh world");
         refresh.setOnClickListener(v -> refreshRealm());
         root.addView(refresh);
+        root.addView(label("Installed apps", 22));
+        Intent launcher = new Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER);
+        List<ResolveInfo> apps = getPackageManager().queryIntentActivities(launcher, 0);
+        for (ResolveInfo app : apps) {
+            final String packageName = app.activityInfo.packageName;
+            Button open = button(app.loadLabel(getPackageManager()).toString());
+            open.setOnClickListener(v -> {
+                Intent installed = getPackageManager().getLaunchIntentForPackage(packageName);
+                if (installed != null) startActivity(installed);
+            });
+            root.addView(open);
+        }
         refreshRealm();
     }
 
