@@ -23,6 +23,7 @@ test('Synthia Android exposes Android, Google Play, and compatibility fallbacks'
 
   assert.match(app, /\/api\/solo\/android\/apps/);
   assert.match(app, /\/api\/solo\/android\/store/);
+  assert.doesNotMatch(app, /(?<!\$)\$\([^\n]+\)\.forEach/);
   assert.match(adapter, /\/play-store/);
   assert.match(adapter, /\/store-status/);
   assert.match(bridge, /"\/apps"/);
