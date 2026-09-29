@@ -71,6 +71,34 @@ export async function startSynthiaFrontScreen({
       if (request.method === 'GET' && url.pathname === '/api/solo/status') {
         return reply(response, 200, { ok: true, ...(await solo.status()) });
       }
+      if (request.method === 'POST' && url.pathname === '/api/solo/tool-factory') {
+        if (!organism.birthMirror.configuration?.configured) {
+          const error = new Error('Configure birth information before using the Tool Factory.');
+          error.code = 'BIRTH_CONFIGURATION_REQUIRED';
+          throw error;
+        }
+        const body = await bodyOf(request);
+        const operation = body.operation === 'run' ? 'run' : body.operation === 'synthesize' ? 'synthesize' : null;
+        if (!operation) throw new TypeError('Tool Factory operation must be synthesize or run');
+        if (operation === 'synthesize' && (!String(body.purpose ?? '').trim() || !String(body.dimension ?? '').trim())) {
+          throw new TypeError('Tool purpose and dimension are required');
+        }
+        if (operation === 'run' && !String(body.id ?? '').trim()) throw new TypeError('Generated tool id is required');
+        const input = operation === 'run'
+          ? { op: 'run', id: body.id, input: body.input }
+          : { op: 'synthesize', purpose: body.purpose, dimension: body.dimension, level: Number(body.level ?? 7) };
+        const batch = await organism.swarm.submit([{
+          id: `hover-tool-${Date.now()}`,
+          capability: operation === 'run' ? 'tool.run' : 'tool.synthesize',
+          input,
+          meta: { source: 'solo-hover-build', replaySafe: true },
+        }]);
+        const execution = batch.executions[0] ?? null;
+        if (!execution || execution.status !== 'complete') {
+          return reply(response, 409, { ok: false, execution, pending: batch.pending });
+        }
+        return reply(response, 200, { ok: true, execution });
+      }
       if (request.method === 'POST' && url.pathname === '/api/solo/surface') {
         const body = await bodyOf(request);
         return reply(response, 200, { ok: true, surface: solo.setSurface(String(body.surface ?? 'chat')) });
