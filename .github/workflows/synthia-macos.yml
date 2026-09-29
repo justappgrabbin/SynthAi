@@ -41,14 +41,18 @@ jobs:
           APP=dist/Synthia.app
           test -d "$APP"
           test -x "$APP/Contents/MacOS/Synthia"
-          test -x "$APP/Contents/Resources/runtime/node"
+          test -x "$APP/Contents/Resources/runtime/node-x64"
+          test -x "$APP/Contents/Resources/runtime/node-arm64"
           test -x "$APP/Contents/Resources/runtime/talk-python-shim"
-          test -f "$APP/Contents/Resources/hover/src/ui/server.mjs"
-          test -f "$APP/Contents/Resources/hover/ui/index.html"
+          test -f "$APP/Contents/Resources/mac/mac-bridge.mjs"
+          test -f "$APP/Contents/Resources/synthia/src/ui/server.mjs"
+          test -f "$APP/Contents/Resources/synthia/ui/index.html"
           plutil -lint "$APP/Contents/Info.plist"
           lipo -info "$APP/Contents/MacOS/Synthia" | grep -q 'x86_64 arm64'
-          lipo -info "$APP/Contents/Resources/runtime/node" | grep -q 'x86_64 arm64'
+          file "$APP/Contents/Resources/runtime/node-x64" | grep -q 'x86_64'
+          file "$APP/Contents/Resources/runtime/node-arm64" | grep -q 'arm64'
           codesign --verify --deep --strict "$APP"
+          "$APP/Contents/MacOS/Synthia" --self-test
 
       - name: Verify embedded Hover runtime
         run: |
