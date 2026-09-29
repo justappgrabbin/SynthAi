@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#12091f">
+  <meta name="application-name" content="SynthAI Computer">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="icon" href="/synthai-icon.svg" type="image/svg+xml">
+  <title>SynthAI Computer</title>
+  <link rel="stylesheet" href="/computer.css">
+</head>
+<body>
+  <div class="computer">
+    <aside class="rail">
+      <div class="brand">
+        <div class="orb">S</div>
+        <div><strong>SynthAI</strong><small>Computer</small></div>
+      </div>
+      <nav id="nav">
+        <button class="nav active" data-view="home">⌂ <span>Home</span></button>
+        <button class="nav" data-view="build">✦ <span>Build</span></button>
+        <button class="nav" data-view="files">▤ <span>Files</span></button>
+        <button class="nav" data-view="github">⌁ <span>GitHub</span></button>
+        <button class="nav" data-view="systems">◫ <span>Systems</span></button>
+        <button class="nav" data-view="activity">↯ <span>Activity</span></button>
+      </nav>
+      <a class="diagnostic" href="/computer.html">Diagnostic</a>
+    </aside>
+
+    <main>
+      <header class="topbar">
+        <div>
+          <small class="eyebrow">PRIMARY OPERATING SURFACE</small>
+          <h1 id="viewTitle">Computer Home</h1>
+        </div>
+        <div class="statusline">
+          <span class="dot" id="bootDot"></span>
+          <span id="bootLabel">booting</span>
+        </div>
+      </header>
+
+      <section class="view active" id="home">
+        <div class="hero">
+          <div>
+            <span class="pill">SynthAI Computer</span>
+            <h2>Your work lives here first.</h2>
+            <p>Create projects and edit their files on this device. The Computer connects to its embedded Linux runtime automatically when available; GitHub publishing is optional.</p>
+          </div>
+          <button class="primary big" data-go="build">Create something</button>
+        </div>
+        <p id="runtimeEvidence" class="muted" role="status">Starting the Computer…</p>
+
+        <div class="status-grid">
+          <article><small>On-device Computer</small><strong id="runtimeStatus">STARTING</strong><span id="runtimeDetail">booting</span></article>
+          <article><small>Project workspace</small><strong id="projectStatus">WAITING</strong><span id="projectCount">0 projects</span></article>
+          <article><small>GitHub publishing (optional)</small><strong id="githubStatus">NOT CONNECTED</strong><span id="githubDetail">connect when you want to publish</span></article>
+          <article><small>Mounted apps</small><strong id="mountStatus">WIRED</strong><span id="mountCount">0 mounted</span></article>
+        </div>
+
+        <div class="two">
+          <article class="panel">
+            <div class="panel-head"><div><small>RECENT PROJECTS</small><h3>Workspace</h3></div><button class="quiet" data-go="build">Open builder</button></div>
+            <div id="recentProjects" class="empty">No local projects yet.</div>
+          </article>
+          <article class="panel">
+            <div class="panel-head"><div><small>REGISTERED COMPONENTS</small><h3>Computer registry</h3></div></div>
+            <div id="homeSystems" class="system-list"></div>
+          </article>
+        </div>
+      </section>
+
+      <section class="view" id="build">
+        <div class="builder-grid">
+          <article class="panel project-panel">
+            <div class="panel-head"><div><small>PROJECT</small><h3>Build workspace</h3></div><span class="pill" id="projectState">no project</span></div>
+            <p id="workspaceNotice" class="muted" role="status">Waiting for the on-device Computer to start.</p>
+            <label>Project name<input id="projectName" placeholder="My app"></label>
+            <label>Description<input id="projectDescription" placeholder="What this project is for"></label>
+            <div class="row">
+              <button class="primary" id="createProject">New project</button>
+              <select id="projectPicker"><option value="">Choose project</option></select>
+            </div>
+          </article>
+
+          <article class="panel editor-panel">
+            <div class="editor-head">
+              <input id="filePath" value="index.html" aria-label="File path">
+              <div class="row">
+                <button class="quiet" id="saveFile">Save file</button>
+                <button class="quiet" id="previewFile">Preview</button>
+                <button class="primary" id="publishProject">Publish to GitHub</button>
+              </div>
+            </div>
+            <textarea id="editor" spellcheck="false" aria-label="Project file editor"></textarea>
+            <div id="builderMessage" class="message">Create or choose a project.</div>
+          </article>
+
+          <article class="panel preview-panel">
+            <div class="panel-head"><div><small>LIVE LOCAL OUTPUT</small><h3>Preview</h3></div></div>
+            <iframe id="preview" sandbox="allow-scripts"></iframe>
+          </article>
+        </div>
+      </section>
+
+      <section class="view" id="files">
+        <article class="panel">
+          <div class="panel-head"><div><small>COMPUTER VFS</small><h3>Project files</h3></div><span id="fileProjectName" class="pill">choose a project</span></div>
+          <div id="fileList" class="file-list empty">No project selected.</div>
+        </article>
+      </section>
+
+      <section class="view" id="github">
+        <div class="two">
+          <article class="panel">
+            <div class="panel-head"><div><small>OPTIONAL PUBLISHING</small><h3>GitHub connection</h3></div><strong id="githubPanelState">NOT CONNECTED</strong></div>
+            <p class="muted">The on-device Computer starts without a server URL. Publishing to GitHub requires an authorized GitHub connection. If you use the separate Synthia Server bridge, configure it here.</p>
+            <details>
+              <summary>Configure Synthia Server for GitHub publishing</summary>
+              <p class="muted">The GitHub credential stays on Synthia Server. This device keeps only the bridge URL and its access token.</p>
+              <label>Synthia Server URL<input id="serverUrl" placeholder="https://synthia-server.onrender.com"></label>
+              <label>Computer access token<input id="computerToken" type="password" placeholder="Access token for your server"></label>
+              <div class="row">
+                <button class="primary" id="connectGitHub">Connect and verify</button>
+                <button class="quiet" id="refreshRepos">Refresh repos</button>
+              </div>
+            </details>
+            <div id="githubMessage" class="message">GitHub publishing is optional. Your local projects work without it.</div>
+          </article>
+          <article class="panel">
+            <div class="panel-head"><div><small>REPOSITORIES</small><h3>GitHub workspace</h3></div><span id="repoCount" class="pill">0</span></div>
+            <div id="repoList" class="repo-list empty">Configure GitHub publishing to load repositories.</div>
+          </article>
+        </div>
+      </section>
+
+      <section class="view" id="systems">
+        <article class="panel">
+          <div class="panel-head"><div><small>VERIFIED LOCAL RUNTIME</small><h3>Services registered on this device</h3></div></div>
+          <div id="localServiceList" class="system-list"></div>
+        </article>
+        <article class="panel">
+          <div class="panel-head"><div><small>MACRO REGISTRY</small><h3>Registered components</h3></div></div>
+          <p class="muted">A registered component may be available for integration without running on this device.</p>
+          <div id="systemsList" class="cards"></div>
+        </article>
+      </section>
+
+      <section class="view" id="activity">
+        <article class="panel">
+          <div class="panel-head"><div><small>EVENT BUS</small><h3>Runtime activity</h3></div><button class="quiet" id="clearActivity">Clear view</button></div>
+          <div id="activityList" class="activity-list"></div>
+        </article>
+      </section>
+    </main>
+  </div>
+  <script src="/computer-app.android7.js"></script>
+</body>
+</html>

@@ -42,6 +42,7 @@ public final class MainActivity extends Activity {
     protected void onCreate(Bundle state) {
         super.onCreate(state);
 
+        Log.i(TAG, "ANDROID_API=" + android.os.Build.VERSION.SDK_INT + " ABIS=" + java.util.Arrays.toString(android.os.Build.SUPPORTED_ABIS));
         startService(new Intent(this, ComputerBackendService.class));
 
         webView = new WebView(this);
@@ -55,7 +56,7 @@ public final class MainActivity extends Activity {
         settings.setAllowContentAccess(false);
         settings.setMediaPlaybackRequiresUserGesture(false);
         settings.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
-        settings.setUserAgentString(settings.getUserAgentString() + " SynthAIComputer/0.4.0");
+        settings.setUserAgentString(settings.getUserAgentString() + " SynthAIComputer/0.4.0-a7");
 
         webView.setWebChromeClient(new WebChromeClient() {
             @Override
@@ -81,12 +82,12 @@ public final class MainActivity extends Activity {
             String base = JSONObject.quote(LinuxContainer.BASE_URL);
             String secret = JSONObject.quote(ComputerBackendService.sessionSecret(this));
             String js =
-                    "(()=>{" +
-                    "const c=globalThis.SynthAIComputer;" +
+                    "(function(){" +
+                    "var c=window.SynthAIComputer;" +
                     "if(!c||typeof c.connectLocalBackend!=='function')return 'not-ready';" +
                     "c.connectLocalBackend({baseUrl:" + base + ",token:" + secret + ",timeoutMs:3000})" +
-                    ".catch(e=>window.dispatchEvent(new CustomEvent('synthai-local-backend-error'," +
-                    "{detail:{message:String(e&&e.message||e)}})));" +
+                    ".catch(function(e){window.dispatchEvent(new CustomEvent('synthai-local-backend-error'," +
+                    "{detail:{message:String(e&&e.message||e)}}));});" +
                     "return 'connecting';})()";
 
             backendAttachInFlight = true;
@@ -99,7 +100,7 @@ public final class MainActivity extends Activity {
                 handler.postDelayed(() -> {
                     if (webView == null) return;
                     webView.evaluateJavascript(
-                            "Boolean(globalThis.SynthAIComputer && globalThis.SynthAIComputer.snapshot && globalThis.SynthAIComputer.snapshot().localBackend?.status === 'VERIFIED')",
+                            "(function(){var c=window.SynthAIComputer;if(!c||!c.snapshot)return false;var s=c.snapshot();return Boolean(s&&s.localBackend&&s.localBackend.status==='VERIFIED');})()",
                             verified -> {
                                 Log.i(TAG, "LOCAL_BACKEND_BROWSER_READY=" + verified);
                                 backendAttached = "true".equals(verified);
@@ -202,7 +203,7 @@ public final class MainActivity extends Activity {
             attachAttempts = 0;
             Log.i(TAG, "PAGE_FINISHED " + url);
             view.postDelayed(() -> view.evaluateJavascript(
-                    "Boolean(globalThis.SynthAIComputer && globalThis.SynthAIComputer.snapshot && globalThis.SynthAIComputer.snapshot().environment === 'browser')",
+                    "Boolean(window.SynthAIComputer && window.SynthAIComputer.snapshot && window.SynthAIComputer.snapshot().environment === 'browser')",
                     value -> Log.i(TAG, "RUNTIME_READY=" + value)
             ), 1500);
             attachLocalBackendWhenReady();

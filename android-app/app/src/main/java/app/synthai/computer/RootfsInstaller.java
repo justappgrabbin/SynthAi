@@ -2,6 +2,7 @@ package app.synthai.computer;
 
 import android.content.Context;
 import android.system.Os;
+import android.system.OsConstants;
 import android.util.Log;
 
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
@@ -220,9 +221,18 @@ final class RootfsInstaller {
         }
     }
 
+    private static boolean isSymbolicLink(File file) {
+        try {
+            int mode = Os.lstat(file.getAbsolutePath()).st_mode;
+            return (mode & OsConstants.S_IFMT) == OsConstants.S_IFLNK;
+        } catch (Throwable ignored) {
+            return false;
+        }
+    }
+
     private static void deleteRecursively(File file) {
         if (file == null || !file.exists()) return;
-        if (file.isDirectory() && !java.nio.file.Files.isSymbolicLink(file.toPath())) {
+        if (file.isDirectory() && !isSymbolicLink(file)) {
             File[] children = file.listFiles();
             if (children != null) for (File child : children) deleteRecursively(child);
         }

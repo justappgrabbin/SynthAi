@@ -1,0 +1,196 @@
+name: Build SynthAI Computer for Android 7
+
+on:
+  push:
+    branches:
+      - integration/android7-computer-20260929
+  workflow_dispatch:
+
+concurrency:
+  group: synthai-android7-${{ github.ref_name }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  verify-and-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 70
+
+    steps:
+      - name: Checkout repository and donor submodule
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Use Node 22 for build verification
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Use Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install ephemeris runtime needed by Computer tests
+        run: python -m pip install --disable-pip-version-check ephem
+
+      - name: Verify canonical Computer and stage browser runtime
+        run: npm test
+
+      - name: Build Android 7 WebView compatibility bundle
+        run: |
+          node .github/scripts/prepare-android7-web.mjs
+          npx --yes esbuild@0.25.10 public/computer-app.android7-entry.mjs \
+            --bundle \
+            --format=iife \
+            --platform=browser \
+            --target=chrome51 \
+            --outfile=public/computer-app.android7.js
+          test -s public/computer-app.android7.js
+          ! grep -q '<script type="module"' public/index.android7.html
+
+      - name: Copy Android 7 surface into APK assets
+        run: |
+          rm -rf android-app/app/src/main/assets
+          mkdir -p android-app/app/src/main/assets
+          cp -R public/. android-app/app/src/main/assets/
+          cp public/index.android7.html android-app/app/src/main/assets/index.html
+          mkdir -p android-app/app/src/main/assets/licenses
+          cp android-app/THIRD_PARTY_NOTICES.md android-app/app/src/main/assets/licenses/THIRD_PARTY_NOTICES.md
+
+      - name: Enable ARM64 container image builds
+        uses: docker/setup-qemu-action@v3
+        with:
+          platforms: arm64
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build embedded ARM64 Linux Computer rootfs
+        run: |
+          rm -rf /tmp/synthai-linux-rootfs
+          docker buildx build \
+            --platform linux/arm64 \
+            --file android-app/linux/Dockerfile \
+            --tag "synthai-computer-android7-arm64:$GITHUB_SHA" \
+            --load \
+            .
+          node .github/scripts/arm64-backend-smoke.mjs "synthai-computer-android7-arm64:$GITHUB_SHA"
+          mkdir -p /tmp/synthai-linux-rootfs
+          container="$(docker create --platform linux/arm64 "synthai-computer-android7-arm64:$GITHUB_SHA")"
+          docker export "$container" | tar -C /tmp/synthai-linux-rootfs -xf -
+          docker rm "$container"
+          test -f /tmp/synthai-linux-rootfs/opt/synthai/computer/backend/local-server.mjs
+          test -x /tmp/synthai-linux-rootfs/usr/local/bin/node
+          tar -C /tmp/synthai-linux-rootfs -czf android-app/app/src/main/assets/linux-rootfs.bundle .
+          printf '%s\n' "$GITHUB_SHA" > android-app/app/src/main/assets/linux-rootfs.version
+
+      - name: Use Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Install Android SDK and API 24 platform
+        uses: android-actions/setup-android@v3
+        with:
+          packages: 'platform-tools platforms;android-24 platforms;android-35 build-tools;35.0.0'
+          log-accepted-android-sdk-licenses: 'false'
+
+      - name: Install Android NDK r28
+        run: sdkmanager 'ndk;28.0.13004108'
+
+      - name: Build ARM64 PRoot for Android API 24
+        env:
+          OPENMINIS_COMMIT: 4ef29002e88db1e20e462ec2ff46916e8a7dcb45
+          NDK_VERSION: 28.0.13004108
+        run: |
+          rm -rf /tmp/openminis
+          git clone https://github.com/OpenMinis/OpenMinis.git /tmp/openminis
+          git -C /tmp/openminis checkout "$OPENMINIS_COMMIT"
+          git -C /tmp/openminis submodule update --init --recursive
+          export ANDROID_NDK_HOME="$ANDROID_SDK_ROOT/ndk/$NDK_VERSION"
+
+          sed -i 's/^ANDROID_API=26$/ANDROID_API=24/' /tmp/openminis/deps/build_proot.sh
+          grep -q '^ANDROID_API=24$' /tmp/openminis/deps/build_proot.sh
+          bash /tmp/openminis/deps/build_proot.sh
+
+          rm -rf android-app/app/src/main/jniLibs
+          mkdir -p android-app/app/src/main/jniLibs/arm64-v8a
+          cp /tmp/openminis/src/android/app/src/main/jniLibs/arm64-v8a/libproot.so android-app/app/src/main/jniLibs/arm64-v8a/
+          cp /tmp/openminis/src/android/app/src/main/jniLibs/arm64-v8a/libproot-loader.so android-app/app/src/main/jniLibs/arm64-v8a/
+          cp /tmp/openminis/src/android/app/src/main/jniLibs/arm64-v8a/libproot-loader32.so android-app/app/src/main/jniLibs/arm64-v8a/
+
+          test "$(sha256sum android-app/app/src/main/jniLibs/arm64-v8a/libproot-loader.so | awk '{print $1}')" = "44ef39c1e1a18c09f6e4c4b5d6f8bba82d30596598bd155ec162d05c5122ff04"
+          test "$(sha256sum android-app/app/src/main/jniLibs/arm64-v8a/libproot-loader32.so | awk '{print $1}')" = "25f6bd90bc5a3d3088026289a0d3eaf3e502bd2b00e5cb74fadd9791132efa34"
+
+          PROOT_COMMIT="$(git -C /tmp/openminis/deps/proot rev-parse HEAD)"
+          {
+            echo "Android compatibility target: API 24 / Android 7.0"
+            echo "OpenMinis commit: $OPENMINIS_COMMIT"
+            echo "PRoot commit: $PROOT_COMMIT"
+            echo "PRoot NDK API: 24"
+            echo "Android NDK: $NDK_VERSION"
+          } > android-app/app/src/main/assets/licenses/linux-runtime-provenance.txt
+
+          PROOT_LICENSE="$(find /tmp/openminis/deps/proot -maxdepth 2 -type f \( -iname 'COPYING*' -o -iname 'LICENSE*' \) | head -n 1)"
+          test -n "$PROOT_LICENSE"
+          cp "$PROOT_LICENSE" android-app/app/src/main/assets/licenses/PRoot-LICENSE.txt
+
+          mkdir -p android-app/app/src/main/jniLibs/x86_64
+          cat > /tmp/synthai-abi-shim.c <<'EOF'
+          int synthai_container_abi_placeholder(void) { return 0; }
+          EOF
+          "$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/x86_64-linux-android24-clang" \
+            -shared -fPIC /tmp/synthai-abi-shim.c \
+            -o android-app/app/src/main/jniLibs/x86_64/libsynthai-container-abi-placeholder.so
+
+      - name: Install Gradle 8.7
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.7'
+
+      - name: Build Android 7 debug APK
+        working-directory: android-app
+        run: gradle --no-daemon :app:assembleDebug
+
+      - name: Verify Android 7 APK payload
+        run: |
+          APK=android-app/app/build/outputs/apk/debug/app-debug.apk
+          unzip -l "$APK" | tee /tmp/apk-tree.txt
+          grep -q 'assets/linux-rootfs.bundle' /tmp/apk-tree.txt
+          unzip -p "$APK" assets/linux-rootfs.bundle | gzip -t
+          grep -q 'lib/arm64-v8a/libproot.so' /tmp/apk-tree.txt
+          grep -q 'assets/computer-app.android7.js' /tmp/apk-tree.txt
+          ! unzip -p "$APK" assets/index.html | grep -q 'type="module"'
+
+      - name: Enable KVM for Android 7 emulator
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Verify APK surface on Android 7.0
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 24
+          arch: x86_64
+          profile: pixel_2
+          disable-animations: true
+          script: bash .github/scripts/android7-smoke.sh
+
+      - name: Record APK checksum
+        run: |
+          sha256sum android-app/app/build/outputs/apk/debug/app-debug.apk | tee android-app/app/build/outputs/apk/debug/app-debug.apk.sha256
+
+      - name: Upload Android 7 APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: SynthAI-Computer-Android7-debug
+          path: |
+            android-app/app/build/outputs/apk/debug/app-debug.apk
+            android-app/app/build/outputs/apk/debug/app-debug.apk.sha256
+          if-no-files-found: error

@@ -15,10 +15,12 @@ export class LocalComputerBackendAdapter {
   }
 
   async fetchJson(path, options = {}) {
-    const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), this.timeoutMs);
+    const Controller = globalThis.AbortController;
+    const controller = typeof Controller === 'function' ? new Controller() : null;
+    const timer = controller ? setTimeout(() => controller.abort(), this.timeoutMs) : null;
     try {
-      const response = await fetch(this.baseUrl + path, { ...options, signal: controller.signal });
+      const request = controller ? { ...options, signal: controller.signal } : options;
+      const response = await fetch(this.baseUrl + path, request);
       const text = await response.text();
       let body;
       try { body = text ? JSON.parse(text) : {}; }
@@ -28,7 +30,7 @@ export class LocalComputerBackendAdapter {
       }
       return body;
     } finally {
-      clearTimeout(timer);
+      if (timer) clearTimeout(timer);
     }
   }
 
