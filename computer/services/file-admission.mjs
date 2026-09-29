@@ -94,7 +94,7 @@ export class FileAdmission {
   }
 
   async write(path, content, source = 'desktop', encoding = 'utf8') {
-    if (typeof path !== 'string' || !path.startsWith('/home/') || path.includes('..') || typeof content !== 'string' || content.length > 500000) {
+    if (typeof path !== 'string' || !path.startsWith('/home/') || path.includes('..') || typeof content !== 'string' || content.length > 8000000) {
       throw new TypeError('A /home/ file path and text content are required.');
     }
     const bytes = encoding === 'base64' ? Buffer.from(content, 'base64') : Buffer.from(content);

@@ -61,10 +61,15 @@ public final class MainActivity extends Activity {
 
     private void startComputer() {
         try {
-            int version = getPackageManager().getPackageInfo(getPackageName(), 0).versionCode;
-            File runtime = new File(getFilesDir(), "runtime-" + version);
+            android.content.pm.PackageInfo packageInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
+            File runtime = new File(getFilesDir(), "runtime-" + packageInfo.versionCode + "-" + packageInfo.lastUpdateTime);
             File entry = new File(runtime, "mobile-entry.mjs");
-            if (!entry.isFile()) extractRuntime(runtime);
+            File complete = new File(runtime, ".complete");
+            if (!complete.isFile() || !entry.isFile()) {
+                extractRuntime(runtime);
+                if (!entry.isFile()) throw new IllegalStateException("Packaged computer entry is missing");
+                if (!complete.createNewFile() && !complete.isFile()) throw new IllegalStateException("Cannot mark runtime ready");
+            }
             File data = new File(getFilesDir(), "computer-data");
             if (!data.exists() && !data.mkdirs()) throw new IllegalStateException("Cannot create computer data directory");
             int exit = startNode(new String[]{"node", entry.getAbsolutePath(), data.getAbsolutePath()});

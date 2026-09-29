@@ -22,10 +22,15 @@ test('imported source survives restart and exact address reactivates ATO and exe
     assert.equal(dnaRecord.meta.dna.pieces, 1);
     const source = 'function answer() { return 6 * 7; }\nconsole.log(answer());';
     const record = await first.files.write('/home/user/Imports/source.js', source, 'e2e');
+    const binary = Buffer.alloc(600000, 0xab);
+    const binaryRecord = await first.files.write('/home/user/Imports/asset.bin', binary.toString('base64'), 'e2e', 'base64');
+    assert.equal(binaryRecord.meta.size, binary.length);
     assert.ok(record.meta.addressKey);
     assert.ok(first.conversation.execution.execution.capabilityMesh.getNode(`file:${record.meta.addressKey}:${record.meta.digest}`));
     const second = await start();
     const recalled = await second.files.activate(record.meta.addressKey, record.path);
+    const binaryRecalled = await second.files.activate(binaryRecord.meta.addressKey, binaryRecord.path);
+    assert.deepEqual(Buffer.from(binaryRecalled.content, 'base64'), binary);
     assert.equal(recalled.activation.automatonId, 'addressed-file-recall');
     assert.equal(recalled.content, source);
     const receipt = await second.conversation.executeArtifact({ name: 'source.js', type: 'javascript', content: recalled.content });
