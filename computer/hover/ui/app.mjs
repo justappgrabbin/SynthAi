@@ -47,12 +47,13 @@ async function openSurface(name) {
   openMenu(false);
   workspace.setAttribute('aria-hidden', 'false');
   $$('.surface').forEach((surface) => surface.classList.toggle('active', surface.dataset.surface === name));
-  $('#surface-subtitle').textContent = ({ browser: 'Browser', chat: 'Chat', world: 'World', todo: 'To Do', android: 'Android', build: 'Build' })[name] || name;
+  $('#surface-subtitle').textContent = ({ browser: 'Browser', chat: 'Chat', world: 'World', todo: 'To Do', android: 'Android', mac: 'Mac', build: 'Build' })[name] || name;
   await api('/api/solo/surface', { method: 'POST', body: JSON.stringify({ surface: name }) }).catch(() => {});
   if (name === 'todo') await loadTasks();
   if (name === 'world') await loadWorld();
   if (name === 'browser') await loadBrowserState();
   if (name === 'android') await loadAndroidSurface();
+  if (name === 'mac') await loadMacSurface();
 }
 
 function collapse() {
@@ -86,10 +87,12 @@ async function sendChat(text, replay = false) {
   if (!trimmed) return;
   if (!replay) addMessage('user', trimmed);
   const lower = trimmed.toLowerCase();
-  const surfaceMatch = lower.match(/^(?:open|show|go to)\s+(browser|chat|world|to do|todo|android|apps|play store|build)$/);
+  const surfaceMatch = lower.match(/^(?:open|show|go to)\s+(browser|chat|world|to do|todo|android|apps|play store|mac|mac apps|build)$/);
   if (surfaceMatch) {
     const requested = surfaceMatch[1];
-    const target = requested === 'to do' ? 'todo' : ['apps', 'play store'].includes(requested) ? 'android' : requested;
+    const target = requested === 'to do' ? 'todo'
+      : ['apps', 'play store'].includes(requested) ? 'android'
+        : requested === 'mac apps' ? 'mac' : requested;
     addMessage('synthia', `Opening ${target === 'todo' ? 'To Do' : target}.`);
     await openSurface(target);
     return;
@@ -438,6 +441,68 @@ $('[data-web-url]').forEach((button) => button.addEventListener('click', async (
     $('#android-store-state').textContent = 'Opened the web version in Android.';
   } catch (error) { $('#android-store-state').textContent = error.message; }
 }));
+
+
+function macAppButton(app) {
+  const button = document.createElement('button');
+  button.className = 'mac-app';
+  button.type = 'button';
+  const label = document.createElement('strong');
+  label.textContent = app.name || app.bundleId || 'Mac app';
+  const bundle = document.createElement('small');
+  bundle.textContent = app.bundleId || 'macOS application';
+  button.append(label, bundle);
+  button.addEventListener('click', async () => {
+    try {
+      await api('/api/solo/mac/open-app', {
+        method: 'POST',
+        body: JSON.stringify({ name: app.name || '', bundleId: app.bundleId || '' }),
+      });
+      $('#mac-state').textContent = `Opened ${app.name || app.bundleId} on the paired Mac.`;
+    } catch (error) {
+      $('#mac-state').textContent = error.message;
+    }
+  });
+  return button;
+}
+
+async function loadMacSurface() {
+  const state = $('#mac-state');
+  const grid = $('#mac-apps');
+  try {
+    const status = await api('/api/solo/mac/status');
+    if (!status.reachable) throw new Error(status.error || 'Mac bridge is not reachable');
+    state.textContent = `Paired to ${status.hostname || 'Mac'} · ${status.arch || 'macOS'}`;
+    const apps = await api('/api/solo/mac/apps');
+    $('#mac-app-count').textContent = `${apps.count ?? apps.apps?.length ?? 0} available`;
+    grid.innerHTML = '';
+    for (const app of apps.apps || []) grid.appendChild(macAppButton(app));
+    if (!grid.children.length) grid.innerHTML = '<div class="mac-empty">No Mac applications were returned.</div>';
+  } catch (error) {
+    state.textContent = `Mac bridge: ${error.message}`;
+    $('#mac-app-count').textContent = '';
+    grid.innerHTML = '<div class="mac-empty">Pair a Mac to see and launch its applications.</div>';
+  }
+}
+
+$('#mac-pair-form').addEventListener('submit', async (event) => {
+  event.preventDefault();
+  const baseUrl = $('#mac-bridge-url').value.trim();
+  const token = $('#mac-token').value.trim();
+  const state = $('#mac-state');
+  state.textContent = 'Pairing Mac…';
+  try {
+    await api('/api/solo/mac/configure', {
+      method: 'POST',
+      body: JSON.stringify({ baseUrl, token }),
+    });
+    // Do not persist the pairing token in browser storage.
+    await loadMacSurface();
+  } catch (error) {
+    state.textContent = error.message;
+  }
+});
+$('#mac-refresh').addEventListener('click', loadMacSurface);
 
 if (new URLSearchParams(location.search).get('setup') === '1') {
   await openSurface('chat');
