@@ -7,7 +7,7 @@ android {
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "org.synthai.computer"
+        applicationId = "org.synthai.computer.t7"
         minSdk = 28
         targetSdk = 35
         versionCode = 2
