@@ -91,10 +91,12 @@ const server = createServer(async (req, res) => {
       }
       if (req.method === 'POST' && url.pathname === '/api/execute') {
         const request = await body(req);
-        const artifact = request.addressKey
+        const admitted = request.addressKey
           ? files.resolve(request.addressKey).find((entry) => entry.path === request.path) ?? files.resolve(request.addressKey)[0]
           : await files.write(`/home/user/Documents/${String(request.name ?? 'artifact').replaceAll('/', '_')}`, request.content, 'execution-intake');
-        if (!artifact) throw new TypeError('No artifact found at that state-space address.');
+        if (!admitted) throw new TypeError('No artifact found at that state-space address.');
+        const artifact = await files.activate(admitted.meta.addressKey, admitted.path);
+        if (artifact.meta.encoding === 'base64') throw new TypeError('Binary artifacts cannot be executed as text.');
         return json(res, 200, await conversation.executeArtifact({ name: artifact.path.split('/').at(-1), type: request.type, content: artifact.content }));
       }
       return json(res, 404, { error: 'Unknown computer operation.' });

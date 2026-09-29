@@ -9,7 +9,7 @@ destination.parent.mkdir(parents=True, exist_ok=True)
 def included(path):
     relative = path.relative_to(root)
     parts = relative.parts
-    if parts[0] in {'android', 'tests'}:
+    if parts[0] in {'android', 'tests', 'platforms'}:
         return False
     if any(part in {'node_modules', '.git', 'tests', 'test', 'source-archives', '__pycache__'} for part in parts):
         return False
