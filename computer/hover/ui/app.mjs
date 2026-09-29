@@ -439,8 +439,8 @@ $('#android-search-form').addEventListener('submit', async (event) => {
   const query = $('#android-search').value.trim();
   if (query) await openStore({ query });
 });
-$('[data-store-package]').forEach((button) => button.addEventListener('click', () => openStore({ packageName: button.dataset.storePackage })));
-$('[data-web-url]').forEach((button) => button.addEventListener('click', async () => {
+$$('[data-store-package]').forEach((button) => button.addEventListener('click', () => openStore({ packageName: button.dataset.storePackage })));
+$$('[data-web-url]').forEach((button) => button.addEventListener('click', async () => {
   try {
     await api('/api/solo/android/open-url', { method: 'POST', body: JSON.stringify({ url: button.dataset.webUrl }) });
     $('#android-store-state').textContent = 'Opened the web version in Android.';
