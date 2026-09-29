@@ -142,6 +142,10 @@ public final class MainActivity extends Activity {
         });
         root.addView(start, matchWrap());
 
+        Button androidHub = button("Android apps + Google Play");
+        androidHub.setOnClickListener(v -> startActivity(new Intent(this, AndroidHubActivity.class)));
+        root.addView(androidHub, matchWrap());
+
         Button mic = button("Allow microphone (optional)");
         mic.setOnClickListener(v -> requestPermissions(new String[]{Manifest.permission.RECORD_AUDIO}, 102));
         root.addView(mic, matchWrap());
@@ -195,7 +199,10 @@ public final class MainActivity extends Activity {
                 + "\nHands: " + (handsEnabled() ? "enabled" : "needs Accessibility permission")
                 + "\nPlanet: " + (OverlayService.isRunning() ? "floating" : "not started")
                 + "\nSynthia 5.8 runtime (" + HoverPorts.RUNTIME_URL + "): " + runtime
-                + "\nLocal hand bridge: " + HoverPorts.BRIDGE_URL);
+                + "\nLocal hand bridge: " + HoverPorts.BRIDGE_URL
+                + "\nAndroid " + Build.VERSION.RELEASE + " (SDK " + Build.VERSION.SDK_INT + ")"
+                + "\nGoogle Play: " + (AndroidRuntimeBridge.isPackageInstalled(
+                        this, AndroidRuntimeBridge.PLAY_STORE_PACKAGE) ? "ready" : "web fallback"));
     }
 
     private Button button(String text) {
