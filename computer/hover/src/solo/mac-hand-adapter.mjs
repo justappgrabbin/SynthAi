@@ -66,6 +66,15 @@ export class MacHandBridge {
   }
 
   async status() {
+    if (!this.token) {
+      return freeze({
+        available: false,
+        reachable: false,
+        paired: false,
+        baseUrl: this.baseUrl,
+        error: 'Mac residence is not paired',
+      });
+    }
     try {
       const status = await this.request('/status');
       return freeze({ available: true, reachable: true, baseUrl: this.baseUrl, ...status });
