@@ -126,3 +126,9 @@ export { createDeepSurfaceMorphAdapter, DEEP_SURFACE_MORPH_PIPELINE } from './mo
 export { SoloHoverRuntime } from './solo/solo-runtime.mjs';
 export { SoloBrowserHand, VisualBrowserExecutor } from './solo/browser-hand-adapter.mjs';
 export { SoloTaskStore } from './solo/solo-task-store.mjs';
+
+export {
+  CoupledStateEvolutionRuntime,
+  DEFAULT_STATE_BASIS,
+  propagateCoupledState,
+} from './state-space/coupled-state-evolution.mjs';
