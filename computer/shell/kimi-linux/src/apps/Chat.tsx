@@ -162,7 +162,7 @@ export default function Chat() {
   return (
     <div className="flex h-full" style={{ background: 'var(--bg-window)' }}>
       {/* Left Sidebar */}
-      <div className="flex flex-col shrink-0" style={{ width: 220, borderRight: '1px solid var(--border-subtle)' }}>
+      <div className="computer-chat-sidebar flex flex-col shrink-0" style={{ width: 220, borderRight: '1px solid var(--border-subtle)' }}>
         <div className="p-3 shrink-0">
           <div className="flex items-center gap-2 px-3" style={{ height: 36, borderRadius: 18, background: 'var(--bg-input)', border: '1px solid var(--border-default)' }}>
             <Search size={14} style={{ color: 'var(--text-disabled)', flexShrink: 0 }} />

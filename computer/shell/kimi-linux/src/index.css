@@ -167,3 +167,21 @@
     100% { background-position: 200% 0; }
   }
 }
+
+/* The same Kimi windows become single full-width panels on a phone. */
+@media (max-width: 600px) {
+  .computer-window {
+    left: 0 !important;
+    top: 28px !important;
+    width: 100vw !important;
+    height: calc(100dvh - 78px) !important;
+    border-radius: 0 !important;
+    min-width: 0 !important;
+  }
+
+  .computer-window-resize { pointer-events: none !important; }
+  .computer-window-resize > div { display: none; }
+  .computer-chat-sidebar { display: none !important; }
+  .computer-window input, .computer-window textarea { font-size: 16px; }
+  .computer-window button { touch-action: manipulation; }
+}

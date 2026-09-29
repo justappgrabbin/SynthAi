@@ -195,7 +195,7 @@ const WindowFrame = memo(function WindowFrame({ window: win, children }: WindowF
   return (
     <div
       ref={frameRef}
-      className="absolute flex flex-col select-none"
+      className="computer-window absolute flex flex-col select-none"
       style={{
         left: win.position.x,
         top: win.position.y,
@@ -214,7 +214,7 @@ const WindowFrame = memo(function WindowFrame({ window: win, children }: WindowF
     >
       {/* Resize handles wrapper */}
       <div
-        className="absolute inset-0 z-50"
+        className="computer-window-resize absolute inset-0 z-50"
         style={{
           cursor: getCursor as unknown as string,
           pointerEvents: isDragging ? 'none' : 'auto',

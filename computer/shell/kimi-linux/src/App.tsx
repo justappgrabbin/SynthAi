@@ -95,7 +95,7 @@ function AppShell() {
   }, [dispatch, state.appLauncherOpen, state.notificationCenterOpen, state.isAltTabbing, state.activeWindowId]);
 
   return (
-    <div className={state.theme.mode === 'light' ? 'light' : ''} style={{ width: '100vw', height: '100vh', overflow: 'hidden' }}>
+    <div className={state.theme.mode === 'light' ? 'light' : ''} style={{ width: '100vw', height: '100dvh', overflow: 'hidden' }}>
       {hostState === 'checking' && <div className="p-6 text-white">Connecting to Synthia's local computer…</div>}
       {hostState === 'failed' && <div className="p-6 text-white">The local computer runtime is unavailable. Start the bundled computer service and reload.</div>}
       {hostState === 'ready' && (

@@ -76,8 +76,8 @@ export default function Ingest() {
     } catch (error) { setOutput(String(error)); }
   };
 
-  return <div className="h-full flex text-[var(--text-primary)] text-sm">
-    <div className="w-2/5 min-w-56 border-r border-[var(--border-subtle)] flex flex-col">
+  return <div className="h-full flex flex-col md:flex-row text-[var(--text-primary)] text-sm">
+    <div className="w-full h-2/5 min-h-40 md:h-full md:w-2/5 md:min-w-56 border-b md:border-b-0 md:border-r border-[var(--border-subtle)] flex flex-col">
       <div className="p-4 border-b border-[var(--border-subtle)]">
         <label className="flex items-center gap-2 cursor-pointer rounded-lg px-3 py-2 bg-[var(--accent-primary)] text-white w-fit">
           <FileUp size={18} /> {busy ? 'Importing…' : 'Import files or ZIP'}
@@ -94,7 +94,7 @@ export default function Ingest() {
       </div>
       <button onClick={() => refresh().catch((error) => setMessage(String(error)))} className="p-2 flex gap-2 items-center border-t border-[var(--border-subtle)]"><RefreshCw size={14} /> Refresh</button>
     </div>
-    <div className="flex-1 min-w-0 p-5 overflow-auto">
+    <div className="flex-1 min-w-0 min-h-0 p-3 md:p-5 overflow-auto">
       {message && <p className="mb-4 text-[var(--text-secondary)]">{message}</p>}
       {active ? <>
         <h2 className="font-semibold text-lg break-all">{active.path.split('/').at(-1)}</h2>

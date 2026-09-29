@@ -117,6 +117,7 @@ const Desktop = memo(function Desktop() {
             animation: 'iconAppear 300ms cubic-bezier(0.34, 1.56, 0.64, 1)',
           }}
           onDoubleClick={() => handleIconDoubleClick(icon)}
+          onClick={(e) => { if (window.matchMedia('(pointer: coarse)').matches) { e.stopPropagation(); handleIconDoubleClick(icon); } }}
           onMouseDown={(e) => handleIconMouseDown(e, icon)}
           onContextMenu={(e) => {
             e.stopPropagation();

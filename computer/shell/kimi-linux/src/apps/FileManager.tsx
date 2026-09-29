@@ -152,14 +152,14 @@ export default function FileManager() {
   }, [filteredChildren]);
 
   return (
-    <div className="relative flex h-full text-[var(--text-primary)]">
+    <div className="relative flex flex-col md:flex-row h-full text-[var(--text-primary)]">
       {/* Sidebar */}
-      <div className="w-48 shrink-0 border-r border-[var(--border-subtle)] overflow-y-auto py-2">
+      <div className="w-full h-12 md:h-auto md:w-48 shrink-0 border-b md:border-b-0 md:border-r border-[var(--border-subtle)] overflow-x-auto md:overflow-y-auto py-1 md:py-2 flex md:block">
         {SIDEBAR_ITEMS.map((item) => (
           <button
             key={item.id}
             onClick={() => handleSidebarClick(item.path)}
-            className="w-full flex items-center gap-2.5 px-3 py-1.5 text-xs text-[var(--text-primary)] hover:bg-[var(--bg-hover)] transition-colors text-left"
+            className="shrink-0 md:w-full flex items-center gap-2.5 px-3 py-1.5 text-xs text-[var(--text-primary)] hover:bg-[var(--bg-hover)] transition-colors text-left"
           >
             {item.id === 'home' && <Home size={14} />}
             {item.id === 'desktop' && <Folder size={14} />}
@@ -175,9 +175,9 @@ export default function FileManager() {
       </div>
 
       {/* Main area */}
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className="flex-1 flex flex-col min-w-0 min-h-0">
         {/* Toolbar */}
-        <div className="flex items-center gap-2 px-3 py-2 border-b border-[var(--border-subtle)]">
+        <div className="flex items-center gap-2 px-3 py-2 border-b border-[var(--border-subtle)] overflow-x-auto shrink-0">
           <button
             onClick={navigateUp}
             className="w-7 h-7 rounded flex items-center justify-center text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] disabled:opacity-30"
@@ -324,7 +324,7 @@ export default function FileManager() {
               return (
                 <button
                   key={node.id}
-                  onClick={() => setSelectedId(node.id)}
+                  onClick={() => { setSelectedId(node.id); if (window.matchMedia('(pointer: coarse)').matches) handleDoubleClick(node); }}
                   onDoubleClick={() => handleDoubleClick(node)}
                   className="inline-flex flex-col items-center gap-1 p-2 m-1 rounded-lg transition-colors w-20"
                   style={{
@@ -360,7 +360,7 @@ export default function FileManager() {
             return (
               <div
                 key={node.id}
-                onClick={() => setSelectedId(node.id)}
+                onClick={() => { setSelectedId(node.id); if (window.matchMedia('(pointer: coarse)').matches) handleDoubleClick(node); }}
                 onDoubleClick={() => handleDoubleClick(node)}
                 className="flex items-center px-3 py-1.5 text-xs cursor-pointer transition-colors"
                 style={{
