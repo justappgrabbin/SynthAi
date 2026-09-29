@@ -238,6 +238,20 @@ export async function startSynthiaFrontScreen({
         const body = await bodyOf(request);
         return reply(response, 200, await solo.android.openApp(body.packageName));
       }
+      if (request.method === 'GET' && url.pathname === '/api/solo/android/apps') {
+        return reply(response, 200, await solo.android.apps());
+      }
+      if (request.method === 'GET' && url.pathname === '/api/solo/android/store-status') {
+        return reply(response, 200, await solo.android.storeStatus());
+      }
+      if (request.method === 'POST' && url.pathname === '/api/solo/android/store') {
+        const body = await bodyOf(request);
+        return reply(response, 200, await solo.android.openStore({ packageName: body.packageName, query: body.query }));
+      }
+      if (request.method === 'POST' && url.pathname === '/api/solo/android/open-url') {
+        const body = await bodyOf(request);
+        return reply(response, 200, await solo.android.openUrl(body.url));
+      }
       if (request.method === 'POST' && url.pathname === '/api/solo/android/command') {
         const body = await bodyOf(request);
         return reply(response, 200, await solo.android.command(body.message ?? ''));
