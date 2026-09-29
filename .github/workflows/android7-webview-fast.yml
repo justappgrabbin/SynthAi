@@ -1,0 +1,71 @@
+name: Android 7 WebView Fast Check
+
+on:
+  push:
+    branches:
+      - integration/android7-computer-20260929
+
+concurrency:
+  group: synthai-android7-webview-${{ github.ref_name }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  webview:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Stage browser runtime
+        run: npm run build:computer
+
+      - name: Build Android 7 compatibility bundle
+        run: |
+          node .github/scripts/prepare-android7-web.mjs
+          npx --yes esbuild@0.25.10 public/computer-app.android7-entry.mjs \
+            --bundle --format=iife --platform=browser --target=chrome51 \
+            --outfile=public/computer-app.android7.js
+          rm -rf android-app/app/src/main/assets
+          mkdir -p android-app/app/src/main/assets
+          cp -R public/. android-app/app/src/main/assets/
+          cp public/index.android7.html android-app/app/src/main/assets/index.html
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: android-actions/setup-android@v3
+        with:
+          packages: 'platform-tools platforms;android-24 platforms;android-35 build-tools;35.0.0'
+          log-accepted-android-sdk-licenses: 'false'
+
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.7'
+
+      - name: Build surface-only Android 7 APK
+        working-directory: android-app
+        run: gradle --no-daemon :app:assembleDebug
+
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Boot on Android 7.0 WebView
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 24
+          arch: x86_64
+          profile: pixel_2
+          disable-animations: true
+          script: bash .github/scripts/android7-smoke.sh
