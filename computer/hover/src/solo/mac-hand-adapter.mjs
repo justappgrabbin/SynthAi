@@ -1,5 +1,7 @@
-const DEFAULT_BASE_URL = process.env.SYNTHIA_MAC_BRIDGE_URL || 'http://127.0.0.1:8798';
-const DEFAULT_TOKEN = process.env.SYNTHIA_MAC_BRIDGE_TOKEN || '';
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { dirname, resolve } from 'node:path';
+
+const DEFAULT_BASE_URL = 'http://127.0.0.1:8798';
 
 function freeze(value) {
   if (value && typeof value === 'object' && !Object.isFrozen(value)) Object.freeze(value);
@@ -15,17 +17,39 @@ function normalBaseUrl(value) {
   return url.href.replace(/\/$/, '');
 }
 
+function loadPairing(path) {
+  if (!path) return {};
+  try {
+    const value = JSON.parse(readFileSync(path, 'utf8'));
+    return value && typeof value === 'object' ? value : {};
+  } catch {
+    return {};
+  }
+}
+
 export class MacHandBridge {
-  constructor({ baseUrl = DEFAULT_BASE_URL, token = DEFAULT_TOKEN, timeoutMs = 2200 } = {}) {
-    this.baseUrl = normalBaseUrl(baseUrl);
-    this.token = String(token || '');
+  constructor({ baseUrl, token, timeoutMs = 2200, persistencePath = null } = {}) {
+    this.persistencePath = persistencePath ? resolve(String(persistencePath)) : null;
+    const saved = loadPairing(this.persistencePath);
+    const environmentBase = process.env.SYNTHIA_MAC_BRIDGE_URL || '';
+    const environmentToken = process.env.SYNTHIA_MAC_BRIDGE_TOKEN || '';
+    this.baseUrl = normalBaseUrl(baseUrl || environmentBase || saved.baseUrl || DEFAULT_BASE_URL);
+    this.token = String(token || environmentToken || saved.token || '');
     this.timeoutMs = timeoutMs;
   }
 
   configure({ baseUrl = this.baseUrl, token = this.token } = {}) {
     this.baseUrl = normalBaseUrl(baseUrl);
     this.token = String(token || '');
-    return freeze({ ok: true, baseUrl: this.baseUrl, paired: Boolean(this.token) });
+    if (this.persistencePath) {
+      mkdirSync(dirname(this.persistencePath), { recursive: true });
+      writeFileSync(
+        this.persistencePath,
+        JSON.stringify({ baseUrl: this.baseUrl, token: this.token }, null, 2) + '\n',
+        { encoding: 'utf8', mode: 0o600 },
+      );
+    }
+    return freeze({ ok: true, baseUrl: this.baseUrl, paired: Boolean(this.token), persisted: Boolean(this.persistencePath) });
   }
 
   async request(path, { method = 'GET', body = null } = {}) {
@@ -68,7 +92,7 @@ export class MacHandBridge {
   async status() {
     try {
       const status = await this.request('/status');
-      return freeze({ available: true, reachable: true, baseUrl: this.baseUrl, ...status });
+      return freeze({ available: true, reachable: true, paired: Boolean(this.token), baseUrl: this.baseUrl, ...status });
     } catch (error) {
       return freeze({
         available: false,
@@ -101,6 +125,10 @@ export class MacHandBridge {
     }
     return freeze({ ok: true, status: 'NO_DIRECT_MAC_ACTION', action: null, message: raw });
   }
+}
+
+export function macPairingPath(persistenceDir) {
+  return resolve(String(persistenceDir || '.synthia-state'), 'mac-bridge.json');
 }
 
 export default MacHandBridge;
