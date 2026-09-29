@@ -29,12 +29,6 @@ const DELTA_TABLE = {
   'repair|close': { to: 'close', transition: 'dormancy' },
 };
 
-const renderPayload = (payload) => {
-  if (payload === null || payload === undefined) return '';
-  if (typeof payload === 'string') return payload;
-  try { return JSON.stringify(payload); } catch { return String(payload); }
-};
-
 const normalizeInput = (input) => {
   if (typeof input === 'string') return { text: input };
   if (input && Array.isArray(input.args)) {
@@ -102,16 +96,10 @@ export class ConversationAutomaton extends Automaton {
 
     let utterance;
     if (unresolved) {
-      utterance = `${text || '<input>'} — context remains unresolved.`;
+      utterance = text || 'I’m here.';
     } else {
-      const lines = [];
-      if (packet) {
-        const payloadText = renderPayload(packet.payload);
-        lines.push(`[weave:${packet.from || 'mesh'}] ${payloadText}`);
-      }
-      if (text) lines.push(text);
-      contributions.forEach((contribution, index) => lines.push(`${index + 1}. ${contribution}`));
-      utterance = lines.join('\n');
+      // State packets are internal cognition and must never be rendered into chat.
+      utterance = text || contributions.find((value) => typeof value === 'string' && value.trim()) || 'I’m here.';
     }
 
     this.ownedState.turns += 1;
