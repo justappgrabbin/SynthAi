@@ -1,7 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createServer } from 'node:http';
-import { readFile } from 'node:fs/promises';
+import { mkdtemp, readFile, rm, stat } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { MacHandBridge } from '../src/solo/mac-hand-adapter.mjs';
 
 test('Mac residence adapter authenticates, lists apps and opens an app through the shared protocol', async (t) => {
@@ -36,6 +38,26 @@ test('Mac residence adapter authenticates, lists apps and opens an app through t
   const opened = await bridge.openApp({ name: 'Safari' });
   assert.equal(opened.ok, true);
   assert.deepEqual(calls.map(call => call.url), ['/status', '/apps', '/open-app']);
+});
+
+test('Mac pairing survives restart in private Synthia state', async (t) => {
+  const dir = await mkdtemp(join(tmpdir(), 'synthia-mac-pairing-'));
+  t.after(() => rm(dir, { recursive: true, force: true }));
+  const path = join(dir, 'mac-bridge.json');
+
+  const first = new MacHandBridge({ persistencePath: path });
+  const configured = first.configure({ baseUrl: 'http://paired-mac.local:8798', token: 'private-pair-token' });
+  assert.equal(configured.persisted, true);
+
+  const second = new MacHandBridge({ persistencePath: path });
+  assert.equal(second.baseUrl, 'http://paired-mac.local:8798');
+  assert.equal(second.token, 'private-pair-token');
+
+  const stored = JSON.parse(await readFile(path, 'utf8'));
+  assert.equal(stored.baseUrl, 'http://paired-mac.local:8798');
+  assert.equal(stored.token, 'private-pair-token');
+  const mode = (await stat(path)).mode & 0o777;
+  assert.equal(mode, 0o600);
 });
 
 test('front screen contains both Android and Mac runtime surfaces', async () => {
