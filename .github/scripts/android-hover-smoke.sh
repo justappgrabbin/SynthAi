@@ -6,7 +6,7 @@
 set -Eeuo pipefail
 
 APK="${APK:-android-app/app/build/outputs/apk/hover/debug/app-hover-debug.apk}"
-PKG="app.synthai.hover"
+PKG="app.synthai.android"
 TAG="SynthiaHover"
 
 adb install -r "$APK"
@@ -15,7 +15,7 @@ adb shell pm grant "$PKG" android.permission.POST_NOTIFICATIONS || true
 adb forward tcp:18797 tcp:8797
 adb logcat -c
 adb shell am force-stop "$PKG" || true
-adb shell am start -n "$PKG/.MainActivity" || true
+adb shell am start -n "$PKG/app.synthai.hover.MainActivity" || true
 
 for attempt in $(seq 1 90); do
   LOGS="$(adb logcat -d -s "$TAG:*" 'AndroidRuntime:E' '*:S' 2>/dev/null || true)"
@@ -35,8 +35,16 @@ for attempt in $(seq 1 90); do
       sleep 1
       continue
     fi
+    APPS="$(curl -s --max-time 5 http://127.0.0.1:18797/apps || true)"
+    STORE="$(curl -s --max-time 5 http://127.0.0.1:18797/store-status || true)"
+    if ! grep -q '"apps":' <<<"$APPS" || ! grep -q '"store":"google-play"' <<<"$STORE"; then
+      sleep 1
+      continue
+    fi
     echo "bridge /status: $BRIDGE"
-    echo "Hover x86_64 verification: launcher, foreground bridge (8797) and planet overlay start; runtime ABI reported"
+    echo "bridge /apps: $APPS"
+    echo "bridge /store-status: $STORE"
+    echo "Synthia Android x86_64 verification: launcher, bridge, app catalog, store bridge and planet overlay start; runtime ABI reported"
     echo "$LOGS"
     exit 0
   fi

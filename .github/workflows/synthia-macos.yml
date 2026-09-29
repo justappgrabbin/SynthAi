@@ -1,0 +1,121 @@
+name: Build Synthia macOS
+
+on:
+  push:
+    branches:
+      - 'hover/**'
+    paths:
+      - 'macos-app/**'
+      - 'desktop/mac/**'
+      - 'computer/hover/**'
+      - '.github/workflows/synthia-macos.yml'
+  pull_request:
+    paths:
+      - 'macos-app/**'
+      - 'computer/hover/**'
+      - '.github/workflows/synthia-macos.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: synthia-macos-${{ github.head_ref || github.ref_name }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build-macos:
+    runs-on: macos-14
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout Synthia
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Build universal Synthia app
+        run: bash macos-app/build-macos-app.sh
+
+      - name: Verify bundle structure and universal binaries
+        run: |
+          APP=dist/Synthia.app
+          test -d "$APP"
+          test -x "$APP/Contents/MacOS/Synthia"
+          test -x "$APP/Contents/Resources/runtime/node-x64"
+          test -x "$APP/Contents/Resources/runtime/node-arm64"
+          test -x "$APP/Contents/Resources/runtime/talk-python-shim"
+          test -f "$APP/Contents/Resources/mac/mac-bridge.mjs"
+          test -f "$APP/Contents/Resources/synthia/src/ui/server.mjs"
+          test -f "$APP/Contents/Resources/synthia/ui/index.html"
+          plutil -lint "$APP/Contents/Info.plist"
+          lipo -info "$APP/Contents/MacOS/Synthia" | grep -q 'x86_64 arm64'
+          file "$APP/Contents/Resources/runtime/node-x64" | grep -q 'x86_64'
+          file "$APP/Contents/Resources/runtime/node-arm64" | grep -q 'arm64'
+          codesign --verify --deep --strict "$APP"
+          "$APP/Contents/MacOS/Synthia" --self-test
+
+      - name: Verify embedded Hover runtime
+        run: |
+          set -Eeuo pipefail
+          APP="$PWD/dist/Synthia.app"
+          DATA="$RUNNER_TEMP/synthia-mac-state"
+          LOG="$RUNNER_TEMP/synthia-mac-runtime.log"
+          mkdir -p "$DATA"
+          ARCH="$(uname -m)"
+          if [[ "$ARCH" == "arm64" ]]; then
+            NODE="$APP/Contents/Resources/runtime/node-arm64"
+          else
+            NODE="$APP/Contents/Resources/runtime/node-x64"
+          fi
+
+          (
+            cd "$APP/Contents/Resources/synthia"
+            HOST=127.0.0.1 \
+            PORT=4173 \
+            SYNTHIA_DATA_DIR="$DATA" \
+            SYNTHIA_TALK_PYTHON="$APP/Contents/Resources/runtime/talk-python-shim" \
+            "$NODE" src/ui/server.mjs >"$LOG" 2>&1
+          ) &
+          PID=$!
+          cleanup(){ kill "$PID" 2>/dev/null || true; wait "$PID" 2>/dev/null || true; }
+          trap cleanup EXIT
+
+          READY=0
+          for _ in $(seq 1 80); do
+            if curl -fsS --max-time 5 http://127.0.0.1:4173/api/solo/status >"$RUNNER_TEMP/status.json"; then
+              READY=1
+              break
+            fi
+            if ! kill -0 "$PID" 2>/dev/null; then break; fi
+            sleep .15
+          done
+          if [[ "$READY" != 1 ]]; then
+            echo "Synthia macOS runtime did not become ready"
+            cat "$LOG" || true
+            exit 1
+          fi
+
+          grep -q '"ok":true' "$RUNNER_TEMP/status.json"
+          TALK=$(curl -fsS --max-time 10 \
+            -H 'content-type: application/json' \
+            -d '{"message":"next steps","name":"Joe"}' \
+            http://127.0.0.1:4173/api/solo/talk/chat)
+          echo "$TALK"
+          grep -q '"reply"' <<<"$TALK"
+          grep -q 'route to success' <<<"$TALK"
+
+      - name: Record package checksum
+        run: |
+          cd dist
+          shasum -a 256 Synthia-macOS-universal.zip | tee Synthia-macOS-universal.zip.sha256
+          du -h Synthia-macOS-universal.zip
+
+      - name: Upload installable Synthia macOS app
+        uses: actions/upload-artifact@v4
+        with:
+          name: Synthia-macOS-universal
+          path: |
+            dist/Synthia-macOS-universal.zip
+            dist/Synthia-macOS-universal.zip.sha256
+          if-no-files-found: error

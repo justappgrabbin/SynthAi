@@ -58,7 +58,7 @@ jobs:
       - name: Verify Hover birth entry, task queue and embedded Talk
         run: |
           python -m pip install -r computer/donors/synthia58/extras/Cynthia-Talk-v1-unmodified/requirements.txt
-          node --test --test-concurrency=1 computer/hover/test/09-front-screen.test.mjs computer/hover/test/11-birth-mirror-runtime.test.mjs computer/hover/test/20-hover-task-worker.test.mjs
+          node --test --test-concurrency=1 computer/hover/test/09-front-screen.test.mjs computer/hover/test/11-birth-mirror-runtime.test.mjs computer/hover/test/20-hover-task-worker.test.mjs computer/hover/test/21-android-store-surface.test.mjs computer/hover/test/22-multi-runtime.test.mjs
           npm install --prefix /tmp/hover-ui-test playwright@1.58.2
           /tmp/hover-ui-test/node_modules/.bin/playwright install --with-deps chromium
           node .github/scripts/hover-ui-smoke.mjs
@@ -268,8 +268,8 @@ jobs:
           if grep -q 'assets/computer-runtime/' /tmp/hover-apk-tree.txt; then echo "hover APK must not ship the Computer surface"; exit 1; fi
           "$ANDROID_SDK_ROOT/build-tools/35.0.0/aapt2" dump badging "$APK" > /tmp/hover-badging.txt
           cat /tmp/hover-badging.txt
-          grep -q "package: name='app.synthai.hover'" /tmp/hover-badging.txt
-          grep -Eq "application-label:'Synthia'|application: label='Synthia'" /tmp/hover-badging.txt
+          grep -q "package: name='app.synthai.android'" /tmp/hover-badging.txt
+          grep -Eq "application-label:'Synthia Android'|application: label='Synthia Android'" /tmp/hover-badging.txt
           grep -q "launchable-activity: name='app.synthai.hover.MainActivity'" /tmp/hover-badging.txt
           for perm in SYSTEM_ALERT_WINDOW FOREGROUND_SERVICE FOREGROUND_SERVICE_SPECIAL_USE POST_NOTIFICATIONS RECORD_AUDIO; do
             grep -q "uses-permission: name='android.permission.$perm'" /tmp/hover-badging.txt
@@ -317,7 +317,7 @@ jobs:
       - name: Upload installable Synthia Hover APK (hover)
         uses: actions/upload-artifact@v4
         with:
-          name: Synthia-Hover-5.8-debug
+          name: Synthia-Android-Runtime-Store-debug
           path: |
             android-app/app/build/outputs/apk/hover/debug/app-hover-debug.apk
             android-app/app/build/outputs/apk/hover/debug/app-hover-debug.apk.sha256

@@ -80,6 +80,15 @@ export class AndroidHandBridge {
   typeText(text) { return this.request('/set-text', { method: 'POST', body: { text: String(text ?? '') } }); }
   global(action) { return this.request('/global', { method: 'POST', body: { action: String(action ?? '').toUpperCase() } }); }
   openApp(packageName) { return this.request('/open-app', { method: 'POST', body: { packageName: String(packageName ?? '') } }); }
+  apps() { return this.request('/apps'); }
+  storeStatus() { return this.request('/store-status'); }
+  openStore({ packageName = '', query = '' } = {}) {
+    return this.request('/play-store', { method: 'POST', body: {
+      packageName: String(packageName ?? ''),
+      query: String(query ?? ''),
+    } });
+  }
+  openUrl(url) { return this.request('/open-url', { method: 'POST', body: { url: String(url ?? '') } }); }
 
   async command(message) {
     const raw = String(message ?? '').trim();
@@ -103,6 +112,12 @@ export class AndroidHandBridge {
     if (/^(?:inspect|read|see)(?:\s+(?:the\s+)?screen)?$/i.test(raw)) return freeze({ action: 'screen', ...(await this.screen()) });
     if ((match = raw.match(/^open\s+app\s+([a-zA-Z0-9._]+)$/i))) {
       return freeze({ action: 'open-app', ...(await this.openApp(match[1])) });
+    }
+    if (/^open\s+(?:google\s+)?play(?:\s+store)?$/i.test(raw)) {
+      return freeze({ action: 'play-store', ...(await this.openStore()) });
+    }
+    if ((match = raw.match(/^(?:find|search|install)\s+(.+?)(?:\s+(?:in|on)\s+(?:google\s+)?play(?:\s+store)?)?$/i))) {
+      return freeze({ action: 'play-store-search', ...(await this.openStore({ query: match[1] })) });
     }
 
     return freeze({ ok: true, status: 'NO_DIRECT_ANDROID_ACTION', action: null, message: raw, lower });
