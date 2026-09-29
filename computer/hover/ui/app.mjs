@@ -488,7 +488,13 @@ async function loadMacSurface() {
         if (saved.token) $('#mac-token').value = saved.token;
       } catch {}
     }
-    if ($('#mac-host').value && $('#mac-token').value) await configureMacFromFields({ quiet: true });
+    if (!$('#mac-host').value || !$('#mac-token').value) {
+      state.textContent = 'Mac residence is not paired yet.';
+      grid.innerHTML = '<div class="android-empty">Enter the bridge address and pairing token shown by Synthia on the Mac.</div>';
+      $('#mac-app-count').textContent = '';
+      return;
+    }
+    await configureMacFromFields({ quiet: true });
     const [status, apps] = await Promise.all([
       api('/api/solo/mac/status'),
       api('/api/solo/mac/apps'),
