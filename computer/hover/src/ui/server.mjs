@@ -256,6 +256,26 @@ export async function startSynthiaFrontScreen({
         const body = await bodyOf(request);
         return reply(response, 200, await solo.android.command(body.message ?? ''));
       }
+      if (request.method === 'POST' && url.pathname === '/api/solo/mac/configure') {
+        return reply(response, 200, solo.mac.configure(await bodyOf(request)));
+      }
+      if (request.method === 'GET' && url.pathname === '/api/solo/mac/status') {
+        return reply(response, 200, await solo.mac.status());
+      }
+      if (request.method === 'GET' && url.pathname === '/api/solo/mac/apps') {
+        return reply(response, 200, await solo.mac.apps());
+      }
+      if (request.method === 'POST' && url.pathname === '/api/solo/mac/open-app') {
+        return reply(response, 200, await solo.mac.openApp(await bodyOf(request)));
+      }
+      if (request.method === 'POST' && url.pathname === '/api/solo/mac/open-url') {
+        const body = await bodyOf(request);
+        return reply(response, 200, await solo.mac.openUrl(body.url));
+      }
+      if (request.method === 'POST' && url.pathname === '/api/solo/mac/command') {
+        const body = await bodyOf(request);
+        return reply(response, 200, await solo.mac.command(body.message ?? ''));
+      }
       if (request.method === 'GET' && url.pathname === '/api/solo/world') {
         return reply(response, 200, {
           ok: true,
