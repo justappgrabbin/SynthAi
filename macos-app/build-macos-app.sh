@@ -82,7 +82,7 @@ if [[ -f "$ICON_SOURCE" ]]; then
     "1024 icon_512x512@2x.png"; do
     size="${spec%% *}"
     name="${spec#* }"
-    sips -z "$size" "$size" "$ICON_SOURCE" --out "$ICONSET/$name" >/dev/null
+    sips -s format png -z "$size" "$size" "$ICON_SOURCE" --out "$ICONSET/$name" >/dev/null
   done
   iconutil -c icns "$ICONSET" -o "$RESOURCES/Synthia.icns"
   /usr/libexec/PlistBuddy -c "Delete :CFBundleIconFile" "$CONTENTS/Info.plist" >/dev/null 2>&1 || true
