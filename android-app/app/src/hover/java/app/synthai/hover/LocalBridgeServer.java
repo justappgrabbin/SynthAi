@@ -2,8 +2,13 @@ package app.synthai.hover;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
+import android.net.Uri;
 import android.provider.Settings;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.BufferedInputStream;
@@ -13,7 +18,11 @@ import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -113,7 +122,26 @@ public final class LocalBridgeServer {
                         .put("runtimeUrl", HoverPorts.RUNTIME_URL));
             }
 
-            if (hands == null && !("/open-app".equals(path))) {
+            if ("GET".equals(method) && "/store-status".equals(path)) {
+                return ok(storeStatus());
+            }
+            if ("GET".equals(method) && "/apps".equals(path)) {
+                return ok(launchableApps());
+            }
+            if ("POST".equals(method) && "/play-store".equals(path)) {
+                return ok(openPlayStore(
+                        body.optString("packageName", "").trim(),
+                        body.optString("query", "").trim()));
+            }
+            if ("POST".equals(method) && "/open-url".equals(path)) {
+                return ok(openExternalUrl(body.optString("url", "").trim()));
+            }
+
+            if (hands == null && !("/open-app".equals(path)
+                    || "/apps".equals(path)
+                    || "/play-store".equals(path)
+                    || "/store-status".equals(path)
+                    || "/open-url".equals(path))) {
                 return error(409, "Synthia Hands is not enabled in Android Accessibility settings.");
             }
 
@@ -162,6 +190,107 @@ public final class LocalBridgeServer {
         } catch (Exception e) {
             return error(400, e.getMessage() == null ? e.getClass().getSimpleName() : e.getMessage());
         }
+    }
+
+    private JSONObject storeStatus() throws Exception {
+        PackageManager pm = context.getPackageManager();
+        boolean installed;
+        try {
+            pm.getPackageInfo("com.android.vending", 0);
+            installed = true;
+        } catch (PackageManager.NameNotFoundException missing) {
+            installed = false;
+        }
+        return new JSONObject()
+                .put("ok", true)
+                .put("store", "google-play")
+                .put("packageName", "com.android.vending")
+                .put("installed", installed);
+    }
+
+    private JSONObject launchableApps() throws Exception {
+        PackageManager pm = context.getPackageManager();
+        Intent launcher = new Intent(Intent.ACTION_MAIN);
+        launcher.addCategory(Intent.CATEGORY_LAUNCHER);
+        List<ResolveInfo> infos = pm.queryIntentActivities(launcher, PackageManager.MATCH_ALL);
+        infos.sort(Comparator.comparing(
+                info -> String.valueOf(info.loadLabel(pm)),
+                String.CASE_INSENSITIVE_ORDER));
+
+        JSONArray apps = new JSONArray();
+        Set<String> seen = new HashSet<>();
+        for (ResolveInfo info : infos) {
+            if (info.activityInfo == null || info.activityInfo.packageName == null) continue;
+            String packageName = info.activityInfo.packageName;
+            if (!seen.add(packageName)) continue;
+            ApplicationInfo appInfo = info.activityInfo.applicationInfo;
+            apps.put(new JSONObject()
+                    .put("label", String.valueOf(info.loadLabel(pm)))
+                    .put("packageName", packageName)
+                    .put("system", appInfo != null && (appInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0));
+        }
+        return new JSONObject()
+                .put("ok", true)
+                .put("count", apps.length())
+                .put("apps", apps);
+    }
+
+    private JSONObject openPlayStore(String packageName, String query) throws Exception {
+        PackageManager pm = context.getPackageManager();
+
+        if (packageName.isEmpty() && query.isEmpty()) {
+            Intent launch = pm.getLaunchIntentForPackage("com.android.vending");
+            if (launch != null) {
+                launch.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                context.startActivity(launch);
+                return new JSONObject().put("ok", true).put("destination", "google-play-app");
+            }
+        }
+
+        String marketUri;
+        String webUri;
+        if (!packageName.isEmpty()) {
+            marketUri = "market://details?id=" + Uri.encode(packageName);
+            webUri = "https://play.google.com/store/apps/details?id=" + Uri.encode(packageName);
+        } else {
+            String safeQuery = query.isEmpty() ? "apps" : query;
+            marketUri = "market://search?q=" + Uri.encode(safeQuery) + "&c=apps";
+            webUri = "https://play.google.com/store/search?q=" + Uri.encode(safeQuery) + "&c=apps";
+        }
+
+        try {
+            Intent market = new Intent(Intent.ACTION_VIEW, Uri.parse(marketUri));
+            market.setPackage("com.android.vending");
+            market.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            context.startActivity(market);
+            return new JSONObject()
+                    .put("ok", true)
+                    .put("destination", "google-play-app")
+                    .put("packageName", packageName)
+                    .put("query", query);
+        } catch (Exception unavailable) {
+            Intent web = new Intent(Intent.ACTION_VIEW, Uri.parse(webUri));
+            web.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            context.startActivity(web);
+            return new JSONObject()
+                    .put("ok", true)
+                    .put("destination", "google-play-web")
+                    .put("packageName", packageName)
+                    .put("query", query);
+        }
+    }
+
+    private JSONObject openExternalUrl(String rawUrl) throws Exception {
+        if (rawUrl.isEmpty()) throw new IllegalArgumentException("url is required");
+        Uri uri = Uri.parse(rawUrl);
+        String scheme = uri.getScheme();
+        if (!"https".equalsIgnoreCase(scheme) && !"http".equalsIgnoreCase(scheme)) {
+            throw new IllegalArgumentException("Only http/https URLs may be opened");
+        }
+        Intent view = new Intent(Intent.ACTION_VIEW, uri);
+        view.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        context.startActivity(view);
+        return new JSONObject().put("ok", true).put("action", "open-url").put("url", rawUrl);
     }
 
     private JSONObject result(String action, boolean accepted) throws Exception {
