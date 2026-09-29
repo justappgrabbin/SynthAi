@@ -1,7 +1,7 @@
 import { SoloTaskStore } from './solo-task-store.mjs';
 import { SoloBrowserHand } from './browser-hand-adapter.mjs';
 import { AndroidHandBridge } from './android-hand-adapter.mjs';
-import { MacHandBridge } from './mac-hand-adapter.mjs';
+import { MacHandBridge, macPairingPath } from './mac-hand-adapter.mjs';
 
 export class SoloHoverRuntime {
   constructor({ organism, persistenceDir = '.synthia-state' } = {}) {
@@ -10,7 +10,7 @@ export class SoloHoverRuntime {
     this.tasks = new SoloTaskStore({ persistenceDir });
     this.browser = new SoloBrowserHand({ persistenceDir });
     this.android = new AndroidHandBridge();
-    this.mac = new MacHandBridge();
+    this.mac = new MacHandBridge({ persistencePath: macPairingPath(persistenceDir) });
     this.activeSurface = 'chat';
     this.working = false;
     this.stopped = false;
