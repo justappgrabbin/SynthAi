@@ -50,6 +50,16 @@ test('front screen serves live status, chat, and the independently callable exec
   status = await fetch(`${started.url}/api/status`).then((response) => response.json());
   assert.equal(status.ready, true);
 
+  const realm = await fetch(`${started.url}/api/realm`).then(response => response.json());
+  assert.equal(realm.places.length, 9);
+  assert.equal(realm.residents[0].projectionOf, 'synthia');
+  const moved = await fetch(`${started.url}/api/realm/action`, {
+    method: 'POST', headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ type: 'travel', target: { placeId: 'garden' } }),
+  }).then(response => response.json());
+  assert.equal(moved.ok, true);
+  assert.equal(moved.world.residents[0].location.placeId, 'garden');
+
   const tray = await fetch(`${started.url}/api/tray`).then((response) => response.json());
   assert.ok(tray.instruments.some((entry) => entry.kind === 'registered-app' && entry.id === 'gamegan-single-player'));
   assert.ok(tray.instruments.some((entry) => entry.kind === 'state-space' && entry.id === 'state-space-browser'));

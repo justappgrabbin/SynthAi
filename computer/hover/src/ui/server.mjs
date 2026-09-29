@@ -6,6 +6,7 @@ import { FederatedSynthia } from '../federated-synthia.mjs';
 import { talkReply } from '../solo/talk-adapter.mjs';
 import { SoloHoverRuntime } from '../solo/solo-runtime.mjs';
 import { createSynthia17Resident } from '../solo/synthia17-resident.mjs';
+import { RealmRuntime } from '../world/realm-runtime.mjs';
 
 const UI_ROOT = fileURLToPath(new URL('../../ui/', import.meta.url));
 const MIME = Object.freeze({
@@ -62,12 +63,21 @@ export async function startSynthiaFrontScreen({
 } = {}) {
   const organism = synthia ?? await FederatedSynthia.create({ persistenceDir });
   const solo = new SoloHoverRuntime({ organism, persistenceDir });
+  const realm = new RealmRuntime({ organism, persistenceDir });
+  await realm.start();
   const resident17 = await createSynthia17Resident({ persistenceDir });
   organism.attachResident17(resident17);
   await solo.startTasks();
   const server = createServer(async (request, response) => {
     try {
       const url = new URL(request.url, `http://${request.headers.host ?? 'localhost'}`);
+      if (request.method === 'GET' && url.pathname === '/api/realm') {
+        return reply(response, 200, realm.snapshot());
+      }
+      if (request.method === 'POST' && url.pathname === '/api/realm/action') {
+        const result = await realm.action(await bodyOf(request));
+        return reply(response, result.ok ? 200 : 409, result);
+      }
       if (request.method === 'POST' && url.pathname === '/api/solo/talk/chat') {
         return reply(response, 200, await talkReply(await bodyOf(request)));
       }
@@ -387,7 +397,7 @@ export async function startSynthiaFrontScreen({
     server.once('error', reject);
     server.listen(port, host, resolve);
   });
-  server.on('close', () => { solo.stopTasks(); solo.browser.close().catch(() => {}); });
+  server.on('close', () => { solo.stopTasks(); realm.stop().catch(() => {}); solo.browser.close().catch(() => {}); });
   const address = server.address();
   const actualPort = typeof address === 'object' ? address.port : port;
   return Object.freeze({ server, synthia: organism, solo, resident17, url: `http://${host}:${actualPort}` });

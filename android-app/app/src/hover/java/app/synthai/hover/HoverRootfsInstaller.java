@@ -3,6 +3,7 @@ package app.synthai.hover;
 import android.content.Context;
 import android.system.ErrnoException;
 import android.system.Os;
+import android.system.OsConstants;
 import android.util.Log;
 
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
@@ -18,8 +19,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -171,7 +170,7 @@ final class HoverRootfsInstaller {
         int copied = 0;
         for (PendingHardLink link : hardLinks) {
             File target = new File(root, link.target);
-            boolean targetIsSymlink = Files.isSymbolicLink(target.toPath());
+            boolean targetIsSymlink = isSymlink(target);
             if (targetIsSymlink) {
                 checkedParent(rootPath, target, link.target);
             } else {
@@ -182,7 +181,7 @@ final class HoverRootfsInstaller {
             if (parent != null && !parent.exists() && !parent.mkdirs()) {
                 throw new IOException("cannot create parent for " + link.destination);
             }
-            if (link.destination.exists() || Files.isSymbolicLink(link.destination.toPath())) {
+            if (link.destination.exists() || isSymlink(link.destination)) {
                 deleteRecursively(link.destination);
             }
             if (targetIsSymlink) {
@@ -194,7 +193,12 @@ final class HoverRootfsInstaller {
                 Os.link(target.getAbsolutePath(), link.destination.getAbsolutePath());
             } catch (ErrnoException error) {
                 // Android SELinux denies link() in app data (EACCES); store an independent copy instead.
-                Files.copy(target.toPath(), link.destination.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                try (InputStream in = new FileInputStream(target);
+                     BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(link.destination))) {
+                    byte[] buffer = new byte[128 * 1024];
+                    int read;
+                    while ((read = in.read(buffer)) != -1) out.write(buffer, 0, read);
+                }
                 chmod(link.destination, Os.stat(target.getAbsolutePath()).st_mode);
                 copied++;
             }
@@ -240,7 +244,15 @@ final class HoverRootfsInstaller {
     // Guest symlinks such as Alpine's bin/sh -> /bin/busybox are absolute inside the guest, so
     // they must not be resolved against the Android host filesystem.
     private static boolean present(File file) {
-        return file.isFile() || Files.isSymbolicLink(file.toPath());
+        return file.isFile() || isSymlink(file);
+    }
+
+    private static boolean isSymlink(File file) {
+        try {
+            return OsConstants.S_ISLNK(Os.lstat(file.getAbsolutePath()).st_mode);
+        } catch (ErrnoException missing) {
+            return false;
+        }
     }
 
     private static void require(File file, String label) throws IOException {
@@ -286,7 +298,7 @@ final class HoverRootfsInstaller {
 
     private static void deleteRecursively(File file) {
         if (file == null) return;
-        boolean symlink = Files.isSymbolicLink(file.toPath());
+        boolean symlink = isSymlink(file);
         if (!symlink && !file.exists()) return;
         if (!symlink && file.isDirectory()) {
             File[] children = file.listFiles();

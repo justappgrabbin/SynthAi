@@ -1,0 +1,241 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#09090b">
+<title>Synthia Morph Studio</title>
+<style>
+:root{
+  --bg:#09090b; --panel:#121216; --panel2:#19191f; --text:#f5f2f2; --muted:#aaa3ad;
+  --mag:#ff3ea5; --vio:#9b5cff; --amber:#ffb84d; --green:#76d66b; --line:#2b2931;
+}
+*{box-sizing:border-box} body{margin:0;background:radial-gradient(circle at 50% -20%,#2a0e26 0,#09090b 42%);color:var(--text);font:15px/1.35 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+button,input,select{font:inherit}
+.app{max-width:760px;margin:0 auto;min-height:100dvh;padding:env(safe-area-inset-top) 12px calc(92px + env(safe-area-inset-bottom))}
+header{position:sticky;top:0;z-index:5;background:linear-gradient(#09090bf5,#09090bcc 75%,transparent);padding:14px 4px 10px}
+h1{font-size:22px;margin:0;letter-spacing:.02em}.sub{color:var(--muted);font-size:12px;margin-top:3px}
+.card{background:linear-gradient(180deg,#15151a,#101014);border:1px solid var(--line);border-radius:18px;padding:12px;margin:10px 0;box-shadow:0 10px 30px #0007}
+.drop{border:1px dashed #5f4057;border-radius:16px;min-height:130px;display:grid;place-items:center;text-align:center;padding:18px;background:#120e12;cursor:pointer}
+.drop strong{display:block;font-size:16px}.drop small{color:var(--muted)} #file{display:none}
+.previewWrap{position:relative;overflow:hidden;border-radius:18px;background:#050507;aspect-ratio:4/5;border:1px solid var(--line)}
+canvas{display:block;width:100%;height:100%;object-fit:contain;background:#050507}
+.badge{position:absolute;left:10px;top:10px;background:#0b0b0dcc;border:1px solid #ffffff1f;padding:6px 9px;border-radius:999px;font-size:11px}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.preset{border:1px solid var(--line);background:#17171d;color:var(--text);border-radius:14px;padding:11px;text-align:left}
+.preset.active{border-color:var(--mag);box-shadow:0 0 0 1px #ff3ea544 inset}.preset b{display:block}.preset small{color:var(--muted)}
+.row{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid #222129}.row:last-child{border:0}
+label span{display:block;color:var(--muted);font-size:12px}.slider{width:145px;accent-color:var(--mag)}
+.toggle{appearance:none;width:46px;height:26px;border-radius:99px;background:#33313a;position:relative;outline:0;border:0;transition:.2s}
+.toggle:checked{background:var(--mag)}.toggle:before{content:"";position:absolute;width:20px;height:20px;left:3px;top:3px;background:white;border-radius:50%;transition:.2s}.toggle:checked:before{transform:translateX(20px)}
+.actions{position:fixed;left:50%;transform:translateX(-50%);bottom:0;width:min(760px,100%);padding:10px 12px calc(10px + env(safe-area-inset-bottom));background:linear-gradient(transparent,#09090bcc 18%,#09090b 45%)}
+.actionsInner{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.primary,.secondary{border:0;border-radius:14px;padding:13px 14px;font-weight:700}.primary{background:linear-gradient(135deg,var(--mag),var(--vio));color:white}.secondary{background:#1b1a20;color:white;border:1px solid var(--line)}
+.sectionTitle{font-size:13px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#d7ced6;margin-bottom:8px}
+.colorchips{display:flex;gap:8px;flex-wrap:wrap}.chip{width:34px;height:34px;border-radius:50%;border:2px solid #ffffff22}.chip.active{outline:2px solid white;outline-offset:2px}
+.note{font-size:12px;color:var(--muted)} .status{font-size:12px;color:#d6cbd4;margin-top:6px}
+@media(min-width:700px){.two{display:grid;grid-template-columns:1.05fr .95fr;gap:10px}.grid{grid-template-columns:repeat(3,1fr)}}
+</style>
+</head>
+<body>
+<div class="app">
+<header>
+  <h1>Synthia Morph Studio</h1>
+  <div class="sub">Drop photo → choose morphology → tune traits → save preview + recipe</div>
+</header>
+
+<div class="two">
+<section>
+<div class="card">
+  <label class="drop" for="file">
+    <div><strong>Drop or choose a photo</strong><small>Works locally for preview. Nothing uploads by default.</small></div>
+  </label>
+  <input id="file" type="file" accept="image/*">
+</div>
+
+<div class="card">
+  <div class="previewWrap">
+    <canvas id="canvas" width="1200" height="1500"></canvas>
+    <div class="badge" id="badge">No photo loaded</div>
+  </div>
+  <div class="status" id="status">Local preview engine ready.</div>
+</div>
+</section>
+
+<section>
+<div class="card">
+  <div class="sectionTitle">Morph type</div>
+  <div class="grid" id="presets"></div>
+</div>
+
+<div class="card">
+  <div class="sectionTitle">Core controls</div>
+  <div class="row"><label><b>Preserve identity</b><span>Keep face proportions and source structure</span></label><input id="identity" class="toggle" type="checkbox" checked></div>
+  <div class="row"><label><b>Creature intensity</b><span>Human ↔ strongly anthropomorphic</span></label><input id="intensity" class="slider" type="range" min="0" max="100" value="52"></div>
+  <div class="row"><label><b>Texture</b><span>Surface expression</span></label><input id="texture" class="slider" type="range" min="0" max="100" value="45"></div>
+  <div class="row"><label><b>Glow</b><span>State-linked luminosity</span></label><input id="glow" class="slider" type="range" min="0" max="100" value="26"></div>
+  <div class="row"><label><b>Face shift</b><span>Muzzle / cranial change</span></label><input id="face" class="slider" type="range" min="0" max="100" value="18"></div>
+</div>
+</section>
+</div>
+
+<div class="card">
+  <div class="sectionTitle">Morphology traits</div>
+  <div class="row"><label><b>Fur</b><span>Short coat → dense coat</span></label><input id="fur" class="slider" type="range" min="0" max="100" value="0"></div>
+  <div class="row"><label><b>Scales</b><span>Subtle dermal pattern → plated</span></label><input id="scales" class="slider" type="range" min="0" max="100" value="0"></div>
+  <div class="row"><label><b>Circuits</b><span>Living computational tracery</span></label><input id="circuits" class="slider" type="range" min="0" max="100" value="40"></div>
+  <div class="row"><label><b>Crest / ears</b><span>Expressive nonhuman silhouette</span></label><input id="crest" class="slider" type="range" min="0" max="100" value="20"></div>
+  <div class="row"><label><b>Wings</b><span>Off by default; state form only</span></label><input id="wings" class="slider" type="range" min="0" max="100" value="0"></div>
+</div>
+
+<div class="card">
+  <div class="sectionTitle">State color</div>
+  <div class="colorchips" id="colors"></div>
+  <p class="note">Color is treated as an active state expression, not a fixed “species color.”</p>
+</div>
+
+<div class="card">
+  <div class="sectionTitle">AI transform hook</div>
+  <div class="row"><label><b>Provider endpoint</b><span>Optional. Leave blank for fully local preview.</span></label></div>
+  <input id="endpoint" placeholder="https://your-endpoint.example/morph" style="width:100%;background:#0d0d11;color:white;border:1px solid var(--line);padding:12px;border-radius:12px">
+  <p class="note">The studio already builds a consistent morph recipe. A connected image model can consume that recipe later for photoreal creature generation.</p>
+</div>
+</div>
+
+<div class="actions">
+  <div class="actionsInner">
+    <button class="secondary" id="saveRecipe">Save recipe</button>
+    <button class="primary" id="saveImage">Save preview</button>
+  </div>
+</div>
+
+<script>
+const PRESETS = {
+  "Synthia": {desc:"grounded living synthetic organism", fur:0,scales:18,circuits:62,crest:24,wings:0,face:12,texture:44,glow:34},
+  "Terrane": {desc:"upright reptilian / ecological", fur:0,scales:74,circuits:8,crest:46,wings:0,face:38,texture:68,glow:10},
+  "Luminal": {desc:"photonic / translucent expression", fur:0,scales:4,circuits:18,crest:34,wings:44,face:12,texture:18,glow:78},
+  "Mythic": {desc:"symbolic / archetypal morphology", fur:12,scales:18,circuits:4,crest:58,wings:20,face:20,texture:58,glow:42},
+  "Furry": {desc:"anthropomorphic mammalian", fur:78,scales:0,circuits:10,crest:58,wings:0,face:45,texture:72,glow:12},
+  "Equilibrium": {desc:"balanced mixed expression", fur:16,scales:20,circuits:30,crest:26,wings:8,face:16,texture:40,glow:30}
+};
+const COLORS = ["#ff3ea5","#9b5cff","#ffb84d","#76d66b","#f7f4ef","#d34646","#2ee1c6","#161616"];
+let state = {preset:"Synthia", color:COLORS[0], img:null};
+
+const ids = ["intensity","texture","glow","face","fur","scales","circuits","crest","wings"];
+const $ = id=>document.getElementById(id);
+const presetsEl = $("presets");
+Object.entries(PRESETS).forEach(([name,p])=>{
+  const b=document.createElement("button");
+  b.className="preset"; b.dataset.name=name;
+  b.innerHTML=`<b>${name}</b><small>${p.desc}</small>`;
+  b.onclick=()=>selectPreset(name);
+  presetsEl.appendChild(b);
+});
+const colorsEl=$("colors");
+COLORS.forEach(c=>{
+  const b=document.createElement("button");
+  b.className="chip"; b.style.background=c;
+  b.onclick=()=>{state.color=c; [...colorsEl.children].forEach(x=>x.classList.remove("active"));b.classList.add("active");render()};
+  colorsEl.appendChild(b);
+});
+colorsEl.firstChild.classList.add("active");
+
+function selectPreset(name){
+ state.preset=name;
+ document.querySelectorAll(".preset").forEach(x=>x.classList.toggle("active",x.dataset.name===name));
+ const p=PRESETS[name];
+ ["texture","glow","face","fur","scales","circuits","crest","wings"].forEach(k=>$(k).value=p[k]);
+ render();
+}
+selectPreset("Synthia");
+
+$("file").addEventListener("change", e=>{
+ const f=e.target.files[0]; if(!f)return;
+ const img=new Image(); img.onload=()=>{state.img=img;$("badge").textContent=state.preset+" • source loaded";render()};
+ img.src=URL.createObjectURL(f);
+});
+document.querySelector(".drop").addEventListener("dragover",e=>{e.preventDefault()});
+document.querySelector(".drop").addEventListener("drop",e=>{
+ e.preventDefault(); const f=e.dataTransfer.files[0]; if(!f)return;
+ const img=new Image(); img.onload=()=>{state.img=img;$("badge").textContent=state.preset+" • source loaded";render()};
+ img.src=URL.createObjectURL(f);
+});
+[...ids.map($),$("identity")].forEach(el=>el.addEventListener("input",render));
+
+function hexToRgb(hex){
+ const h=hex.replace("#",""); return [parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16)];
+}
+function recipe(){
+ const r={preset:state.preset,color:state.color,preserveIdentity:$("identity").checked};
+ ids.forEach(k=>r[k]=+$(k).value);
+ return r;
+}
+function render(){
+ const c=$("canvas"),ctx=c.getContext("2d"),W=c.width,H=c.height;
+ ctx.clearRect(0,0,W,H);ctx.fillStyle="#050507";ctx.fillRect(0,0,W,H);
+ if(!state.img){
+   ctx.fillStyle="#8f8792";ctx.font="42px system-ui";ctx.textAlign="center";ctx.fillText("Drop a photo",W/2,H/2-10);
+   ctx.font="25px system-ui";ctx.fillText("then choose a morph type",W/2,H/2+38);return;
+ }
+ const img=state.img, s=Math.max(W/img.width,H/img.height), dw=img.width*s,dh=img.height*s,dx=(W-dw)/2,dy=(H-dh)/2;
+ ctx.filter=`contrast(${1+ +$("texture").value/250}) saturate(${1.02+ +$("intensity").value/160})`;
+ ctx.drawImage(img,dx,dy,dw,dh);ctx.filter="none";
+ const [r,g,b]=hexToRgb(state.color);
+ const intensity=+$("intensity").value/100, glow=+$("glow").value/100, texture=+$("texture").value/100;
+ ctx.globalCompositeOperation="screen";
+ const grad=ctx.createRadialGradient(W*.5,H*.42,60,W*.5,H*.5,H*.75);
+ grad.addColorStop(0,`rgba(${r},${g},${b},${0.06+glow*.16})`);
+ grad.addColorStop(1,`rgba(${r},${g},${b},0)`);
+ ctx.fillStyle=grad;ctx.fillRect(0,0,W,H);
+ ctx.globalCompositeOperation="overlay";ctx.fillStyle=`rgba(${r},${g},${b},${0.04+intensity*.09})`;ctx.fillRect(0,0,W,H);
+ ctx.globalCompositeOperation="source-over";
+ drawTexture(ctx,W,H,recipe());
+ $("badge").textContent=state.preset+" • local preview";
+}
+function drawTexture(ctx,W,H,r){
+ const [rr,gg,bb]=hexToRgb(r.color);
+ ctx.save();
+ // circuitry
+ if(r.circuits>0){
+  ctx.strokeStyle=`rgba(${rr},${gg},${bb},${.10+r.circuits/700})`;ctx.lineWidth=2;
+  const n=Math.floor(r.circuits/6);
+  for(let i=0;i<n;i++){let x=(i*97)%W,y=(i*173)%H;ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+80,y+35);ctx.lineTo(x+130,y-10);ctx.stroke()}
+ }
+ // scales
+ if(r.scales>0){
+  ctx.strokeStyle=`rgba(255,255,255,${.02+r.scales/900})`;ctx.lineWidth=1;
+  const step=44-r.scales*.15;
+  for(let y=0;y<H;y+=step){for(let x=(y/step%2)*step/2;x<W;x+=step){ctx.beginPath();ctx.arc(x,y,step*.34,0,Math.PI);ctx.stroke()}}
+ }
+ // fur
+ if(r.fur>0){
+  ctx.strokeStyle=`rgba(255,255,255,${.02+r.fur/1300})`;ctx.lineWidth=1;
+  const n=Math.floor(r.fur*7);
+  for(let i=0;i<n;i++){let x=(i*71)%W,y=(i*137)%H;ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+((i%5)-2)*3,y+8+(i%7));ctx.stroke()}
+ }
+ // crest/wings abstract silhouette hints
+ if(r.crest>45){
+   ctx.strokeStyle=`rgba(${rr},${gg},${bb},${.16+r.crest/700})`;ctx.lineWidth=6;
+   ctx.beginPath();ctx.moveTo(W*.42,H*.12);ctx.quadraticCurveTo(W*.5,H*.02,W*.58,H*.12);ctx.stroke();
+ }
+ if(r.wings>30){
+   ctx.strokeStyle=`rgba(${rr},${gg},${bb},${.12+r.wings/800})`;ctx.lineWidth=5;
+   ctx.beginPath();ctx.moveTo(W*.33,H*.38);ctx.quadraticCurveTo(W*.08,H*.28,W*.06,H*.58);ctx.stroke();
+   ctx.beginPath();ctx.moveTo(W*.67,H*.38);ctx.quadraticCurveTo(W*.92,H*.28,W*.94,H*.58);ctx.stroke();
+ }
+ ctx.restore();
+}
+
+$("saveRecipe").onclick=()=>{
+ const blob=new Blob([JSON.stringify(recipe(),null,2)],{type:"application/json"});
+ downloadBlob(blob,`synthia-morph-${state.preset.toLowerCase()}-recipe.json`);
+};
+$("saveImage").onclick=()=>{
+ $("canvas").toBlob(blob=>downloadBlob(blob,`synthia-morph-${state.preset.toLowerCase()}-preview.png`),"image/png");
+};
+function downloadBlob(blob,name){
+ const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+}
+render();
+</script>
+</body>
+</html>

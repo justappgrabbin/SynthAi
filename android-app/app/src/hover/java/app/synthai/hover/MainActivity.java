@@ -142,6 +142,10 @@ public final class MainActivity extends Activity {
         });
         root.addView(start, matchWrap());
 
+        Button computer = button("Open Synthia computer · chat and Realm");
+        computer.setOnClickListener(v -> startActivity(new Intent(this, NativeComputerActivity.class)));
+        root.addView(computer, matchWrap());
+
         Button mic = button("Allow microphone (optional)");
         mic.setOnClickListener(v -> requestPermissions(new String[]{Manifest.permission.RECORD_AUDIO}, 102));
         root.addView(mic, matchWrap());

@@ -1,0 +1,1330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>YOU-N-I-VERSE · House Simulation</title>
+<script src="https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.min.js"></script>
+<script src="/morph/runtime/morph-engine.js"></script>
+<script src="/morph/runtime/sprite-runtime.classic.js"></script>
+<script src="/morph/runtime/reskin-controller.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Rajdhani:wght@300;400;500;600&family=Space+Mono:ital@0;1&display=swap');
+
+:root {
+  --void: #04040a;
+  --void2: #080812;
+  --purple: #a855f7;
+  --pink: #ec4899;
+  --cyan: #22d3ee;
+  --gold: #fbbf24;
+  --green: #10b981;
+  --red: #ef4444;
+  --glass: rgba(255,255,255,0.04);
+  --border: rgba(168,85,247,0.25);
+}
+
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+
+body {
+  background: var(--void);
+  color: #d0d0f0;
+  font-family: 'Rajdhani', sans-serif;
+  height: 100dvh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── HEADER ── */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  background: linear-gradient(90deg, rgba(168,85,247,0.12), rgba(236,72,153,0.08));
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  z-index: 100;
+}
+.logo {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  background: linear-gradient(90deg, var(--purple), var(--pink));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  letter-spacing: 1px;
+}
+.sim-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10px;
+  color: #888;
+  font-family: 'Space Mono', monospace;
+}
+.status-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 8px var(--green);
+  animation: pulse-dot 2s infinite;
+}
+@keyframes pulse-dot { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+/* ── MAIN LAYOUT ── */
+.main {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+  position: relative;
+}
+
+/* ── CANVAS ── */
+#sim-canvas {
+  flex: 1;
+  display: block;
+  cursor: grab;
+  touch-action: none;
+}
+#sim-canvas:active { cursor: grabbing; }
+
+/* ── SIDE PANEL ── */
+.side-panel {
+  width: 280px;
+  background: var(--void2);
+  border-left: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition: transform 0.3s ease;
+  z-index: 50;
+}
+@media(max-width: 640px) {
+  .side-panel {
+    position: absolute;
+    right: 0; top: 0; bottom: 0;
+    transform: translateX(100%);
+    width: 88vw;
+    max-width: 320px;
+    z-index: 500;
+  }
+  .side-panel.open { transform: translateX(0); }
+}
+
+.panel-tabs {
+  display: flex;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.ptab {
+  flex: 1;
+  padding: 10px 6px;
+  text-align: center;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 8px;
+  letter-spacing: 0.5px;
+  color: #666;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s;
+  text-transform: uppercase;
+}
+.ptab.active { color: var(--purple); border-bottom-color: var(--purple); background: rgba(168,85,247,0.06); }
+
+.panel-body { flex:1; overflow-y:auto; padding:14px; scrollbar-width:thin; scrollbar-color: var(--border) transparent; }
+
+/* ── AGENT CARD ── */
+.agent-card {
+  background: var(--glass);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px;
+  margin-bottom: 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+  overflow: hidden;
+}
+.agent-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, transparent 60%, rgba(168,85,247,0.05));
+  pointer-events: none;
+}
+.agent-card:hover, .agent-card.selected {
+  border-color: var(--purple);
+  background: rgba(168,85,247,0.08);
+}
+.agent-card.selected { border-color: var(--pink); }
+
+.ac-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.ac-avatar {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  flex-shrink: 0;
+  border: 2px solid;
+}
+.ac-name {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  color: #e0e0ff;
+}
+.ac-type {
+  font-size: 10px;
+  color: #888;
+  margin-top: 2px;
+}
+.ac-gates {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.gate-pill {
+  font-family: 'Space Mono', monospace;
+  font-size: 9px;
+  padding: 2px 7px;
+  border-radius: 10px;
+  border: 1px solid;
+}
+.gate-body  { color: #10b981; border-color: rgba(16,185,129,0.4); background: rgba(16,185,129,0.08); }
+.gate-mind  { color: #22d3ee; border-color: rgba(34,211,238,0.4); background: rgba(34,211,238,0.08); }
+.gate-heart { color: #ec4899; border-color: rgba(236,72,153,0.4); background: rgba(236,72,153,0.08); }
+
+/* ── DETAIL VIEW ── */
+.detail-section {
+  margin-bottom: 16px;
+}
+.ds-title {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 9px;
+  color: var(--purple);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--border);
+}
+.ds-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 5px 0;
+  font-size: 12px;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+.ds-label { color: #666; font-size: 11px; }
+.ds-val { font-family: 'Space Mono', monospace; font-size: 11px; color: #c0c0e0; }
+
+.resonance-bar-wrap {
+  margin-bottom: 10px;
+}
+.rb-header {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  margin-bottom: 4px;
+}
+.rb-name { color: #c0c0e0; }
+.rb-score { font-family: 'Space Mono', monospace; font-size: 10px; }
+.rb-track {
+  height: 6px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.rb-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 1s ease;
+}
+
+/* ── WATCH LOG ── */
+.watch-log {
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  line-height: 1.8;
+}
+.log-entry {
+  padding: 6px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  animation: logfade 0.4s ease;
+}
+@keyframes logfade { from{opacity:0; transform:translateY(-4px)} to{opacity:1;transform:translateY(0)} }
+.log-time { color: #555; margin-right: 6px; }
+.log-txt { color: #a0a0c0; }
+.log-hi { color: var(--purple); }
+.log-bond { color: var(--pink); }
+.log-conflict { color: var(--red); }
+.log-gate { color: var(--cyan); }
+
+/* ── BOTTOM BAR (mobile) ── */
+.bottom-bar {
+  display: none;
+  background: var(--void2);
+  border-top: 1px solid var(--border);
+  padding: 8px 10px calc(8px + env(safe-area-inset-bottom));
+  flex-shrink: 0;
+  z-index: 1000;
+  position: relative;
+}
+@media(max-width: 640px) { .bottom-bar { display: flex; gap: 6px; } }
+
+.bb-btn {
+  flex: 1;
+  min-height: 52px;
+  padding: 10px 4px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--glass);
+  color: #d0d0f0;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 9px;
+  text-align: center;
+  cursor: pointer;
+  letter-spacing: 0.5px;
+  -webkit-tap-highlight-color: rgba(168,85,247,0.3);
+  user-select: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.1s;
+}
+.bb-btn:active { background: rgba(168,85,247,0.35) !important; }
+.bb-btn.active { background: rgba(168,85,247,0.2); border-color: var(--purple); color: var(--purple); }
+
+/* ── HUD OVERLAY ── */
+.hud {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  pointer-events: none;
+  z-index: 20;
+}
+.hud-stat {
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  color: rgba(168,85,247,0.7);
+  line-height: 1.9;
+}
+.hud-title {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 9px;
+  color: rgba(168,85,247,0.5);
+  letter-spacing: 1px;
+  margin-bottom: 4px;
+  text-transform: uppercase;
+}
+
+/* ── SPAWN CONTROLS ── */
+.spawn-controls {
+  position: absolute;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 10px;
+  z-index: 30;
+  pointer-events: all;
+}
+@media(max-width:640px) { .spawn-controls { display: none; } }
+
+.ctrl-btn {
+  padding: 9px 18px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  background: rgba(8,8,18,0.85);
+  color: #d0d0f0;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 9px;
+  cursor: pointer;
+  backdrop-filter: blur(10px);
+  transition: all 0.2s;
+  letter-spacing: 0.5px;
+}
+.ctrl-btn:hover { border-color: var(--purple); color: var(--purple); }
+.ctrl-btn.danger:hover { border-color: var(--red); color: var(--red); }
+
+/* ── TOOLTIP ── */
+.tooltip {
+  position: absolute;
+  background: rgba(8,8,18,0.95);
+  border: 1px solid var(--purple);
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 11px;
+  pointer-events: none;
+  z-index: 200;
+  min-width: 160px;
+  backdrop-filter: blur(10px);
+  display: none;
+}
+.tt-name { font-family: 'Orbitron', sans-serif; font-size: 11px; color: var(--purple); margin-bottom: 5px; }
+.tt-row { display: flex; justify-content: space-between; gap: 12px; color: #888; font-size: 10px; margin-top: 2px; }
+.tt-val { font-family: 'Space Mono', monospace; color: #c0c0e0; }
+
+/* scrollbars */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">YOU-N-I-VERSE · HOUSE</div>
+  <div class="sim-status">
+    <div class="status-dot"></div>
+    <span id="tick-counter">TICK 0</span>
+  </div>
+</div>
+
+<div class="main">
+  <!-- 3D Canvas -->
+  <div style="position:relative; flex:1; overflow:hidden;">
+    <canvas id="sim-canvas"></canvas>
+
+    <!-- HUD -->
+    <div class="hud">
+      <div class="hud-title">Field Stats</div>
+      <div class="hud-stat" id="hud-agents">Agents: 0</div>
+      <div class="hud-stat" id="hud-bonds">Bonds: 0</div>
+      <div class="hud-stat" id="hud-conflicts">Conflicts: 0</div>
+      <div class="hud-stat" id="hud-avg">Avg Resonance: —</div>
+    </div>
+
+    <!-- Spawn controls -->
+    <div class="spawn-controls">
+      <button class="ctrl-btn" onclick="spawnAgent()">+ Spawn Agent</button>
+      <button class="ctrl-btn" onclick="togglePause()" id="pause-btn">|| Pause</button>
+      <button class="ctrl-btn danger" onclick="clearAgents()">x Clear All</button>
+    </div>
+  </div>
+
+  <!-- Side Panel -->
+  <div class="side-panel" id="side-panel">
+    <div class="panel-tabs">
+      <div class="ptab active" onclick="switchTab('agents')" id="tab-agents">Agents</div>
+      <div class="ptab" onclick="switchTab('detail')" id="tab-detail">Chart</div>
+      <div class="ptab" onclick="switchTab('watch')" id="tab-watch">Watch</div>
+    </div>
+    <div class="panel-body" id="panel-body">
+      <!-- filled by JS -->
+    </div>
+  </div>
+</div>
+
+<!-- Bottom bar (mobile) -->
+<div class="bottom-bar">
+  <div class="bb-btn active" id="bb-sim" onclick="showMobileView('sim')">[~] World</div>
+  <div class="bb-btn" id="bb-agents" onclick="showMobileView('agents')">[+] Agents</div>
+  <div class="bb-btn" id="bb-watch" onclick="showMobileView('watch')">[|] Watch</div>
+  <div class="bb-btn" id="bb-spawn" onclick="spawnAgent()">+ Spawn</div>
+</div>
+
+<div class="tooltip" id="tooltip"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+// HD DATA
+// ═══════════════════════════════════════════════════════════════
+
+const HD_TYPES = ['Manifestor','Generator','Manifesting Generator','Projector','Reflector'];
+const HD_PROFILES = ['1/3','1/4','2/4','2/5','3/5','3/6','4/6','5/1','5/2','6/2','6/3'];
+const HD_AUTHORITIES = ['Sacral','Emotional','Splenic','Ego','G-Center','None','Lunar'];
+
+const GATE_THEMES = {
+  1:'Self-Expression',2:'Higher Knowing',3:'Ordering',4:'Formulization',
+  5:'Fixed Patterns',6:'Friction',7:'The Role of the Self',8:'Contribution',
+  9:'Focus',10:'Behavior of Self',11:'Ideas',12:'Caution',13:'The Listener',
+  14:'Power Skills',15:'Extremes',16:'Skills',17:'Opinions',18:'Correction',
+  19:'Wanting',20:'The Now',21:'The Hunter',22:'Openness',23:'Assimilation',
+  24:'Rationalization',25:'Innocence',26:'The Egoist',27:'Caring',28:'The Game Player',
+  29:'Perseverance',30:'Feelings',31:'Influence',32:'Continuity',33:'Privacy',
+  34:'Power',35:'Change',36:'Crisis',37:'Friendship',38:'The Fighter',
+  39:'Provocation',40:'Aloneness',41:'Contraction',42:'Growth',43:'Insight',
+  44:'Alertness',45:'The Gatherer',46:'Determination',47:'Realization',48:'Depth',
+  49:'Revolution',50:'Values',51:'Shock',52:'Inaction',53:'Starting',54:'Drive',
+  55:'Abundance',56:'Stimulation',57:'Intuitive Clarity',58:'Joy',59:'Sexuality',
+  60:'Limitation',61:'Inner Truth',62:'Detail',63:'Doubt',64:'Confusion'
+};
+
+const TYPE_COLORS = {
+  'Manifestor':       { primary:'#a855f7', glow:'#7e22ce', accent:'#d946ef' },
+  'Generator':        { primary:'#f59e0b', glow:'#b45309', accent:'#fbbf24' },
+  'Manifesting Generator': { primary:'#f97316', glow:'#c2410c', accent:'#fb923c' },
+  'Projector':        { primary:'#22d3ee', glow:'#0e7490', accent:'#67e8f9' },
+  'Reflector':        { primary:'#f0abfc', glow:'#a21caf', accent:'#e879f9' }
+};
+
+const NAMES_POOL = [
+  'Lyra','Orion','Nova','Zephyr','Sage','Echo','Phoenix','Cipher',
+  'Vesper','Aether','Solara','Kai','Indra','Vega','Seren','Oberon',
+  'Asha','Nyx','Calder','Ember','Flux','Helios','Iris','Juno'
+];
+
+// ═══════════════════════════════════════════════════════════════
+// GNN RESONANCE ENGINE
+// ═══════════════════════════════════════════════════════════════
+
+class ResonanceGNN {
+  // Compute resonance between two agents (0..1)
+  // Based on gate harmonic distances + trinity field alignment
+  compute(a, b) {
+    const bodyR   = this._gateHarmonic(a.body.gate,   b.body.gate)   * 0.35;
+    const mindR   = this._gateHarmonic(a.mind.gate,   b.mind.gate)   * 0.30;
+    const heartR  = this._gateHarmonic(a.heart.gate,  b.heart.gate)  * 0.35;
+    const typeR   = this._typeAffinity(a.type, b.type)               * 0.15;
+    const lineR   = this._lineHarmonic(a.body.line,   b.body.line)   * 0.10;
+    const profileR= this._profileResonance(a.profile, b.profile)     * 0.10;
+
+    // Weighted blend — normalize so typology is flavoring, not dominant
+    const raw = (bodyR + mindR + heartR) + (typeR + lineR + profileR);
+    // GraphSAGE-inspired neighborhood aggregation: average over both agent embeddings
+    const emb_a = this._embed(a);
+    const emb_b = this._embed(b);
+    const dotSim = this._cosine(emb_a, emb_b);
+    // Final: blend physics+dot
+    return Math.min(1, raw * 0.6 + dotSim * 0.4);
+  }
+
+  _embed(agent) {
+    // 6-dim node embedding: gate/6 features → normalized vector
+    return [
+      (agent.body.gate  % 8) / 8,
+      (agent.body.line)  / 6,
+      (agent.mind.gate  % 8) / 8,
+      (agent.mind.line)  / 6,
+      (agent.heart.gate % 8) / 8,
+      (agent.heart.line) / 6,
+    ];
+  }
+
+  _cosine(a, b) {
+    let dot = 0, ma = 0, mb = 0;
+    for (let i = 0; i < a.length; i++) { dot += a[i]*b[i]; ma += a[i]*a[i]; mb += b[i]*b[i]; }
+    if (ma === 0 || mb === 0) return 0;
+    return dot / (Math.sqrt(ma) * Math.sqrt(mb));
+  }
+
+  _gateHarmonic(g1, g2) {
+    // I Ching harmonic: same circuit = high, complementary = medium, unrelated = low
+    const diff = Math.abs(g1 - g2);
+    if (diff === 0) return 1.0;
+    if (diff === 1 || diff === 63) return 0.85; // adjacent
+    // Opposite gate (channel pair logic)
+    const pairs = { 1:2,2:1,3:50,4:49,7:13,13:7,11:56,56:11,17:62,62:17,
+                     25:51,51:25,36:35,35:36,15:5,5:15,46:29,29:46 };
+    if (pairs[g1] === g2) return 0.9;
+    // Same circuit family (mod 8 approximation)
+    if (diff % 8 === 0) return 0.7;
+    if (diff % 4 === 0) return 0.55;
+    return Math.max(0.1, 0.5 - diff / 128);
+  }
+
+  _typeAffinity(t1, t2) {
+    const table = {
+      'Manifestor':           { 'Manifestor':0.5, 'Generator':0.7, 'Manifesting Generator':0.6, 'Projector':0.9, 'Reflector':0.8 },
+      'Generator':            { 'Manifestor':0.7, 'Generator':0.8, 'Manifesting Generator':0.85,'Projector':0.9, 'Reflector':0.75 },
+      'Manifesting Generator':{ 'Manifestor':0.6, 'Generator':0.85,'Manifesting Generator':0.7, 'Projector':0.8, 'Reflector':0.7 },
+      'Projector':            { 'Manifestor':0.9, 'Generator':0.9, 'Manifesting Generator':0.8, 'Projector':0.5, 'Reflector':0.85 },
+      'Reflector':            { 'Manifestor':0.8, 'Generator':0.75,'Manifesting Generator':0.7, 'Projector':0.85,'Reflector':0.6 }
+    };
+    return (table[t1] && table[t1][t2]) ? table[t1][t2] : 0.5;
+  }
+
+  _lineHarmonic(l1, l2) {
+    // Lines 1-6, complementary: 1+4, 2+5, 3+6
+    const comp = { 1:4,2:5,3:6,4:1,5:2,6:3 };
+    if (l1 === l2) return 0.6;
+    if (comp[l1] === l2) return 1.0;
+    return 0.4;
+  }
+
+  _profileResonance(p1, p2) {
+    if (p1 === p2) return 0.7;
+    // Compatible profiles
+    const compat = {
+      '1/3':['2/4','4/6'],'1/4':['2/5','3/5'],'2/4':['1/3','5/1'],
+      '2/5':['1/4','6/2'],'3/5':['1/4','4/6'],'3/6':['6/3','5/2'],
+      '4/6':['1/3','3/5'],'5/1':['2/4','6/2'],'5/2':['3/6','6/3'],
+      '6/2':['2/5','5/1'],'6/3':['3/6','5/2']
+    };
+    if (compat[p1] && compat[p1].includes(p2)) return 0.9;
+    return 0.4;
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// AGENT FACTORY
+// ═══════════════════════════════════════════════════════════════
+
+let agentIdCounter = 0;
+const gnn = new ResonanceGNN();
+
+function randomGate() { return Math.floor(Math.random()*64)+1; }
+function randomLine() { return Math.floor(Math.random()*6)+1; }
+function randomColor(){ return Math.floor(Math.random()*6)+1; }
+function randomTone() { return Math.floor(Math.random()*6)+1; }
+function randomBase() { return Math.floor(Math.random()*5)+1; }
+function pick(arr)    { return arr[Math.floor(Math.random()*arr.length)]; }
+
+function makeAgent(overrides = {}) {
+  const id  = agentIdCounter++;
+  const type = overrides.type || pick(HD_TYPES);
+  const col = TYPE_COLORS[type];
+  const bodyGate = overrides.bodyGate || randomGate();
+  const mindGate = overrides.mindGate || randomGate();
+  const heartGate= overrides.heartGate|| randomGate();
+
+  const agent = {
+    id,
+    name: overrides.name || NAMES_POOL[id % NAMES_POOL.length],
+    type,
+    profile: pick(HD_PROFILES),
+    authority: pick(HD_AUTHORITIES),
+    body:  { gate: bodyGate,  line: randomLine(), color: randomColor(), tone: randomTone(), base: randomBase() },
+    mind:  { gate: mindGate,  line: randomLine(), color: randomColor(), tone: randomTone(), base: randomBase() },
+    heart: { gate: heartGate, line: randomLine(), color: randomColor(), tone: randomTone(), base: randomBase() },
+    colors: col,
+    // World state
+    pos: new THREE.Vector3((Math.random()-0.5)*18, 0, (Math.random()-0.5)*18),
+    vel: new THREE.Vector3((Math.random()-0.5)*0.03, 0, (Math.random()-0.5)*0.03),
+    targetPos: null,
+    state: 'idle', // idle, walking, talking, meditating, conflicting
+    stateTimer: 0,
+    resonanceCache: {},
+    bonds: [],       // agent ids with high resonance
+    conflicts: [],   // agent ids with low resonance
+    // 3D mesh refs
+    mesh: null,
+    labelMesh: null,
+    auraMesh: null,
+    // Behavioral modulation
+    energy: 1.0,
+    lastInteraction: null,
+  };
+  return agent;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// THREE.JS WORLD
+// ═══════════════════════════════════════════════════════════════
+
+const canvas = document.getElementById('sim-canvas');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.setClearColor(0x04040a);
+
+const scene = new THREE.Scene();
+scene.fog = new THREE.FogExp2(0x04040a, 0.04);
+
+const camera = new THREE.PerspectiveCamera(60, 1, 0.1, 200);
+camera.position.set(0, 18, 22);
+camera.lookAt(0, 0, 0);
+
+// Lights
+const ambient = new THREE.AmbientLight(0x1a0a2e, 2.5);
+scene.add(ambient);
+
+const dirLight = new THREE.DirectionalLight(0xa855f7, 1.5);
+dirLight.position.set(10, 20, 10);
+dirLight.castShadow = true;
+scene.add(dirLight);
+
+const pinkLight = new THREE.PointLight(0xec4899, 1.2, 30);
+pinkLight.position.set(-8, 6, -8);
+scene.add(pinkLight);
+
+const cyanLight = new THREE.PointLight(0x22d3ee, 0.8, 25);
+cyanLight.position.set(8, 4, 8);
+scene.add(cyanLight);
+
+// Floor grid
+const gridHelper = new THREE.GridHelper(40, 40, 0x1a0a2e, 0x0d0718);
+scene.add(gridHelper);
+
+// Floor plane
+const floorGeo = new THREE.PlaneGeometry(40, 40);
+const floorMat = new THREE.MeshStandardMaterial({ color: 0x060310, roughness: 0.8 });
+const floor = new THREE.Mesh(floorGeo, floorMat);
+floor.rotation.x = -Math.PI/2;
+floor.position.y = -0.01;
+floor.receiveShadow = true;
+scene.add(floor);
+
+// Orbit controls (manual)
+let isDragging = false, prevMouse = {x:0,y:0};
+let camTheta = 0.5, camPhi = 0.8, camRadius = 28;
+let touchStart = null;
+
+function updateCamera() {
+  camera.position.x = camRadius * Math.sin(camTheta) * Math.sin(camPhi);
+  camera.position.y = camRadius * Math.cos(camPhi);
+  camera.position.z = camRadius * Math.cos(camTheta) * Math.sin(camPhi);
+  camera.lookAt(0, 0, 0);
+}
+updateCamera();
+
+canvas.addEventListener('mousedown', e => { isDragging=true; prevMouse={x:e.clientX,y:e.clientY}; });
+canvas.addEventListener('mouseup', () => isDragging=false);
+canvas.addEventListener('mousemove', e => {
+  if (!isDragging) return;
+  const dx = (e.clientX - prevMouse.x) * 0.005;
+  const dy = (e.clientY - prevMouse.y) * 0.005;
+  camTheta -= dx;
+  camPhi = Math.max(0.2, Math.min(1.4, camPhi + dy));
+  prevMouse = {x:e.clientX,y:e.clientY};
+  updateCamera();
+});
+canvas.addEventListener('wheel', e => {
+  camRadius = Math.max(6, Math.min(50, camRadius + e.deltaY * 0.02));
+  updateCamera();
+});
+
+// Touch
+canvas.addEventListener('touchstart', e => {
+  if (e.touches.length === 1) { touchStart = {x:e.touches[0].clientX, y:e.touches[0].clientY}; isDragging=true; }
+});
+canvas.addEventListener('touchend', () => { isDragging=false; touchStart=null; });
+canvas.addEventListener('touchmove', e => {
+  e.preventDefault();
+  if (e.touches.length === 1 && isDragging && touchStart) {
+    const dx = (e.touches[0].clientX - touchStart.x) * 0.005;
+    const dy = (e.touches[0].clientY - touchStart.y) * 0.005;
+    camTheta -= dx;
+    camPhi = Math.max(0.2, Math.min(1.4, camPhi + dy));
+    touchStart = {x:e.touches[0].clientX, y:e.touches[0].clientY};
+    updateCamera();
+  }
+}, {passive:false});
+
+// Resize
+function resize() {
+  const w = canvas.clientWidth, h = canvas.clientHeight;
+  renderer.setSize(w, h, false);
+  camera.aspect = w / h;
+  camera.updateProjectionMatrix();
+}
+new ResizeObserver(resize).observe(canvas);
+resize();
+
+// ═══════════════════════════════════════════════════════════════
+// AGENT 3D MESH BUILDER
+// ═══════════════════════════════════════════════════════════════
+
+function buildAgentMesh(agent) {
+  const group = new THREE.Group();
+  const col = new THREE.Color(agent.colors.primary);
+
+  // Aura sphere
+  const auraGeo = new THREE.SphereGeometry(0.7, 16, 16);
+  const auraMat = new THREE.MeshBasicMaterial({ color: col, transparent:true, opacity:0.06, side: THREE.BackSide });
+  const aura = new THREE.Mesh(auraGeo, auraMat);
+  aura.position.y = 0.9;
+  group.add(aura);
+  agent.auraMesh = aura;
+
+  // Body parts material
+  const mat = new THREE.MeshStandardMaterial({ color: col, roughness:0.3, metalness:0.5, emissive: col, emissiveIntensity: 0.15 });
+
+  // Head
+  const head = new THREE.Mesh(new THREE.SphereGeometry(0.13, 16, 16), mat.clone());
+  head.position.y = 1.72;
+  head.castShadow = true;
+  group.add(head);
+
+  // Eyes
+  const eyeMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+  [-0.045, 0.045].forEach(x => {
+    const eye = new THREE.Mesh(new THREE.SphereGeometry(0.018, 8, 8), eyeMat);
+    eye.position.set(x, 1.74, 0.11);
+    group.add(eye);
+  });
+  // Pupils
+  const pupilMat = new THREE.MeshBasicMaterial({ color: new THREE.Color(agent.colors.accent) });
+  [-0.045, 0.045].forEach(x => {
+    const pupil = new THREE.Mesh(new THREE.SphereGeometry(0.009, 8, 8), pupilMat);
+    pupil.position.set(x, 1.74, 0.125);
+    group.add(pupil);
+  });
+
+  // Torso
+  const torso = new THREE.Mesh(new THREE.CapsuleGeometry(0.14, 0.45, 4, 8), mat.clone());
+  torso.position.y = 1.05;
+  torso.castShadow = true;
+  group.add(torso);
+
+  // Arms
+  const armGeo = new THREE.CapsuleGeometry(0.045, 0.38, 4, 8);
+  const leftArm = new THREE.Group(); leftArm.name = 'leftArm';
+  const laM = new THREE.Mesh(armGeo, mat.clone()); laM.position.y = -0.19;
+  leftArm.add(laM); leftArm.position.set(-0.22, 1.3, 0);
+  group.add(leftArm);
+
+  const rightArm = new THREE.Group(); rightArm.name = 'rightArm';
+  const raM = new THREE.Mesh(armGeo, mat.clone()); raM.position.y = -0.19;
+  rightArm.add(raM); rightArm.position.set(0.22, 1.3, 0);
+  group.add(rightArm);
+
+  // Legs
+  const legGeo = new THREE.CapsuleGeometry(0.055, 0.45, 4, 8);
+  const leftLeg = new THREE.Group(); leftLeg.name = 'leftLeg';
+  const llM = new THREE.Mesh(legGeo, mat.clone()); llM.position.y = -0.225;
+  leftLeg.add(llM); leftLeg.position.set(-0.09, 0.5, 0);
+  group.add(leftLeg);
+
+  const rightLeg = new THREE.Group(); rightLeg.name = 'rightLeg';
+  const rlM = new THREE.Mesh(legGeo, mat.clone()); rlM.position.y = -0.225;
+  rightLeg.add(rlM); rightLeg.position.set(0.09, 0.5, 0);
+  group.add(rightLeg);
+
+  // Trinity indicator dots
+  const bodyDot  = new THREE.Mesh(new THREE.SphereGeometry(0.04,8,8), new THREE.MeshBasicMaterial({color:0x10b981}));
+  const mindDot  = new THREE.Mesh(new THREE.SphereGeometry(0.04,8,8), new THREE.MeshBasicMaterial({color:0x22d3ee}));
+  const heartDot = new THREE.Mesh(new THREE.SphereGeometry(0.04,8,8), new THREE.MeshBasicMaterial({color:0xec4899}));
+  bodyDot.position.set(-0.18, 0.85, 0.12);
+  mindDot.position.set(0, 1.78, 0);
+  heartDot.position.set(0.18, 0.85, 0.12);
+  group.add(bodyDot); group.add(mindDot); group.add(heartDot);
+
+  group.position.copy(agent.pos);
+  group.userData.agentId = agent.id;
+  scene.add(group);
+  agent.mesh = group;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// BOND LINES
+// ═══════════════════════════════════════════════════════════════
+
+const bondLines = new Map(); // key: 'a-b'
+
+function updateBondLines(agents) {
+  // Remove old
+  bondLines.forEach((line, key) => {
+    scene.remove(line);
+  });
+  bondLines.clear();
+
+  const agentArr = Array.from(agents.values());
+  for (let i = 0; i < agentArr.length; i++) {
+    for (let j = i+1; j < agentArr.length; j++) {
+      const a = agentArr[i], b = agentArr[j];
+      const r = gnn.compute(a, b);
+      if (r > 0.65) {
+        const key = `${a.id}-${b.id}`;
+        const points = [
+          new THREE.Vector3(a.pos.x, 0.9, a.pos.z),
+          new THREE.Vector3(b.pos.x, 0.9, b.pos.z)
+        ];
+        const geo = new THREE.BufferGeometry().setFromPoints(points);
+        const isHighResonance = r > 0.82;
+        const mat = new THREE.LineBasicMaterial({
+          color: isHighResonance ? 0xec4899 : 0x7e22ce,
+          transparent: true,
+          opacity: isHighResonance ? 0.5 : 0.25
+        });
+        const line = new THREE.Line(geo, mat);
+        scene.add(line);
+        bondLines.set(key, line);
+      }
+    }
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SIMULATION STATE
+// ═══════════════════════════════════════════════════════════════
+
+const agents = new Map();
+let selectedAgentId = null;
+let simPaused = false;
+let tickCount = 0;
+let activeTab = 'agents';
+let watchLog = [];
+let mobileView = 'sim';
+const panel = document.getElementById('side-panel');
+
+function spawnAgent(overrides = {}) {
+  const agent = makeAgent(overrides);
+  buildAgentMesh(agent);
+  agents.set(agent.id, agent);
+  // Compute resonance with all existing
+  agents.forEach((other, oid) => {
+    if (oid === agent.id) return;
+    const r = gnn.compute(agent, other);
+    agent.resonanceCache[oid] = r;
+    other.resonanceCache[agent.id] = r;
+    if (r > 0.75) {
+      agent.bonds.push(oid);
+      other.bonds.push(agent.id);
+      addLog(`<span class="log-hi">${agent.name}</span> <span class="log-bond">bonded</span> with <span class="log-hi">${other.name}</span> <span class="log-gate">[R:${(r*100).toFixed(0)}%]</span>`);
+    } else if (r < 0.3) {
+      agent.conflicts.push(oid);
+      other.conflicts.push(agent.id);
+      addLog(`<span class="log-hi">${agent.name}</span> <span class="log-conflict">conflicts</span> with <span class="log-hi">${other.name}</span> <span class="log-gate">[R:${(r*100).toFixed(0)}%]</span>`);
+    }
+  });
+  updateBondLines(agents);
+  renderPanel();
+  addLog(`<span class="log-gate">[+]</span> <span class="log-hi">${agent.name}</span> (${agent.type} ${agent.profile}) entered the House`);
+  updateHUD();
+}
+
+function clearAgents() {
+  agents.forEach(a => { if (a.mesh) scene.remove(a.mesh); });
+  agents.clear();
+  bondLines.forEach(l => scene.remove(l));
+  bondLines.clear();
+  selectedAgentId = null;
+  agentIdCounter = 0;
+  renderPanel();
+  updateHUD();
+  addLog('<span class="log-conflict">[x]</span> House cleared');
+}
+
+function togglePause() {
+  simPaused = !simPaused;
+  document.getElementById('pause-btn').textContent = simPaused ? '▶ Resume' : '|| Pause';
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SIMULATION TICK
+// ═══════════════════════════════════════════════════════════════
+
+const HOUSE_BOUNDS = 16;
+const BOND_DIST = 4.5;
+const REPEL_DIST = 2.2;
+
+function tick(dt) {
+  if (simPaused) return;
+  tickCount++;
+  const agentArr = Array.from(agents.values());
+
+  agentArr.forEach(agent => {
+    agent.stateTimer -= dt;
+
+    // Decide next target
+    if (agent.stateTimer <= 0 || !agent.targetPos) {
+      // Choose behavior based on type + resonance
+      const roll = Math.random();
+
+      if (agent.bonds.length > 0 && roll < 0.45) {
+        // Move toward a bonded agent
+        const bondId = agent.bonds[Math.floor(Math.random()*agent.bonds.length)];
+        const bonded = agents.get(bondId);
+        if (bonded) {
+          const dir = bonded.pos.clone().sub(agent.pos).normalize();
+          const dist = agent.pos.distanceTo(bonded.pos);
+          if (dist > 2.5) {
+            agent.targetPos = bonded.pos.clone().add(dir.multiplyScalar(-2.2));
+            agent.state = 'walking';
+          } else {
+            agent.state = 'talking';
+          }
+        }
+        agent.stateTimer = 2.5 + Math.random()*3;
+      } else if (agent.type === 'Manifestor' && roll < 0.65) {
+        // Manifestors roam freely
+        agent.targetPos = new THREE.Vector3(
+          (Math.random()-0.5)*HOUSE_BOUNDS*1.8,
+          0,
+          (Math.random()-0.5)*HOUSE_BOUNDS*1.8
+        );
+        agent.state = 'walking';
+        agent.stateTimer = 3 + Math.random()*4;
+      } else if (agent.type === 'Projector' && roll < 0.5) {
+        // Projectors observe — stay still, meditate
+        agent.state = 'meditating';
+        agent.stateTimer = 4 + Math.random()*5;
+        agent.targetPos = null;
+      } else if (agent.type === 'Reflector') {
+        // Reflectors move slowly, often pause
+        agent.targetPos = new THREE.Vector3(
+          (Math.random()-0.5)*HOUSE_BOUNDS*1.2,
+          0, (Math.random()-0.5)*HOUSE_BOUNDS*1.2
+        );
+        agent.state = Math.random() < 0.4 ? 'meditating' : 'walking';
+        agent.stateTimer = 5 + Math.random()*6;
+      } else {
+        // General wander
+        agent.targetPos = new THREE.Vector3(
+          (Math.random()-0.5)*HOUSE_BOUNDS,
+          0, (Math.random()-0.5)*HOUSE_BOUNDS
+        );
+        agent.state = 'walking';
+        agent.stateTimer = 2 + Math.random()*4;
+      }
+    }
+
+    // Move toward target
+    if (agent.targetPos && agent.state === 'walking') {
+      const diff = agent.targetPos.clone().sub(agent.pos);
+      const dist = diff.length();
+      if (dist > 0.15) {
+        const speed = agent.type === 'Manifestor' ? 0.05 :
+                      agent.type === 'Generator' || agent.type === 'Manifesting Generator' ? 0.045 :
+                      agent.type === 'Projector' ? 0.03 : 0.025;
+        agent.vel.copy(diff.normalize().multiplyScalar(speed));
+        // Face direction
+        agent.mesh.rotation.y = Math.atan2(diff.x, diff.z);
+      } else {
+        agent.vel.set(0,0,0);
+        if (agent.stateTimer > 0.5) agent.stateTimer = 0.1; // arrive
+      }
+    } else {
+      agent.vel.multiplyScalar(0.9);
+    }
+
+    // Repulsion from conflicts and nearby agents
+    agentArr.forEach(other => {
+      if (other.id === agent.id) return;
+      const d = agent.pos.distanceTo(other.pos);
+      if (d < REPEL_DIST && d > 0.01) {
+        const repel = agent.pos.clone().sub(other.pos).normalize().multiplyScalar(0.02 / d);
+        agent.vel.add(repel);
+        // conflict agents repel harder
+        if (agent.conflicts.includes(other.id)) {
+          agent.vel.add(repel.multiplyScalar(2));
+        }
+      }
+    });
+
+    // Apply velocity
+    agent.pos.add(agent.vel);
+    // Clamp to bounds
+    agent.pos.x = Math.max(-HOUSE_BOUNDS, Math.min(HOUSE_BOUNDS, agent.pos.x));
+    agent.pos.z = Math.max(-HOUSE_BOUNDS, Math.min(HOUSE_BOUNDS, agent.pos.z));
+
+    // Update mesh
+    if (agent.mesh) {
+      agent.mesh.position.x = agent.pos.x;
+      agent.mesh.position.z = agent.pos.z;
+    }
+  });
+
+  // Update bond lines every 60 ticks
+  if (tickCount % 60 === 0) updateBondLines(agents);
+
+  // Occasional event log entries
+  if (tickCount % 180 === 0) generateEvent(agentArr);
+}
+
+function generateEvent(agentArr) {
+  if (agentArr.length < 2) return;
+  const a = agentArr[Math.floor(Math.random()*agentArr.length)];
+  const b = agentArr[Math.floor(Math.random()*agentArr.length)];
+  if (a.id === b.id) return;
+  const r = a.resonanceCache[b.id] || 0.5;
+
+  const events = r > 0.75 ? [
+    () => `<span class="log-hi">${a.name}</span> and <span class="log-hi">${b.name}</span> <span class="log-bond">co-create</span> around Gate <span class="log-gate">${a.heart.gate} ↔ ${b.heart.gate}</span>`,
+    () => `<span class="log-hi">${a.name}</span> <span class="log-bond">recognizes</span> <span class="log-hi">${b.name}</span>'s <span class="log-gate">${GATE_THEMES[b.body.gate] || 'field'}</span>`,
+    () => `Heart field: <span class="log-hi">${a.name}</span> + <span class="log-hi">${b.name}</span> — <span class="log-bond">${(r*100).toFixed(0)}% resonance</span>`,
+  ] : r < 0.35 ? [
+    () => `<span class="log-hi">${a.name}</span> <span class="log-conflict">deflects</span> <span class="log-hi">${b.name}</span>'s Gate <span class="log-gate">${b.mind.gate}</span> signal`,
+    () => `Field tension: <span class="log-hi">${a.name}</span> (${a.type}) vs <span class="log-hi">${b.name}</span> (${b.type}) — <span class="log-conflict">${(r*100).toFixed(0)}%</span>`,
+  ] : [
+    () => `<span class="log-hi">${a.name}</span> passes <span class="log-hi">${b.name}</span> — neutral field <span class="log-gate">[${(r*100).toFixed(0)}%]</span>`,
+  ];
+  addLog(events[Math.floor(Math.random()*events.length)]());
+}
+
+// ═══════════════════════════════════════════════════════════════
+// ANIMATION LOOP
+// ═══════════════════════════════════════════════════════════════
+
+const clock = new THREE.Clock();
+
+function animate() {
+  requestAnimationFrame(animate);
+  const dt = clock.getDelta();
+  tick(dt);
+  animateMeshes(clock.elapsedTime);
+
+  // HUD update every second
+  if (Math.floor(clock.elapsedTime) !== Math.floor(clock.elapsedTime - dt)) {
+    updateHUD();
+    document.getElementById('tick-counter').textContent = `TICK ${tickCount}`;
+  }
+
+  renderer.render(scene, camera);
+  if (window.MorphReskin) MorphReskin.render(clock.elapsedTime);
+}
+
+function animateMeshes(t) {
+  agents.forEach(agent => {
+    if (!agent.mesh) return;
+    const g = agent.mesh;
+    const offset = agent.id * 0.7;
+
+    const leftArm  = g.getObjectByName('leftArm');
+    const rightArm = g.getObjectByName('rightArm');
+    const leftLeg  = g.getObjectByName('leftLeg');
+    const rightLeg = g.getObjectByName('rightLeg');
+
+    switch(agent.state) {
+      case 'walking':
+        g.position.y = Math.abs(Math.sin((t + offset) * 7)) * 0.06;
+        if (leftArm)  leftArm.rotation.x  = Math.sin((t+offset)*7) * 0.5;
+        if (rightArm) rightArm.rotation.x = Math.sin((t+offset)*7+Math.PI)*0.5;
+        if (leftLeg)  leftLeg.rotation.x  = Math.sin((t+offset)*7+Math.PI)*0.5;
+        if (rightLeg) rightLeg.rotation.x = Math.sin((t+offset)*7)*0.5;
+        if (agent.auraMesh) agent.auraMesh.material.opacity = 0.04 + Math.sin(t*3)*0.02;
+        break;
+      case 'talking':
+        g.position.y = 0;
+        if (rightArm) rightArm.rotation.z = Math.sin((t+offset)*3)*0.3 + 0.25;
+        if (agent.auraMesh) agent.auraMesh.material.opacity = 0.1 + Math.sin(t*4)*0.05;
+        break;
+      case 'meditating':
+        g.position.y = 0.12 + Math.sin((t+offset)*1.2)*0.08;
+        if (leftArm)  leftArm.rotation.x  = 0.4;
+        if (rightArm) rightArm.rotation.x = 0.4;
+        if (agent.auraMesh) {
+          agent.auraMesh.material.opacity = 0.14 + Math.sin(t*2)*0.08;
+          agent.auraMesh.scale.setScalar(1 + Math.sin(t*1.5)*0.12);
+        }
+        break;
+      default:
+        g.position.y = Math.sin((t+offset)*1.8)*0.015;
+        if (leftArm)  leftArm.rotation.x  = 0;
+        if (rightArm) rightArm.rotation.x = 0;
+        if (leftLeg)  leftLeg.rotation.x  = 0;
+        if (rightLeg) rightLeg.rotation.x = 0;
+        if (agent.auraMesh) agent.auraMesh.material.opacity = 0.05 + Math.sin(t*2+offset)*0.02;
+    }
+
+    // Selected highlight
+    if (selectedAgentId === agent.id && agent.auraMesh) {
+      agent.auraMesh.material.opacity = 0.2 + Math.sin(t*4)*0.08;
+      agent.auraMesh.scale.setScalar(1.3 + Math.sin(t*3)*0.1);
+    }
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════
+// RAYCASTING (click agent)
+// ═══════════════════════════════════════════════════════════════
+
+const raycaster = new THREE.Raycaster();
+const mouse = new THREE.Vector2();
+
+function getAgentAtEvent(e) {
+  const rect = canvas.getBoundingClientRect();
+  const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+  const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+  mouse.x = ((clientX - rect.left) / rect.width)  * 2 - 1;
+  mouse.y = -((clientY - rect.top)  / rect.height) * 2 + 1;
+  raycaster.setFromCamera(mouse, camera);
+  const meshes = [];
+  agents.forEach(a => { if (a.mesh) meshes.push(...a.mesh.children); });
+  const intersects = raycaster.intersectObjects(meshes, true);
+  if (intersects.length > 0) {
+    let obj = intersects[0].object;
+    while (obj.parent && !obj.userData.agentId && obj.parent !== scene) obj = obj.parent;
+    if (obj.userData.agentId !== undefined) return obj.userData.agentId;
+    // Walk up
+    let g = intersects[0].object;
+    while (g.parent) {
+      if (g.userData.agentId !== undefined) return g.userData.agentId;
+      g = g.parent;
+    }
+  }
+  return null;
+}
+
+let clickStartTime = 0;
+canvas.addEventListener('mousedown', () => { clickStartTime = Date.now(); });
+canvas.addEventListener('mouseup', e => {
+  if (Date.now() - clickStartTime > 200) return; // drag
+  const id = getAgentAtEvent(e);
+  if (id !== null) selectAgent(id);
+});
+canvas.addEventListener('touchstart', e => { clickStartTime = Date.now(); }, {passive:true});
+canvas.addEventListener('touchend', e => {
+  if (Date.now() - clickStartTime > 200) return;
+  // Don't intercept if touch ended outside canvas bounds
+  const rect = canvas.getBoundingClientRect();
+  const tx = e.changedTouches[0].clientX, ty = e.changedTouches[0].clientY;
+  if (tx < rect.left || tx > rect.right || ty < rect.top || ty > rect.bottom) return;
+  const id = getAgentAtEvent({clientX: tx, clientY: ty});
+  if (id !== null) { selectAgent(id); showMobileView('agents'); }
+}, {passive:true});
+
+function selectAgent(id) {
+  selectedAgentId = id;
+  switchTab('detail');
+  renderPanel();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// UI
+// ═══════════════════════════════════════════════════════════════
+
+function switchTab(tab) {
+  activeTab = tab;
+  document.querySelectorAll('.ptab').forEach(t => t.classList.remove('active'));
+  document.getElementById(`tab-${tab}`).classList.add('active');
+  renderPanel();
+}
+
+function renderPanel() {
+  const body = document.getElementById('panel-body');
+  if (activeTab === 'agents') {
+    let html = '';
+    if (agents.size === 0) {
+      html = '<div style="color:#555;font-size:12px;padding:20px;text-align:center;">No agents in the House.<br><br>Tap <b>Spawn Agent</b> to begin.</div>';
+    }
+    agents.forEach(agent => {
+      const isSelected = selectedAgentId === agent.id;
+      const col = agent.colors.primary;
+      html += `<div class="agent-card ${isSelected?'selected':''}" onclick="selectAgent(${agent.id})">
+        <div class="ac-header">
+          <div class="ac-avatar" style="background:${col}22;border-color:${col}88">
+            ${agent.type === 'Manifestor' ? 'M' : agent.type === 'Generator' ? 'G' : agent.type === 'Manifesting Generator' ? 'MG' : agent.type === 'Projector' ? 'P' : 'R'}
+          </div>
+          <div>
+            <div class="ac-name">${agent.name}</div>
+            <div class="ac-type">${agent.type} · ${agent.profile}</div>
+          </div>
+        </div>
+        <div class="ac-gates">
+          <span class="gate-pill gate-body">B·${agent.body.gate}.${agent.body.line}</span>
+          <span class="gate-pill gate-mind">M·${agent.mind.gate}.${agent.mind.line}</span>
+          <span class="gate-pill gate-heart">H·${agent.heart.gate}.${agent.heart.line}</span>
+        </div>
+      </div>`;
+    });
+    body.innerHTML = html;
+  } else if (activeTab === 'detail') {
+    if (selectedAgentId === null || !agents.has(selectedAgentId)) {
+      body.innerHTML = '<div style="color:#555;font-size:12px;padding:20px;text-align:center;">Click an agent in the world to see their chart.</div>';
+      return;
+    }
+    const a = agents.get(selectedAgentId);
+    const col = a.colors.primary;
+    let html = `
+      <div style="text-align:center;margin-bottom:16px;">
+        <div style="font-family:Orbitron;font-size:18px;color:${col};margin-bottom:4px;">${a.name}</div>
+        <div style="font-size:12px;color:#888;">${a.type} · Profile ${a.profile} · ${a.authority}</div>
+      </div>
+
+      <div class="detail-section">
+        <div class="ds-title">Trinity Chart</div>
+        <div class="ds-row"><span class="ds-label">[B] Body Gate</span><span class="ds-val">G${a.body.gate}.${a.body.line} <span style="color:#555">C${a.body.color}·T${a.body.tone}·B${a.body.base}</span></span></div>
+        <div class="ds-row"><span class="ds-label" style="color:#888;">Theme</span><span class="ds-val" style="color:#7b7b9b;font-family:Rajdhani;">${GATE_THEMES[a.body.gate]||'—'}</span></div>
+        <div class="ds-row" style="margin-top:6px"><span class="ds-label">[M] Mind Gate</span><span class="ds-val">G${a.mind.gate}.${a.mind.line} <span style="color:#555">C${a.mind.color}·T${a.mind.tone}·B${a.mind.base}</span></span></div>
+        <div class="ds-row"><span class="ds-label" style="color:#888;">Theme</span><span class="ds-val" style="color:#7b7b9b;font-family:Rajdhani;">${GATE_THEMES[a.mind.gate]||'—'}</span></div>
+        <div class="ds-row" style="margin-top:6px"><span class="ds-label">[H] Heart Gate</span><span class="ds-val">G${a.heart.gate}.${a.heart.line} <span style="color:#555">C${a.heart.color}·T${a.heart.tone}·B${a.heart.base}</span></span></div>
+        <div class="ds-row"><span class="ds-label" style="color:#888;">Theme</span><span class="ds-val" style="color:#7b7b9b;font-family:Rajdhani;">${GATE_THEMES[a.heart.gate]||'—'}</span></div>
+      </div>
+
+      <div class="detail-section">
+        <div class="ds-title">Resonance Field</div>`;
+
+    let resEntries = [];
+    agents.forEach((other) => {
+      if (other.id === a.id) return;
+      const r = a.resonanceCache[other.id] || gnn.compute(a, other);
+      resEntries.push({other, r});
+    });
+    resEntries.sort((x,y) => y.r - x.r);
+
+    if (resEntries.length === 0) {
+      html += '<div style="color:#555;font-size:11px;padding:10px 0;">No other agents in the House.</div>';
+    }
+    resEntries.forEach(({other, r}) => {
+      const pct = (r*100).toFixed(0);
+      const barColor = r > 0.75 ? '#ec4899' : r > 0.5 ? '#a855f7' : r > 0.3 ? '#4b5563' : '#ef4444';
+      html += `<div class="resonance-bar-wrap">
+        <div class="rb-header">
+          <span class="rb-name">${other.name} <span style="color:#555">${other.type}</span></span>
+          <span class="rb-score" style="color:${barColor}">${pct}%</span>
+        </div>
+        <div class="rb-track"><div class="rb-fill" style="width:${pct}%;background:${barColor}"></div></div>
+      </div>`;
+    });
+    html += '</div>';
+    body.innerHTML = html;
+  } else if (activeTab === 'watch') {
+    let html = '<div class="watch-log">';
+    watchLog.slice(-50).reverse().forEach(entry => {
+      html += `<div class="log-entry"><span class="log-time">${entry.time}</span><span class="log-txt">${entry.msg}</span></div>`;
+    });
+    html += '</div>';
+    body.innerHTML = html || '<div style="color:#555;font-size:11px;padding:20px;">Log will appear as agents interact.</div>';
+  }
+}
+
+function addLog(msg) {
+  const now = new Date();
+  const time = `${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')}`;
+  watchLog.push({time, msg});
+  if (watchLog.length > 200) watchLog.shift();
+  if (activeTab === 'watch') renderPanel();
+}
+
+function updateHUD() {
+  const agentArr = Array.from(agents.values());
+  let totalBonds = 0, totalConflicts = 0, totalR = 0, pairs = 0;
+  agentArr.forEach(a => {
+    totalBonds += a.bonds.length;
+    totalConflicts += a.conflicts.length;
+    Object.values(a.resonanceCache).forEach(r => { totalR += r; pairs++; });
+  });
+  document.getElementById('hud-agents').textContent    = `Agents: ${agents.size}`;
+  document.getElementById('hud-bonds').textContent     = `Bonds: ${Math.floor(totalBonds/2)}`;
+  document.getElementById('hud-conflicts').textContent = `Conflicts: ${Math.floor(totalConflicts/2)}`;
+  document.getElementById('hud-avg').textContent       = `Avg Resonance: ${pairs > 0 ? (totalR/pairs*100).toFixed(0)+'%' : '—'}`;
+}
+
+function showMobileView(view) {
+  mobileView = view;
+  document.querySelectorAll('.bb-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(`bb-${view}`)?.classList.add('active');
+  if (view === 'sim') {
+    panel.classList.remove('open');
+  } else {
+    panel.classList.add('open');
+    if (view === 'agents') switchTab('agents');
+    else if (view === 'watch') switchTab('watch');
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// BOOT
+// ═══════════════════════════════════════════════════════════════
+
+// Seed with archetypes
+const SEED_AGENTS = [
+  { type:'Manifestor',   name:'Lyra',   bodyGate:1,  mindGate:43, heartGate:6  },
+  { type:'Generator',    name:'Orion',  bodyGate:34, mindGate:9,  heartGate:29 },
+  { type:'Projector',    name:'Sage',   bodyGate:57, mindGate:20, heartGate:10 },
+  { type:'Manifesting Generator', name:'Nova', bodyGate:35, mindGate:36, heartGate:22 },
+  { type:'Reflector',    name:'Echo',   bodyGate:41, mindGate:19, heartGate:30 },
+  { type:'Generator',    name:'Zephyr', bodyGate:14, mindGate:2,  heartGate:46 },
+];
+
+SEED_AGENTS.forEach(a => spawnAgent(a));
+addLog('<span class="log-gate">[*]</span> YOU-N-I-VERSE House initialized — <span class="log-hi">6 agents</span> entered');
+renderPanel();
+if (window.MorphReskin) { MorphReskin.attach({canvas, camera, agents}).boot(); }
+animate();
+</script>
+</body>
+</html>

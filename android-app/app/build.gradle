@@ -27,6 +27,8 @@ android {
         hover {
             dimension 'face'
             applicationId 'app.synthai.hover'
+            // T7/VOVE M60 runs Android 7.0 (API 24).
+            minSdk 24
             versionCode 59
             versionName '0.5.8-hover-repair1'
             manifestPlaceholders = [appLabel: 'Synthia']
