@@ -35,8 +35,20 @@ for attempt in $(seq 1 90); do
       sleep 1
       continue
     fi
+    ANDROID_STATUS="$(curl -s --max-time 5 http://127.0.0.1:18797/android/status || true)"
+    ANDROID_APPS="$(curl -s --max-time 5 http://127.0.0.1:18797/android/apps || true)"
+    if ! grep -q '"hostRuntime":"android"' <<<"$ANDROID_STATUS"; then
+      sleep 1
+      continue
+    fi
+    if ! grep -q '"apps":' <<<"$ANDROID_APPS"; then
+      sleep 1
+      continue
+    fi
     echo "bridge /status: $BRIDGE"
-    echo "Hover x86_64 verification: launcher, foreground bridge (8797) and planet overlay start; runtime ABI reported"
+    echo "bridge /android/status: $ANDROID_STATUS"
+    echo "bridge /android/apps: $ANDROID_APPS"
+    echo "Hover x86_64 verification: launcher, Android app bridge, foreground bridge (8797) and planet overlay start; runtime ABI reported"
     echo "$LOGS"
     exit 0
   fi
