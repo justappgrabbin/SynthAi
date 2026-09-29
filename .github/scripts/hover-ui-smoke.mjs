@@ -42,9 +42,17 @@ try {
   await page.locator('#identity-form button[type=submit]').click();
   await page.locator('#setup-dialog').waitFor({ state: 'hidden', timeout: 60000 });
   await page.waitForFunction(() => document.querySelector('#planet-label').textContent.includes('online'));
+  await page.waitForFunction(() => {
+    const messages = [...document.querySelectorAll('#chat-log .message.synthia')];
+    const text = messages.at(-1)?.textContent || '';
+    return text.length > 0 && !/conditionStateId|sensoryExpression|voiceControls|fixedEmotionAssigned/.test(text);
+  });
   await page.locator('#planet').click();
   await page.locator('#planet').click();
   await page.locator('[data-open-surface="build"]').click();
+  await page.frameLocator('#build-frame').locator('#root').waitFor();
+  const foundryColor = await page.frameLocator('#build-frame').locator('#root').evaluate(el => getComputedStyle(el).color);
+  assert.notEqual(foundryColor, 'rgb(0, 0, 0)');
   await page.locator('#build-tools').click();
   await page.frameLocator('#build-frame').locator('#tray.active').waitFor();
   await page.locator('#build-talk').click();
