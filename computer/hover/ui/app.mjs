@@ -376,6 +376,13 @@ $('#build-home').addEventListener('click', () => { $('#build-frame').src = '/bui
 $('#build-studio').addEventListener('click', () => { $('#build-frame').src = '/studio/index.html'; });
 $('#build-tools').addEventListener('click', () => { $('#build-frame').src = '/lab.html#tray'; });
 
+async function openTalk() {
+  $('#build-frame').src = '/talk/index.html';
+  if (activeSurface !== 'build') await openSurface('build');
+}
+$('#build-talk').addEventListener('click', openTalk);
+$('#talk-open').addEventListener('click', openTalk);
+
 function androidAppButton(app) {
   const button = document.createElement('button');
   button.className = 'android-app';
@@ -520,7 +527,7 @@ $('#mac-pair-form').addEventListener('submit', async (event) => {
   } catch (error) { $('#mac-state').textContent = error.message; }
 });
 
-$('[data-mac-web]').forEach((button) => button.addEventListener('click', async () => {
+$$('[data-mac-web]').forEach((button) => button.addEventListener('click', async () => {
   try {
     await api('/api/solo/mac/open-url', { method: 'POST', body: JSON.stringify({ url: button.dataset.macWeb }) });
     $('#mac-state').textContent = 'Opened on the paired Mac.';
@@ -533,10 +540,3 @@ if (new URLSearchParams(location.search).get('setup') === '1') {
   setupDialog.showModal();
 }
 window.addEventListener('focus', loadStatus);
-
-async function openTalk() {
-  await openSurface('build');
-  $('#build-frame').src = '/talk/index.html';
-}
-$('#build-talk').addEventListener('click', openTalk);
-$('#talk-open').addEventListener('click', openTalk);
