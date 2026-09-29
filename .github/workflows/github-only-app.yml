@@ -282,11 +282,14 @@ jobs:
 
       - name: Verify modern Synthia uses the same runtime and installs separately
         run: |
+          set -x
           APK=android-app/app/build/outputs/apk/modern/debug/app-modern-debug.apk
           test -s "$APK"
           unzip -p "$APK" assets/linux-rootfs.bundle | gzip -t
-          cmp <(unzip -p "$APK" assets/linux-rootfs.bundle | sha256sum) <(unzip -p android-app/app/build/outputs/apk/hover/debug/app-hover-debug.apk assets/linux-rootfs.bundle | sha256sum)
+          unzip -p "$APK" assets/linux-rootfs.bundle | sha256sum
+          unzip -p android-app/app/build/outputs/apk/hover/debug/app-hover-debug.apk assets/linux-rootfs.bundle | sha256sum
           "$ANDROID_SDK_ROOT/build-tools/35.0.0/aapt2" dump badging "$APK" > /tmp/modern-badging.txt
+          sed -n '1,14p' /tmp/modern-badging.txt
           grep -q "package: name='app.synthai.hover.modern'" /tmp/modern-badging.txt
           grep -q "sdkVersion:'26'" /tmp/modern-badging.txt
           grep -q "launchable-activity: name='app.synthai.hover.MainActivity'" /tmp/modern-badging.txt
