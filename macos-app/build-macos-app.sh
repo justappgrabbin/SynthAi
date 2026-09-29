@@ -8,50 +8,52 @@ CONTENTS="$APP/Contents"
 MACOS="$CONTENTS/MacOS"
 RESOURCES="$CONTENTS/Resources"
 WORK="${TMPDIR:-/tmp}/synthia-macos-build"
+NODE_VERSION="${NODE_VERSION:-v22.23.2}"
 
 rm -rf "$APP" "$WORK"
-mkdir -p "$MACOS" "$RESOURCES/runtime" "$RESOURCES/hover" "$WORK"
+mkdir -p "$MACOS" "$RESOURCES/runtime" "$RESOURCES/mac" "$RESOURCES/synthia" "$WORK"
 
-echo "Building universal Synthia macOS launcher"
+echo "Building universal Synthia macOS host"
 for arch in x86_64 arm64; do
   swiftc -O \
     -target "${arch}-apple-macosx13.0" \
     -framework Cocoa \
     -framework WebKit \
-    "$ROOT/macos-app/SynthiaMacApp.swift" \
+    "$ROOT/desktop/mac/SynthiaHost.swift" \
     -o "$WORK/Synthia-$arch"
 done
 lipo -create "$WORK/Synthia-x86_64" "$WORK/Synthia-arm64" -output "$MACOS/Synthia"
 chmod +x "$MACOS/Synthia"
 
-echo "Resolving current Node 22 runtime"
-NODE_VERSION="${NODE_VERSION:-$(curl -fsSL https://nodejs.org/dist/index.json | python3 -c 'import json,sys; rows=json.load(sys.stdin); print(next(r["version"] for r in rows if r["version"].startswith("v22.")))')}"
-echo "Embedding Node $NODE_VERSION for Intel + Apple Silicon"
-
+echo "Embedding pinned Node $NODE_VERSION for Intel + Apple Silicon"
+curl -fsSL "https://nodejs.org/dist/$NODE_VERSION/SHASUMS256.txt" -o "$WORK/SHASUMS256.txt"
 for arch in x64 arm64; do
-  archive="$WORK/node-$NODE_VERSION-darwin-$arch.tar.gz"
-  curl -fsSL "https://nodejs.org/dist/$NODE_VERSION/node-$NODE_VERSION-darwin-$arch.tar.gz" -o "$archive"
-  tar -xzf "$archive" -C "$WORK"
+  archive="node-$NODE_VERSION-darwin-$arch.tar.gz"
+  curl -fsSL "https://nodejs.org/dist/$NODE_VERSION/$archive" -o "$WORK/$archive"
+  (
+    cd "$WORK"
+    grep "  $archive$" SHASUMS256.txt | shasum -a 256 -c -
+  )
+  tar -xzf "$WORK/$archive" -C "$WORK"
+  cp "$WORK/node-$NODE_VERSION-darwin-$arch/bin/node" "$RESOURCES/runtime/node-$arch"
+  chmod +x "$RESOURCES/runtime/node-$arch"
 done
 
-lipo -create \
-  "$WORK/node-$NODE_VERSION-darwin-x64/bin/node" \
-  "$WORK/node-$NODE_VERSION-darwin-arm64/bin/node" \
-  -output "$RESOURCES/runtime/node"
-chmod +x "$RESOURCES/runtime/node"
-
+cp "$ROOT/desktop/mac/mac-bridge.mjs" "$RESOURCES/mac/mac-bridge.mjs"
 cp "$ROOT/macos-app/talk-shim.mjs" "$RESOURCES/runtime/talk-shim.mjs"
 cat > "$RESOURCES/runtime/talk-python-shim" <<'SHIM'
 #!/bin/sh
 set -eu
 HERE="$(cd "$(dirname "$0")" && pwd)"
-# Hover invokes this as: python-like-runner <talk-runner.py> <json>.
-# The first argument is the preserved Python runner path; the Node shim consumes the JSON contract.
-exec "$HERE/node" "$HERE/talk-shim.mjs" "$2"
+# Hover calls a Python-shaped contract: <runner.py> <json>.
+# macOS uses the packaged Node implementation so no system Python is required.
+ARCH="$(uname -m)"
+if [ "$ARCH" = "arm64" ]; then NODE="$HERE/node-arm64"; else NODE="$HERE/node-x64"; fi
+exec "$NODE" "$HERE/talk-shim.mjs" "$2"
 SHIM
 chmod +x "$RESOURCES/runtime/talk-python-shim"
 
-echo "Copying executable Synthia Hover runtime"
+echo "Copying executable Synthia Hover organism"
 rsync -a \
   --exclude '/authorities/originals/' \
   --exclude '/docs/' \
@@ -59,31 +61,9 @@ rsync -a \
   --exclude '/tests/' \
   --exclude '/RELEASE-*.md' \
   --exclude '/CHANGELOG.md' \
-  "$ROOT/computer/hover/" "$RESOURCES/hover/"
+  "$ROOT/computer/hover/" "$RESOURCES/synthia/"
 
-cat > "$CONTENTS/Info.plist" <<'PLIST'
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0">
-<dict>
-  <key>CFBundleDevelopmentRegion</key><string>en</string>
-  <key>CFBundleDisplayName</key><string>Synthia</string>
-  <key>CFBundleExecutable</key><string>Synthia</string>
-  <key>CFBundleIdentifier</key><string>app.synthai.hover.macos</string>
-  <key>CFBundleInfoDictionaryVersion</key><string>6.0</string>
-  <key>CFBundleName</key><string>Synthia</string>
-  <key>CFBundlePackageType</key><string>APPL</string>
-  <key>CFBundleShortVersionString</key><string>0.5.8-mac1</string>
-  <key>CFBundleVersion</key><string>60</string>
-  <key>LSMinimumSystemVersion</key><string>13.0</string>
-  <key>NSHighResolutionCapable</key><true/>
-  <key>NSAppTransportSecurity</key>
-  <dict>
-    <key>NSAllowsLocalNetworking</key><true/>
-  </dict>
-</dict>
-</plist>
-PLIST
+cp "$ROOT/desktop/mac/Info.plist" "$CONTENTS/Info.plist"
 
 ICON_SOURCE="$ROOT/computer/hover/ui/assets/synthia-planet.png"
 if [[ -f "$ICON_SOURCE" ]]; then
@@ -105,11 +85,13 @@ if [[ -f "$ICON_SOURCE" ]]; then
     sips -z "$size" "$size" "$ICON_SOURCE" --out "$ICONSET/$name" >/dev/null
   done
   iconutil -c icns "$ICONSET" -o "$RESOURCES/Synthia.icns"
+  /usr/libexec/PlistBuddy -c "Delete :CFBundleIconFile" "$CONTENTS/Info.plist" >/dev/null 2>&1 || true
   /usr/libexec/PlistBuddy -c "Add :CFBundleIconFile string Synthia.icns" "$CONTENTS/Info.plist"
 fi
 
 codesign --force --deep --sign - "$APP"
 codesign --verify --deep --strict "$APP"
+"$MACOS/Synthia" --self-test
 
 mkdir -p "$DIST"
 rm -f "$DIST/Synthia-macOS-universal.zip"
@@ -117,4 +99,4 @@ ditto -c -k --sequesterRsrc --keepParent "$APP" "$DIST/Synthia-macOS-universal.z
 
 echo "Built:"
 du -sh "$APP" "$DIST/Synthia-macOS-universal.zip"
-file "$MACOS/Synthia" "$RESOURCES/runtime/node"
+file "$MACOS/Synthia" "$RESOURCES/runtime/node-x64" "$RESOURCES/runtime/node-arm64"
