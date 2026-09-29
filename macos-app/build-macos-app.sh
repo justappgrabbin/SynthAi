@@ -40,6 +40,17 @@ lipo -create \
   -output "$RESOURCES/runtime/node"
 chmod +x "$RESOURCES/runtime/node"
 
+cp "$ROOT/macos-app/talk-shim.mjs" "$RESOURCES/runtime/talk-shim.mjs"
+cat > "$RESOURCES/runtime/talk-python-shim" <<'SHIM'
+#!/bin/sh
+set -eu
+HERE="$(cd "$(dirname "$0")" && pwd)"
+# Hover invokes this as: python-like-runner <talk-runner.py> <json>.
+# The first argument is the preserved Python runner path; the Node shim consumes the JSON contract.
+exec "$HERE/node" "$HERE/talk-shim.mjs" "$2"
+SHIM
+chmod +x "$RESOURCES/runtime/talk-python-shim"
+
 echo "Copying executable Synthia Hover runtime"
 rsync -a \
   --exclude '/authorities/originals/' \
