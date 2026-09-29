@@ -17,6 +17,18 @@ test('chat is a seven-entry sequential, consuming pipeline', async () => {
   assert.ok(system.detector.emergenceLog.length >= 1);
 });
 
+test('visible chat never exposes runtime JSON or state packets', async () => {
+  const system = makeSystem();
+  const message = 'Hello Synthia';
+  const response = await system.chat(message, { personId: 'chat-visible-test' });
+  assert.equal(typeof response.utterance, 'string');
+  assert.equal(response.utterance, message);
+  assert.equal(response.utterance.includes('[weave:'), false);
+  assert.equal(response.utterance.includes('conditionStateId'), false);
+  assert.equal(response.utterance.includes('resolved-state'), false);
+  assert.doesNotMatch(response.utterance, /^\s*[\[{]/);
+});
+
 test('analysis routes internal, hybrid, and external artifacts differently', async () => {
   const system = makeSystem();
   const internal = await system.executeArtifact({ name: 'data.json', content: '{"n":3}' }, { personId: 'exec-test' });
