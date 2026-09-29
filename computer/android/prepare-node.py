@@ -14,11 +14,13 @@ with ZipFile(archive_path) as archive:
         output = target / 'bin' / abi / 'libnode.so'
         output.parent.mkdir(parents=True, exist_ok=True)
         output.write_bytes(archive.read(matches[0]))
-    headers = [name for name in names if '/include/node/' in name and not name.endswith('/')]
-    if not any(name.endswith('/include/node/node.h') for name in headers):
-        raise RuntimeError('Node headers missing from mobile release')
+    node_headers = [name for name in names if name.endswith('/node.h')]
+    if len(node_headers) != 1:
+        raise RuntimeError(f'Expected one Node header root, found {node_headers}')
+    prefix = node_headers[0][:-len('node.h')]
+    headers = [name for name in names if name.startswith(prefix) and not name.endswith('/')]
     for name in headers:
-        relative = name.split('/include/node/', 1)[1]
+        relative = name[len(prefix):]
         output = target / 'include/node' / relative
         output.parent.mkdir(parents=True, exist_ok=True)
         output.write_bytes(archive.read(name))

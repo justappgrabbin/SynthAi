@@ -30,7 +30,7 @@ jobs:
       - name: Stage Node 18 mobile runtime
         run: |
           curl -fL --retry 3 -o /tmp/node-mobile.zip 'https://github.com/nodejs-mobile/nodejs-mobile/releases/download/v18.20.4/nodejs-mobile-v18.20.4-android.zip'
-          sha256sum /tmp/node-mobile.zip
+          echo 'bd7321eaa1a7602fbe0bb87302df2d79d87835cf4363fbdd17c350dbb485c2af  /tmp/node-mobile.zip' | sha256sum -c -
           python computer/android/prepare-node.py /tmp/node-mobile.zip
       - run: gradle -p computer/android :app:assembleDebug --stacktrace
       - uses: actions/upload-artifact@v4
