@@ -62,21 +62,45 @@ jobs:
           DATA="$RUNNER_TEMP/synthia-mac-state"
           LOG="$RUNNER_TEMP/synthia-mac-runtime.log"
           mkdir -p "$DATA"
+          ARCH="$(uname -m)"
+          if [[ "$ARCH" == "arm64" ]]; then
+            NODE="$APP/Contents/Resources/runtime/node-arm64"
+          else
+            NODE="$APP/Contents/Resources/runtime/node-x64"
+          fi
+
           (
-            cd "$APP/Contents/Resources/hover"
-            HOST=127.0.0.1             PORT=4173             SYNTHIA_DATA_DIR="$DATA"             SYNTHIA_TALK_PYTHON="$APP/Contents/Resources/runtime/talk-python-shim"             "$APP/Contents/Resources/runtime/node" src/ui/server.mjs >"$LOG" 2>&1
+            cd "$APP/Contents/Resources/synthia"
+            HOST=127.0.0.1 \
+            PORT=4173 \
+            SYNTHIA_DATA_DIR="$DATA" \
+            SYNTHIA_TALK_PYTHON="$APP/Contents/Resources/runtime/talk-python-shim" \
+            "$NODE" src/ui/server.mjs >"$LOG" 2>&1
           ) &
           PID=$!
           cleanup(){ kill "$PID" 2>/dev/null || true; wait "$PID" 2>/dev/null || true; }
           trap cleanup EXIT
 
-          for _ in $(seq 1 120); do
-            if curl -fsS http://127.0.0.1:4173/api/solo/status >"$RUNNER_TEMP/status.json"; then break; fi
-            sleep .1
+          READY=0
+          for _ in $(seq 1 80); do
+            if curl -fsS --max-time 5 http://127.0.0.1:4173/api/solo/status >"$RUNNER_TEMP/status.json"; then
+              READY=1
+              break
+            fi
+            if ! kill -0 "$PID" 2>/dev/null; then break; fi
+            sleep .15
           done
+          if [[ "$READY" != 1 ]]; then
+            echo "Synthia macOS runtime did not become ready"
+            cat "$LOG" || true
+            exit 1
+          fi
 
           grep -q '"ok":true' "$RUNNER_TEMP/status.json"
-          TALK=$(curl -fsS             -H 'content-type: application/json'             -d '{"message":"next steps","name":"Joe"}'             http://127.0.0.1:4173/api/solo/talk/chat)
+          TALK=$(curl -fsS --max-time 10 \
+            -H 'content-type: application/json' \
+            -d '{"message":"next steps","name":"Joe"}' \
+            http://127.0.0.1:4173/api/solo/talk/chat)
           echo "$TALK"
           grep -q '"reply"' <<<"$TALK"
           grep -q 'route to success' <<<"$TALK"
