@@ -1,14 +1,12 @@
 import { createServer } from 'node:http';
-import { readFile, stat, mkdir, mkdtemp, writeFile, rm } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
-import { execFile } from 'node:child_process';
-import { promisify } from 'node:util';
+import { readFile, stat, mkdir } from 'node:fs/promises';
 import { join, resolve, extname, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { ComputerRuntime } from '../ComputerRuntime.mjs';
 import { JsonFilePersistence } from '../runtime/json-file-persistence.mjs';
 import { ConversationExecution } from '../services/conversation-execution.mjs';
 import { FileAdmission } from '../services/file-admission.mjs';
+import { readZipMembers } from './zip-members.mjs';
 
 const root = resolve(fileURLToPath(new URL('../shell/kimi-linux/dist/', import.meta.url)));
 const dataDir = resolve(process.env.SYNTHIA_DATA_DIR ?? fileURLToPath(new URL('../runtime/data/local-computer/', import.meta.url)));
@@ -21,7 +19,6 @@ const computer = await new ComputerRuntime({
 }).boot();
 const conversation = new ConversationExecution(computer);
 const files = new FileAdmission(computer, conversation.execution);
-const runFile = promisify(execFile);
 
 async function ingestUpload({ name, base64 }) {
   if (typeof name !== 'string' || !name || typeof base64 !== 'string' || base64.length > 8000000) throw new TypeError('A named file of at most 6 MB is required.');
@@ -42,24 +39,12 @@ async function ingestUpload({ name, base64 }) {
     await files.mirrorImported([archive]);
     return { items: [archive] };
   }
-  const directory = await mkdtemp(join(tmpdir(), 'synthia-ingest-'));
-  const zipPath = join(directory, 'source.zip');
   const items = [archive];
-  try {
-    await writeFile(zipPath, bytes);
-    const { stdout } = await runFile('unzip', ['-Z1', zipPath], { maxBuffer: 1024 * 1024 });
-    const entries = stdout.split('\n').filter(Boolean);
-    if (entries.length > 200) throw new RangeError('Archive has more than 200 entries.');
-    for (const entry of entries) {
-      if (entry.endsWith('/')) continue;
-      const parts = entry.split('/');
-      if (parts.some((part) => !part || part === '.' || part === '..') || entry.startsWith('/')) continue;
-      const { stdout: member } = await runFile('unzip', ['-p', zipPath, entry], { encoding: 'buffer', maxBuffer: 600000 });
-      items.push(await save(`/home/user/Imports/${safeName.slice(0, -4)}/${entry}`, member, `archive:${archive.addressKey}`));
-    }
-    await files.mirrorImported(items);
-    return { items };
-  } finally { await rm(directory, { recursive: true, force: true }); }
+  for (const { name: entry, content } of readZipMembers(bytes)) {
+    items.push(await save(`/home/user/Imports/${safeName.slice(0, -4)}/${entry}`, content, `archive:${archive.addressKey}`));
+  }
+  await files.mirrorImported(items);
+  return { items };
 }
 
 const mime = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg', '.webp': 'image/webp', '.ico': 'image/x-icon' };

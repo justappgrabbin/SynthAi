@@ -1,0 +1,40 @@
+name: Synthia Computer Android checkpoint
+on:
+  workflow_dispatch:
+  push:
+    branches: [reassembly/computer-2026-09-29]
+    paths: ['computer/**', '.github/workflows/computer-apk.yml']
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: android-actions/setup-android@v4
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.7'
+      - run: sdkmanager 'platforms;android-35' 'ndk;27.0.12077973' 'cmake;3.22.1'
+      - run: npm --prefix computer/shell/kimi-linux ci && npm --prefix computer run build && npm --prefix computer run test:reassembly
+      - run: python computer/android/prepare-assets.py
+      - name: Stage Node 18 mobile runtime
+        run: |
+          curl -fL --retry 3 -o /tmp/node-mobile.zip 'https://github.com/nodejs-mobile/nodejs-mobile/releases/download/v18.20.4/nodejs-mobile-v18.20.4-android.zip'
+          sha256sum /tmp/node-mobile.zip
+          python computer/android/prepare-node.py /tmp/node-mobile.zip
+      - run: gradle -p computer/android :app:assembleDebug --stacktrace
+      - uses: actions/upload-artifact@v4
+        with:
+          name: synthia-computer-android-debug
+          path: computer/android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error

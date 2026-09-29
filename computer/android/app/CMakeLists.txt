@@ -1,0 +1,8 @@
+cmake_minimum_required(VERSION 3.22.1)
+project(synthia_computer)
+add_library(computer-node SHARED src/main/cpp/computer-node.cpp)
+add_library(libnode SHARED IMPORTED)
+set_target_properties(libnode PROPERTIES IMPORTED_LOCATION "${CMAKE_SOURCE_DIR}/libnode/bin/${ANDROID_ABI}/libnode.so")
+target_include_directories(computer-node PRIVATE libnode/include/node)
+find_library(android_log log)
+target_link_libraries(computer-node libnode ${android_log})
