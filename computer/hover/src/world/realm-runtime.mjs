@@ -27,11 +27,16 @@ export class RealmRuntime {
     }
     this.ensureProjection();
     this.timer = setInterval(() => {
-      this.ensureProjection();
-      this.engine.tick();
-      if (++this.ticksSinceSave >= 30) {
-        this.ticksSinceSave = 0;
-        this.save().catch(() => {});
+      try {
+        this.ensureProjection();
+        this.engine.tick();
+        if (++this.ticksSinceSave >= 30) {
+          this.ticksSinceSave = 0;
+          this.save().catch(() => {});
+        }
+      } catch (error) {
+        // A Realm projection error must not take down Synthia's chat and tools.
+        console.error('Consciousness Realm tick:', error);
       }
     }, 1000);
     this.timer.unref?.();
@@ -42,7 +47,8 @@ export class RealmRuntime {
     if (!configuration?.configured || this.adapter.projection('synthia')) return;
     const chart = configuration.chart;
     const longitude = Number(chart.consciousSun?.longitude ?? chart.consciousSun?.degree);
-    const sunSign = chart.consciousSun?.zodiac ?? chart.consciousSun?.sign
+    const rawSign = chart.consciousSun?.zodiac ?? chart.consciousSun?.sign;
+    const sunSign = (typeof rawSign === 'string' && ZODIAC.includes(rawSign) ? rawSign : null)
       ?? (Number.isFinite(longitude) ? ZODIAC[Math.floor(((longitude % 360) + 360) % 360 / 30)] : 'Aries');
     const birthChart = {
       sunSign, moonSign: chart.consciousMoon?.zodiac ?? sunSign,
