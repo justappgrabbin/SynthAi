@@ -122,10 +122,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             [server.path],
             directory: synthiaDir,
             extraEnvironment: [
+                "HOST": "127.0.0.1",
                 "PORT": "4183",
                 "SYNTHIA_DATA_DIR": stateDirectory.path,
                 "SYNTHIA_MAC_BRIDGE_URL": "http://127.0.0.1:8798",
                 "SYNTHIA_MAC_BRIDGE_TOKEN": pairingToken,
+                "SYNTHIA_TALK_PYTHON": resources.appendingPathComponent("runtime/talk-python-shim").path,
             ]
         )
     }
