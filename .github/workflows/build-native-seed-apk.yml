@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - 'integration/synthia-reality-resident'
+      - 'feature/synthia-android-resident-store'
     paths:
       - 'native-android/**'
       - 'computer/native/**'
@@ -43,6 +44,6 @@ jobs:
       - name: Upload native APK
         uses: actions/upload-artifact@v4
         with:
-          name: synthai-native-seed-debug-apk
+          name: synthia-android-resident-debug-apk
           path: native-android/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error

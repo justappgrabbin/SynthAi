@@ -14,6 +14,12 @@ import android.os.Handler;
 import android.os.Looper;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.app.AlertDialog;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.ScrollView;
+import android.widget.TextView;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import java.io.ByteArrayOutputStream;
@@ -35,6 +41,7 @@ public final class MainActivity extends Activity {
     private final Handler main = new Handler(Looper.getMainLooper());
     private NativeSeedClient client;
     private EventJournal journal;
+    private LocalRuntime resident;
     private PhoneWorldView world;
     private SharedPreferences prefs;
     private List<PhoneWorldView.AppPlace> appPlaces = new ArrayList<>();
@@ -46,17 +53,21 @@ public final class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         client = new NativeSeedClient("http://127.0.0.1:17757");
         journal = new EventJournal(this);
+        resident = new LocalRuntime(this);
         prefs = getSharedPreferences("synthai-native", MODE_PRIVATE);
         world = new PhoneWorldView(this);
         world.setListener(this::enterApp);
         world.setMirrorListener(this::pickMirrorImage);
         world.setFieldListener(this::openSynthiaField);
         world.setPackageListener(this::pickSynthiaPackage);
+        world.setStoreListener(this::openPlayStore);
         mirrorFile = new File(getFilesDir(), "synthia-mirror-face.jpg");
         loadMirrorFace();
         setContentView(world);
         refreshApps();
-        wakeRuntimeAndFlush(0);
+        resident.wake(0);
+        world.setResidentName("SYNTHIA");
+        world.setStatus("ANDROID RUNTIME ACTIVE · LOCAL");
     }
 
     @Override
@@ -66,7 +77,8 @@ public final class MainActivity extends Activity {
         long elapsed = last > 0 ? Math.max(0, System.currentTimeMillis() - last) : 0;
         prefs.edit().remove("backgroundAt").apply();
         refreshApps();
-        wakeRuntimeAndFlush(elapsed);
+        resident.wake(elapsed);
+        world.setStatus("ANDROID RUNTIME ACTIVE · LOCAL");
     }
 
     @Override
@@ -100,6 +112,7 @@ public final class MainActivity extends Activity {
         }
         next.sort(Comparator.comparing(a -> a.label.toLowerCase()));
         appPlaces = next;
+        resident.setApplications(appsJson);
         world.setApps(next);
 
         JSONObject sync = new JSONObject();
@@ -117,7 +130,7 @@ public final class MainActivity extends Activity {
             event.put("at", System.currentTimeMillis());
         } catch (Exception ignored) {}
         journal.append(event);
-        flushJournal();
+        resident.record("app.launch", event);
 
         Intent launch = getPackageManager().getLaunchIntentForPackage(app.packageName);
         if (launch != null) {
@@ -127,35 +140,43 @@ public final class MainActivity extends Activity {
     }
 
     private void openSynthiaField() {
-        world.setStatus("OPENING SYNTHIA 5.7 FIELD");
-        io.execute(() -> {
-            NativeSeedClient.Result health = ensureCurrentNativeSeed();
-            boolean available = false;
-            String fieldUrl = "http://127.0.0.1:17758/";
+        ScrollView scroll = new ScrollView(this);
+        LinearLayout column = new LinearLayout(this);
+        column.setOrientation(LinearLayout.VERTICAL);
+        column.setPadding(28, 28, 28, 28);
+        scroll.addView(column);
+        TextView heading = new TextView(this);
+        heading.setText("Synthia · Android resident\nLocal event journal and address state");
+        heading.setTextSize(20);
+        column.addView(heading);
+        TextView snapshot = new TextView(this);
+        snapshot.setText(resident.snapshot().toString() + "\n\nRecent events\n" + resident.recentEvents(8).toString());
+        snapshot.setTextIsSelectable(true);
+        column.addView(snapshot);
+        EditText address = new EditText(this);
+        address.setHint("Address as JSON");
+        address.setMinLines(3);
+        address.setText(resident.snapshot().optJSONObject("address").toString());
+        column.addView(address);
+        Button activate = new Button(this);
+        activate.setText("Activate address locally");
+        activate.setOnClickListener(v -> {
             try {
-                JSONObject root = new JSONObject(health.body == null ? "{}" : health.body);
-                JSONObject front = root.optJSONObject("synthia57FrontScreen");
-                if (front != null) {
-                    available = front.optBoolean("mounted", false);
-                    fieldUrl = front.optString("url", fieldUrl);
-                }
-            } catch (Exception ignored) {}
-            boolean finalAvailable = available;
-            String finalUrl = fieldUrl;
-            main.post(() -> {
-                if (!finalAvailable) {
-                    world.setStatus("SYNTHIA 5.7 FIELD NOT READY");
-                    return;
-                }
-                WebView view = new WebView(this);
-                view.getSettings().setJavaScriptEnabled(true);
-                view.getSettings().setDomStorageEnabled(true);
-                view.setWebViewClient(new WebViewClient());
-                fieldView = view;
-                setContentView(view);
-                view.loadUrl(finalUrl);
-            });
+                resident.setAddress(new JSONObject(address.getText().toString()));
+                snapshot.setText(resident.snapshot().toString() + "\n\nRecent events\n" + resident.recentEvents(8).toString());
+                world.setStatus("ADDRESS ACTIVE · LOCAL");
+            } catch (Exception error) { address.setError("Enter a JSON object"); }
         });
+        column.addView(activate);
+        new AlertDialog.Builder(this).setView(scroll).setPositiveButton("Back to world", null).show();
+    }
+
+    private void openPlayStore() {
+        resident.record("store.open", new JSONObject());
+        Intent launch = getPackageManager().getLaunchIntentForPackage("com.android.vending");
+        if (launch == null) launch = new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps"));
+        try { startActivity(launch); }
+        catch (Exception error) { world.setStatus("PLAY STORE UNAVAILABLE ON THIS DEVICE"); }
     }
 
     @Override

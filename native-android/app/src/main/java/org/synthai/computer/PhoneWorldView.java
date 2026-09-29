@@ -41,11 +41,13 @@ final class PhoneWorldView extends View {
     private final RectF mirrorButton = new RectF();
     private final RectF fieldButton = new RectF();
     private final RectF packageButton = new RectF();
+    private final RectF storeButton = new RectF();
     private final List<AppPlace> apps = new ArrayList<>();
     private Listener listener;
     private Runnable mirrorListener;
     private Runnable fieldListener;
     private Runnable packageListener;
+    private Runnable storeListener;
     private Bitmap mirrorFace;
     private String status = "MESH WAKING";
     private String residentName = "YOU";
@@ -89,6 +91,8 @@ final class PhoneWorldView extends View {
     void setPackageListener(Runnable listener) {
         this.packageListener = listener;
     }
+
+    void setStoreListener(Runnable listener) { this.storeListener = listener; }
 
     void setMirrorFace(Bitmap bitmap) {
         this.mirrorFace = bitmap;
@@ -177,6 +181,7 @@ final class PhoneWorldView extends View {
         paint.setTextSize(10.5f * density);
         canvas.drawText(status, 18f * density, 50f * density, paint);
 
+
         if (residentName.equals("SYNTHIA")) {
             packageButton.setEmpty();
             paint.setColor(Color.rgb(61, 40, 79));
@@ -241,6 +246,15 @@ final class PhoneWorldView extends View {
         drawResident(canvas);
 
         canvas.restore();
+
+        storeButton.set(width - 104f*density, height - 96f*density, width - 14f*density, height - 55f*density);
+        paint.setColor(Color.rgb(52, 94, 74));
+        canvas.drawRoundRect(storeButton, 11f*density, 11f*density, paint);
+        paint.setColor(Color.WHITE);
+        paint.setTextSize(10f*density);
+        paint.setFakeBoldText(true);
+        canvas.drawText("PLAY STORE", storeButton.left + 9f*density, storeButton.centerY() + 3f*density, paint);
+        paint.setFakeBoldText(false);
 
         // Bottom hint stays on screen.
         paint.setColor(Color.argb(210, 18, 11, 29));
@@ -318,8 +332,8 @@ final class PhoneWorldView extends View {
             paint.setColor(Color.rgb(230, 210, 244));
             paint.setTextSize(8f*density);
             paint.setFakeBoldText(true);
-            float textW = paint.measureText("SYNTHIA 5.7");
-            canvas.drawText("SYNTHIA 5.7", residentX - textW/2f, residentY + 28f*density, paint);
+            float textW = paint.measureText("SYNTHIA ANDROID");
+            canvas.drawText("SYNTHIA ANDROID", residentX - textW/2f, residentY + 28f*density, paint);
             paint.setFakeBoldText(false);
             if (walking) postInvalidateOnAnimation();
             return;
@@ -401,6 +415,11 @@ final class PhoneWorldView extends View {
                 }
                 return true;
             case MotionEvent.ACTION_UP:
+                if (!dragging && storeButton.contains(event.getX(), event.getY())) {
+                    if (storeListener != null) storeListener.run();
+                    performClick();
+                    return true;
+                }
                 if (!dragging && !fieldButton.isEmpty() && fieldButton.contains(event.getX(), event.getY())) {
                     if (fieldListener != null) fieldListener.run();
                     performClick();
