@@ -20,6 +20,7 @@ import { WHEEL_ARCSECONDS } from '../../vendor/kimi-agent-automata-state-space-m
 import { fnv1a32 } from '../../vendor/kimi-agent-automata-state-space-merge/pure-synthia-automata/src/engine/derivation.js';
 import { KIMI_SOURCE_MODULES } from './kimi-package-manifest.mjs';
 import { KIMI_KNOWLEDGE_FILES } from './kimi-knowledge-manifest.mjs';
+import { CoupledStateEvolutionRuntime } from './coupled-state-evolution.mjs';
 import { safe } from '../util.mjs';
 
 const PACKAGE_ROOT = '../../vendor/kimi-agent-automata-state-space-merge/';
@@ -177,6 +178,7 @@ export class SovereignStateSpaceRuntime {
     this.centerGates = centerGatesForMap(this.gateCenterMap);
     this.predictor = new Predictor({ engine: this.engine });
     this.livingLoop = new LivingLoop(this.engine, { seed });
+    this.stateEvolution = new CoupledStateEvolutionRuntime({ basis: FIVE_LEVELS });
     this.moduleCache = new Map();
     this.history = [];
     this.knowledge = [];
@@ -188,6 +190,7 @@ export class SovereignStateSpaceRuntime {
       { id: 'human-design-chart', center: 'G', capabilities: ['calculate-chart', 'blueprint', 'active-channels'] },
       { id: 'state-space-living-loop', center: 'Root', capabilities: ['tick', 'sense-vitals', 'endogenous-action', 'replay-episodes'] },
       { id: 'state-space-knowledge', center: 'Ajna', capabilities: ['search-corpus', 'read-source', 'inspect-provenance'] },
+      { id: 'coupled-state-evolution', center: 'G', capabilities: ['propagate-coupled-state', 'field-dependent-transition', 'measure-state-weights'] },
     ].map(Object.freeze));
     this.moduleInstruments = Object.freeze(KIMI_SOURCE_MODULES.map((path) => Object.freeze({
       id: sourceId(path),
@@ -409,6 +412,7 @@ export class SovereignStateSpaceRuntime {
       'human-design-chart': 'chart',
       'state-space-living-loop': input.mode ?? 'tick',
       'state-space-knowledge': input.document ? 'knowledge-document' : 'knowledge-search',
+      'coupled-state-evolution': 'state-evolution',
     };
     if (!(id in operations)) throw new Error(`unknown state-space instrument: ${id}`);
     return this.execute({ ...input, operation: operations[id] }, context);
@@ -477,6 +481,14 @@ export class SovereignStateSpaceRuntime {
       case 'five-levels':
         output = this.fiveLevels(input.gate ?? input.address?.gate ?? 1);
         break;
+      case 'state-evolution':
+        output = this.stateEvolution.evolve({
+          ...(input.evolution ?? input),
+          basis: input.basis ?? FIVE_LEVELS,
+          address: input.address ?? null,
+          context: input.context ?? context ?? null,
+        });
+        break;
       case 'knowledge-search':
         output = this.searchKnowledge(input.query ?? input.text ?? '', { limit: input.limit });
         break;
@@ -539,6 +551,7 @@ export class SovereignStateSpaceRuntime {
       executableSourceModules: this.moduleInstruments.length,
       knowledgeSources: this.knowledge.length,
       knowledgeCharacters: this.knowledge.reduce((sum, entry) => sum + entry.chars, 0),
+      coupledStateEvolution: this.stateEvolution.manifest(),
       sovereignArtifact: 'vendor/kimi-agent-automata-state-space-merge/sovereign.html',
     });
   }
