@@ -397,3 +397,5 @@ async function openTalk() {
 }
 $('#build-talk').addEventListener('click', openTalk);
 $('#talk-open').addEventListener('click', openTalk);
+
+// UI regression set: chat visibility, Build overflow, and preserved Foundry contrast.
