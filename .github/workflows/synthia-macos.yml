@@ -6,6 +6,7 @@ on:
       - 'hover/**'
     paths:
       - 'macos-app/**'
+      - 'desktop/mac/**'
       - 'computer/hover/**'
       - '.github/workflows/synthia-macos.yml'
   pull_request:
