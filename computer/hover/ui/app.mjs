@@ -72,6 +72,9 @@ $$('[data-open-surface]').forEach((button) => button.addEventListener('click', (
 $('#workspace-close').addEventListener('click', collapse);
 $('#workspace-max').addEventListener('click', () => workspace.classList.toggle('maximized'));
 $('#setup-open').addEventListener('click', () => setupDialog.showModal());
+$('#build-home').addEventListener('click', () => { $('#build-frame').src = '/build/index.html'; });
+$('#build-studio').addEventListener('click', () => { $('#build-frame').src = '/studio/index.html'; });
+$('#build-tools').addEventListener('click', () => { $('#build-frame').src = '/lab.html#tray'; });
 
 function addMessage(who, text, trace = false) {
   const div = document.createElement('div');
@@ -373,10 +376,6 @@ await loadTasks();
 await syncMorphAppearance();
 
 setInterval(() => { if (activeSurface === 'todo' && !document.hidden) loadTasks(); }, 3000);
-
-$('#build-home').addEventListener('click', () => { $('#build-frame').src = '/build/index.html'; });
-$('#build-studio').addEventListener('click', () => { $('#build-frame').src = '/studio/index.html'; });
-$('#build-tools').addEventListener('click', () => { $('#build-frame').src = '/lab.html#tray'; });
 
 function androidAppButton(app) {
   const button = document.createElement('button');
