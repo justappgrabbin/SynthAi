@@ -44,11 +44,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             pairingToken = UUID().uuidString.replacingOccurrences(of: "-", with: "") + UUID().uuidString.replacingOccurrences(of: "-", with: "")
             try pairingToken.write(to: tokenFile, atomically: true, encoding: .utf8)
         }
+        try? FileManager.default.setAttributes([.posixPermissions: 0o600], ofItemAtPath: tokenFile.path)
     }
 
     private func buildMenus() {
         let main = NSMenu()
         let appItem = NSMenuItem()
+        appItem.title = "Synthia"
         main.addItem(appItem)
         let appMenu = NSMenu()
         appMenu.addItem(withTitle: "Show Pairing Code", action: #selector(showPairingCode), keyEquivalent: "p")
