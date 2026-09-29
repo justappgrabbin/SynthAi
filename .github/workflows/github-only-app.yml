@@ -216,13 +216,13 @@ jobs:
         with:
           gradle-version: '8.7'
 
-      - name: Build self-contained debug APKs (venom + hover faces)
+      - name: Build self-contained debug APKs (Computer + Android 7 and modern Synthia)
         working-directory: android-app
         run: |
           if [[ "$GITHUB_REF_NAME" == hover/repair-* ]]; then
-            gradle --no-daemon :app:assembleHoverDebug
+            gradle --no-daemon :app:assembleHoverDebug :app:assembleModernDebug
           else
-            gradle --no-daemon :app:assembleVenomDebug :app:assembleHoverDebug
+            gradle --no-daemon :app:assembleVenomDebug :app:assembleHoverDebug :app:assembleModernDebug
           fi
 
       - name: Verify self-contained APK payload (venom)
@@ -280,6 +280,17 @@ jobs:
           grep -q 'app.synthai.hover.BridgeForegroundService' /tmp/hover-manifest.txt
           grep -q 'app.synthai.hover.OverlayService' /tmp/hover-manifest.txt
 
+      - name: Verify modern Synthia uses the same runtime and installs separately
+        run: |
+          APK=android-app/app/build/outputs/apk/modern/debug/app-modern-debug.apk
+          test -s "$APK"
+          unzip -p "$APK" assets/linux-rootfs.bundle | gzip -t
+          cmp <(unzip -p "$APK" assets/linux-rootfs.bundle | sha256sum) <(unzip -p android-app/app/build/outputs/apk/hover/debug/app-hover-debug.apk assets/linux-rootfs.bundle | sha256sum)
+          "$ANDROID_SDK_ROOT/build-tools/35.0.0/aapt2" dump badging "$APK" > /tmp/modern-badging.txt
+          grep -q "package: name='app.synthai.hover.modern'" /tmp/modern-badging.txt
+          grep -q "sdkVersion:'26'" /tmp/modern-badging.txt
+          grep -q "launchable-activity: name='app.synthai.hover.MainActivity'" /tmp/modern-badging.txt
+
       - name: Enable KVM for Android emulator
         run: |
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
@@ -302,6 +313,7 @@ jobs:
           cd android-app/app/build/outputs/apk
           if [[ -f venom/debug/app-venom-debug.apk ]]; then (cd venom/debug && sha256sum app-venom-debug.apk | tee app-venom-debug.apk.sha256); fi
           (cd hover/debug && sha256sum app-hover-debug.apk | tee app-hover-debug.apk.sha256)
+          (cd modern/debug && sha256sum app-modern-debug.apk | tee app-modern-debug.apk.sha256)
           ls -l hover/debug
 
       - name: Upload installable self-contained APK (venom)
@@ -321,4 +333,13 @@ jobs:
           path: |
             android-app/app/build/outputs/apk/hover/debug/app-hover-debug.apk
             android-app/app/build/outputs/apk/hover/debug/app-hover-debug.apk.sha256
+          if-no-files-found: error
+
+      - name: Upload installable Synthia APK (modern)
+        uses: actions/upload-artifact@v4
+        with:
+          name: Synthia-Modern-debug
+          path: |
+            android-app/app/build/outputs/apk/modern/debug/app-modern-debug.apk
+            android-app/app/build/outputs/apk/modern/debug/app-modern-debug.apk.sha256
           if-no-files-found: error
