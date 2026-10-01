@@ -1,0 +1,24 @@
+{
+  "schema": "synthia.autonomous-finisher.v1",
+  "created": "2026-10-01",
+  "mode": "additive-copy-only",
+  "priority": ["resonance-network","stellar-proximology-science-lab","agentic-reality","computer","foundry-paper","remaining-apps"],
+  "products": [
+    {"id":"resonance-network","kind":"sovereign-product","required":["social-network","13-part-addressing","purpose-pathways","resonance-science","enterprise","mesh"]},
+    {"id":"stellar-proximology-science-lab","kind":"sovereign-product","required":["experiments","evidence","provenance","comparison","causal-testing"]},
+    {"id":"agentic-reality","kind":"sovereign-product","required":["persistent-world","addressed-places","agents","world-events","morph-gnn"]},
+    {"id":"computer","kind":"execution-product","required":["task-routing","artifact-runtime","tool-execution","state-persistence"]},
+    {"id":"foundry-paper","kind":"construction-product","required":["ingest","classify","compose","preview","publish"]}
+  ],
+  "sources": ["github","supabase","google-drive","chatgpt-library","conversation-files"],
+  "rules": {
+    "neverDeleteOrigins": true,
+    "neverOverwriteDonors": true,
+    "workOnBranchesAndCopies": true,
+    "preserveProvenance": true,
+    "doNotCollapseSovereignProducts": true,
+    "resonanceBeforeAgenticReality": true,
+    "addressContract": ["planetary","dimension","gate","line","color","tone","base","degree","minute","second","arc","zodiac","house"]
+  },
+  "deliverables": ["unified-product-index","web-builds","android-apk-where-supported","test-evidence","provenance-ledger","marketability-check"]
+}
