@@ -6,6 +6,7 @@ on:
     branches:
       - 'integration/synthia-reality-resident'
       - 'integration/echo-prime-resident-loaders'
+      - 'repair/synthia58-trident-20261001'
     paths:
       - 'native-android/**'
       - 'computer/native/**'
