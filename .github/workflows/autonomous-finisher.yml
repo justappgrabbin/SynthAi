@@ -1,0 +1,35 @@
+name: Synthia Autonomous Finisher
+on:
+  workflow_dispatch:
+  push:
+    branches: [build/autonomous-finisher-20261001]
+    paths: ['autobuilder/**','computer/**','package.json','package-lock.json']
+permissions:
+  contents: read
+  actions: read
+jobs:
+  finish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Inventory test build package
+        run: node autobuilder/finish.mjs
+      - name: Upload unified product index
+        uses: actions/upload-artifact@v4
+        with:
+          name: synthai-product-index
+          path: dist/product-index/
+          if-no-files-found: error
+      - name: Upload APK when built
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: synthai-android-apk
+          path: android/app/build/outputs/apk/debug/*.apk
+          if-no-files-found: ignore
