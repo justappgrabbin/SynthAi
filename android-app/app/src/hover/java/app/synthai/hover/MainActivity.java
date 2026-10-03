@@ -142,6 +142,22 @@ public final class MainActivity extends Activity {
         });
         root.addView(start, matchWrap());
 
+        Button computer = button("Open Synthia computer · chat and Realm");
+        computer.setOnClickListener(v -> startActivity(new Intent(this, NativeComputerActivity.class)));
+        root.addView(computer, matchWrap());
+
+        Button play = button("Open Google Play Store");
+        play.setOnClickListener(v -> {
+            Intent installed = getPackageManager().getLaunchIntentForPackage("com.android.vending");
+            try {
+                startActivity(installed != null ? installed : new Intent(Intent.ACTION_VIEW,
+                        Uri.parse("https://play.google.com/store/apps")));
+            } catch (Exception error) {
+                status.setText("Play Store is unavailable on this tablet: " + error.getMessage());
+            }
+        });
+        root.addView(play, matchWrap());
+
         Button mic = button("Allow microphone (optional)");
         mic.setOnClickListener(v -> requestPermissions(new String[]{Manifest.permission.RECORD_AUDIO}, 102));
         root.addView(mic, matchWrap());

@@ -27,9 +27,30 @@ android {
         hover {
             dimension 'face'
             applicationId 'app.synthai.hover'
+            // T7/VOVE M60 runs Android 7.0 (API 24).
+            minSdk 24
             versionCode 59
             versionName '0.5.8-hover-repair1'
             manifestPlaceholders = [appLabel: 'Synthia']
+        }
+        modern {
+            dimension 'face'
+            applicationId 'app.synthai.hover.modern'
+            minSdk 26
+            versionCode 60
+            versionName '0.5.8-hover-modern1'
+            manifestPlaceholders = [appLabel: 'Synthia']
+        }
+    }
+
+    // Both tablet builds use the same Synthia sources and runtime; only their
+    // install identity and Android minimum differ. They keep separate state.
+    sourceSets {
+        modern {
+            java.srcDirs = ['src/hover/java']
+            res.srcDirs = ['src/hover/res']
+            manifest.srcFile 'src/hover/AndroidManifest.xml'
+            assets.srcDirs = ['src/hover/assets']
         }
     }
 

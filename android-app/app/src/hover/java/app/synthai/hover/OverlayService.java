@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Bitmap;
 import android.graphics.PixelFormat;
+import android.net.Uri;
 import android.os.Build;
 import android.os.IBinder;
 import android.provider.Settings;
@@ -21,6 +22,7 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceError;
+import android.webkit.ValueCallback;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
@@ -63,6 +65,12 @@ public final class OverlayService extends Service {
     private WindowManager.LayoutParams bubbleParams;
     private WindowManager.LayoutParams panelParams;
     private WebView panelWebView;
+    private static ValueCallback<Uri[]> pendingFileChoice;
+
+    static synchronized void completeFileChoice(Uri[] uris) {
+        if (pendingFileChoice != null) pendingFileChoice.onReceiveValue(uris);
+        pendingFileChoice = null;
+    }
     private HoverVoice voice;
     private boolean pageReady;
     private boolean pageFailed;
@@ -202,7 +210,7 @@ public final class OverlayService extends Service {
         settings.setDomStorageEnabled(true);
         settings.setMediaPlaybackRequiresUserGesture(false);
         settings.setAllowFileAccess(false);
-        settings.setAllowContentAccess(false);
+        settings.setAllowContentAccess(true);
         panelWebView.setWebViewClient(new WebViewClient() {
             @Override
             public void onPageStarted(WebView view, String url, Bitmap favicon) {
@@ -227,6 +235,18 @@ public final class OverlayService extends Service {
             }
         });
         panelWebView.setWebChromeClient(new WebChromeClient() {
+            @Override
+            public boolean onShowFileChooser(WebView view, ValueCallback<Uri[]> callback,
+                    FileChooserParams params) {
+                completeFileChoice(null);
+                pendingFileChoice = callback;
+                Intent picker = new Intent(OverlayService.this, PhotoPickerActivity.class);
+                picker.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                picker.putExtra("mime", params.getAcceptTypes().length > 0
+                        ? params.getAcceptTypes()[0] : "image/*");
+                startActivity(picker);
+                return true;
+            }
             @Override
             public void onPermissionRequest(PermissionRequest request) {
                 // Microphone permission is granted only if the user granted Android RECORD_AUDIO.
@@ -317,6 +337,7 @@ public final class OverlayService extends Service {
             if (panel != null) windowManager.removeView(panel);
         } catch (Exception ignored) {}
         if (panelWebView != null) {
+            completeFileChoice(null);
             panelWebView.destroy();
             panelWebView = null;
         }

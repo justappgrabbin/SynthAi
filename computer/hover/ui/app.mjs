@@ -9,7 +9,6 @@ let activeSurface = 'chat';
 let browserPage = null;
 let browserBundle = null;
 let identityConfigured = false;
-let worldAnimation = null;
 let pendingChat = null;
 let identityContext = { personId: 'front-screen', agentId: 'synthia' };
 const draftKey = 'synthia-origin-draft-v1';
@@ -344,24 +343,40 @@ $('#todo-form').addEventListener('submit', async (event) => { event.preventDefau
 
 async function loadWorld() {
   try {
-    const data = await api('/api/solo/world');
-    const latest = data.perception?.latest;
-    $('#world-state').textContent = latest?.address ? `${latest.address.dimension} · Gate ${latest.address.gate}.${latest.address.line} · Color ${latest.address.color} · Tone ${latest.address.tone} · Base ${latest.address.base}` : 'Waiting for a landed state.';
-    drawWorld(data);
-  } catch (error) { $('#world-state').textContent = error.message; drawWorld(null); }
+    const realm = await api('/api/realm');
+    const resident = realm.residents.find(person => person.projectionOf === 'synthia');
+    $('#realm-time').textContent = `Day ${realm.time.day} · ${String(realm.time.hour).padStart(2, '0')}:${String(realm.time.minute).padStart(2, '0')}`;
+    $('#world-state').textContent = resident
+      ? `${resident.name} is at ${realm.places.find(p => p.id === resident.location?.placeId)?.name ?? 'the Realm'} · ${resident.currentActivity?.type ?? 'observing'}`
+      : 'Configure Synthia to enter Consciousness Realm.';
+    const needs = resident?.worldNeeds ?? {};
+    $('#realm-needs').textContent = Object.entries(needs).map(([key, value]) => `${key}: ${Math.round(value)}`).join(' · ');
+    const places = $('#realm-places'); places.replaceChildren();
+    for (const place of realm.places) {
+      const button = document.createElement('button');
+      button.textContent = place.name;
+      button.title = place.description;
+      button.classList.toggle('current', place.id === resident?.location?.placeId);
+      button.disabled = !resident;
+      button.addEventListener('click', () => realmAction('travel', place.id));
+      places.append(button);
+    }
+    $('#realm-event').textContent = realm.events[realm.events.length - 1]?.description ?? '';
+    const morph = $('#realm-morph').contentWindow;
+    morph?.postMessage({ type: 'synthia:realm-state', mode: resident?.currentActivity?.type === 'working' ? 'walk' : resident?.currentActivity?.type === 'socializing' ? 'talk' : 'idle' }, location.origin);
+  } catch (error) { $('#world-state').textContent = `Realm unavailable: ${error.message}`; }
+}
+async function realmAction(type, placeId) {
+  try {
+    await api('/api/realm/action', { method: 'POST', body: JSON.stringify({ type, target: { placeId } }) });
+    await loadWorld();
+  } catch (error) { $('#realm-event').textContent = error.message; }
 }
 $('#world-refresh').addEventListener('click', loadWorld);
-
-function drawWorld(data) {
-  const canvas = $('#world-canvas'); const rect = canvas.getBoundingClientRect(); const dpr = Math.min(2, devicePixelRatio || 1); canvas.width = Math.max(1, rect.width * dpr); canvas.height = Math.max(1, rect.height * dpr); const ctx = canvas.getContext('2d'); ctx.setTransform(dpr,0,0,dpr,0,0);
-  const w = rect.width, h = rect.height; const dims = ['Movement','Evolution','Being','Design','Space']; const active = data?.perception?.latest?.address?.dimension;
-  const particles = Array.from({length:90},(_,i)=>({x:(i*73)%Math.max(1,w),y:(i*149)%Math.max(1,h),r:.4+(i%4)*.25,a:.18+(i%5)*.07}));
-  if (worldAnimation) cancelAnimationFrame(worldAnimation);
-  let t=0;
-  const render=()=>{t+=.006;ctx.clearRect(0,0,w,h);const g=ctx.createRadialGradient(w*.56,h*.54,0,w*.56,h*.54,Math.max(w,h)*.7);g.addColorStop(0,'rgba(103,30,170,.18)');g.addColorStop(1,'rgba(1,1,5,0)');ctx.fillStyle=g;ctx.fillRect(0,0,w,h);for(const p of particles){ctx.beginPath();ctx.fillStyle=`rgba(220,190,255,${p.a})`;ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fill()}const cx=w*.55,cy=h*.55,R=Math.min(w,h)*.3;dims.forEach((d,i)=>{const a=-Math.PI/2+i*Math.PI*2/dims.length+t*.15;const x=cx+Math.cos(a)*R,y=cy+Math.sin(a)*R;ctx.beginPath();ctx.strokeStyle=d===active?'rgba(56,241,231,.85)':'rgba(194,94,255,.46)';ctx.lineWidth=d===active?2:1;ctx.moveTo(cx,cy);ctx.lineTo(x,y);ctx.stroke();ctx.beginPath();ctx.fillStyle=d===active?'#3cf0e7':'#b749f2';ctx.shadowColor=ctx.fillStyle;ctx.shadowBlur=18;ctx.arc(x,y,d===active?8:6,0,Math.PI*2);ctx.fill();ctx.shadowBlur=0;ctx.fillStyle='rgba(232,219,244,.75)';ctx.font='11px system-ui';ctx.fillText(d,x+11,y+3)});ctx.beginPath();ctx.fillStyle='#b84cf4';ctx.shadowColor='#e268ff';ctx.shadowBlur=28;ctx.arc(cx,cy,16+Math.sin(t*3)*2,0,Math.PI*2);ctx.fill();ctx.shadowBlur=0;worldAnimation=requestAnimationFrame(render)};render();
-}
-
-window.addEventListener('resize', () => { if (activeSurface === 'world') loadWorld(); });
+$('#realm-body').addEventListener('click', () => { $('#realm-morph').src = '/morph/offline-reskin-demo.html'; });
+$('#realm-photo').addEventListener('click', () => { $('#realm-morph').src = '/morph/studio.html'; });
+document.querySelectorAll('[data-realm-action]').forEach(button => button.addEventListener('click', () => realmAction(button.dataset.realmAction)));
+setInterval(() => { if (activeSurface === 'world' && !document.hidden) loadWorld(); }, 5000);
 
 await loadStatus();
 await loadTasks();

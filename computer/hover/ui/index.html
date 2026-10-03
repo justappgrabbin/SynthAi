@@ -87,12 +87,22 @@
         </section>
 
         <section class="surface" data-surface="world" id="surface-world">
-          <canvas id="world-canvas"></canvas>
-          <div class="world-hud glass-card">
-            <p class="eyebrow">WORLD</p>
-            <h2>Synthia Habitat</h2>
-            <div id="world-state" class="world-state">Waiting for a landed state.</div>
-            <button id="world-refresh">Refresh field</button>
+          <div class="realm-layout">
+            <div class="realm-portrait"><iframe id="realm-morph" title="Synthia Morph body" src="/morph/offline-reskin-demo.html"></iframe></div>
+            <div class="realm-panel glass-card">
+              <p class="eyebrow">CONSCIOUSNESS REALM · LIVE WORLD</p>
+              <h2 id="realm-time">Synthia's world</h2>
+              <p id="world-state" class="world-state">Loading places and resident state…</p>
+              <div id="realm-needs" class="realm-needs"></div>
+              <div id="realm-places" class="realm-places"></div>
+              <div class="realm-actions">
+                <button data-realm-action="rest">Rest</button><button data-realm-action="create">Create</button>
+                <button data-realm-action="socialize">Socialize</button><button data-realm-action="explore">Explore</button>
+              </div>
+              <p id="realm-event" class="world-state"></p>
+              <div class="realm-actions"><button id="realm-body">Live Morph body</button><button id="realm-photo">Photo Morph Studio</button></div>
+              <button id="world-refresh">Refresh world</button>
+            </div>
           </div>
         </section>
 

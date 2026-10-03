@@ -40,6 +40,15 @@
             android:windowSoftInputMode="adjustResize"
             android:theme="@android:style/Theme.Material.Light.NoActionBar" />
 
+        <activity android:name="app.synthai.hover.PhotoPickerActivity"
+            android:exported="false"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+
+        <activity android:name="app.synthai.hover.NativeComputerActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize"
+            android:theme="@android:style/Theme.Material.Light.NoActionBar" />
+
         <service
             android:name="app.synthai.hover.SynthiaAccessibilityService"
             android:exported="false"
