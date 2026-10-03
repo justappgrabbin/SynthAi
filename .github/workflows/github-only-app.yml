@@ -291,7 +291,7 @@ jobs:
           "$ANDROID_SDK_ROOT/build-tools/35.0.0/aapt2" dump badging "$APK" > /tmp/modern-badging.txt
           sed -n '1,14p' /tmp/modern-badging.txt
           grep -q "package: name='app.synthai.hover.modern'" /tmp/modern-badging.txt
-          grep -q "sdkVersion:'26'" /tmp/modern-badging.txt
+          grep -q "minSdkVersion:'26'" /tmp/modern-badging.txt
           grep -q "launchable-activity: name='app.synthai.hover.MainActivity'" /tmp/modern-badging.txt
 
       - name: Enable KVM for Android emulator
