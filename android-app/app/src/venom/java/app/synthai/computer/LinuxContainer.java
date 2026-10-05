@@ -125,6 +125,7 @@ final class LinuxContainer {
         // Embedded Synthia Server: Node lite on 17381 + Python on 17382, loopback only.
         // Auth is the same per-install session secret as the Computer backend.
         env.put("SYNTHIA_EMBEDDED", "1");
+        env.put("RESONANCE_EMBEDDED", "1");
         env.put("HOST", "127.0.0.1");
         env.put("SYNTHIA_NODE_PORT", "17381");
         env.put("SYNTHIA_PY_PORT", "17382");

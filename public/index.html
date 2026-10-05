@@ -10,7 +10,7 @@
   <title>SynthAI Computer</title>
   <link rel="stylesheet" href="/computer.css">
 </head>
-<body>
+<body class="phone-os">
   <div class="computer">
     <aside class="rail">
       <div class="brand">
@@ -19,6 +19,8 @@
       </div>
       <nav id="nav">
         <button class="nav active" data-view="home">⌂ <span>Home</span></button>
+        <button class="nav" data-view="world">◎ <span>World</span></button>
+        <button class="nav" data-view="resonance">⌁ <span>Network</span></button>
         <button class="nav" data-view="build">✦ <span>Build</span></button>
         <button class="nav" data-view="files">▤ <span>Files</span></button>
         <button class="nav" data-view="github">⌁ <span>GitHub</span></button>
@@ -32,7 +34,7 @@
       <header class="topbar">
         <div>
           <small class="eyebrow">PRIMARY OPERATING SURFACE</small>
-          <h1 id="viewTitle">Computer Home</h1>
+          <h1 id="viewTitle">Venom</h1>
         </div>
         <div class="statusline">
           <span class="dot" id="bootDot"></span>
@@ -41,6 +43,18 @@
       </header>
 
       <section class="view active" id="home">
+        <div class="phone-clock"><time id="phoneClock"></time><p id="phoneDate"></p></div>
+        <div class="phone-launcher" aria-label="Applications">
+          <button data-go="world"><b>◎</b><span>Consciousness Realm</span></button>
+          <button data-go="resonance"><b>⌁</b><span>Resonance Network</span></button>
+          <button data-go="build"><b>✦</b><span>Build</span></button>
+          <button data-go="files"><b>▤</b><span>Files</span></button>
+          <button data-go="github"><b>⌘</b><span>GitHub</span></button>
+          <button data-go="systems"><b>◫</b><span>Systems</span></button>
+          <button data-go="activity"><b>↯</b><span>Activity</span></button>
+        </div>
+        <p id="phoneNetworkStatus" role="status">Starting on-device services…</p>
+        <details class="phone-runtime"><summary>Computer status</summary>
         <div class="hero">
           <div>
             <span class="pill">SynthAI Computer</span>
@@ -79,8 +93,34 @@
           </div>
           <pre id="phoneReport">No phone check recorded yet.</pre>
         </article>
+        </details>
       </section>
 
+      <section class="view" id="world">
+        <p id="realmStatus" role="status">Starting Consciousness Realm…</p>
+        <iframe id="realmApp" title="Consciousness Realm" src="/realm/index.html" allow="autoplay"></iframe>
+        <details class="phone-runtime"><summary>World and avatar</summary>
+          <label>Enter world<select id="worldSelect"></select></label>
+          <div class="row"><button id="hostWorld" class="quiet">Host my world</button><button id="leaveWorld" class="quiet">Leave shared world</button></div>
+          <label>World invitation<input id="worldInvite" type="text" placeholder="Paste a world invitation"></label>
+          <div class="row"><button id="joinWorld" class="quiet">Join world</button><button id="copyWorldInvite" class="quiet">Copy my invitation</button></div>
+          <p id="roomStatus" class="muted">Your local world</p>
+          <label>My world theme<select id="worldTheme"><option value="cosmic">Cosmic silk</option><option value="aurora">Aurora</option><option value="garden">Living garden</option><option value="noir">Neon midnight</option></select></label>
+          <label>My world color<input id="worldColor" type="color" value="#0a0a0f"></label>
+          <label>Avatar photo<input id="avatarPhoto" type="file" accept="image/png,image/jpeg,image/webp"></label>
+          <label>Interaction sprite sheet<input id="avatarSheet" type="file" accept="image/png,image/jpeg,image/webp"></label>
+          <label>Frames across sheet<input id="avatarFrames" type="number" min="1" max="64" value="1"></label>
+          <button id="saveWorld" class="primary">Save my world</button>
+          <button id="downloadAvatar" class="quiet">Download my 12-state sprite sheet</button>
+          <p class="muted">Your photo creates a themed avatar with 12 core poses. Object interactions add temporary morph states. You can also import an authored sprite sheet.</p>
+          <label>Swarm expression<select id="swarmEncoding"><option value="binary">Binary</option><option value="ascii">ASCII</option><option value="nato">NATO</option><option value="transliteration">Transliteration</option><option value="unicode">Unicode</option></select></label>
+          <details><summary>Inspect expression</summary><pre id="expressionInspector">Load your Resonance profile to inspect its expressions.</pre><button id="hearAddress" class="quiet">Read the address aloud</button><button id="playAddress" class="quiet">Hear its sound expression</button></details>
+        </details>
+      </section>
+      <section class="view" id="resonance">
+        <p id="resonanceStatus" role="status">Starting Resonance Network…</p>
+        <iframe id="resonanceApp" title="Resonance Network" allow="clipboard-write"></iframe>
+      </section>
       <section class="view" id="build">
         <div class="builder-grid">
           <article class="panel project-panel">

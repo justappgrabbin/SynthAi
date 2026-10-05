@@ -5,6 +5,7 @@ on:
     branches:
       - integration/github-only-app-20260923
       - 'hover/**'
+      - 'fix/venom-hover-runtime-*'
   pull_request:
     branches:
       - main
@@ -55,13 +56,24 @@ jobs:
       - name: Verify canonical Computer and local backend
         run: npm test
 
+      - name: Verify the supplied Resonance Network is executable
+        run: |
+          python -m venv /tmp/resonance-test
+          /tmp/resonance-test/bin/pip install -r computer/donors/resonance-network/backend/requirements.txt
+          npm ci --prefix computer/donors/resonance-network/frontend --no-audit --no-fund
+          npm run build --prefix computer/donors/resonance-network/frontend
+          RESONANCE_PYTHON=/tmp/resonance-test/bin/python3 node computer/tests/resonance-live-smoke.mjs
+
       - name: Verify Hover birth entry, task queue and embedded Talk
         run: |
           python -m pip install -r computer/donors/synthia58/extras/Cynthia-Talk-v1-unmodified/requirements.txt
-          node --test --test-concurrency=1 computer/hover/test/09-front-screen.test.mjs computer/hover/test/11-birth-mirror-runtime.test.mjs computer/hover/test/20-hover-task-worker.test.mjs
+          node --test --test-concurrency=1 computer/hover/test/22-phone-contact.test.mjs computer/hover/test/09-front-screen.test.mjs computer/hover/test/11-birth-mirror-runtime.test.mjs computer/hover/test/20-hover-task-worker.test.mjs
           npm install --prefix /tmp/hover-ui-test playwright@1.58.2
           /tmp/hover-ui-test/node_modules/.bin/playwright install --with-deps chromium
           node .github/scripts/hover-ui-smoke.mjs
+
+      - name: Build the actual Consciousness Realm phone renderer
+        run: npm run build:realm
 
       - name: Copy the verified browser surface into Android assets
         run: |

@@ -1,0 +1,10 @@
+{
+  "driveFileId": "1cEjQ3y-i-iVe6ajG4hCaS1TQ0cxZSZVX",
+  "archiveSha256": "f344c177ad04eb46b489c2e0bcb4ea890110a13b6766e367425108b8f04f831f",
+  "source": "ConsciousnessRealm (1).zip",
+  "excludes": [
+    "attached_assets/ninebody-sandbox archive (not imported by application)",
+    "development metadata",
+    "build output"
+  ]
+}

@@ -1,0 +1,717 @@
+<div style="font-family: 'Courier New', monospace; background: #0a0a0f; color: #e0e0e0; min-height: 100vh; padding: 20px;">
+  <style>
+    .hd-morph-container { max-width: 1400px; margin: 0 auto; }
+    .hd-header { text-align: center; margin-bottom: 30px; border-bottom: 1px solid #333; padding-bottom: 20px; }
+    .hd-header h1 { color: #00ffcc; text-shadow: 0 0 20px rgba(0,255,204,0.3); margin: 0; font-size: 28px; }
+    .hd-header p { color: #888; margin: 10px 0 0; }
+
+    .hd-grid { display: grid; grid-template-columns: 320px 1fr 320px; gap: 20px; }
+    @media (max-width: 1200px) { .hd-grid { grid-template-columns: 1fr; } }
+
+    .hd-panel { background: #111118; border: 1px solid #222; border-radius: 8px; padding: 16px; }
+    .hd-panel h3 { color: #00ffcc; margin: 0 0 16px; font-size: 14px; text-transform: uppercase; letter-spacing: 2px; }
+
+    .hd-input { width: 100%; background: #0a0a0f; border: 1px solid #333; color: #e0e0e0; padding: 8px 12px; margin-bottom: 10px; border-radius: 4px; font-family: inherit; font-size: 13px; box-sizing: border-box; }
+    .hd-input:focus { outline: none; border-color: #00ffcc; }
+    .hd-label { display: block; color: #666; font-size: 11px; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 1px; }
+
+    .hd-btn { background: linear-gradient(135deg, #00ffcc, #0088aa); border: none; color: #000; padding: 10px 24px; border-radius: 4px; font-weight: bold; cursor: pointer; width: 100%; font-family: inherit; text-transform: uppercase; letter-spacing: 1px; margin-top: 10px; }
+    .hd-btn:hover { filter: brightness(1.2); }
+
+    .hd-canvas-container { position: relative; background: #080810; border-radius: 8px; overflow: hidden; min-height: 400px; display: flex; align-items: center; justify-content: center; }
+    .hd-canvas { max-width: 100%; max-height: 500px; }
+
+    .hd-spec { font-size: 12px; line-height: 1.6; }
+    .hd-spec-item { margin-bottom: 12px; padding: 8px; background: #0a0a0f; border-left: 2px solid #00ffcc; }
+    .hd-spec-label { color: #00ffcc; font-weight: bold; display: inline-block; width: 100px; }
+    .hd-implant { display: inline-block; padding: 2px 8px; margin: 2px; background: #1a1a2e; border: 1px solid #333; border-radius: 3px; font-size: 11px; }
+    .hd-zone-defined { color: #00ffcc; }
+    .hd-zone-open { color: #ff6b6b; }
+
+    .hd-gate-grid { display: grid; grid-template-columns: repeat(8, 1fr); gap: 3px; margin-top: 10px; }
+    .hd-gate { padding: 4px; text-align: center; font-size: 10px; border-radius: 3px; background: #1a1a2e; border: 1px solid #333; color: #666; cursor: pointer; transition: all 0.2s; }
+    .hd-gate.active { background: #00ffcc22; border-color: #00ffcc; color: #00ffcc; }
+    .hd-gate:hover { border-color: #666; }
+
+    .hd-palette { display: flex; gap: 8px; margin-top: 8px; }
+    .hd-color-swatch { width: 40px; height: 40px; border-radius: 4px; border: 2px solid #333; }
+
+    .hd-upload { border: 2px dashed #333; padding: 30px; text-align: center; border-radius: 8px; cursor: pointer; transition: all 0.2s; margin-bottom: 16px; }
+    .hd-upload:hover { border-color: #00ffcc; background: #00ffcc08; }
+    .hd-upload input { display: none; }
+
+    .hd-narrative { font-style: italic; color: #aaa; padding: 12px; background: #0a0a0f; border-radius: 4px; margin-top: 12px; line-height: 1.8; }
+
+    .hd-tabs { display: flex; gap: 4px; margin-bottom: 12px; }
+    .hd-tab { padding: 6px 12px; background: #1a1a2e; border: 1px solid #333; border-radius: 4px; cursor: pointer; font-size: 11px; color: #888; }
+    .hd-tab.active { background: #00ffcc22; border-color: #00ffcc; color: #00ffcc; }
+  </style>
+
+  <div class="hd-morph-container">
+    <div class="hd-header">
+      <h1>◈ HDCyberMorphEngine v1.0</h1>
+      <p>Human Design → Cyberpunk Character Morph System | Synthia OS Body Field Extension</p>
+    </div>
+
+    <div class="hd-grid">
+      <!-- LEFT: Controls -->
+      <div class="hd-panel">
+        <h3>◈ Chart Input</h3>
+
+        <div class="hd-upload" id="uploadArea">
+          <input type="file" id="faceInput" accept="image/*">
+          <div style="color: #666; font-size: 12px;">📷 Drop face image or click to upload</div>
+        </div>
+
+        <label class="hd-label">Type</label>
+        <select class="hd-input" id="hdType">
+          <option value="Manifestor">Manifestor</option>
+          <option value="Generator">Generator</option>
+          <option value="ManifestingGenerator">Manifesting Generator</option>
+          <option value="Projector">Projector</option>
+          <option value="Reflector">Reflector</option>
+        </select>
+
+        <label class="hd-label">Profile</label>
+        <select class="hd-input" id="hdProfile">
+          <option value="1_3">1/3 — Investigator/Martyr</option>
+          <option value="1_4" selected>1/4 — Investigator/Influencer</option>
+          <option value="2_4">2/4 — Hermit/Influencer</option>
+          <option value="2_5">2/5 — Hermit/Heretic</option>
+          <option value="3_5">3/5 — Martyr/Heretic</option>
+          <option value="3_6">3/6 — Martyr/Role Model</option>
+          <option value="4_6">4/6 — Influencer/Role Model</option>
+          <option value="4_1">4/1 — Influencer/Investigator</option>
+          <option value="5_1">5/1 — Heretic/Investigator</option>
+          <option value="5_2">5/2 — Heretic/Hermit</option>
+          <option value="6_2">6/2 — Role Model/Hermit</option>
+          <option value="6_3">6/3 — Role Model/Martyr</option>
+        </select>
+
+        <label class="hd-label">Authority</label>
+        <select class="hd-input" id="hdAuthority">
+          <option value="Emotional">Emotional — Solar Plexus</option>
+          <option value="Sacral">Sacral</option>
+          <option value="Splenic">Splenic</option>
+          <option value="Ego">Ego — Heart</option>
+          <option value="SelfProjected">Self-Projected — G Center</option>
+          <option value="Mental">Mental — Ajna/Head</option>
+          <option value="Lunar">Lunar — Reflector</option>
+          <option value="Environmental">Environmental</option>
+        </select>
+
+        <label class="hd-label">Defined Centers (click to toggle)</label>
+        <div id="centerToggles" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; margin-bottom: 12px;">
+          <button class="hd-gate" data-center="Head" onclick="toggleCenter(this)">Head</button>
+          <button class="hd-gate" data-center="Ajna" onclick="toggleCenter(this)">Ajna</button>
+          <button class="hd-gate" data-center="Throat" onclick="toggleCenter(this)">Throat</button>
+          <button class="hd-gate" data-center="G" onclick="toggleCenter(this)">G</button>
+          <button class="hd-gate active" data-center="Heart" onclick="toggleCenter(this)">Heart</button>
+          <button class="hd-gate" data-center="SolarPlexus" onclick="toggleCenter(this)">SP</button>
+          <button class="hd-gate" data-center="Sacral" onclick="toggleCenter(this)">Sacral</button>
+          <button class="hd-gate" data-center="Spleen" onclick="toggleCenter(this)">Spleen</button>
+          <button class="hd-gate active" data-center="Root" onclick="toggleCenter(this)">Root</button>
+        </div>
+
+        <label class="hd-label">Conscious Gates (comma-separated)</label>
+        <input class="hd-input" id="hdGates" type="text" value="6.4, 12.1, 22.3, 36.2, 37.5, 49.6" placeholder="e.g., 6.4, 12.1, 22.3">
+
+        <label class="hd-label">Incarnation Cross</label>
+        <input class="hd-input" id="hdCross" type="text" value="Cross of Eden">
+
+        <button class="hd-btn" onclick="generateMorph()">◈ Generate Morph</button>
+        <button class="hd-btn" style="background: #333; color: #00ffcc; margin-top: 8px;" onclick="loadPreset('manifestor')">Load: Manifestor 1/4</button>
+        <button class="hd-btn" style="background: #333; color: #00ffcc; margin-top: 4px;" onclick="loadPreset('projector')">Load: Projector 5/1</button>
+      </div>
+
+      <!-- CENTER: Canvas -->
+      <div class="hd-panel">
+        <h3>◈ Morph Preview</h3>
+        <div class="hd-canvas-container" id="canvasContainer">
+          <canvas id="morphCanvas" class="hd-canvas" width="500" height="600"></canvas>
+        </div>
+        <div style="margin-top: 12px; display: flex; gap: 8px;">
+          <button class="hd-btn" style="flex: 1; background: #1a1a2e; color: #00ffcc;" onclick="downloadImage()">⬇ Download Image</button>
+          <button class="hd-btn" style="flex: 1; background: #1a1a2e; color: #00ffcc;" onclick="downloadSpec()">⬇ Export Spec</button>
+        </div>
+      </div>
+
+      <!-- RIGHT: Specification -->
+      <div class="hd-panel">
+        <h3>◈ Cyberpunk Spec</h3>
+        <div id="specOutput" class="hd-spec">
+          <div style="color: #666; text-align: center; padding: 40px 0;">Enter chart data and click Generate Morph</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Engine data embedded for standalone operation
+    const TYPE_ARCHETYPE = {
+      Manifestor: { archetype: 'Vanguard', faction: 'Militech / Frontline', threat: 9, frame: 'heavy_plate', desc: 'Initiator-class chassis. Built for shock and awe. Angular, aggressive armor plates. Always first through the breach.' },
+      Generator: { archetype: 'Powerhouse', faction: 'Industrial / Grid', threat: 6, frame: 'reinforced_frame', desc: 'Sustainable output engine. Bulkier frame with visible power conduits. The grid runs because they run.' },
+      ManifestingGenerator: { archetype: 'Hybrid', faction: 'Mercenary / Free Agent', threat: 8, frame: 'adaptive_combat', desc: 'Dual-core system. Can sustain AND initiate. Frame shifts between efficiency and aggression. Unpredictable.' },
+      Projector: { archetype: 'Observer', faction: 'Surveillance / Intelligence', threat: 7, frame: 'light_sensor', desc: 'Recognition array. Minimal armor, maximum sensor coverage. Sees what others cannot. Guides from shadows.' },
+      Reflector: { archetype: 'Mirror', faction: 'Diplomat / Chameleon', threat: 4, frame: 'adaptive_membrane', desc: 'Adaptive skin system. No fixed form. Reflects environment and people in it. Nearly invisible when still.' }
+    };
+
+    const AUTH_PALETTE = {
+      Emotional: { primary: [220,60,40], secondary: [255,140,0], glow: [255,80,60], pulse: 'pulsing' },
+      Sacral: { primary: [0,180,200], secondary: [0,255,180], glow: [0,255,200], pulse: 'steady' },
+      Splenic: { primary: [180,200,220], secondary: [100,150,255], glow: [200,220,255], pulse: 'erratic' },
+      Ego: { primary: [255,215,0], secondary: [200,50,50], glow: [255,200,50], pulse: 'steady' },
+      SelfProjected: { primary: [147,51,255], secondary: [200,100,255], glow: [180,80,255], pulse: 'pulsing' },
+      Mental: { primary: [0,255,150], secondary: [50,200,100], glow: [100,255,150], pulse: 'erratic' },
+      Lunar: { primary: [200,200,220], secondary: [150,150,180], glow: [220,220,255], pulse: 'dormant' },
+      Environmental: { primary: [100,100,100], secondary: [150,150,150], glow: [200,200,200], pulse: 'steady' }
+    };
+
+    const PROFILE_STANCE = {
+      '1_3': { stance: 'Investigator/Martyr', pose: 'crouched_examining', detail: 5 },
+      '1_4': { stance: 'Investigator/Influencer', pose: 'grounded_forward', detail: 4 },
+      '2_4': { stance: 'Hermit/Influencer', pose: 'seated_turned', detail: 3 },
+      '2_5': { stance: 'Hermit/Heretic', pose: 'contemplative_back', detail: 4 },
+      '3_5': { stance: 'Martyr/Heretic', pose: 'dynamic_mid_action', detail: 6 },
+      '3_6': { stance: 'Martyr/RoleModel', pose: 'ascending_transcendent', detail: 6 },
+      '4_6': { stance: 'Influencer/RoleModel', pose: 'mentor_standing', detail: 4 },
+      '4_1': { stance: 'Influencer/Investigator', pose: 'networked_grounded', detail: 4 },
+      '5_1': { stance: 'Heretic/Investigator', pose: 'mysterious_partially_obscured', detail: 5 },
+      '5_2': { stance: 'Heretic/Hermit', pose: 'isolated_beacon', detail: 3 },
+      '6_2': { stance: 'RoleModel/Hermit', pose: 'transcendent_seated', detail: 2 },
+      '6_3': { stance: 'RoleModel/Martyr', pose: 'wounded_rising', detail: 6 }
+    };
+
+    const GATE_MAP = {
+      1: { name: 'Creative', loc: 'crown', type: 'neural_array' },
+      2: { name: 'Keeper of Keys', loc: 'temple', type: 'data_vault' },
+      3: { name: 'Ordering', loc: 'forehead', type: 'chaos_dampener' },
+      4: { name: 'Formulization', loc: 'brow', type: 'logic_processor' },
+      5: { name: 'Patterns', loc: 'temple', type: 'rhythm_sync' },
+      6: { name: 'Friction', loc: 'jaw', type: 'conflict_sensor' },
+      7: { name: 'Role of Self', loc: 'third_eye', type: 'direction_compass' },
+      8: { name: 'Contribution', loc: 'throat', type: 'expression_beam' },
+      9: { name: 'Focus', loc: 'eyes', type: 'concentration_lens' },
+      10: { name: 'Behavior', loc: 'heart_space', type: 'behavioral_matrix' },
+      11: { name: 'Ideas', loc: 'crown', type: 'idea_generator' },
+      12: { name: 'Caution', loc: 'throat', type: 'hesitation_brake' },
+      13: { name: 'Listener', loc: 'ears', type: 'audio_array' },
+      14: { name: 'Power Skills', loc: 'sacrum', type: 'resource_converter' },
+      15: { name: 'Extremes', loc: 'lymphatic', type: 'range_extender' },
+      16: { name: 'Skills', loc: 'hands', type: 'talent_matrix' },
+      17: { name: 'Opinions', loc: 'ajna', type: 'opinion_projector' },
+      18: { name: 'Correction', loc: 'spleen', type: 'fault_detector' },
+      19: { name: 'Wanting', loc: 'heart', type: 'need_sensor' },
+      20: { name: 'Now', loc: 'throat', type: 'present_moment' },
+      21: { name: 'Hunter', loc: 'hands', type: 'control_grip' },
+      22: { name: 'Grace', loc: 'solar_plexus', type: 'social_grace' },
+      23: { name: 'Assimilation', loc: 'throat', type: 'knowledge_integrator' },
+      24: { name: 'Rationalization', loc: 'head', type: 'thought_loop' },
+      25: { name: 'Innocence', loc: 'g_center', type: 'purity_filter' },
+      26: { name: 'Trickster', loc: 'heart', type: 'deception_array' },
+      27: { name: 'Nurturing', loc: 'sacral', type: 'care_distributor' },
+      28: { name: 'Struggle', loc: 'spleen', type: 'struggle_engine' },
+      29: { name: 'Perseverance', loc: 'sacral', type: 'commitment_lock' },
+      30: { name: 'Feelings', loc: 'solar_plexus', type: 'desire_furnace' },
+      31: { name: 'Influence', loc: 'throat', type: 'leadership_beacon' },
+      32: { name: 'Continuity', loc: 'root', type: 'endurance_core' },
+      33: { name: 'Privacy', loc: 'throat', type: 'stealth_mode' },
+      34: { name: 'Power', loc: 'sacral', type: 'raw_power_cell' },
+      35: { name: 'Change', loc: 'throat', type: 'experience_collector' },
+      36: { name: 'Crisis', loc: 'solar_plexus', type: 'crisis_navigator' },
+      37: { name: 'Friendship', loc: 'solar_plexus', type: 'bond_weaver' },
+      38: { name: 'Fighter', loc: 'root', type: 'combat_stim' },
+      39: { name: 'Provocation', loc: 'root', type: 'provocation_field' },
+      40: { name: 'Aloneness', loc: 'heart', type: 'isolation_chamber' },
+      41: { name: 'Contraction', loc: 'root', type: 'dream_seed' },
+      42: { name: 'Growth', loc: 'sacral', type: 'maturation_cycle' },
+      43: { name: 'Insight', loc: 'ajna', type: 'breakthrough_array' },
+      44: { name: 'Alertness', loc: 'spleen', type: 'pattern_recognizer' },
+      45: { name: 'Gatherer', loc: 'throat', type: 'resource_controller' },
+      46: { name: 'Determination', loc: 'g_center', type: 'body_lock' },
+      47: { name: 'Realization', loc: 'ajna', type: 'insight_compressor' },
+      48: { name: 'Depth', loc: 'spleen', type: 'depth_probe' },
+      49: { name: 'Revolution', loc: 'solar_plexus', type: 'rejection_field' },
+      50: { name: 'Values', loc: 'spleen', type: 'value_calibrator' },
+      51: { name: 'Shock', loc: 'heart', type: 'shock_inductor' },
+      52: { name: 'Stillness', loc: 'root', type: 'inertia_anchor' },
+      53: { name: 'Beginnings', loc: 'root', type: 'startup_sequence' },
+      54: { name: 'Ambition', loc: 'root', type: 'drive_turbine' },
+      55: { name: 'Spirit', loc: 'solar_plexus', type: 'mood_synth' },
+      56: { name: 'Stimulation', loc: 'throat', type: 'story_projector' },
+      57: { name: 'Intuitive', loc: 'spleen', type: 'instinct_port' },
+      58: { name: 'Vitality', loc: 'root', type: 'joy_reactor' },
+      59: { name: 'Sexuality', loc: 'sacral', type: 'attraction_field' },
+      60: { name: 'Limitation', loc: 'root', type: 'mutation_trigger' },
+      61: { name: 'Mystery', loc: 'head', type: 'truth_seeker' },
+      62: { name: 'Details', loc: 'throat', type: 'detail_scanner' },
+      63: { name: 'Doubt', loc: 'head', type: 'doubt_processor' },
+      64: { name: 'Confusion', loc: 'head', type: 'confusion_transmuter' }
+    };
+
+    const CIRCUIT_COLOR = {
+      Individual: [147,51,255], Tribal: [255,140,0], Collective: [0,180,200], Integration: [255,215,0]
+    };
+
+    const GATE_CIRCUIT = {
+      1:'Individual',2:'Collective',3:'Individual',4:'Collective',5:'Collective',6:'Tribal',7:'Collective',8:'Individual',9:'Collective',10:'Integration',
+      11:'Collective',12:'Individual',13:'Tribal',14:'Integration',15:'Collective',16:'Tribal',17:'Collective',18:'Tribal',19:'Tribal',20:'Integration',
+      21:'Tribal',22:'Individual',23:'Individual',24:'Individual',25:'Integration',26:'Tribal',27:'Tribal',28:'Individual',29:'Tribal',30:'Individual',
+      31:'Collective',32:'Tribal',33:'Individual',34:'Integration',35:'Individual',36:'Individual',37:'Tribal',38:'Individual',39:'Individual',40:'Tribal',
+      41:'Individual',42:'Collective',43:'Individual',44:'Tribal',45:'Tribal',46:'Integration',47:'Individual',48:'Collective',49:'Tribal',50:'Tribal',
+      51:'Individual',52:'Collective',53:'Collective',54:'Tribal',55:'Individual',56:'Individual',57:'Individual',58:'Collective',59:'Tribal',60:'Individual',
+      61:'Individual',62:'Collective',63:'Collective',64:'Individual'
+    };
+
+    const CENTER_POS = {
+      Head: [0.5, 0.05], Ajna: [0.5, 0.15], Throat: [0.5, 0.35], G: [0.5, 0.5],
+      Heart: [0.35, 0.45], SolarPlexus: [0.5, 0.6], Sacral: [0.5, 0.75], Spleen: [0.25, 0.55], Root: [0.5, 0.9]
+    };
+
+    const AUTH_CENTER = {
+      Emotional: 'SolarPlexus', Sacral: 'Sacral', Splenic: 'Spleen', Ego: 'Heart',
+      SelfProjected: 'G', Mental: 'Ajna', Lunar: 'Head', Environmental: 'Throat'
+    };
+
+    const LOC_POS = {
+      crown: [0.5, 0.02], temple: [0.3, 0.15], forehead: [0.5, 0.12], brow: [0.5, 0.18],
+      'third_eye': [0.5, 0.16], throat: [0.5, 0.35], jaw: [0.5, 0.4], neck: [0.5, 0.45],
+      eyes: [0.5, 0.2], ears: [0.2, 0.2], heart_space: [0.5, 0.5], sternum: [0.5, 0.5],
+      cardiac: [0.4, 0.48], 'solar_plexus': [0.5, 0.6], 'upper_abdomen': [0.5, 0.58],
+      sacrum: [0.5, 0.8], hips: [0.35, 0.75], 'lower_abdomen': [0.5, 0.7],
+      spleen_area: [0.3, 0.55], lymphatic: [0.25, 0.5], 'root_base': [0.5, 0.95],
+      hands: [0.8, 0.7], g_center: [0.5, 0.5], ajna: [0.5, 0.15], head: [0.5, 0.05],
+      heart: [0.35, 0.45], spleen: [0.25, 0.55], root: [0.5, 0.9], solar_plexus: [0.5, 0.6], sacral: [0.5, 0.75]
+    };
+
+    let currentImage = null;
+    let currentSpec = null;
+
+    // File upload
+    document.getElementById('uploadArea').addEventListener('click', () => document.getElementById('faceInput').click());
+    document.getElementById('faceInput').addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const img = new Image();
+      img.onload = () => {
+        currentImage = img;
+        const canvas = document.getElementById('morphCanvas');
+        canvas.width = img.width;
+        canvas.height = img.height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0);
+      };
+      img.src = URL.createObjectURL(file);
+    });
+
+    function toggleCenter(btn) {
+      btn.classList.toggle('active');
+    }
+
+    function getDefinedCenters() {
+      return Array.from(document.querySelectorAll('#centerToggles .active')).map(b => b.dataset.center);
+    }
+
+    function parseGates(input) {
+      if (!input.trim()) return [];
+      return input.split(',').map(s => {
+        const [num, line] = s.trim().split('.');
+        return { number: parseInt(num), line: parseInt(line) || 1 };
+      }).filter(g => g.number >= 1 && g.number <= 64);
+    }
+
+    function getLineExpr(line) {
+      const expr = ['Investigation/Foundation','Projection/Calling','Trial & Error/Adaptation','Externalization/Influence','Universalization/Heresy','Role Model/Transcendence'];
+      return expr[line-1] || 'Unknown';
+    }
+
+    function generateMorph() {
+      const type = document.getElementById('hdType').value;
+      const profile = document.getElementById('hdProfile').value;
+      const authority = document.getElementById('hdAuthority').value;
+      const defined = getDefinedCenters();
+      const allCenters = ['Head','Ajna','Throat','G','Heart','SolarPlexus','Sacral','Spleen','Root'];
+      const undefined = allCenters.filter(c => !defined.includes(c));
+      const gates = parseGates(document.getElementById('hdGates').value);
+      const cross = document.getElementById('hdCross').value;
+
+      const typeData = TYPE_ARCHETYPE[type];
+      const authData = AUTH_PALETTE[authority];
+      const profData = PROFILE_STANCE[profile] || PROFILE_STANCE['1_4'];
+
+      // Build spec
+      const spec = {
+        type, profile, authority, defined, undefined, gates, cross,
+        archetype: typeData.archetype,
+        faction: typeData.faction,
+        threat: typeData.threat,
+        frame: typeData.frame,
+        stance: profData.stance,
+        pose: profData.pose,
+        detail: profData.detail,
+        primary: authData.primary,
+        secondary: authData.secondary,
+        glow: authData.glow,
+        pulse: authData.pulse
+      };
+      currentSpec = spec;
+
+      // Render
+      renderCanvas(spec);
+      renderSpec(spec);
+    }
+
+    function renderCanvas(spec) {
+      const canvas = document.getElementById('morphCanvas');
+      const ctx = canvas.getContext('2d');
+      const w = canvas.width || 500;
+      const h = canvas.height || 600;
+
+      // If no image, create a face silhouette
+      if (!currentImage) {
+        ctx.fillStyle = '#0a0a0f';
+        ctx.fillRect(0, 0, w, h);
+        // Draw face outline
+        ctx.strokeStyle = '#333';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.ellipse(w/2, h/2, w*0.25, h*0.35, 0, 0, Math.PI*2);
+        ctx.stroke();
+        // Eyes
+        ctx.beginPath();
+        ctx.ellipse(w/2 - w*0.08, h/2 - h*0.05, w*0.04, h*0.03, 0, 0, Math.PI*2);
+        ctx.ellipse(w/2 + w*0.08, h/2 - h*0.05, w*0.04, h*0.03, 0, 0, Math.PI*2);
+        ctx.stroke();
+      } else {
+        ctx.drawImage(currentImage, 0, 0, w, h);
+      }
+
+      // Apply overlays
+      const [pr, pg, pb] = spec.primary;
+      const [gr, gg, gb] = spec.glow;
+
+      // Authority glow
+      const authC = AUTH_CENTER[spec.authority];
+      const [ax, ay] = CENTER_POS[authC] || [0.5, 0.5];
+      drawGlow(ctx, ax*w, ay*h, w*0.15, [gr, gg, gb], 0.7);
+
+      // Defined centers
+      for (const center of spec.defined) {
+        const [cx, cy] = CENTER_POS[center] || [0.5, 0.5];
+        const cov = center === 'Sacral' ? 0.9 : center === 'Heart' ? 0.7 : 0.5;
+        drawImplant(ctx, cx*w, cy*h, w*0.08*cov, [pr, pg, pb], 0.8, center);
+      }
+
+      // Open centers (wiring)
+      for (const center of spec.undefined) {
+        const [cx, cy] = CENTER_POS[center] || [0.5, 0.5];
+        drawWiring(ctx, cx*w, cy*h, w*0.06, [80, 80, 80], 0.4);
+      }
+
+      // Gate implants
+      for (const gate of spec.gates) {
+        const gData = GATE_MAP[gate.number];
+        if (!gData) continue;
+        const circuit = GATE_CIRCUIT[gate.number] || 'Individual';
+        const color = CIRCUIT_COLOR[circuit];
+        const [gx, gy] = LOC_POS[gData.loc] || [0.5, 0.5];
+        const intensity = gate.line / 6;
+        drawGateImplant(ctx, gx*w, gy*h, w*0.04, color, intensity, gate.number, gData.name);
+      }
+
+      // Eye modification
+      const eyeColors = {
+        Manifestor: [255,80,60], Generator: [0,255,200], ManifestingGenerator: [255,200,0],
+        Projector: [180,80,255], Reflector: [200,200,220]
+      };
+      const eyeColor = eyeColors[spec.type] || [255,255,255];
+      drawEye(ctx, w/2 - w*0.12, h/2 - h*0.08, w*0.06, eyeColor, 0.9);
+      drawEye(ctx, w/2 + w*0.12, h/2 - h*0.08, w*0.06, eyeColor, 0.9);
+
+      // Type-specific frame overlay
+      drawFrameOverlay(ctx, spec, w, h);
+
+      // Color grade
+      ctx.save();
+      ctx.globalCompositeOperation = 'overlay';
+      ctx.globalAlpha = 0.12;
+      ctx.fillStyle = `rgb(${pr},${pg},${pb})`;
+      ctx.fillRect(0, 0, w, h);
+      ctx.restore();
+
+      // Vignette
+      const vig = ctx.createRadialGradient(w/2, h/2, w*0.25, w/2, h/2, w*0.7);
+      vig.addColorStop(0, 'rgba(0,0,0,0)');
+      vig.addColorStop(1, 'rgba(0,0,0,0.5)');
+      ctx.fillStyle = vig;
+      ctx.fillRect(0, 0, w, h);
+    }
+
+    function drawGlow(ctx, x, y, r, color, intensity) {
+      ctx.save();
+      ctx.globalAlpha = intensity * 0.5;
+      const g = ctx.createRadialGradient(x, y, 0, x, y, r);
+      g.addColorStop(0, `rgba(${color[0]},${color[1]},${color[2]},0.8)`);
+      g.addColorStop(0.5, `rgba(${color[0]},${color[1]},${color[2]},0.2)`);
+      g.addColorStop(1, `rgba(${color[0]},${color[1]},${color[2]},0)`);
+      ctx.fillStyle = g;
+      ctx.beginPath();
+      ctx.arc(x, y, r, 0, Math.PI*2);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    function drawImplant(ctx, x, y, r, color, intensity, label) {
+      ctx.save();
+      ctx.globalAlpha = intensity * 0.6;
+      // Core
+      ctx.fillStyle = `rgba(${color[0]},${color[1]},${color[2]},0.7)`;
+      ctx.beginPath();
+      ctx.arc(x, y, r*0.3, 0, Math.PI*2);
+      ctx.fill();
+      // Ring
+      ctx.strokeStyle = `rgba(${color[0]},${color[1]},${color[2]},0.9)`;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(x, y, r*0.5, 0, Math.PI*2);
+      ctx.stroke();
+      // Tech marks
+      ctx.strokeStyle = `rgba(${color[0]},${color[1]},${color[2]},0.5)`;
+      ctx.lineWidth = 1;
+      for (let i = 0; i < 4; i++) {
+        const a = (i/4) * Math.PI*2;
+        ctx.beginPath();
+        ctx.moveTo(x + Math.cos(a)*r*0.5, y + Math.sin(a)*r*0.5);
+        ctx.lineTo(x + Math.cos(a)*r*0.8, y + Math.sin(a)*r*0.8);
+        ctx.stroke();
+      }
+      // Label
+      ctx.fillStyle = `rgba(${color[0]},${color[1]},${color[2]},0.9)`;
+      ctx.font = '10px monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText(label, x, y - r - 4);
+      ctx.restore();
+    }
+
+    function drawWiring(ctx, x, y, r, color, intensity) {
+      ctx.save();
+      ctx.globalAlpha = intensity;
+      ctx.strokeStyle = `rgba(${color[0]},${color[1]},${color[2]},0.6)`;
+      ctx.lineWidth = 1;
+      ctx.setLineDash([4, 3]);
+      ctx.beginPath();
+      ctx.arc(x, y, r, 0, Math.PI*2);
+      ctx.stroke();
+      // Exposed wires
+      for (let i = 0; i < 3; i++) {
+        const a = (i/3) * Math.PI*2 + Math.random();
+        ctx.beginPath();
+        ctx.moveTo(x + Math.cos(a)*r, y + Math.sin(a)*r);
+        ctx.lineTo(x + Math.cos(a)*r*1.5, y + Math.sin(a)*r*1.5);
+        ctx.stroke();
+      }
+      ctx.setLineDash([]);
+      ctx.restore();
+    }
+
+    function drawGateImplant(ctx, x, y, r, color, intensity, num, name) {
+      ctx.save();
+      ctx.globalAlpha = intensity * 0.7;
+      // Hex shape
+      ctx.fillStyle = `rgba(${color[0]},${color[1]},${color[2]},0.5)`;
+      ctx.beginPath();
+      for (let i = 0; i < 6; i++) {
+        const a = (i/6) * Math.PI*2 - Math.PI/6;
+        const px = x + Math.cos(a) * r;
+        const py = y + Math.sin(a) * r;
+        if (i === 0) ctx.moveTo(px, py);
+        else ctx.lineTo(px, py);
+      }
+      ctx.closePath();
+      ctx.fill();
+      ctx.strokeStyle = `rgba(${color[0]},${color[1]},${color[2]},0.9)`;
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+      // Gate number
+      ctx.fillStyle = '#fff';
+      ctx.font = 'bold 9px monospace';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(num, x, y);
+      ctx.restore();
+    }
+
+    function drawEye(ctx, x, y, r, color, intensity) {
+      ctx.save();
+      ctx.globalAlpha = intensity;
+      const g = ctx.createRadialGradient(x, y, 0, x, y, r*2);
+      g.addColorStop(0, `rgba(${color[0]},${color[1]},${color[2]},0.9)`);
+      g.addColorStop(0.5, `rgba(${color[0]},${color[1]},${color[2]},0.3)`);
+      g.addColorStop(1, `rgba(${color[0]},${color[1]},${color[2]},0)`);
+      ctx.fillStyle = g;
+      ctx.beginPath();
+      ctx.arc(x, y, r*2, 0, Math.PI*2);
+      ctx.fill();
+      // Iris ring
+      ctx.strokeStyle = `rgba(${color[0]},${color[1]},${color[2]},1)`;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(x, y, r*0.6, 0, Math.PI*2);
+      ctx.stroke();
+      // Mechanical detail
+      ctx.strokeStyle = `rgba(${color[0]},${color[1]},${color[2]},0.5)`;
+      ctx.lineWidth = 1;
+      for (let i = 0; i < 8; i++) {
+        const a = (i/8) * Math.PI*2;
+        ctx.beginPath();
+        ctx.moveTo(x + Math.cos(a)*r*0.3, y + Math.sin(a)*r*0.3);
+        ctx.lineTo(x + Math.cos(a)*r*0.6, y + Math.sin(a)*r*0.6);
+        ctx.stroke();
+      }
+      ctx.restore();
+    }
+
+    function drawFrameOverlay(ctx, spec, w, h) {
+      ctx.save();
+      ctx.globalAlpha = 0.3;
+      const [r,g,b] = spec.primary;
+
+      if (spec.type === 'Manifestor') {
+        // Angular plates
+        ctx.strokeStyle = `rgba(${r},${g},${b},0.6)`;
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(w*0.2, h*0.3);
+        ctx.lineTo(w*0.35, h*0.25);
+        ctx.lineTo(w*0.3, h*0.4);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(w*0.8, h*0.3);
+        ctx.lineTo(w*0.65, h*0.25);
+        ctx.lineTo(w*0.7, h*0.4);
+        ctx.stroke();
+      } else if (spec.type === 'Projector') {
+        // Sensor rings
+        ctx.strokeStyle = `rgba(${r},${g},${b},0.4)`;
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.arc(w/2, h/2, w*0.3, 0, Math.PI*2);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(w/2, h/2, w*0.35, 0, Math.PI*2);
+        ctx.stroke();
+      } else if (spec.type === 'Reflector') {
+        // Mirror segments
+        ctx.fillStyle = `rgba(${r},${g},${b},0.1)`;
+        for (let i = 0; i < 6; i++) {
+          const a1 = (i/6) * Math.PI*2;
+          const a2 = ((i+1)/6) * Math.PI*2;
+          ctx.beginPath();
+          ctx.moveTo(w/2, h/2);
+          ctx.arc(w/2, h/2, w*0.4, a1, a2);
+          ctx.closePath();
+          ctx.fill();
+        }
+      }
+      ctx.restore();
+    }
+
+    function renderSpec(spec) {
+      const out = document.getElementById('specOutput');
+      const authData = AUTH_PALETTE[spec.authority];
+
+      let html = '';
+
+      html += `<div class="hd-spec-item">
+        <span class="hd-spec-label">ARCHETYPE</span> ${spec.archetype}<br>
+        <span class="hd-spec-label">FACTION</span> ${spec.faction}<br>
+        <span class="hd-spec-label">THREAT</span> ${'█'.repeat(spec.threat)}${'░'.repeat(10-spec.threat)} ${spec.threat}/10
+      </div>`;
+
+      html += `<div class="hd-spec-item">
+        <span class="hd-spec-label">STANCE</span> ${spec.stance}<br>
+        <span class="hd-spec-label">POSE</span> ${spec.pose}<br>
+        <span class="hd-spec-label">DETAIL</span> Level ${spec.detail}/6
+      </div>`;
+
+      html += `<div class="hd-spec-item">
+        <span class="hd-spec-label">PALETTE</span><br>
+        <div class="hd-palette">
+          <div class="hd-color-swatch" style="background: rgb(${spec.primary[0]},${spec.primary[1]},${spec.primary[2]})"></div>
+          <div class="hd-color-swatch" style="background: rgb(${spec.secondary[0]},${spec.secondary[1]},${spec.secondary[2]})"></div>
+          <div class="hd-color-swatch" style="background: rgb(${spec.glow[0]},${spec.glow[1]},${spec.glow[2]}); box-shadow: 0 0 10px rgb(${spec.glow[0]},${spec.glow[1]},${spec.glow[2]})"></div>
+        </div>
+        <span style="color: #666; font-size: 10px;">Primary → Secondary → Authority Glow (${spec.pulse})</span>
+      </div>`;
+
+      html += `<div class="hd-spec-item">
+        <span class="hd-spec-label">DEFINED</span> <span class="hd-zone-defined">${spec.defined.join(', ')}</span><br>
+        <span class="hd-spec-label">OPEN</span> <span class="hd-zone-open">${spec.undefined.join(', ')}</span>
+      </div>`;
+
+      html += `<div class="hd-spec-item">
+        <span class="hd-spec-label">IMPLANTS</span><br>`;
+      for (const g of spec.gates) {
+        const gd = GATE_MAP[g.number];
+        if (gd) {
+          const circuit = GATE_CIRCUIT[g.number] || 'Individual';
+          html += `<span class="hd-implant">G${g.number} ${gd.name} (L${g.line}) [${circuit}]</span>`;
+        }
+      }
+      html += `</div>`;
+
+      html += `<div class="hd-narrative">
+        <strong>${spec.cross}</strong><br>
+        ${TYPE_ARCHETYPE[spec.type].desc}<br><br>
+        Defined systems are cybernetically integrated — stable, always-on. 
+        Open systems remain organic — exposed wiring, receptive, vulnerable to conditioning. 
+        The character's power comes from what is defined. Their wisdom comes from what is open.
+      </div>`;
+
+      out.innerHTML = html;
+    }
+
+    function loadPreset(name) {
+      if (name === 'manifestor') {
+        document.getElementById('hdType').value = 'Manifestor';
+        document.getElementById('hdProfile').value = '1_4';
+        document.getElementById('hdAuthority').value = 'Emotional';
+        document.getElementById('hdGates').value = '6.4, 12.1, 22.3, 36.2, 37.5, 49.6';
+        document.getElementById('hdCross').value = 'Cross of Eden';
+        document.querySelectorAll('#centerToggles .hd-gate').forEach(b => {
+          b.classList.toggle('active', ['Heart','Throat','Head','Ajna','Root'].includes(b.dataset.center));
+        });
+      } else if (name === 'projector') {
+        document.getElementById('hdType').value = 'Projector';
+        document.getElementById('hdProfile').value = '5_1';
+        document.getElementById('hdAuthority').value = 'Splenic';
+        document.getElementById('hdGates').value = '11.5, 17.2, 43.1, 62.4';
+        document.getElementById('hdCross').value = 'Cross of the Sphinx';
+        document.querySelectorAll('#centerToggles .hd-gate').forEach(b => {
+          b.classList.toggle('active', ['Ajna','Throat','G'].includes(b.dataset.center));
+        });
+      }
+      generateMorph();
+    }
+
+    function downloadImage() {
+      const canvas = document.getElementById('morphCanvas');
+      const link = document.createElement('a');
+      link.download = `hd_cyber_morph_${Date.now()}.png`;
+      link.href = canvas.toDataURL();
+      link.click();
+    }
+
+    function downloadSpec() {
+      if (!currentSpec) return;
+      const blob = new Blob([JSON.stringify(currentSpec, null, 2)], {type: 'application/json'});
+      const link = document.createElement('a');
+      link.download = `hd_cyber_spec_${Date.now()}.json`;
+      link.href = URL.createObjectURL(blob);
+      link.click();
+    }
+
+    // Initialize with default
+    loadPreset('manifestor');
+  </script>
+</div>

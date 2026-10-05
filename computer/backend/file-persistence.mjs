@@ -1,5 +1,6 @@
 import { mkdir, readFile, rename, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
+import { randomUUID } from 'node:crypto';
 
 const keyName = key => Buffer.from(String(key)).toString('base64url') + '.json';
 
@@ -25,7 +26,7 @@ export class FilePersistence {
   async save(key, value) {
     await mkdir(this.root, { recursive: true });
     const target = this.pathFor(key);
-    const temp = target + '.tmp-' + process.pid + '-' + Date.now();
+    const temp = target + '.tmp-' + process.pid + '-' + randomUUID();
     await writeFile(temp, JSON.stringify(value), { encoding: 'utf8', mode: 0o600 });
     await rename(temp, target);
     return true;

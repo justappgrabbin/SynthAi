@@ -181,6 +181,8 @@ public final class MainActivity extends Activity {
         public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
             Uri uri = request.getUrl();
             if (APP_HOST.equals(uri.getHost())) return false;
+            if ("http".equals(uri.getScheme()) && "127.0.0.1".equals(uri.getHost())
+                    && uri.getPort() == 17383) return false;
             String scheme = uri.getScheme();
             if ("http".equals(scheme) || "https".equals(scheme)) {
                 try {

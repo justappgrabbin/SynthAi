@@ -327,7 +327,7 @@ export async function startSynthiaFrontScreen({
       }
       if (request.method === 'POST' && url.pathname === '/api/chat') {
         const body = await bodyOf(request);
-        const result = await organism.chat(body.message ?? '', body.context ?? {});
+        const result = await solo.contact(body.message ?? '', body.context ?? {});
         await organism.dnaPerception.flush();
         return reply(response, 200, { ...result, dnaPerception: organism.dnaPerception.latest() });
       }

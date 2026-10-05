@@ -2,3 +2,11 @@ node_modules/
 mobile-web/
 android/
 public/computer-runtime/
+
+__pycache__/
+*.pyc
+computer/donors/resonance-network/frontend/dist/
+computer/donors/resonance-network/backend/*.db
+computer/donors/consciousness-realm/dist/
+public/realm/
+computer/donors/consciousness-realm/.cache/

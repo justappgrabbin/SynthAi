@@ -1,0 +1,22 @@
+{
+  "servers": [
+    {
+      "id": "hotel-remote",
+      "name": "Hotel Business MCP",
+      "transport": "http",
+      "url": "https://hotel.example.com/mcp",
+      "headerEnv": { "Authorization": "HOTEL_MCP_AUTHORIZATION" },
+      "discoveryTools": ["find_opportunities"],
+      "invitationTool": "hotel-remote::receive_opportunity_invitation",
+      "installationTool": "hotel-remote::offer_synthia_install"
+    },
+    {
+      "id": "local-helper",
+      "name": "Local MCP Process",
+      "transport": "stdio",
+      "command": "node",
+      "args": ["/absolute/path/to/local-mcp-server.mjs"],
+      "discoveryTools": ["find_opportunities"]
+    }
+  ]
+}

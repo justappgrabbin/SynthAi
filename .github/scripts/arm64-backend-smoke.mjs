@@ -37,7 +37,7 @@ async function boot() {
   container = await docker('run', '--detach', '--rm', '--platform', 'linux/arm64',
     '--publish', '127.0.0.1:17380:17380', '--volume', `${volume}:/var/lib/synthai`,
     '--env', `SYNTHAI_LOCAL_TOKEN=${token}`, '--env', 'SYNTHAI_LOCAL_HOST=0.0.0.0',
-    '--env', 'SYNTHIA_EMBEDDED=1', '--env', `TERMINAL_TOKEN=${token}`,
+    '--env', 'SYNTHIA_EMBEDDED=1', '--env', 'RESONANCE_EMBEDDED=1', '--env', `TERMINAL_TOKEN=${token}`,
     '--env', 'DATA_DIR=/var/lib/synthai/synthia', '--env', 'CORS_ORIGIN=https://appassets.androidplatform.net',
     image, 'node', '/opt/synthai/computer/backend/local-server.mjs');
 
@@ -115,6 +115,29 @@ try {
   assert.equal(synthiaProbe.github, 503, probe);
   assert.equal(synthiaProbe.githubBody.error, 'github_token_not_configured', probe);
   console.log('ARM64 embedded Synthia Server verified: node /health, python /health, /computer/github/status reachable (no token yet)');
+  let phone;
+  const resonanceDeadline = Date.now() + 120000;
+  do {
+    phone = await rpc('phone.runtime');
+    if (phone.resonance.children['resonance-network']?.state === 'ready') break;
+    await new Promise(resolve => setTimeout(resolve, 1000));
+  } while (Date.now() < resonanceDeadline);
+  assert.equal(phone.resonance.children['resonance-network']?.state, 'ready', JSON.stringify(phone.resonance));
+  const profileProbe = await docker('exec', container, 'node', '-e', [
+    '(async()=>{',
+    "const r=await fetch('http://127.0.0.1:17383/api/profile/create',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:'arm64-phone@example.invalid',display_name:'ARM64 fixture',birth:{date:'1990-01-01',time:'12:00',utc_offset_hours:0,latitude:51.5,longitude:-.1}})});",
+    'if(!r.ok)throw new Error(await r.text());console.log(JSON.stringify(await r.json()));',
+    '})().catch(e=>{console.error(e);process.exit(1)})',
+  ].join(''));
+  const resonanceProfile = JSON.parse(profileProbe.split('\n').pop());
+  const embodied = await rpc('phone.bindProfile', resonanceProfile.user_id);
+  assert.equal(embodied.profile.addresses.length, 26);
+  assert.equal(embodied.swarm.pieces.length, 26);
+  const themed = await rpc('phone.preferences', { theme: 'garden' });
+  assert.equal(themed.world.contract.hostExpression.atmosphere.theme, 'garden');
+  const observed = await rpc('phone.observe', { type: 'interaction', target: 'realm:chair:one', action: 'sit' });
+  assert.equal(observed.accepted, true);
+  console.log('ARM64 Resonance app verified: actual chart, neural identity, address swarm, world theme and persisted interaction');
 } finally {
   if (container) {
     try { await docker('logs', container); } catch { /* Keep original failure. */ }

@@ -1,0 +1,10 @@
+.git
+**/node_modules
+**/__pycache__
+**/.venv
+**/.cache
+public
+android-app/app/src/venom/assets
+android-app/app/src/hover/assets
+computer/donors/resonance-network
+computer/donors/consciousness-realm
