@@ -32,6 +32,7 @@ export class PhoneWorldSession {
     this.pending = Promise.resolve();
     this.room = new RealmRoom();
     this.sharedParticipants = [];
+    this.sharedRelationships = new Set();
   }
 
   async boot() {
@@ -128,6 +129,16 @@ export class PhoneWorldSession {
         const worldId = this.state.get('phone.world')?.worldId;
         const shared = await this.room.sync(this.roomParticipant(), this.worlds.world(worldId));
         this.sharedParticipants = shared.participants;
+        for (const peer of shared.participants.filter(peer => peer.id !== this.state.get('phone.profile')?.id)) {
+          if (!this.sharedRelationships.has(`${shared.roomId}:${peer.id}`)) {
+            const address = peer.addresses[0]?.expression?.address;
+            const neural = address ? await this.connections.call({ operation: 'observe', address, signal: .5 }) : null;
+            await this.mesh.registerParticipant(peer.id, { kind: 'shared-avatar', address, residency: 'active', publicState: { name: peer.name, worldId, addresses: peer.addresses }, metadata: { roomId: shared.roomId } });
+            await this.mesh.connect(this.state.get('phone.profile').id, peer.id, { type: 'shares-world', evidence: { roomId: shared.roomId, neural } });
+            await this.state.set('phone.neural.connections', this.connections.model);
+            this.sharedRelationships.add(`${shared.roomId}:${peer.id}`);
+          }
+        }
         this.roomError = null;
         if (this.room.mode === 'guest') {
           await this.worlds.updateGrammar(worldId, shared.world.grammar);

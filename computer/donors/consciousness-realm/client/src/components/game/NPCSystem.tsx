@@ -54,7 +54,7 @@ function NPC({ npc }: { npc: any }) {
         anchorY="middle"
         billboard
       >
-        Press E to talk
+        Tap Interact nearby
       </Text>
       
       {/* Interaction aura */}

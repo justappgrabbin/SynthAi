@@ -3,7 +3,7 @@ import { randomBytes, randomUUID, timingSafeEqual } from 'node:crypto';
 import { networkInterfaces } from 'node:os';
 
 const token = () => randomBytes(24).toString('base64url');
-const matches = (a, b) => typeof a === 'string' && typeof b === 'string' && a.length === b.length && timingSafeEqual(Buffer.from(a), Buffer.from(b));
+const matches = (a, b) => typeof a === 'string' && typeof b === 'string' && Buffer.byteLength(a) === Buffer.byteLength(b) && timingSafeEqual(Buffer.from(a), Buffer.from(b));
 function actor(record) {
   if (!record?.id || !Array.isArray(record.addresses) || record.addresses.length > 64) throw new Error('Resolved avatar identity required');
   const position = record.position ?? [0, 1, 0];
@@ -29,9 +29,11 @@ export class RealmRoom {
         const credential = String(req.headers.authorization ?? '').replace(/^Bearer /i, '');
         if (req.url === '/join') {
           if (!matches(credential, this.secret)) return respond(401, { error: 'Invalid world invitation' });
+          this.snapshot();
           if (this.peers.size >= 16) return respond(409, { error: 'World is full' });
           const participant = actor(input.participant), id = randomUUID(), key = token();
           if (participant.id === this.owner.id) throw new Error('This avatar already owns the world');
+          if ([...this.peers.values()].some(peer => peer.participant.id === participant.id)) throw new Error('This avatar is already connected');
           this.peers.set(id, { participant, key, seenAt: this.clock() });
           return respond(200, { peerId: id, key, ...this.snapshot() });
         }
@@ -57,7 +59,7 @@ export class RealmRoom {
   }
   status() { return { mode: this.mode, invite: this.mode === 'host' ? this.invite : null, peers: this.mode === 'host' ? this.peers.size : this.last?.participants?.length ?? 0 }; }
   async request(path, credential, body) {
-    const response = await fetch(this.base + path, { method: 'POST', headers: { authorization: `Bearer ${credential}`, 'content-type': 'application/json' }, body: JSON.stringify(body), signal: AbortSignal.timeout(5000) });
+    const response = await fetch(this.base + path, { method: 'POST', headers: { authorization: `Bearer ${credential}`, 'content-type': 'application/json' }, body: JSON.stringify(body), signal: AbortSignal.timeout(2000) });
     const value = await response.json(); if (!response.ok) throw new Error(value.error ?? `Shared world unavailable (${response.status})`); return value;
   }
   async join(invitation, participant) {

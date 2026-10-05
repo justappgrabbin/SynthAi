@@ -19,7 +19,7 @@ export function resolveRealmSwarm(participants = [], tick = 0) {
       const dimension = dimensions[Math.floor(tick / 4) % dimensions.length];
       if (dimension !== 'Movement') node = engine.applyDimension(node, dimension);
       pieces.push({ id: node.id, ownerId: participant.id, position: participant.position ?? [0, 1, 0],
-        address, expression: expressAddress(address), dimension, amplitude: node.amplitude, phase: node.phase });
+        address, expression: expressAddress(address, { encodings: false }), dimension, amplitude: node.amplitude, phase: node.phase });
     }
   }
   // A second Design pass sees all owners, allowing actual cross-owner edges.

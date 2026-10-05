@@ -4,6 +4,7 @@ import { Text, useTexture } from "@react-three/drei";
 import * as THREE from "three";
 import { useConsciousness } from "../../lib/stores/useConsciousness";
 import { useAudio } from "../../lib/stores/useAudio";
+import { usePhone } from '../../phone/PhoneBridge';
 
 interface RitualZoneProps {
   position: [number, number, number];
@@ -39,7 +40,7 @@ export default function RitualZone({ position, fieldId, name }: RitualZoneProps)
     groupRef.current.rotation.y += 0.005;
     
     // Check player proximity (assuming player is at camera focus point)
-    const playerPos = state.camera.position.clone();
+    const playerPos = new THREE.Vector3(...usePhone.getState().position);
     playerPos.y = 0; // Ground level
     const zonePos = new THREE.Vector3(...position);
     const distance = playerPos.distanceTo(zonePos);

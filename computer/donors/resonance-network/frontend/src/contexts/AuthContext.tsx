@@ -33,6 +33,7 @@ export const useAuth = () => {
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [userId, setUserId] = useState<string | null>(null);
+  const [restored, setRestored] = useState(false);
   const [displayName, setDisplayName] = useState<string | null>(null);
   const [profile, setProfile] = useState<ProfileResponse | null>(null);
 
@@ -49,14 +50,15 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         localStorage.removeItem('resonance_profile');
       }
     }
+    setRestored(true);
   }, []);
 
   useEffect(() => {
-    if (window.parent === window || !document.referrer) return;
+    if (!restored || window.parent === window || !document.referrer) return;
     const parentUrl = new URL(document.referrer);
     if (!['appassets.androidplatform.net', '127.0.0.1', 'localhost'].includes(parentUrl.hostname)) return;
     window.parent.postMessage({ type: 'resonance:profile', userId }, parentUrl.origin);
-  }, [userId]);
+  }, [userId, restored]);
 
   const createOrLoadProfile: AuthContextType['createOrLoadProfile'] = async (params) => {
     const response = await apiService.createProfile({

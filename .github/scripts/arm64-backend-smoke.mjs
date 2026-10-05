@@ -12,7 +12,7 @@ const base = 'http://127.0.0.1:17380';
 let container;
 
 async function docker(...args) {
-  const result = await exec('docker', args, { timeout: 20000 });
+  const result = await exec('docker', args, { timeout: 120000 });
   return result.stdout.trim();
 }
 
@@ -140,7 +140,7 @@ try {
   console.log('ARM64 Resonance app verified: actual chart, neural identity, address swarm, world theme and persisted interaction');
 } finally {
   if (container) {
-    try { await docker('logs', container); } catch { /* Keep original failure. */ }
+    try { console.log(await docker('logs', '--tail', '120', container)); } catch { /* Keep original failure. */ }
     try { await stop(); } catch { /* Keep original failure. */ }
   }
   try { await docker('volume', 'rm', volume); } catch { /* CI volume is ephemeral. */ }

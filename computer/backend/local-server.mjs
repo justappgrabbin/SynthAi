@@ -53,6 +53,7 @@ function cors(req, res) {
   if (origin === 'https://appassets.androidplatform.net' || origin === 'http://127.0.0.1' || origin === 'http://localhost') {
     res.setHeader('Access-Control-Allow-Origin', origin);
     res.setHeader('Vary', 'Origin');
+    res.setHeader('Access-Control-Allow-Private-Network', 'true');
   }
   res.setHeader('Access-Control-Allow-Headers', 'Authorization, Content-Type, X-SynthAI-Local-Token');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');

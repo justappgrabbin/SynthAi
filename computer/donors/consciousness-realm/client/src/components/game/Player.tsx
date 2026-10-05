@@ -137,7 +137,6 @@ export default function Player() {
     if (usePhone.getState().motion !== motion) usePhone.getState().setMotion(motion);
     if (state.clock.elapsedTime - lastReport.current >= 2) {
       lastReport.current = state.clock.elapsedTime;
-      usePhone.getState().setPosition(player.position.toArray());
       publishRealmEvent({ type: 'movement', position: player.position.toArray(), motion, field: activeField });
     }
 
@@ -155,6 +154,7 @@ export default function Player() {
       player.position.y = groundLevel;
       velocity.y = 0;
     }
+    usePhone.getState().setPosition(player.position.toArray());
     
     // Update camera to follow player
     const idealCameraPosition = new THREE.Vector3(
