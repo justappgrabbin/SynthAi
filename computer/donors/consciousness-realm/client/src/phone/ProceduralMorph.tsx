@@ -3,16 +3,21 @@ import { useFrame, useThree } from '@react-three/fiber';
 import { Html } from '@react-three/drei';
 import * as THREE from 'three';
 import { usePhone, publishRealmEvent } from './PhoneBridge';
+import { solveMotionMorph, solveWorldMorph } from '@computer/morph-search.mjs';
 
 const spectrum = ['#ff526c', '#ff9b45', '#ffe36b', '#76d9a0', '#72baff', '#8e8bff', '#cf8fff'];
 
 export function MorphBody({ kind, color = '#e8a3df', photo, name, motion = 'idle' }: any) {
   const wings = useRef<THREE.Group>(null);
-  useFrame(({ clock }) => {
+  const previous = useRef([5, 1, .45]);
+  const plan = useMemo(() => solveMotionMorph(motion, previous.current), [motion]);
+  useFrame(({ clock }, delta) => {
+    previous.current = plan.position;
     if (wings.current) {
-      wings.current.rotation.y = Math.sin(clock.elapsedTime * (motion === 'walk' ? 12 : 5)) * .45;
-      const target = motion === 'sit' ? .65 : motion === 'lift' || motion === 'reach' ? 1.2 : 1;
-      wings.current.scale.y = THREE.MathUtils.lerp(wings.current.scale.y, target, .12);
+      const [frequency, height, angle] = plan.position;
+      const blend = 1 - Math.exp(-8 * Math.min(delta, .1));
+      wings.current.rotation.y = THREE.MathUtils.lerp(wings.current.rotation.y, Math.sin(clock.elapsedTime * frequency) * angle, blend);
+      wings.current.scale.y = THREE.MathUtils.lerp(wings.current.scale.y, height, blend);
     }
   });
   return <group name={`host-morph:${kind}`}>
@@ -60,7 +65,9 @@ export function RequestedWorld() {
   const color = contract?.hostExpression?.color ?? '#e8a3df';
   // Address coordinates supply placement/scale. The host grammar supplies the
   // visual form; changing a visitor's original addresses is never necessary.
-  const anchors = (pieces ?? []).slice(0, 8);
+  const layoutKey = JSON.stringify((pieces ?? []).slice(0, 8).map((piece: any) => [piece.id, piece.address.arc, piece.address.gate, piece.address.line]));
+  const layout = useMemo(() => solveWorldMorph(pieces ?? []), [layoutKey, contract?.worldId]);
+  const anchors = layout.anchors;
   useFrame(() => {
     const key = `${contract?.worldId}:${kind}:${form}`;
     if (!kind || !form || lastReceipt.current === key || !gl.info.render.calls) return;
@@ -71,13 +78,12 @@ export function RequestedWorld() {
     });
     if (!structures || !bodies) return;
     lastReceipt.current = key;
-    publishRealmEvent({ type: 'field-change', field: 'morph-rendered', worldId: contract.worldId, structureKind: kind, inhabitantKind: form, structures, bodies });
+    publishRealmEvent({ type: 'field-change', field: 'morph-rendered', worldId: contract.worldId, structureKind: kind, inhabitantKind: form, structures, bodies, optimizer: { algorithms: layout.algorithms, score: layout.score, evaluations: layout.evaluations } });
   });
   return <group name="request-driven-world">
     {anchors.map((piece: any, index: number) => {
-      const angle = (piece.address.arc ?? piece.address.gate * 20250) / 1296000 * Math.PI * 2;
-      const scale = 1.6 + piece.address.line / 6;
-      return <group key={piece.id} position={[Math.cos(angle) * 12, 0, Math.sin(angle) * 12]} rotation={[0, -angle, 0]} name={`structure:${piece.id}:${kind}`}>
+      const { angle, scale, position } = piece;
+      return <group key={piece.id} position={position} rotation={[0, -angle, 0]} name={`structure:${piece.id}:${kind}`}>
         {kind === 'rainbow' ? spectrum.map((band, i) => <mesh key={band} position={[0, .08, 0]}>
           <ringGeometry args={[scale + i * .22, scale + (i + 1) * .22, 36, 1, 0, Math.PI]} />
           <meshStandardMaterial color={band} emissive={band} emissiveIntensity={.25} side={THREE.DoubleSide} />
