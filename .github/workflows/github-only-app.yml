@@ -9,6 +9,7 @@ on:
   pull_request:
     branches:
       - main
+      - integrate/canonical-hover
       - integration/github-only-app-20260923
       - recovery/computer-visible-home-smoke-20260925
     paths:
