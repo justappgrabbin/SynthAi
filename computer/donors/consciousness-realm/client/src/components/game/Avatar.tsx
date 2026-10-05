@@ -1,5 +1,6 @@
 import { usePhone } from "../../phone/PhoneBridge";
 import { AvatarSkin } from "../../phone/AvatarSkin";
+import { MorphBody } from '../../phone/ProceduralMorph';
 import { AddressSwarm } from "../../phone/AddressSwarm";
 import { useRef } from "react";
 import { useFrame } from "@react-three/fiber";
@@ -22,14 +23,17 @@ export default function Avatar() {
   const activeField = getActiveField();
   const hostColor = usePhone((state: any) => state.session?.world?.contract?.hostExpression?.color);
   const skin = usePhone((state: any) => state.session?.avatar);
+  const form = usePhone((state: any) => state.session?.world?.contract?.sceneMorph?.kind);
+  const motion = usePhone((state: any) => state.motion);
+  const requestedBody = form && form !== 'human';
   const avatarColor = hostColor || activeField?.avatarColor || '#888888';
   
   return (
     <group ref={groupRef}>
-      <AvatarSkin />
+      {requestedBody ? <MorphBody kind={form} color={avatarColor} photo={skin?.photo} motion={motion} /> : <AvatarSkin />}
       <AddressSwarm />
       {/* Stylized humanoid avatar */}
-      <group visible={!skin?.photo && !skin?.spriteSheet}>
+      <group visible={!requestedBody && !skin?.photo && !skin?.spriteSheet}>
         {/* Body */}
         <mesh position={[0, 0, 0]} castShadow receiveShadow>
           <capsuleGeometry args={[0.3, 1.2, 4, 8]} />

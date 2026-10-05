@@ -133,11 +133,13 @@ try {
   const embodied = await rpc('phone.bindProfile', resonanceProfile.user_id);
   assert.equal(embodied.profile.addresses.length, 26);
   assert.equal(embodied.swarm.pieces.length, 26);
-  const themed = await rpc('phone.preferences', { theme: 'garden' });
-  assert.equal(themed.world.contract.hostExpression.atmosphere.theme, 'garden');
+  const themed = await rpc('phone.chooseWorld', 'Butterflies and rainbows');
+  assert.equal(themed.world.contract.hostExpression.architecture.kind, 'rainbow');
+  assert.equal(themed.world.contract.sceneMorph.kind, 'butterfly');
+  assert.equal(themed.worldChoice.fields.length, 5);
   const observed = await rpc('phone.observe', { type: 'interaction', target: 'realm:chair:one', action: 'sit' });
   assert.equal(observed.accepted, true);
-  console.log('ARM64 Resonance app verified: actual chart, neural identity, address swarm, world theme and persisted interaction');
+  console.log('ARM64 Resonance app verified: actual chart, neural identity, address swarm, requested world and persisted interaction');
 } finally {
   if (container) {
     try { console.log(await docker('logs', '--tail', '120', container)); } catch { /* Keep original failure. */ }

@@ -105,14 +105,16 @@
           <label>World invitation<input id="worldInvite" type="text" placeholder="Paste a world invitation"></label>
           <div class="row"><button id="joinWorld" class="quiet">Join world</button><button id="copyWorldInvite" class="quiet">Copy my invitation</button></div>
           <p id="roomStatus" class="muted">Your local world</p>
-          <label>My world theme<select id="worldTheme"><option value="cosmic">Cosmic silk</option><option value="aurora">Aurora</option><option value="garden">Living garden</option><option value="noir">Neon midnight</option></select></label>
-          <label>My world color<input id="worldColor" type="color" value="#0a0a0f"></label>
+          <label>Describe your world<textarea id="worldRequest" rows="3" placeholder="Rainbows are structures and butterflies are people"></textarea></label>
+          <p class="muted">Choose once. Your world keeps this choice, and visitors take its forms. In other worlds, you take the host's forms while keeping your identity.</p>
+          <button id="chooseWorld" class="primary">Create my world once</button>
+          <p id="worldChoiceStatus" role="status"></p>
           <label>Avatar photo<input id="avatarPhoto" type="file" accept="image/png,image/jpeg,image/webp"></label>
           <label>Interaction sprite sheet<input id="avatarSheet" type="file" accept="image/png,image/jpeg,image/webp"></label>
           <label>Frames across sheet<input id="avatarFrames" type="number" min="1" max="64" value="1"></label>
-          <button id="saveWorld" class="primary">Save my world</button>
+          <button id="saveWorld" class="primary">Save my photo and animations</button>
           <button id="downloadAvatar" class="quiet">Download my 12-state sprite sheet</button>
-          <p class="muted">Your photo creates a themed avatar with 12 core poses. Object interactions add temporary morph states. You can also import an authored sprite sheet.</p>
+          <p class="muted">Your photo remains your identity. Your chosen world supplies your form; other places supply theirs. Object interactions add temporary states. You can also import an authored sprite sheet for your human form.</p>
           <label>Swarm expression<select id="swarmEncoding"><option value="binary">Binary</option><option value="ascii">ASCII</option><option value="nato">NATO</option><option value="transliteration">Transliteration</option><option value="unicode">Unicode</option></select></label>
           <details><summary>Inspect expression</summary><pre id="expressionInspector">Load your Resonance profile to inspect its expressions.</pre><button id="hearAddress" class="quiet">Read the address aloud</button><button id="playAddress" class="quiet">Hear its sound expression</button></details>
         </details>

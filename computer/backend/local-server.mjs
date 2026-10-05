@@ -97,6 +97,7 @@ const calls = new Map([
   ['phone.bindProfile', args => phoneWorld.bindProfile(args[0])],
   ['phone.enterWorld', args => phoneWorld.enterWorld(args[0])],
   ['phone.preferences', args => phoneWorld.preferences(args[0])],
+  ['phone.chooseWorld', args => phoneWorld.chooseWorld(args[0])],
   ['phone.observe', args => phoneWorld.observe(args[0])],
   ['queryCapability', args => runtime.queryCapability(...args)],
   ['route', args => runtime.route(...args)],

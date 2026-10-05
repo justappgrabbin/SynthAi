@@ -3,10 +3,14 @@ import { useFrame } from "@react-three/fiber";
 import { Text } from "@react-three/drei";
 import * as THREE from "three";
 import { useNPCs } from "../../lib/stores/useNPCs";
+import { usePhone } from '../../phone/PhoneBridge';
+import { MorphBody } from '../../phone/ProceduralMorph';
 
 function NPC({ npc }: { npc: any }) {
   const meshRef = useRef<THREE.Mesh>(null);
   const [x, y, z] = npc.position;
+  const form = usePhone((state: any) => state.session?.world?.contract?.sceneMorph?.kind);
+  const color = usePhone((state: any) => state.session?.world?.contract?.hostExpression?.color);
   
   useFrame((state) => {
     if (!meshRef.current) return;
@@ -20,6 +24,8 @@ function NPC({ npc }: { npc: any }) {
   
   return (
     <group position={[x, y, z]}>
+      {form && form !== 'human' && <MorphBody kind={form} color={color} />}
+      <group visible={!form || form === 'human'}>
       {/* NPC Body */}
       <mesh ref={meshRef} castShadow receiveShadow>
         <capsuleGeometry args={[0.4, 1.2, 4, 8]} />
@@ -31,6 +37,7 @@ function NPC({ npc }: { npc: any }) {
         <sphereGeometry args={[0.35, 16, 16]} />
         <meshLambertMaterial color="#6A6A6A" />
       </mesh>
+      </group>
       
       {/* Name label */}
       <Text

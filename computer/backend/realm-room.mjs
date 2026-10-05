@@ -58,26 +58,36 @@ export class RealmRoom {
     return { roomId: this.roomId, world: this.world, participants: [this.owner, ...[...this.peers.values()].map(peer => peer.participant)].filter(Boolean) };
   }
   status() { return { mode: this.mode, invite: this.mode === 'host' ? this.invite : null, peers: this.mode === 'host' ? this.peers.size : this.last?.participants?.length ?? 0 }; }
-  async request(path, credential, body) {
-    const response = await fetch(this.base + path, { method: 'POST', headers: { authorization: `Bearer ${credential}`, 'content-type': 'application/json' }, body: JSON.stringify(body), signal: AbortSignal.timeout(2000) });
-    const value = await response.json(); if (!response.ok) throw new Error(value.error ?? `Shared world unavailable (${response.status})`); return value;
+  async request(path, credential, body, base = this.base) {
+    const response = await fetch(base + path, { method: 'POST', headers: { authorization: `Bearer ${credential}`, 'content-type': 'application/json' }, body: JSON.stringify(body), signal: AbortSignal.timeout(2000) });
+    const value = await response.json();
+    if (!response.ok) { const error = new Error(value.error ?? `Shared world unavailable (${response.status})`); error.status = response.status; throw error; }
+    return value;
   }
   async join(invitation, participant) {
-    await this.leave(); const url = new URL(invitation);
+    const url = new URL(invitation);
     if (!['http:', 'https:'].includes(url.protocol) || url.username || url.password || !url.hash) throw new Error('Use the host’s world invitation');
-    this.base = url.origin;
-    const result = await this.request('/join', url.hash.slice(1), { participant: actor(participant) });
+    const result = await this.request('/join', url.hash.slice(1), { participant: actor(participant) }, url.origin);
+    await this.leave(); this.base = url.origin; this.invitationSecret = url.hash.slice(1);
     this.peerId = result.peerId; this.key = result.key; this.last = result; this.mode = 'guest';
     return result;
   }
   async sync(participant, world) {
     if (this.mode === 'host') { this.owner = actor(participant); this.world = world; return this.snapshot(); }
-    if (this.mode === 'guest') { this.last = await this.request('/sync', this.key, { peerId: this.peerId, participant: actor(participant) }); return this.last; }
+    if (this.mode === 'guest') {
+      try { this.last = await this.request('/sync', this.key, { peerId: this.peerId, participant: actor(participant) }); }
+      catch (error) {
+        if (error.status !== 401) throw error;
+        const result = await this.request('/join', this.invitationSecret, { participant: actor(participant) });
+        this.peerId = result.peerId; this.key = result.key; this.last = result;
+      }
+      return this.last;
+    }
     return null;
   }
   async leave() {
     if (this.mode === 'guest') { try { await this.request('/leave', this.key, { peerId: this.peerId }); } catch { /* Offline guests expire on the host. */ } }
     if (this.server) { this.server.closeAllConnections(); await new Promise(resolve => this.server.close(resolve)); this.server = null; }
-    this.mode = 'local'; this.peers.clear(); this.last = null; this.invite = null; this.key = null; this.secret = null;
+    this.mode = 'local'; this.peers.clear(); this.last = null; this.invite = null; this.key = null; this.secret = null; this.invitationSecret = null;
   }
 }

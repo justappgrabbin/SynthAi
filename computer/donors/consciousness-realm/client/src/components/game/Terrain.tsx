@@ -4,6 +4,7 @@ import * as THREE from "three";
 
 export default function Terrain() {
   const atmosphere = usePhone((state: any) => state.session?.world?.contract?.hostExpression?.atmosphere ?? EMPTY_THEME);
+  const requestedArchitecture = usePhone((state: any) => state.session?.world?.contract?.hostExpression?.architecture?.kind);
   const color = atmosphere.ground ?? '#302039';
   const grassTexture = useTexture('/realm/textures/grass.png');
   const asphaltTexture = useTexture('/realm/textures/asphalt.png');
@@ -35,7 +36,7 @@ export default function Terrain() {
       </mesh>
       
       {/* Decorative rocks */}
-      {Array.from({ length: 20 }, (_, i) => {
+      {!requestedArchitecture && Array.from({ length: 20 }, (_, i) => {
         const angle = (i / 20) * Math.PI * 2;
         const radius = 15 + ((i * 17) % 20);
         const x = Math.cos(angle) * radius;
@@ -57,7 +58,7 @@ export default function Terrain() {
       })}
       
       {/* Mystical floating orbs */}
-      {Array.from({ length: 8 }, (_, i) => {
+      {!requestedArchitecture && Array.from({ length: 8 }, (_, i) => {
         const angle = (i / 8) * Math.PI * 2;
         const radius = 25;
         const x = Math.cos(angle) * radius;

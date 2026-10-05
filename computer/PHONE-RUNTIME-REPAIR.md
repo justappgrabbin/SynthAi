@@ -5,6 +5,19 @@ installed applications remain Android phone computers with embedded Linux.
 
 ## Executable changes
 
+### Request-driven world revision
+
+The preset selector has been replaced by a once-per-profile world request.
+Successful choices persist with their executable host grammar; failed requests
+do not consume the choice. Visitors, local NPCs and shared participants adopt the
+host's form, while identity/photo and their own home choice remain unchanged.
+Public-place grammar works through the same visitor contract. The local five-field
+compiler builds procedural rainbow, butterfly, flower, star and crystal geometry
+in independent structural/inhabitant combinations. Requests requiring other
+assets explicitly remain unresolved. This is not unrestricted neural asset
+generation or a finished iOS runtime; see [acceptance status](MORPH-ACCEPTANCE.md).
+The earlier palette implementation below describes the original adapter only.
+
 Venom now launches the actual supplied Resonance Network Python API, React
 frontend, and opportunity service under restart supervision. It uses the bundled
 JPL ephemeris and a persistent private SQLite database. The 74,697,605-byte source

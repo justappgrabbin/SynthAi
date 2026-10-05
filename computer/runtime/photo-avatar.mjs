@@ -67,3 +67,38 @@ export async function createPhotoMorphPlayer(photo, canvas, theme) {
     stop() { running = false; cancelAnimationFrame(raf); },
   };
 }
+
+export async function createHostSpriteSheet(photo, { kind = 'human', accent = '#e8a3df', material } = {}) {
+  if (kind === 'human') {
+    const avatar = await createPhotoAvatar(photo, { accent, material });
+    avatar.bitmap.close(); return avatar.sheet;
+  }
+  const bitmap = await createImageBitmap(await (await fetch(photo)).blob());
+  try {
+    const sheet = document.createElement('canvas'); sheet.width = lib.W * CORE_STATES.length; sheet.height = lib.H;
+    const ctx = sheet.getContext('2d');
+    CORE_STATES.forEach((name, index) => {
+      const pose = statePose(name);
+      const center = pose.torso;
+      ctx.save(); ctx.translate(index * lib.W, 0);
+      ctx.fillStyle = accent;
+      if (kind === 'butterfly') {
+        const spread = name === 'sit' ? .65 : ['lift', 'reach', 'activate'].includes(name) ? 1.2 : 1;
+        for (const side of [-1, 1]) for (const lobe of [0, 1]) {
+          ctx.beginPath(); ctx.ellipse(center[0] + side * (42 - lobe * 8), center[1] - 18 + lobe * 55, (43 - lobe * 8) * spread, 42 - lobe * 6, side * (lobe ? -.4 : .4), 0, Math.PI * 2); ctx.fill();
+        }
+        ctx.fillStyle = '#3c294d'; ctx.beginPath(); ctx.ellipse(center[0], center[1], 9, 56, 0, 0, Math.PI * 2); ctx.fill();
+      } else if (kind === 'flower') {
+        for (let i = 0; i < 8; i++) { const a = i * Math.PI / 4; ctx.beginPath(); ctx.ellipse(center[0] + Math.cos(a) * 39, center[1] + Math.sin(a) * 39, 35, 18, a, 0, Math.PI * 2); ctx.fill(); }
+        ctx.fillStyle = '#ffe36b'; ctx.beginPath(); ctx.arc(center[0], center[1], 22, 0, Math.PI * 2); ctx.fill();
+      } else if (kind === 'star' || kind === 'crystal') {
+        ctx.beginPath(); const sides = kind === 'star' ? 10 : 4;
+        for (let i = 0; i < sides; i++) { const a = -Math.PI / 2 + i * Math.PI * 2 / sides; const r = kind === 'star' && i % 2 ? 30 : 72; const x = center[0] + Math.cos(a) * r, y = center[1] + Math.sin(a) * r; if (!i) ctx.moveTo(x, y); else ctx.lineTo(x, y); }
+        ctx.closePath(); ctx.fill();
+      } else throw new Error('No sprite generator for this host form');
+      photoFace(ctx, bitmap, pose.head);
+      ctx.restore();
+    });
+    return sheet.toDataURL('image/png');
+  } finally { bitmap.close(); }
+}

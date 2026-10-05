@@ -31,6 +31,15 @@ test('entering a host world preserves photo and chart identity, while neural rel
   assert.equal(host.world.contract.hostExpression.color, '#0a0a0f');
   assert.deepEqual(host.world.contract.identityInvariant, own.world.contract.identityInvariant);
   assert.equal(host.avatar.photo, own.avatar.photo);
+  await session.enterWorld('indiverse:person');
+  const custom = await session.preferences({ theme: 'My copper ocean', appearance: { background: '#042535', accent: '#cd8752', ground: '#164759', material: 'glass', fog: .012 } });
+  assert.equal(custom.world.contract.hostExpression.atmosphere.theme, 'My copper ocean');
+  assert.equal(custom.world.contract.hostExpression.atmosphere.background, '#042535');
+  assert.equal(custom.world.contract.hostExpression.color, '#cd8752');
+  assert.deepEqual(custom.world.contract.identityInvariant, own.world.contract.identityInvariant);
+  assert.equal(custom.avatar.photo, own.avatar.photo);
+  await assert.rejects(session.preferences({ theme: 'An unresolved request' }), /needs a local morph definition/);
+  assert.equal(session.snapshot().world.contract.hostExpression.atmosphere.theme, 'My copper ocean');
   const observation = await session.observe({ type: 'interaction', target: 'npc:one' });
   assert.equal(observation.accepted, true);
   assert.ok(observation.episode.neural.top.length);

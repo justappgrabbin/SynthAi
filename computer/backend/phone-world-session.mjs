@@ -6,6 +6,7 @@ import { ConnectionFieldRuntime } from '../donors/phone-neural/connectionField.m
 import { WORLD_THEMES } from '../runtime/world-themes.mjs';
 import { resolveRealmSwarm } from '../runtime/realm-swarm.mjs';
 import { RealmRoom } from './realm-room.mjs';
+import { compileWorldRequest } from '../runtime/world-request.mjs';
 
 const WORLD = 'reality:consciousness-realm';
 const signs = 'Aries Taurus Gemini Cancer Leo Virgo Libra Scorpio Sagittarius Capricorn Aquarius Pisces'.split(' ');
@@ -30,6 +31,7 @@ export class PhoneWorldSession {
     this.gnn = new HumanDesignGNNRuntime();
     this.connections = new ConnectionFieldRuntime();
     this.pending = Promise.resolve();
+    this.worldRequests = Promise.resolve();
     this.room = new RealmRoom();
     this.sharedParticipants = [];
     this.sharedRelationships = new Set();
@@ -100,6 +102,7 @@ export class PhoneWorldSession {
   async hostRoom() {
     const profile = this.state.get('phone.profile');
     if (!profile) throw new Error('Create or load your Resonance profile first');
+    if (!this.worlds.world(`indiverse:${profile.id}`)?.metadata?.worldChoice) throw new Error('Choose your world before inviting visitors');
     await this.enterWorld(`indiverse:${profile.id}`);
     await this.room.hostWorld({ world: this.worlds.world(`indiverse:${profile.id}`), participant: this.roomParticipant() });
     return this.runtime();
@@ -118,7 +121,7 @@ export class PhoneWorldSession {
   }
 
   async leaveRoom() {
-    await this.room.leave(); this.sharedParticipants = [];
+    await this.room.leave(); this.sharedParticipants = []; this.roomError = null;
     const profile = this.state.get('phone.profile');
     return profile ? this.enterWorld(`indiverse:${profile.id}`) : this.snapshot();
   }
@@ -151,15 +154,41 @@ export class PhoneWorldSession {
     return this.snapshot();
   }
 
-  async preferences({ color, theme, photo, spriteSheet, frameCount } = {}) {
+  chooseWorld(request) {
+    const profile = this.state.get('phone.profile');
+    const run = this.worldRequests.then(async () => {
+      if (!profile) throw new Error('Create or load your Resonance profile first');
+      const worldId = `indiverse:${profile.id}`;
+      if (this.worlds.world(worldId)?.metadata?.worldChoice) throw new Error('Your world has already been chosen');
+      const definition = compileWorldRequest(request);
+      if (this.state.get('phone.profile')?.id !== profile.id) throw new Error('Profile changed before the world was chosen');
+      await this.worlds.chooseWorld(worldId, profile.id, definition);
+      return this.enterWorld(worldId);
+    });
+    this.worldRequests = run.catch(() => {});
+    return run;
+  }
+
+  async preferences({ color, theme, appearance, photo, spriteSheet, frameCount } = {}) {
     const profile = this.state.get('phone.profile');
     if (!profile) throw new Error('Create or load your Resonance profile first');
-    if (theme !== undefined) {
-      if (!WORLD_THEMES[theme]) throw new Error('Choose a registered world theme');
-      const appearance = WORLD_THEMES[theme];
+    if ((color !== undefined || theme !== undefined || appearance !== undefined) && this.worlds.world(`indiverse:${profile.id}`)?.metadata?.worldChoice) throw new Error('Your world has already been chosen; photo and animation updates remain available');
+    if (theme !== undefined || appearance !== undefined) {
+      // Presets are optional starting points, never the boundary of the user's
+      // world. A local request resolver may supply its own rendered endpoint.
+      const base = WORLD_THEMES[theme] ?? {};
+      if (appearance !== undefined && (!appearance || typeof appearance !== 'object' || Array.isArray(appearance))) throw new Error('Morph appearance must be an object');
+      const resolved = { ...base, ...appearance };
+      if (!Object.keys(resolved).length) throw new Error('This request needs a local morph definition; no change has been applied');
+      for (const key of ['background', 'ground', 'path', 'accent', 'light']) {
+        if (resolved[key] !== undefined && !/^#[0-9a-f]{6}$/i.test(resolved[key])) throw new Error(`Invalid morph ${key} color`);
+      }
+      if (resolved.fog !== undefined && (!Number.isFinite(resolved.fog) || resolved.fog < 0 || resolved.fog > 1)) throw new Error('Invalid morph fog density');
+      resolved.theme = typeof theme === 'string' ? theme : 'user-defined';
       await this.worlds.updateGrammar(`indiverse:${profile.id}`, {
-        colors: { world: appearance.accent }, materials: { world: appearance.material },
-        atmosphere: { world: { ...appearance, theme } },
+        ...(resolved.accent ? { colors: { world: resolved.accent } } : {}),
+        ...(resolved.material ? { materials: { world: resolved.material } } : {}),
+        atmosphere: { world: { ...this.worlds.world(`indiverse:${profile.id}`).grammar.atmosphere.world, ...resolved } },
       });
     }
     if (color !== undefined) {
@@ -204,7 +233,7 @@ export class PhoneWorldSession {
 
   snapshot() {
     const profile = this.state.get('phone.profile', null);
-    const participants = this.room.mode !== 'local' ? this.sharedParticipants : this.mesh.listParticipants().filter(p => p.kind === 'human-avatar' && p.id === profile?.id).map(p => ({ id: p.id, addresses: p.publicState.addresses, position: p.publicState.realmState?.position }));
+    const participants = this.room.mode !== 'local' ? this.sharedParticipants : this.mesh.listParticipants().filter(p => p.kind === 'human-avatar' && p.id === profile?.id).map(p => ({ id: p.id, name: p.publicState.name, addresses: p.publicState.addresses, position: p.publicState.realmState?.position, motion: p.publicState.realmState?.motion }));
     const swarm = resolveRealmSwarm(participants, Math.floor(Date.now() / 1000));
     swarm.mode = this.room.mode === 'local' ? 'local-mesh' : this.roomError ? 'shared-offline' : 'shared-world';
     return {
@@ -212,8 +241,10 @@ export class PhoneWorldSession {
       world: this.state.get('phone.world', null),
       worlds: this.worlds.snapshot().worlds.map(w => ({ id: w.id, name: w.name, ownerId: w.ownerId })),
       avatar: profile ? this.state.get(`phone.avatars.${profile.id}`, {}) : {},
+      worldChoice: profile ? this.worlds.world(`indiverse:${profile.id}`)?.metadata?.worldChoice ?? null : null,
       connections: this.connections.snapshot(),
       themes: WORLD_THEMES,
+      inhabitants: participants.map(p => ({ id: p.id, name: p.name ?? p.publicState?.name, position: p.position, motion: p.motion })),
       swarm, room: { ...this.room.status(), error: this.roomError ?? null },
       memory: { vqvae: 'TRAINED_CHECKPOINT_REQUIRED', episodes: profile ? this.state.get(`phone.episodes.${profile.id}`, []).length : 0 },
     };

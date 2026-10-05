@@ -1,4 +1,4 @@
-import { createPhotoAvatar } from '/computer-runtime/runtime/photo-avatar.mjs';
+import { createHostSpriteSheet } from '/computer-runtime/runtime/photo-avatar.mjs';
 
 export function startPhoneShell(computer) {
   const $ = id => document.getElementById(id);
@@ -17,6 +17,10 @@ export function startPhoneShell(computer) {
   function renderSession() {
     const realm = packet?.realm;
     if (!realm) return;
+    $('worldRequest').disabled = !!realm.worldChoice;
+    $('chooseWorld').disabled = !!realm.worldChoice || !realm.profile;
+    $('worldChoiceStatus').textContent = realm.worldChoice ? `Your world: ${realm.worldChoice.request}` : 'Your world has not been chosen yet.';
+    if (realm.worldChoice) $('worldRequest').value = realm.worldChoice.request;
     $('roomStatus').textContent = realm.room.error ?? (realm.room.mode === 'local' ? 'Your local world' : `${realm.room.mode === 'host' ? 'Hosting your world' : 'Shared world'} · ${realm.room.peers} connected`);
     if (realm.room.invite) $('worldInvite').value = realm.room.invite;
     $('realmStatus').textContent = realm.profile
@@ -93,31 +97,47 @@ export function startPhoneShell(computer) {
     if (packet?.realm?.room?.invite) { await navigator.clipboard.writeText(packet.realm.room.invite); $('roomStatus').textContent = 'Invitation copied. Share it with someone on the same network.'; }
   });
 
-  async function photoData(file) {
+  async function photoData(file, sheet = false) {
     if (!file) return undefined;
     if (!['image/png', 'image/jpeg', 'image/webp'].includes(file.type)) throw new Error('Choose a PNG, JPEG, or WebP image.');
     const bitmap = await createImageBitmap(file);
     const canvas = document.createElement('canvas');
-    const ratio = Math.min(1, 1024 / Math.max(bitmap.width, bitmap.height));
-    canvas.width = Math.max(1, Math.round(bitmap.width * ratio)); canvas.height = Math.max(1, Math.round(bitmap.height * ratio));
-    canvas.getContext('2d').drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+    let ratio = Math.min(1, (sheet ? 4096 : 1024) / Math.max(bitmap.width, bitmap.height));
+    let data;
+    do {
+      canvas.width = Math.max(1, Math.round(bitmap.width * ratio)); canvas.height = Math.max(1, Math.round(bitmap.height * ratio));
+      canvas.getContext('2d').drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+      data = canvas.toDataURL(sheet || file.type === 'image/png' ? 'image/png' : 'image/jpeg', .86);
+      ratio *= .8;
+    } while (data.length > 1900000 && Math.max(canvas.width, canvas.height) > 256);
     bitmap.close();
-    return canvas.toDataURL('image/png');
+    return data;
   }
   $('saveWorld').addEventListener('click', async () => {
     try {
-      const [photo, spriteSheet] = await Promise.all([photoData($('avatarPhoto').files[0]), photoData($('avatarSheet').files[0])]);
-      packet.realm = await computer.requireLocalBackend().rpc('phone.preferences', { theme: $('worldTheme').value, photo, spriteSheet, frameCount: $('avatarFrames').value });
+      const [photo, spriteSheet] = await Promise.all([photoData($('avatarPhoto').files[0]), photoData($('avatarSheet').files[0], true)]);
+      packet.realm = await computer.requireLocalBackend().rpc('phone.preferences', { photo, spriteSheet, frameCount: $('avatarFrames').value });
       $('avatarPhoto').value = ''; $('avatarSheet').value = '';
       renderSession();
     } catch (error) { $('realmStatus').textContent = error.message; }
+  });
+  $('chooseWorld').addEventListener('click', async () => {
+    $('chooseWorld').disabled = true;
+    try {
+      packet ??= {};
+      packet.realm = await computer.requireLocalBackend().rpc('phone.chooseWorld', $('worldRequest').value);
+      renderSession();
+    } catch (error) {
+      $('worldChoiceStatus').textContent = error.message;
+      $('chooseWorld').disabled = false;
+    }
   });
   $('downloadAvatar').addEventListener('click', async () => {
     try {
       if (!packet?.realm?.avatar?.photo) throw new Error('Choose an avatar photo and save your world first.');
       const expression = packet.realm.world.contract.hostExpression;
-      const avatar = await createPhotoAvatar(packet.realm.avatar.photo, { ...expression.atmosphere, material: expression.material });
-      const link = document.createElement('a'); link.href = avatar.sheet; link.download = 'my-avatar-12-states.png'; link.click(); avatar.bitmap.close();
+      const sheet = await createHostSpriteSheet(packet.realm.avatar.photo, { ...expression.atmosphere, material: expression.material, kind: packet.realm.world.contract.sceneMorph?.kind ?? 'human' });
+      const link = document.createElement('a'); link.href = sheet; link.download = 'my-avatar-12-states.png'; link.click();
     } catch (error) { $('realmStatus').textContent = error.message; }
   });
   $('swarmEncoding').addEventListener('change', renderSession);

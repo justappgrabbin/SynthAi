@@ -43,7 +43,7 @@ export function AvatarSkin() {
         player.current = runtime; runtime.setState(usePhone.getState().motion); runtime.start();
       }).catch(error => console.error('Avatar image could not load:', error.message));
     return () => { disposed = true; player.current?.stop(); player.current?.bitmap.close(); player.current = null; };
-  }, [avatar?.spriteSheet, avatar?.photo, avatar?.frameCount, appearance?.material, appearance?.atmosphere?.theme]);
+  }, [avatar?.spriteSheet, avatar?.photo, avatar?.frameCount, appearance?.material, JSON.stringify(appearance?.atmosphere)]);
   useEffect(() => { player.current?.setState(motion); }, [motion]);
   if (!avatar?.photo && !avatar?.spriteSheet) return null;
   return <Html position={[0, 0.8, 0]} center distanceFactor={8} style={{ pointerEvents: 'none' }}>

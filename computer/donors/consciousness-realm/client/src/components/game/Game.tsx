@@ -13,6 +13,7 @@ import { RITUAL_ZONES } from "../../lib/consciousnessData";
 import { usePhone, EMPTY_THEME } from '../../phone/PhoneBridge';
 import { WorldSwarm } from '../../phone/WorldSwarm';
 import { WorldObjects } from '../../phone/WorldObjects';
+import { RequestedWorld } from '../../phone/ProceduralMorph';
 
 enum Controls {
   forward = 'forward',
@@ -26,6 +27,7 @@ enum Controls {
 
 export default function Game() {
   const appearance = usePhone((state: any) => state.session?.world?.contract?.hostExpression?.atmosphere ?? EMPTY_THEME);
+  const requestedArchitecture = usePhone((state: any) => state.session?.world?.contract?.hostExpression?.architecture?.kind);
   const [subscribe, getState] = useKeyboardControls<Controls>();
   const { toggleTraitPanel } = useTraits();
   const { updateEnergeticSignature } = useConsciousness();
@@ -85,6 +87,7 @@ export default function Game() {
       {/* Lighting */}
       <ambientLight intensity={0.4} />
       <WorldSwarm />
+      <RequestedWorld />
       <WorldObjects />
       <directionalLight
         position={[10, 20, 10]}
@@ -105,7 +108,7 @@ export default function Game() {
       <Terrain />
       
       {/* Ritual Zones */}
-      {RITUAL_ZONES.map((zone) => (
+      {!requestedArchitecture && RITUAL_ZONES.map((zone) => (
         <RitualZone
           key={zone.id}
           position={zone.position as [number, number, number]}
