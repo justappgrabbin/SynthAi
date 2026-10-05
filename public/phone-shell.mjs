@@ -38,6 +38,8 @@ export function startPhoneShell(computer) {
     if (expression) {
       $('expressionInspector').textContent = `${expression.sentence}\n\n${expression.structure.hexagram} ${expression.structure.name}\nBits (line 1 first): ${expression.structure.bits.join(' ')}\nBigrams: ${expression.structure.bigrams.map(group => group.join('')).join(' / ')}\nTrigrams: ${expression.structure.trigrams.map(group => group.join('')).join(' / ')}\n\n${expression[$('swarmEncoding').value]}\n\nRules: ${realm.swarm.rules} · ${realm.swarm.mode}`;
       if (expression.channels) $('expressionInspector').textContent += `\nSound: ${expression.channels.sound.freq.toFixed(2)} Hz · ${expression.channels.sound.timbre}\nColor: ${expression.channels.color.hex} · ${expression.channels.color.layer}\nProjection: ${expression.channels.projection}`;
+      const unit = realm.swarm.pieces.find(piece => piece.ownerId === realm.profile.id);
+      if (unit?.fields) $('expressionInspector').textContent += '\n\nFive simultaneous fields:\n' + Object.entries(unit.fields).map(([name, field]) => `${name} · ${field.scale}\n  amplitude ${field.qualities.amplitude.toFixed(4)} · phase ${field.qualities.phase.toFixed(4)}${field.micro?.expression?.name ? `\n  micro: ${field.micro.expression.name}` : ''}${field.macro?.chain?.length ? `\n  macro: ${field.macro.chain.map(claim => claim.value).join(' → ')}` : ''}`).join('\n') + `\n\nHexagram vocabulary: ${realm.swarm.hexagrams.length}`;
     }
   }
 

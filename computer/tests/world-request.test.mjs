@@ -18,6 +18,9 @@ test('local fields compile structural and inhabitant roles independently, rather
   const a = compileWorldRequest('Rainbows are structures and butterflies are people');
   const b = compileWorldRequest('Pink crystals are structures and flowers are people');
   assert.deepEqual(a.fields.map(stage => stage.field), WORLD_REQUEST_FIELDS);
+  assert.deepEqual(a.fields.map(stage => stage.projection.substrate), WORLD_REQUEST_FIELDS);
+  assert.equal(a.fields.find(stage => stage.field === 'Design').projection.valid, true);
+  assert.match(a.eventId, /^ling-/);
   assert.equal(a.grammar.architecture.world.kind, 'rainbow');
   assert.equal(a.grammar.embodiment.default.kind, 'butterfly');
   assert.equal(b.grammar.architecture.world.kind, 'crystal');

@@ -7,6 +7,11 @@ installed applications remain Android phone computers with embedded Linux.
 
 ### Request-driven world revision
 
+The follow-up preserves Dream Habitat's real simultaneous grammar kernel and
+corrects swarm units to carry all five projections at once, with sourced
+macro/micro descriptions, weighted edges and Space as observer. Source review is
+recorded in [the morph source audit](SOURCE-MORPH-AUDIT.md).
+
 The preset selector has been replaced by a once-per-profile world request.
 Successful choices persist with their executable host grammar; failed requests
 do not consume the choice. Visitors, local NPCs and shared participants adopt the

@@ -59,8 +59,8 @@ export function WorldSwarm() {
   const source = usePhone((state: any) => state.session?.swarm?.pieces ?? EMPTY_PIECES);
   const theme = usePhone((state: any) => state.session?.world?.contract?.hostExpression?.atmosphere ?? EMPTY_THEME);
   const requestedArchitecture = usePhone((state: any) => state.session?.world?.contract?.hostExpression?.architecture?.kind);
-  // The lower two stages remain inspectable; geometry begins at Being.
-  const visible = useMemo(() => source.filter((piece: any) => !['Movement', 'Evolution'].includes(piece.dimension)), [source]);
+  // Units span all five fields. Geometry uses Being; Space is the observer.
+  const visible = useMemo(() => source.filter((piece: any) => piece.fields?.Being), [source]);
   const octahedra = useMemo(() => visible.filter((piece: any) => piece.expression.structure.trigrams[0]?.[0]), [visible]);
   const other = useMemo(() => visible.filter((piece: any) => !piece.expression.structure.trigrams[0]?.[0]), [visible]);
   return <group><OrbitPieces pieces={octahedra} theme={theme} octahedron /><OrbitPieces pieces={other} theme={theme} octahedron={false} />{!requestedArchitecture && <HexagramStructures pieces={visible} theme={theme} />}</group>;

@@ -161,7 +161,9 @@ jobs:
           test ! -e /tmp/synthia-hover-rootfs/opt/synthia-server
           test ! -e /tmp/synthia-hover-rootfs/opt/synthai
           # Vendored 5.8 app must be byte-identical inside the rootfs.
-          diff -r computer/hover /tmp/synthia-hover-rootfs/opt/synthia58
+          # Python surface-morph verification creates bytecode in the checkout;
+          # Docker intentionally excludes it. Compare preserved source only.
+          diff -r --exclude=__pycache__ --exclude='*.pyc' computer/hover /tmp/synthia-hover-rootfs/opt/synthia58
           tar --hard-dereference -C /tmp/synthia-hover-rootfs -czf android-app/app/src/hover/assets/linux-rootfs.bundle .
           printf '%s-synthia58-hover-1\n' "$GITHUB_SHA" > android-app/app/src/hover/assets/linux-rootfs.version
           du -h android-app/app/src/hover/assets/linux-rootfs.bundle

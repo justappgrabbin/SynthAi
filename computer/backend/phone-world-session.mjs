@@ -160,7 +160,7 @@ export class PhoneWorldSession {
       if (!profile) throw new Error('Create or load your Resonance profile first');
       const worldId = `indiverse:${profile.id}`;
       if (this.worlds.world(worldId)?.metadata?.worldChoice) throw new Error('Your world has already been chosen');
-      const definition = compileWorldRequest(request);
+      const definition = compileWorldRequest(request, { homeWorldId: worldId, identity: { id: profile.id, address: profile.addresses[0].expression.address } });
       if (this.state.get('phone.profile')?.id !== profile.id) throw new Error('Profile changed before the world was chosen');
       await this.worlds.chooseWorld(worldId, profile.id, definition);
       return this.enterWorld(worldId);

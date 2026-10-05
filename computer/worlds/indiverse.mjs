@@ -101,7 +101,7 @@ export class IndiVerseRuntime {
     if (!world || world.ownerId !== String(ownerId)) throw new Error('Only the owner can establish this world');
     if (world.metadata?.worldChoice) throw new Error('Your world has already been chosen');
     const next = { ...world, name: definition.request, grammar: mergeGrammar(definition.grammar),
-      metadata: { ...world.metadata, worldChoice: { request: definition.request, fields: clone(definition.fields), generator: definition.generator, chosenAt: this.clock() } }, updatedAt: this.clock() };
+      metadata: { ...world.metadata, worldChoice: { request: definition.request, fields: clone(definition.fields), eventId: definition.eventId, generator: definition.generator, chosenAt: this.clock() } }, updatedAt: this.clock() };
     // Choice and its executable grammar are one durable snapshot.
     await this.state.set(`indiverse.worlds.${safeKey(worldId)}`, next, { source: 'indiverse' });
     this.bus?.emit('indiverse:world-chosen', clone(next));

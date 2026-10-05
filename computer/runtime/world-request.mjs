@@ -1,3 +1,5 @@
+import { SynthiaLinguisticKernel } from '../donors/dream-habitat/grammarKernel.mjs';
+
 // Local, compositional scene compiler. These are geometry primitives, not
 // whole-world presets. Unknown subjects require an asset resolver; they must
 // never silently become a palette change or consume the one-time choice.
@@ -18,7 +20,7 @@ function resolveSubject(text, role) {
   return { kind: matches[0].id, geometry: matches[0].geometry };
 }
 
-export function compileWorldRequest(input) {
+export function compileWorldRequest(input, context = {}) {
   if (typeof input !== 'string' || input.trim().length < 3 || input.length > 2000) throw new Error('Describe your world in 3–2000 characters');
   const request = input.trim();
   const vocabulary = new Set(('i my me our a an the world system theme please want would like create make choose where with of in to be as are is should have has and for all its their they them turns into everyone people person persons human humans structures structure buildings building architecture home homes bridge bridges inhabitant inhabitants visitor visitors character characters avatar avatars butterfly butterflies rainbow rainbows flower flowers star stars crystal crystals ' + Object.keys(colors).join(' ')).split(' '));
@@ -56,7 +58,7 @@ export function compileWorldRequest(input) {
     { field: 'Design', output: { hostDeterminesEmbodiment: true, interactions: 'relational-mesh', temporaryStates: true } },
     { field: 'Space', output: { structures: { count: 8, radius: 12 }, inhabitants: { hostForm: inhabitants.kind }, dimensionRules: 'YOU-N-I-VERSE' } },
   ];
-  return {
+  const definition = {
     request, fields, generator: 'local-procedural-geometry-v1',
     grammar: {
       colors: { world: accent }, materials: { world: structures.kind === 'crystal' ? 'glass' : 'organic' },
@@ -65,4 +67,18 @@ export function compileWorldRequest(input) {
       movement: { world: fields[0].output }, interaction: { world: fields[3].output }, layout: { world: fields[4].output.structures },
     },
   };
+  const kernel = new SynthiaLinguisticKernel({ strictDesign: true });
+  kernel.registerRewrite('construct-host-world', (_state, action) => action.type === 'choose-world', () => definition.grammar);
+  kernel.registerConstraint('resolved-structures-and-body', candidate => Boolean(candidate?.architecture?.world?.geometry && candidate?.embodiment?.default?.geometry));
+  kernel.registerConstraint('retain-source-identity', candidate => candidate?.embodiment?.default?.preserveIdentity === true);
+  kernel.registerInterpreter('requested-host-meaning', () => ({ request, structures, inhabitants, identity: context.identity ?? null }));
+  kernel.registerRelation('visitor-host-embodiment', () => ({ homeWorldId: context.homeWorldId ?? null, hostDeterminesForm: true, preserveVisitorIdentity: true }));
+  const initial = kernel.createState({ x: { request, structures, inhabitants }, c: context, h: [] });
+  const resolved = kernel.step(initial, { action: { type: 'choose-world' }, perspective: 'host' });
+  if (!resolved.projections.d.valid) throw new Error('World definition failed design validation; your choice has not been used');
+  const projections = ['mu', 'e', 'b', 'd', 's'];
+  definition.fields = fields.map((field, i) => ({ ...field, projection: resolved.projections[projections[i]] }));
+  definition.grammar = resolved.state.x;
+  definition.eventId = resolved.eventId;
+  return definition;
 }

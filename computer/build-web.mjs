@@ -18,6 +18,6 @@ await cp(
 await cp(new URL('./ComputerRuntime.mjs', import.meta.url), new URL('./ComputerRuntime.mjs', to));
 await cp(new URL('./BrowserComputerRuntime.mjs', import.meta.url), new URL('./BrowserComputerRuntime.mjs', to));
 await cp(new URL('./phone-acceptance-report.mjs', import.meta.url), new URL('./phone-acceptance-report.mjs', to));
-for (const dir of ['phone-neural', 'phone-morph']) await cp(new URL(`./donors/${dir}/`, import.meta.url), new URL(`./donors/${dir}/`, to), { recursive: true });
+for (const dir of ['phone-neural', 'phone-morph', 'dream-habitat']) await cp(new URL(`./donors/${dir}/`, import.meta.url), new URL(`./donors/${dir}/`, to), { recursive: true });
 
 console.log('SynthAI browser and mobile Computer runtimes staged');
