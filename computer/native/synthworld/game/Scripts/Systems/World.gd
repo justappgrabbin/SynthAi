@@ -6,6 +6,7 @@ const DUMMY_DAMAGE_INTERVAL:=3.0
 var _timer:=0.0
 var world_state:={"mood.harmony":0.7}
 func _ready()->void:
+    print("SYNTHWORLD_WORLD_READY=true")
     var agent:=AGENT_SCENE.instantiate();agent.name="Generator";add_child(agent);agent.global_position=Vector3(-3,0,0)
     place_tree(Vector3(5,0,5));call_deferred("_execute_seed_sentences")
 func _process(delta:float)->void:

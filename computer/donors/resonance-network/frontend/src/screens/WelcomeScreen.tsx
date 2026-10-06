@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { checkConnection, getApiBaseUrl, setApiBaseUrl } from '../services/apiService';
 
@@ -6,6 +7,8 @@ const WelcomeScreen: React.FC = () => {
   const [email, setEmail] = useState('');
   const [name, setName] = useState('');
   const navigate = useNavigate();
+  const { login } = useAuth();
+  const [entering, setEntering] = useState(false);
 
   const [connected, setConnected] = useState<boolean | null>(null); // null = checking
   const [showServerConfig, setShowServerConfig] = useState(false);
@@ -41,11 +44,18 @@ const WelcomeScreen: React.FC = () => {
     setTesting(false);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    sessionStorage.setItem('pending_email', email);
+    setEntering(true);
+    if (await login(email.trim())) {
+      navigate('/home');
+      setEntering(false);
+      return;
+    }
+    sessionStorage.setItem('pending_email', email.trim());
     sessionStorage.setItem('pending_name', name);
     navigate('/birth-data');
+    setEntering(false);
   };
 
   return (
@@ -140,7 +150,7 @@ const WelcomeScreen: React.FC = () => {
               />
             </div>
 
-            <button type="submit" disabled={connected === false} className="w-full pixel-button disabled:opacity-50">
+            <button type="submit" disabled={connected !== true || entering} className="w-full pixel-button disabled:opacity-50">
               <i className="fa fa-arrow-right mr-2"></i>
               ENTER THE FIELD
             </button>

@@ -73,6 +73,9 @@ jobs:
           /tmp/hover-ui-test/node_modules/.bin/playwright install --with-deps chromium
           node .github/scripts/hover-ui-smoke.mjs
 
+      - name: Verify real Resonance onboarding and returning-profile sign-in
+        run: node .github/scripts/resonance-entry-smoke.mjs
+
       - name: Build the actual Consciousness Realm phone renderer
         run: npm run build:realm
 
@@ -348,7 +351,7 @@ jobs:
           profile: pixel_6
           disable-animations: true
           script: |
-            if [[ "$GITHUB_REF_NAME" != hover/repair-* ]]; then bash .github/scripts/android-smoke.sh; fi
+            if [[ "$GITHUB_REF_NAME" != hover/repair-* ]]; then bash .github/scripts/android-smoke.sh; python .github/scripts/android-synthworld-smoke.py; fi
             bash .github/scripts/android-hover-smoke.sh
 
       - name: Record APK checksums

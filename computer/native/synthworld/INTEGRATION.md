@@ -3,8 +3,8 @@
 Venom and Hover include Godot 4.6.3 and the repaired SYNTHWORLD project in the same APK.
 The launcher opens a non-exported native activity in its own process, keeping
 Godot shutdown separate from the computer backend. CI imports and tests the
-source before exporting its PCK into the APK. Program packs are refreshed on
-launch; Godot's user data and the computer's backend state are not replaced.
+source before exporting its PCK into the APK. The game pack is loaded directly from packaged Android assets using the
+Android resource reader and an explicit OpenGL compatibility driver; Godot's user data and the computer's backend state are not replaced.
 
 The embedded source includes the real lighting, proximity repair and truthful
 command-execution fixes. This integration does not turn the prototype into a
@@ -33,3 +33,7 @@ and sets the four `SYNTHAI_UPDATE_*` GitHub Actions secrets without printing the
 Those secrets are not part of the repository or APK. Current signing material
 is prepared privately, but the connected GitHub integration returns HTTP 403 for Actions secret
 management. Publication remains disabled until those secrets can be configured.
+
+Android acceptance now launches the native game and requires both engine-main-loop
+and loaded-world markers. The screenshot-reported setup failure is not considered
+resolved on the creator’s device until the rebuilt APK opens there.

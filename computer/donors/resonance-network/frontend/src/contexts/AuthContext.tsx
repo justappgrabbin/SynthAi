@@ -6,6 +6,7 @@ interface AuthContextType {
   displayName: string | null;
   profile: ProfileResponse | null;
   isAuthenticated: boolean;
+  restored: boolean;
   hasProfile: boolean;
   createOrLoadProfile: (params: {
     email: string;
@@ -110,6 +111,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     displayName,
     profile,
     isAuthenticated: !!userId,
+    restored,
     hasProfile: !!profile,
     createOrLoadProfile,
     login,

@@ -21,7 +21,8 @@ import ConnectScreen from './screens/ConnectScreen';
 import CreateScreen from './screens/CreateScreen';
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, restored } = useAuth();
+  if (!restored) return <p role="status">Restoring your profile…</p>;
   return isAuthenticated ? <>{children}</> : <Navigate to="/welcome" replace />;
 };
 
@@ -35,9 +36,7 @@ const AppRoutes: React.FC = () => {
       <Route 
         path="/birth-data" 
         element={
-          <ProtectedRoute>
-            <BirthDataScreen />
-          </ProtectedRoute>
+          <BirthDataScreen />
         } 
       />
       <Route 
