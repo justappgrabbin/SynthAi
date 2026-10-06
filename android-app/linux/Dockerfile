@@ -1,4 +1,6 @@
-FROM node:22-alpine3.22 AS resonance-frontend
+# Frontend output is architecture-independent. Run Vite/npm on the builder
+# rather than emulating ARM64 native install scripts under QEMU.
+FROM --platform=$BUILDPLATFORM node:22-alpine3.22 AS resonance-frontend
 WORKDIR /build
 COPY computer/donors/resonance-network/frontend/package*.json ./
 RUN npm ci --no-audit --no-fund
