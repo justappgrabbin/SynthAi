@@ -1,9 +1,10 @@
-const CACHE = 'synthai-computer-v1';
+const CACHE = 'synthai-computer-address-apps-v2';
 const APP = [
   '/',
   '/index.html',
   '/computer.css',
   '/computer-app.mjs',
+  '/address-apps.mjs',
   '/computer.html',
   '/computer-diagnostic.mjs',
   '/manifest.webmanifest',

@@ -4,6 +4,7 @@ import { resolve } from 'node:path';
 import { ComputerRuntime } from '../ComputerRuntime.mjs';
 import { FilePersistence } from './file-persistence.mjs';
 import { startResonanceSupervisor } from './resonance-supervisor.mjs';
+import { AddressApps } from './address-apps.mjs';
 import { PhoneWorldSession } from './phone-world-session.mjs';
 
 const HOST = process.env.SYNTHAI_LOCAL_HOST || '127.0.0.1';
@@ -48,6 +49,8 @@ const runtime = await new ComputerRuntime({
 
 const phoneWorld = await new PhoneWorldSession({ state: runtime.state, bus: runtime.bus }).boot();
 
+const addressApps = await new AddressApps({ state: runtime.state, vfs: runtime.vfs, privateStore: new FilePersistence(resolve(STATE_DIR, 'owner-private')) }).boot();
+
 function cors(req, res) {
   const origin = req.headers.origin;
   if (origin === 'https://appassets.androidplatform.net' || origin === 'http://127.0.0.1' || origin === 'http://localhost') {
@@ -89,6 +92,20 @@ async function readJson(req) {
 }
 
 const calls = new Map([
+  ['apps.snapshot', () => addressApps.snapshot()],
+  ['apps.resolve', args => addressApps.resolve(...args)],
+  ['apps.import', args => addressApps.importFile(...args)],
+  ['apps.routeFile', args => addressApps.routeFile(...args)],
+  ['apps.readFile', args => addressApps.readFile(...args)],
+  ['apps.suggestions', args => addressApps.suggestions(...args)],
+  ['admin.setup', args => addressApps.setup(...args)],
+  ['admin.login', args => addressApps.login(...args)],
+  ['admin.logout', args => addressApps.logout(...args)],
+  ['admin.configure', args => addressApps.configure(...args)],
+  ['admin.schedule', args => addressApps.schedule(...args)],
+  ['admin.cancel', args => addressApps.cancel(...args)],
+  ['admin.gpt.configure', args => addressApps.configureGPT(...args)],
+  ['admin.gpt.chat', args => addressApps.chat(...args)],
   ['snapshot', () => runtime.snapshot()],
   ['phone.runtime', async () => ({ resonance: resonance?.status() ?? { embedded: false }, realm: await phoneWorld.runtime() })],
   ['phone.hostRoom', () => phoneWorld.hostRoom()],

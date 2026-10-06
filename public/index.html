@@ -24,6 +24,8 @@
         <button class="nav" data-view="build">✦ <span>Build</span></button>
         <button class="nav" data-view="files">▤ <span>Files</span></button>
         <button class="nav" data-view="github">⌁ <span>GitHub</span></button>
+        <button class="nav" data-view="apps">▦ <span>App addresses</span></button>
+        <button class="nav" data-view="admin">⚙ <span>Owner admin</span></button>
         <button class="nav" data-view="systems">◫ <span>Systems</span></button>
         <button class="nav" data-view="activity">↯ <span>Activity</span></button>
       </nav>
@@ -54,6 +56,7 @@
           <button data-go="systems"><b>◫</b><span>Systems</span></button>
           <button data-go="activity"><b>↯</b><span>Activity</span></button>
         </div>
+        <article class="panel"><h3>Coming up</h3><div id="appUpcoming" role="status">No scheduled activities.</div><div id="appSuggestions"></div></article>
         <p id="phoneNetworkStatus" role="status">Starting on-device services…</p>
         <details class="phone-runtime"><summary>Computer status</summary>
         <div class="hero">
@@ -200,6 +203,29 @@
         </article>
       </section>
 
+      <section class="view" id="apps">
+        <article class="panel"><h3>Apps by address</h3><p>Open an app by its address or send a file to its private inbox. Routing stores the file; it does not execute imported code.</p>
+        <label>App address<input id="appAddress" value="app://computer/files"></label><button id="openAddress">Open address</button>
+        <div id="addressApps"></div><label>Import file (up to 2 MB)<input id="addressFile" type="file"></label>
+        <div id="addressInbox"></div><p id="addressStatus" role="status"></p></article>
+      </section>
+      <section class="view" id="admin">
+        <article class="panel"><h3>Owner admin</h3><p id="adminInfo">Set up your owner PIN on this device.</p>
+        <label>Owner PIN<input id="ownerPin" type="password" inputmode="numeric" minlength="6" maxlength="12" autocomplete="off"></label>
+        <button id="unlockOwner">Unlock / set up owner</button><button id="lockOwner">Lock</button>
+        <div id="ownerControls" hidden>
+          <h4>Settings</h4><label><input id="addressEnabled" type="checkbox"> Enable the app-address system</label>
+          <label><input id="suggestionsEnabled" type="checkbox"> Suggest timely apps</label><button id="saveAddressSettings">Save settings</button>
+          <p>Turning the system off removes its suggestions and routing. Your files stay on this device. Re-enable it here.</p>
+          <div id="adminAppSettings"></div>
+          <h4>Schedule an app</h4><label>App<select id="scheduleApp"></select></label><label>Activity<input id="scheduleLabel" placeholder="Visit my world"></label>
+          <label>When<input id="scheduleWhen" type="datetime-local"></label><button id="scheduleAddress">Schedule</button><div id="adminScheduleList"></div>
+          <h4>GPT plugin</h4><p>Messages you send here go to OpenAI. Files are not attached automatically. An API key is required; ChatGPT subscriptions do not supply API access.</p>
+          <label>OpenAI API key<input id="gptKey" type="password" autocomplete="off"></label><label>GPT model<input id="gptModel" value="gpt-4.1-mini"></label>
+          <button id="saveGpt">Configure GPT</button><button id="removeGpt">Remove GPT key</button><label>Message<textarea id="gptMessage" rows="3"></textarea></label>
+          <button id="askGpt">Ask GPT</button><pre id="gptReply" role="status"></pre>
+        </div><p id="adminStatus" role="status"></p></article>
+      </section>
       <section class="view" id="activity">
         <article class="panel">
           <div class="panel-head"><div><small>EVENT BUS</small><h3>Runtime activity</h3></div><button class="quiet" id="clearActivity">Clear view</button></div>

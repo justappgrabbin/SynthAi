@@ -1,3 +1,4 @@
+import { startAddressApps } from '/address-apps.mjs';
 import { startPhoneShell } from '/phone-shell.mjs';
 import { BrowserComputerRuntime } from '/computer-runtime/BrowserComputerRuntime.mjs';
 import { LocalStoragePersistence } from '/computer-runtime/core/kernel.mjs';
@@ -7,7 +8,7 @@ import { buildPhoneAcceptanceReport } from '/computer-runtime/phone-acceptance-r
 const $ = selector => document.querySelector(selector);
 const $$ = selector => [...document.querySelectorAll(selector)];
 const escapeHtml = value => String(value ?? '').replace(/[&<>"']/g, char => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;' }[char]));
-const titleFor = id => ({ home:'Venom', world:'Consciousness Realm', resonance:'Resonance Network', build:'Build', files:'Files', github:'GitHub', systems:'Systems', activity:'Activity' }[id] || 'SynthAI Computer');
+const titleFor = id => ({ home:'Venom', world:'Consciousness Realm', resonance:'Resonance Network', build:'Build', files:'Files', github:'GitHub', systems:'Systems', activity:'Activity', apps:'App addresses', admin:'Owner admin' }[id] || 'SynthAI Computer');
 
 const computer = await new BrowserComputerRuntime({
   persistence: new LocalStoragePersistence(),
@@ -534,3 +535,5 @@ if (!isAndroidApp && 'serviceWorker' in navigator) {
 }
 
 startPhoneShell(computer);
+
+startAddressApps(computer, show);

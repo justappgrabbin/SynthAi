@@ -14,9 +14,9 @@ export class LocalComputerBackendAdapter {
     return headers;
   }
 
-  async fetchJson(path, options = {}) {
+  async fetchJson(path, options = {}, timeoutMs = this.timeoutMs) {
     const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), this.timeoutMs);
+    const timer = setTimeout(() => controller.abort(), timeoutMs);
     try {
       const response = await fetch(this.baseUrl + path, { ...options, signal: controller.signal });
       const text = await response.text();
@@ -43,7 +43,7 @@ export class LocalComputerBackendAdapter {
       method: 'POST',
       headers: this.headers(true),
       body: JSON.stringify({ method, args })
-    });
+    }, method === 'admin.gpt.chat' ? 65000 : this.timeoutMs);
     return body.result;
   }
 
