@@ -28,7 +28,7 @@ concurrency:
   cancel-in-progress: true
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   verify-and-build:
@@ -83,6 +83,37 @@ jobs:
           mkdir -p android-app/app/src/main/assets/licenses android-app/app/src/venom/assets android-app/app/src/hover/assets
           cp -R public/. android-app/app/src/venom/assets/
           cp android-app/THIRD_PARTY_NOTICES.md android-app/app/src/main/assets/licenses/THIRD_PARTY_NOTICES.md
+
+      - name: Build and verify native Synthworld game pack
+        run: |
+          curl --fail --location --retry 3 https://github.com/godotengine/godot/releases/download/4.6.3-stable/Godot_v4.6.3-stable_linux.x86_64.zip -o /tmp/godot.zip
+          unzip -q /tmp/godot.zip -d /tmp/godot
+          GODOT=/tmp/godot/Godot_v4.6.3-stable_linux.x86_64
+          "$GODOT" --headless --path computer/native/synthworld/game --editor --import
+          timeout 30 "$GODOT" --headless --path computer/native/synthworld/game --script res://tests/execution_test.gd
+          mkdir -p android-app/app/src/main/assets/synthworld
+          "$GODOT" --headless --path computer/native/synthworld/game --export-pack Android "$PWD/android-app/app/src/main/assets/synthworld/synthworld.pck"
+          test -s android-app/app/src/main/assets/synthworld/synthworld.pck
+          cp computer/native/synthworld/GODOT-LICENSE.txt android-app/app/src/main/assets/licenses/GODOT-LICENSE.txt
+
+      - name: Configure persistent APK signing and increasing version
+        env:
+          UPDATE_KEYSTORE: ${{ secrets.SYNTHAI_UPDATE_KEYSTORE_BASE64 }}
+          UPDATE_STORE_PASSWORD: ${{ secrets.SYNTHAI_UPDATE_STORE_PASSWORD }}
+          UPDATE_KEY_ALIAS: ${{ secrets.SYNTHAI_UPDATE_KEY_ALIAS }}
+          UPDATE_KEY_PASSWORD: ${{ secrets.SYNTHAI_UPDATE_KEY_PASSWORD }}
+        run: |
+          echo "SYNTHAI_VERSION_CODE=$((1000 + GITHUB_RUN_NUMBER))" >> "$GITHUB_ENV"
+          if [[ -n "$UPDATE_KEYSTORE" ]]; then
+            printf '%s' "$UPDATE_KEYSTORE" | base64 --decode > "$RUNNER_TEMP/computer-updates.jks"
+            chmod 600 "$RUNNER_TEMP/computer-updates.jks"
+            echo "SYNTHAI_KEYSTORE=$RUNNER_TEMP/computer-updates.jks" >> "$GITHUB_ENV"
+            echo "SYNTHAI_STORE_PASSWORD=$UPDATE_STORE_PASSWORD" >> "$GITHUB_ENV"
+            echo "SYNTHAI_KEY_ALIAS=$UPDATE_KEY_ALIAS" >> "$GITHUB_ENV"
+            echo "SYNTHAI_KEY_PASSWORD=$UPDATE_KEY_PASSWORD" >> "$GITHUB_ENV"
+          else
+            echo "Persistent signing is not configured; this build cannot publish automatic updates."
+          fi
 
       - name: Enable ARM64 container image builds
         uses: docker/setup-qemu-action@v3
@@ -175,6 +206,12 @@ jobs:
           distribution: temurin
           java-version: '17'
 
+      - name: Verify Android update acceptance policy
+        run: |
+          mkdir -p /tmp/update-policy
+          javac -d /tmp/update-policy android-app/app/src/main/java/app/synthai/updates/UpdatePolicy.java android-app/tests/UpdatePolicyTest.java
+          java -cp /tmp/update-policy UpdatePolicyTest
+
       - name: Install Android SDK 35 without obsolete tools package
         uses: android-actions/setup-android@v3
         with:
@@ -245,6 +282,8 @@ jobs:
         run: |
           APK=android-app/app/build/outputs/apk/venom/debug/app-venom-debug.apk
           unzip -l "$APK" | tee /tmp/apk-tree.txt
+          grep -q 'assets/synthworld/synthworld.pck' /tmp/apk-tree.txt
+          grep -q 'lib/arm64-v8a/libgodot_android.so' /tmp/apk-tree.txt
           grep -q 'assets/linux-rootfs.bundle' /tmp/apk-tree.txt
           unzip -p "$APK" assets/linux-rootfs.bundle | gzip -t
           grep -q 'assets/linux-rootfs.version' /tmp/apk-tree.txt
@@ -337,3 +376,11 @@ jobs:
             android-app/app/build/outputs/apk/hover/debug/app-hover-debug.apk
             android-app/app/build/outputs/apk/hover/debug/app-hover-debug.apk.sha256
           if-no-files-found: error
+
+      - name: Publish verified APK update channel
+        if: ${{ (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) && env.SYNTHAI_KEYSTORE != '' && !startsWith(github.ref_name, 'hover/repair-') }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release view computer-updates --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1 || gh release create computer-updates --repo "$GITHUB_REPOSITORY" --prerelease --title "Computer automatic updates" --notes "Verified phone builds. Android requires installation approval."
+          gh release upload computer-updates --repo "$GITHUB_REPOSITORY" --clobber android-app/app/build/outputs/apk/venom/debug/app-venom-debug.apk android-app/app/build/outputs/apk/hover/debug/app-hover-debug.apk

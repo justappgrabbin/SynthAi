@@ -1,0 +1,7 @@
+{
+  "repository": "https://github.com/justappgrabbin/SYNTHWORLD-",
+  "baseCommit": "d40066bc71613aab426efb5172a2faef85c6a88b",
+  "repairCommit": "a98e2e7d3965bc2cda66d2f265b5069414946328",
+  "engine": "Godot 4.6.3",
+  "integration": "native Android Godot activity; private saved state"
+}

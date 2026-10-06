@@ -1,6 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <uses-permission android:name="android.permission.INTERNET" />
 
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
     <!-- Shared by both faces. Components live in src/venom and src/hover manifests. -->
     <application
         android:allowBackup="true"
@@ -8,5 +9,14 @@
         android:label="${appLabel}"
         android:supportsRtl="true"
         android:usesCleartextTraffic="true"
-        android:theme="@android:style/Theme.Material.NoActionBar" />
+        android:theme="@android:style/Theme.Material.NoActionBar">
+        <activity android:name="app.synthai.computer.SynthworldActivity"
+            android:exported="false" android:process=":synthworld"
+            android:configChanges="orientation|keyboardHidden|screenSize|smallestScreenSize|screenLayout|uiMode"
+            android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen" />
+        <provider android:name="app.synthai.updates.UpdateFileProvider"
+            android:authorities="${applicationId}.updates" android:exported="false" android:grantUriPermissions="true">
+            <meta-data android:name="android.support.FILE_PROVIDER_PATHS" android:resource="@xml/update_paths" />
+        </provider>
+    </application>
 </manifest>

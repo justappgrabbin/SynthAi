@@ -41,6 +41,7 @@ public final class MainActivity extends Activity {
     @Override
     protected void onCreate(Bundle state) {
         super.onCreate(state);
+        app.synthai.updates.AutoUpdates.start(this);
 
         startService(new Intent(this, ComputerBackendService.class));
 
@@ -156,6 +157,7 @@ public final class MainActivity extends Activity {
         @Override
         public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
             Uri uri = request.getUrl();
+
             if (!APP_HOST.equals(uri.getHost())) return super.shouldInterceptRequest(view, request);
 
             String rawPath = uri.getPath();
@@ -180,6 +182,10 @@ public final class MainActivity extends Activity {
         @Override
         public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
             Uri uri = request.getUrl();
+            if (request.isForMainFrame() && "synthai".equals(uri.getScheme()) && "synthworld".equals(uri.getHost())) {
+                startActivity(new Intent(MainActivity.this, SynthworldActivity.class));
+                return true;
+            }
             if (APP_HOST.equals(uri.getHost())) return false;
             if ("http".equals(uri.getScheme()) && "127.0.0.1".equals(uri.getHost())
                     && uri.getPort() == 17383) return false;
