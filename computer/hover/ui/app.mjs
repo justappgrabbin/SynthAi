@@ -105,6 +105,7 @@ async function sendChat(text, replay = false) {
     }
     const result = await api('/api/chat', { method: 'POST', body: JSON.stringify({ message: trimmed, context: { ...identityContext, surface: activeSurface } }) });
     addMessage('synthia', result.utterance || result.output || '(processed)');
+    if (result.contact?.action) addMessage('synthia', `Phone action: ${result.contact.action.action}`);
     if (result.pipelineTrace) addMessage('', `Trace · ${result.pipelineTrace.map((x) => x.stage).join(' → ')}`, true);
     await syncMorphAppearance();
   } catch (error) {

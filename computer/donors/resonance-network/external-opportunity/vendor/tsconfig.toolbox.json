@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "CommonJS",
+    "moduleResolution": "Node",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "types": [
+      "node"
+    ],
+    "outDir": "./synthia-toolbox-cjs",
+    "rootDir": "./synthia-toolbox-src",
+    "typeRoots": [
+      "/opt/nvm/versions/node/v22.16.0/lib/node_modules/ts-node/node_modules/@types"
+    ]
+  },
+  "include": [
+    "./synthia-toolbox-src/**/*.ts"
+  ]
+}

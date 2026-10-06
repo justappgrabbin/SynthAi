@@ -10,7 +10,7 @@
   <title>SynthAI Computer</title>
   <link rel="stylesheet" href="/computer.css">
 </head>
-<body>
+<body class="phone-os">
   <div class="computer">
     <aside class="rail">
       <div class="brand">
@@ -19,9 +19,13 @@
       </div>
       <nav id="nav">
         <button class="nav active" data-view="home">⌂ <span>Home</span></button>
+        <button class="nav" data-view="world">◎ <span>World</span></button>
+        <button class="nav" data-view="resonance">⌁ <span>Network</span></button>
         <button class="nav" data-view="build">✦ <span>Build</span></button>
         <button class="nav" data-view="files">▤ <span>Files</span></button>
         <button class="nav" data-view="github">⌁ <span>GitHub</span></button>
+        <button class="nav" data-view="apps">▦ <span>App addresses</span></button>
+        <button class="nav" data-view="admin">⚙ <span>Owner admin</span></button>
         <button class="nav" data-view="systems">◫ <span>Systems</span></button>
         <button class="nav" data-view="activity">↯ <span>Activity</span></button>
       </nav>
@@ -32,7 +36,7 @@
       <header class="topbar">
         <div>
           <small class="eyebrow">PRIMARY OPERATING SURFACE</small>
-          <h1 id="viewTitle">Computer Home</h1>
+          <h1 id="viewTitle">Venom</h1>
         </div>
         <div class="statusline">
           <span class="dot" id="bootDot"></span>
@@ -41,6 +45,20 @@
       </header>
 
       <section class="view active" id="home">
+        <div class="phone-clock"><time id="phoneClock"></time><p id="phoneDate"></p></div>
+        <div class="phone-launcher" aria-label="Applications">
+          <button data-go="world"><b>◎</b><span>Consciousness Realm</span></button>
+          <a class="button" href="synthai://synthworld"><b>✧</b><span>Synthworld</span></a>
+          <button data-go="resonance"><b>⌁</b><span>Resonance Network</span></button>
+          <button data-go="build"><b>✦</b><span>Build</span></button>
+          <button data-go="files"><b>▤</b><span>Files</span></button>
+          <button data-go="github"><b>⌘</b><span>GitHub</span></button>
+          <button data-go="systems"><b>◫</b><span>Systems</span></button>
+          <button data-go="activity"><b>↯</b><span>Activity</span></button>
+        </div>
+        <article class="panel"><h3>Coming up</h3><div id="appUpcoming" role="status">No scheduled activities.</div><div id="appSuggestions"></div></article>
+        <p id="phoneNetworkStatus" role="status">Starting on-device services…</p>
+        <details class="phone-runtime"><summary>Computer status</summary>
         <div class="hero">
           <div>
             <span class="pill">SynthAI Computer</span>
@@ -79,8 +97,36 @@
           </div>
           <pre id="phoneReport">No phone check recorded yet.</pre>
         </article>
+        </details>
       </section>
 
+      <section class="view" id="world">
+        <p id="realmStatus" role="status">Starting Consciousness Realm…</p>
+        <iframe id="realmApp" title="Consciousness Realm" src="/realm/index.html" allow="autoplay"></iframe>
+        <details class="phone-runtime"><summary>World and avatar</summary>
+          <label>Enter world<select id="worldSelect"></select></label>
+          <div class="row"><button id="hostWorld" class="quiet">Host my world</button><button id="leaveWorld" class="quiet">Leave shared world</button></div>
+          <label>World invitation<input id="worldInvite" type="text" placeholder="Paste a world invitation"></label>
+          <div class="row"><button id="joinWorld" class="quiet">Join world</button><button id="copyWorldInvite" class="quiet">Copy my invitation</button></div>
+          <p id="roomStatus" class="muted">Your local world</p>
+          <label>Describe your world<textarea id="worldRequest" rows="3" placeholder="Rainbows are structures and butterflies are people"></textarea></label>
+          <p class="muted">Choose once. Your world keeps this choice, and visitors take its forms. In other worlds, you take the host's forms while keeping your identity.</p>
+          <button id="chooseWorld" class="primary">Create my world once</button>
+          <p id="worldChoiceStatus" role="status"></p>
+          <label>Avatar photo<input id="avatarPhoto" type="file" accept="image/png,image/jpeg,image/webp"></label>
+          <label>Interaction sprite sheet<input id="avatarSheet" type="file" accept="image/png,image/jpeg,image/webp"></label>
+          <label>Frames across sheet<input id="avatarFrames" type="number" min="1" max="64" value="1"></label>
+          <button id="saveWorld" class="primary">Save my photo and animations</button>
+          <button id="downloadAvatar" class="quiet">Download my 12-state sprite sheet</button>
+          <p class="muted">Your photo remains your identity. Your chosen world supplies your form; other places supply theirs. Object interactions add temporary states. You can also import an authored sprite sheet for your human form.</p>
+          <label>Swarm expression<select id="swarmEncoding"><option value="binary">Binary</option><option value="ascii">ASCII</option><option value="nato">NATO</option><option value="transliteration">Transliteration</option><option value="unicode">Unicode</option></select></label>
+          <details><summary>Inspect expression</summary><pre id="expressionInspector">Load your Resonance profile to inspect its expressions.</pre><button id="hearAddress" class="quiet">Read the address aloud</button><button id="playAddress" class="quiet">Hear its sound expression</button></details>
+        </details>
+      </section>
+      <section class="view" id="resonance">
+        <p id="resonanceStatus" role="status">Starting Resonance Network…</p>
+        <iframe id="resonanceApp" title="Resonance Network" allow="clipboard-write"></iframe>
+      </section>
       <section class="view" id="build">
         <div class="builder-grid">
           <article class="panel project-panel">
@@ -157,6 +203,29 @@
         </article>
       </section>
 
+      <section class="view" id="apps">
+        <article class="panel"><h3>Apps by address</h3><p>Open an app by its address or send a file to its private inbox. Routing stores the file; it does not execute imported code.</p>
+        <label>App address<input id="appAddress" value="app://computer/files"></label><button id="openAddress">Open address</button>
+        <div id="addressApps"></div><label>Import file (up to 2 MB)<input id="addressFile" type="file"></label>
+        <div id="addressInbox"></div><p id="addressStatus" role="status"></p></article>
+      </section>
+      <section class="view" id="admin">
+        <article class="panel"><h3>Owner admin</h3><p id="adminInfo">Set up your owner PIN on this device.</p>
+        <label>Owner PIN<input id="ownerPin" type="password" inputmode="numeric" minlength="6" maxlength="12" autocomplete="off"></label>
+        <button id="unlockOwner">Unlock / set up owner</button><button id="lockOwner">Lock</button>
+        <div id="ownerControls" hidden>
+          <h4>Settings</h4><label><input id="addressEnabled" type="checkbox"> Enable the app-address system</label>
+          <label><input id="suggestionsEnabled" type="checkbox"> Suggest timely apps</label><button id="saveAddressSettings">Save settings</button>
+          <p>Turning the system off removes its suggestions and routing. Your files stay on this device. Re-enable it here.</p>
+          <div id="adminAppSettings"></div>
+          <h4>Schedule an app</h4><label>App<select id="scheduleApp"></select></label><label>Activity<input id="scheduleLabel" placeholder="Visit my world"></label>
+          <label>When<input id="scheduleWhen" type="datetime-local"></label><button id="scheduleAddress">Schedule</button><div id="adminScheduleList"></div>
+          <h4>GPT plugin</h4><p>Messages you send here go to OpenAI. Files are not attached automatically. An API key is required; ChatGPT subscriptions do not supply API access.</p>
+          <label>OpenAI API key<input id="gptKey" type="password" autocomplete="off"></label><label>GPT model<input id="gptModel" value="gpt-4.1-mini"></label>
+          <button id="saveGpt">Configure GPT</button><button id="removeGpt">Remove GPT key</button><label>Message<textarea id="gptMessage" rows="3"></textarea></label>
+          <button id="askGpt">Ask GPT</button><pre id="gptReply" role="status"></pre>
+        </div><p id="adminStatus" role="status"></p></article>
+      </section>
       <section class="view" id="activity">
         <article class="panel">
           <div class="panel-head"><div><small>EVENT BUS</small><h3>Runtime activity</h3></div><button class="quiet" id="clearActivity">Clear view</button></div>

@@ -76,6 +76,7 @@ export class IndiVerseRuntime {
   canonicalObject(id) { return this.state.get(`indiverse.canonical.${safeKey(id)}`, null); }
 
   async createWorld(ownerId, { id = `indiverse:${ownerId}`, name = null, grammar = {}, publicState = {}, metadata = {} } = {}) {
+    if (this.world(id)?.metadata?.worldChoice) throw new Error('This world has already been chosen');
     const record = {
       id: String(id), ownerId: String(ownerId), name: name ?? `${ownerId} IndiVerse`,
       grammar: mergeGrammar(grammar), publicState: clone(publicState), metadata: clone(metadata),
@@ -95,9 +96,22 @@ export class IndiVerseRuntime {
 
   world(id) { return this.state.get(`indiverse.worlds.${safeKey(id)}`, null); }
 
+  async chooseWorld(worldId, ownerId, definition) {
+    const world = this.world(worldId);
+    if (!world || world.ownerId !== String(ownerId)) throw new Error('Only the owner can establish this world');
+    if (world.metadata?.worldChoice) throw new Error('Your world has already been chosen');
+    const next = { ...world, name: definition.request, grammar: mergeGrammar(definition.grammar),
+      metadata: { ...world.metadata, worldChoice: { request: definition.request, fields: clone(definition.fields), eventId: definition.eventId, generator: definition.generator, chosenAt: this.clock() } }, updatedAt: this.clock() };
+    // Choice and its executable grammar are one durable snapshot.
+    await this.state.set(`indiverse.worlds.${safeKey(worldId)}`, next, { source: 'indiverse' });
+    this.bus?.emit('indiverse:world-chosen', clone(next));
+    return clone(next);
+  }
+
   async updateGrammar(worldId, patch = {}) {
     const world = this.world(worldId);
     if (!world) throw new Error(`unknown IndiVerse: ${worldId}`);
+    if (world.metadata?.worldChoice) throw new Error('This world has already been chosen');
     const next=clone(world.grammar??{})??{};
     for(const [key,value] of Object.entries(patch??{})){
       if(value&&typeof value==='object'&&!Array.isArray(value)){

@@ -3,6 +3,9 @@ import { mkdir } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { ComputerRuntime } from '../ComputerRuntime.mjs';
 import { FilePersistence } from './file-persistence.mjs';
+import { startResonanceSupervisor } from './resonance-supervisor.mjs';
+import { AddressApps } from './address-apps.mjs';
+import { PhoneWorldSession } from './phone-world-session.mjs';
 
 const HOST = process.env.SYNTHAI_LOCAL_HOST || '127.0.0.1';
 const PORT = Number(process.env.SYNTHAI_LOCAL_PORT || 17380);
@@ -30,6 +33,8 @@ if (process.env.SYNTHIA_EMBEDDED === '1') {
     console.error('SYNTHIA_SUPERVISOR_FAILED ' + String(error && error.stack || error));
   }
 }
+const resonance = process.env.RESONANCE_EMBEDDED === '1' ? startResonanceSupervisor() : null;
+process.on('exit', () => resonance?.stop('SIGKILL'));
 const synthiaStatus = () => {
   if (!synthia) return { embedded: process.env.SYNTHIA_EMBEDDED === '1', children: {} };
   try { return synthia.status(); } catch (error) { return { embedded: true, error: String(error && error.message || error) }; }
@@ -42,11 +47,16 @@ const runtime = await new ComputerRuntime({
   eventLogPath: EVENT_LOG
 }).boot();
 
+const phoneWorld = await new PhoneWorldSession({ state: runtime.state, bus: runtime.bus }).boot();
+
+const addressApps = await new AddressApps({ state: runtime.state, vfs: runtime.vfs, privateStore: new FilePersistence(resolve(STATE_DIR, 'owner-private')) }).boot();
+
 function cors(req, res) {
   const origin = req.headers.origin;
   if (origin === 'https://appassets.androidplatform.net' || origin === 'http://127.0.0.1' || origin === 'http://localhost') {
     res.setHeader('Access-Control-Allow-Origin', origin);
     res.setHeader('Vary', 'Origin');
+    res.setHeader('Access-Control-Allow-Private-Network', 'true');
   }
   res.setHeader('Access-Control-Allow-Headers', 'Authorization, Content-Type, X-SynthAI-Local-Token');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
@@ -82,7 +92,30 @@ async function readJson(req) {
 }
 
 const calls = new Map([
+  ['apps.snapshot', () => addressApps.snapshot()],
+  ['apps.resolve', args => addressApps.resolve(...args)],
+  ['apps.import', args => addressApps.importFile(...args)],
+  ['apps.routeFile', args => addressApps.routeFile(...args)],
+  ['apps.readFile', args => addressApps.readFile(...args)],
+  ['apps.suggestions', args => addressApps.suggestions(...args)],
+  ['admin.setup', args => addressApps.setup(...args)],
+  ['admin.login', args => addressApps.login(...args)],
+  ['admin.logout', args => addressApps.logout(...args)],
+  ['admin.configure', args => addressApps.configure(...args)],
+  ['admin.schedule', args => addressApps.schedule(...args)],
+  ['admin.cancel', args => addressApps.cancel(...args)],
+  ['admin.gpt.configure', args => addressApps.configureGPT(...args)],
+  ['admin.gpt.chat', args => addressApps.chat(...args)],
   ['snapshot', () => runtime.snapshot()],
+  ['phone.runtime', async () => ({ resonance: resonance?.status() ?? { embedded: false }, realm: await phoneWorld.runtime() })],
+  ['phone.hostRoom', () => phoneWorld.hostRoom()],
+  ['phone.joinRoom', args => phoneWorld.joinRoom(args[0])],
+  ['phone.leaveRoom', () => phoneWorld.leaveRoom()],
+  ['phone.bindProfile', args => phoneWorld.bindProfile(args[0])],
+  ['phone.enterWorld', args => phoneWorld.enterWorld(args[0])],
+  ['phone.preferences', args => phoneWorld.preferences(args[0])],
+  ['phone.chooseWorld', args => phoneWorld.chooseWorld(args[0])],
+  ['phone.observe', args => phoneWorld.observe(args[0])],
   ['queryCapability', args => runtime.queryCapability(...args)],
   ['route', args => runtime.route(...args)],
   ['resolveAddress', args => runtime.resolveAddress(...args)],
@@ -180,6 +213,8 @@ server.listen(PORT, HOST, () => {
 const stop = signal => {
   console.log('SYNTHAI_LOCAL_BACKEND_STOP ' + signal);
   try { synthia?.stop('SIGTERM'); } catch { /* keep stopping */ }
+  resonance?.stop('SIGTERM');
+  phoneWorld.room.leave().catch(() => {});
   server.close(() => process.exit(0));
   setTimeout(() => process.exit(0), 1500).unref();
 };

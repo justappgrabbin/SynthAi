@@ -2,3 +2,20 @@ node_modules/
 mobile-web/
 android/
 public/computer-runtime/
+
+__pycache__/
+*.pyc
+computer/donors/resonance-network/frontend/dist/
+computer/donors/resonance-network/backend/*.db
+computer/donors/consciousness-realm/dist/
+public/realm/
+computer/donors/consciousness-realm/.cache/
+
+# Native engine caches and generated APK game packs
+**/.godot/
+android-app/app/src/main/assets/synthworld/*.pck
+android-app/.gradle/
+android-app/app/build/
+*.jks
+*.p12
+signing.json

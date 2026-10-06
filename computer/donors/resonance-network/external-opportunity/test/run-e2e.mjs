@@ -1,0 +1,30 @@
+import { spawn } from 'node:child_process';
+import fs from 'node:fs';
+import path from 'node:path';
+import os from 'node:os';
+import assert from 'node:assert/strict';
+import { fileURLToPath } from 'node:url';
+const here=path.dirname(fileURLToPath(import.meta.url));
+const root=path.dirname(here);
+const port=18912;
+const state=fs.mkdtempSync(path.join(os.tmpdir(),'rn-opp-e2e-'));
+const tokenFile=path.join(state,'invite-token.txt');
+const cfg={servers:[{id:'hotel-test',name:'Mock Hotel MCP',transport:'stdio',command:process.execPath,args:[path.join(here,'mock-external-mcp-server.mjs')],env:{MOCK_INVITE_TOKEN_FILE:tokenFile},discoveryTools:['find_opportunities'],invitationTool:'hotel-test::receive_opportunity_invitation',installationTool:'hotel-test::offer_synthia_install'}]};
+const child=spawn(process.execPath,[path.join(root,'service.mjs')],{env:{...process.env,SYNTHIA_OPPORTUNITY_PORT:String(port),SYNTHIA_OPPORTUNITY_STATE_DIR:state,SYNTHIA_MCP_SERVERS_JSON:JSON.stringify(cfg),SYNTHIA_CONSENT_SECRET:'e2e-secret'},stdio:['ignore','pipe','inherit']});
+const base=`http://127.0.0.1:${port}`;
+const wait=()=>new Promise((resolve,reject)=>{let n=0;const t=setInterval(async()=>{try{const r=await fetch(base+'/health');if(r.ok){clearInterval(t);resolve();}}catch{}if(++n>80){clearInterval(t);reject(new Error('service did not start'));}},50)});
+const post=async(p,b)=>{const r=await fetch(base+p,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(b)});const j=await r.json();if(!r.ok) throw new Error(`${p}: ${r.status} ${JSON.stringify(j)}`);return j;};
+try{
+ await wait();
+ const discovered=await post('/discover',{need:{owner:'rn-user',description:'Need a hotel willing to trial guest-personalization software',requiredCapabilities:['guest_personalization'],urgency:.8},networkOffer:['free trial','implementation support'],evidence:[{confidence:.9,relevance:.9}]});
+ assert.equal(discovered.layer,'mcp'); assert.equal(discovered.opportunities.length,1); const opp=discovered.opportunities[0]; assert.equal(opp.candidate.networkMember,false); assert.equal(opp.eligible,true);
+ const inv=await post('/invite',{opportunityId:opp.opportunityId,message:'Would you like to try this product?'}); assert.equal(inv.sent,true);
+ for(let i=0;i<40&&!fs.existsSync(tokenFile);i++) await new Promise(r=>setTimeout(r,25));
+ const responseToken=fs.readFileSync(tokenFile,'utf8');
+ const accepted=await post('/respond',{opportunityId:opp.opportunityId,response:'accepted',subjectId:'hotel-aurora',responseToken}); assert.ok(accepted.collaborationConsent.token);
+ const install=await post('/install/approve',{opportunityId:opp.opportunityId,subjectId:'hotel-aurora',scope:['local_runtime'],collaborationConsentToken:accepted.collaborationConsent.token}); assert.ok(install.token);
+ const deployed=await post('/install/deploy',{opportunityId:opp.opportunityId,deviceOwnerId:'hotel-aurora',packageId:'synthia-lite',installationConsentToken:install.token}); assert.equal(deployed.ok,true);
+ const outcome=await post('/outcome',{opportunityId:opp.opportunityId,outcome:{accepted:true,collaborationOccurred:true,perceivedBenefitA:.8,perceivedBenefitB:.9,economicValue:0}}); assert.equal(outcome.outcome.collaborationOccurred,true);
+ const health=await (await fetch(base+'/health')).json(); assert.equal(health.ledgerVerified,true);
+ console.log(JSON.stringify({ok:true,opportunityId:opp.opportunityId,layer:discovered.layer,externalCandidate:opp.candidate.name,invite:inv.sent,install:deployed.ok,ledgerVerified:health.ledgerVerified},null,2));
+} finally { child.kill('SIGTERM'); }

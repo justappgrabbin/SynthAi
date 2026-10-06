@@ -5,13 +5,15 @@ plugins {
 android {
     namespace 'app.synthai.computer'
     compileSdk 35
+    buildToolsVersion "35.0.0"
 
     defaultConfig {
         applicationId 'app.synthai.computer'
         minSdk 26
         targetSdk 35
-        versionCode 2
-        versionName '0.4.0'
+        ndk { abiFilters 'arm64-v8a', 'x86_64' }
+        versionCode Integer.parseInt(System.getenv('SYNTHAI_VERSION_CODE') ?: '3')
+        versionName '0.4.1-synthworld'
     }
 
     // Two faces share the PRoot/rootfs plumbing but ship separately:
@@ -27,23 +29,35 @@ android {
         hover {
             dimension 'face'
             applicationId 'app.synthai.hover'
-            versionCode 59
+            versionCode Integer.parseInt(System.getenv('SYNTHAI_VERSION_CODE') ?: '60')
             versionName '0.5.8-hover-repair1'
             manifestPlaceholders = [appLabel: 'Synthia']
         }
     }
 
+    signingConfigs {
+        updates {
+            def configured = System.getenv('SYNTHAI_KEYSTORE')
+            if (configured) {
+                storeFile file(configured)
+                storePassword System.getenv('SYNTHAI_STORE_PASSWORD')
+                keyAlias System.getenv('SYNTHAI_KEY_ALIAS')
+                keyPassword System.getenv('SYNTHAI_KEY_PASSWORD')
+            }
+        }
+    }
     buildTypes {
         release {
             minifyEnabled false
         }
         debug {
+            if (System.getenv('SYNTHAI_KEYSTORE')) signingConfig signingConfigs.updates
             debuggable true
         }
     }
 
     androidResources {
-        noCompress += ['bundle']
+        noCompress += ['bundle', 'pck']
     }
 
     packaging {
@@ -54,5 +68,9 @@ android {
 }
 
 dependencies {
+    implementation 'org.godotengine:godot:4.6.3.stable'
+    implementation 'androidx.fragment:fragment:1.8.6'
+    implementation 'androidx.work:work-runtime:2.9.1'
+    implementation 'androidx.core:core:1.13.1'
     implementation 'org.apache.commons:commons-compress:1.27.1'
 }

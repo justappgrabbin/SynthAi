@@ -1,0 +1,9 @@
+{
+  "fileId": "1iMkai1ewVPe3CdWww25nwLZ7RqSsyxi_",
+  "archive": "Synthia-Dream-Habitat-v0.4-1.zip",
+  "archiveSha256": "b985eb5169c0a1cf56660ad1f0503c97630531b0c67127895d6102599aa38e44",
+  "module": "src/synthia/five-substrate/grammarKernel.mjs",
+  "moduleSha256": "fd04fd953d1077e4b70189ae490b25b46e9005c66de24d881b83bbb61b23e4ba",
+  "preservation": "Copied without modification. Local rules are registered by world-request.mjs.",
+  "verification": "Supplied verify:habitat and verify:world scripts pass in the extracted source."
+}

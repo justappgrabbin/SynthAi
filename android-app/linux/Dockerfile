@@ -1,3 +1,12 @@
+# Frontend output is architecture-independent. Run Vite/npm on the builder
+# rather than emulating ARM64 native install scripts under QEMU.
+FROM --platform=$BUILDPLATFORM node:22-alpine3.22 AS resonance-frontend
+WORKDIR /build
+COPY computer/donors/resonance-network/frontend/package*.json ./
+RUN npm ci --no-audit --no-fund
+COPY computer/donors/resonance-network/frontend ./
+RUN npm run build
+
 FROM node:22-alpine3.22
 
 RUN apk add --no-cache \
@@ -8,6 +17,13 @@ RUN apk add --no-cache \
     tzdata
 
 COPY computer /opt/synthai/computer
+COPY computer/donors/resonance-network /opt/resonance
+COPY --from=resonance-frontend /build/dist /opt/resonance/frontend/dist
+RUN apk add --no-cache py3-numpy \
+    && python3 -m venv --system-site-packages /opt/resonance-venv \
+    && /opt/resonance-venv/bin/pip install --no-cache-dir -r /opt/resonance/backend/requirements.txt \
+    && rm -rf /opt/synthai/computer/donors/resonance-network
+
 
 # Embedded Synthia Server (checked out by CI at a pinned SHA into ./synthia-server).
 # Only the lite Node bus and the Python API run on the phone, so heavy/native

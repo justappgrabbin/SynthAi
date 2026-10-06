@@ -46,6 +46,7 @@ public final class MainActivity extends Activity {
     @Override
     protected void onCreate(Bundle state) {
         super.onCreate(state);
+        app.synthai.updates.AutoUpdates.start(this);
         if (state != null) {
             askedOverlay = state.getBoolean(STATE_ASKED_OVERLAY, false);
             askedHands = state.getBoolean(STATE_ASKED_HANDS, false);
@@ -141,6 +142,10 @@ public final class MainActivity extends Activity {
             updateStatus();
         });
         root.addView(start, matchWrap());
+
+        Button world = button("Open Synthworld");
+        world.setOnClickListener(v -> startActivity(new Intent(this, app.synthai.computer.SynthworldActivity.class)));
+        root.addView(world, matchWrap());
 
         Button mic = button("Allow microphone (optional)");
         mic.setOnClickListener(v -> requestPermissions(new String[]{Manifest.permission.RECORD_AUDIO}, 102));

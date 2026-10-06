@@ -10,7 +10,8 @@
     "android:init": "npm run build:mobile && npx cap add android",
     "android:sync": "npm run build:mobile && npx cap sync android",
     "android:debug": "npm run android:sync && cd android && ./gradlew assembleDebug",
-    "test": "npm run test:computer && npm run build:computer"
+    "test": "npm run test:computer && npm run build:computer",
+    "build:realm": "node computer/build-phone-realm.mjs"
   },
   "dependencies": {
     "@capacitor/android": "8.5.2",

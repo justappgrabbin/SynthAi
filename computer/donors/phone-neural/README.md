@@ -1,0 +1,1 @@
+Exact phone inference donors copied from the canonical Hover pure-synthia-v0.4.0 neural modules. GNN training metadata remains in the original module. Connection field state is persisted by PhoneWorldSession.

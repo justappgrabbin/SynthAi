@@ -1,0 +1,16 @@
+{
+  "name": "resonance-network-external-opportunity",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node service.mjs",
+    "test:core": "cd core && node --test test/*.js",
+    "test:stdio": "node test/run-e2e.mjs",
+    "test:http": "node test/run-http-e2e.mjs",
+    "test": "npm run test:core && npm run test:stdio && npm run test:http"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

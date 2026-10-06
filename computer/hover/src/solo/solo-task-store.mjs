@@ -45,6 +45,7 @@ export class SoloTaskStore {
       id: `task-${++this.state.sequence}`,
       text: clean,
       done: false,
+      status: 'queued',
       source: String(source || 'user'),
       context: clone(context || {}),
       createdAt: now,
@@ -68,6 +69,7 @@ export class SoloTaskStore {
     for (const key of ['status', 'result', 'error', 'startedAt', 'finishedAt']) {
       if (Object.prototype.hasOwnProperty.call(patch, key)) task[key] = String(patch[key] ?? '');
     }
+    if (Object.prototype.hasOwnProperty.call(patch, 'evidence')) task.evidence = clone(patch.evidence);
     task.updatedAt = new Date().toISOString();
     await this.save();
     return freeze(clone(task));

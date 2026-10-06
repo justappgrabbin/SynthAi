@@ -1,11 +1,13 @@
 import { mkdir, readFile, rename, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
+import { randomUUID } from 'node:crypto';
 
 const keyName = key => Buffer.from(String(key)).toString('base64url') + '.json';
 
 export class FilePersistence {
   constructor(root = process.env.SYNTHAI_STATE_DIR || '/var/lib/synthai') {
     this.root = root;
+    this.saves = new Map();
   }
 
   pathFor(key) {
@@ -23,12 +25,18 @@ export class FilePersistence {
   }
 
   async save(key, value) {
-    await mkdir(this.root, { recursive: true });
-    const target = this.pathFor(key);
-    const temp = target + '.tmp-' + process.pid + '-' + Date.now();
-    await writeFile(temp, JSON.stringify(value), { encoding: 'utf8', mode: 0o600 });
-    await rename(temp, target);
-    return true;
+    const contents = JSON.stringify(value);
+    const running = (this.saves.get(key) ?? Promise.resolve()).catch(() => {}).then(async () => {
+      await mkdir(this.root, { recursive: true });
+      const target = this.pathFor(key);
+      const temp = target + '.tmp-' + process.pid + '-' + randomUUID();
+      await writeFile(temp, contents, { encoding: 'utf8', mode: 0o600 });
+      await rename(temp, target);
+      return true;
+    });
+    this.saves.set(key, running);
+    try { return await running; }
+    finally { if (this.saves.get(key) === running) this.saves.delete(key); }
   }
 }
 

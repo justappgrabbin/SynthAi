@@ -77,6 +77,7 @@ export function synthiaChildSpecs(env = process.env) {
 
 export function startSynthiaSupervisor({
   env = process.env,
+  childSpec = null,
   out = line => console.log(line),
   spawnImpl = spawn,
   fetchImpl = globalThis.fetch,
@@ -85,7 +86,7 @@ export function startSynthiaSupervisor({
   stableAfterMs = 60000,
   probeIntervalMs = 2000
 } = {}) {
-  const spec = synthiaChildSpecs(env);
+  const spec = childSpec ?? synthiaChildSpecs(env);
   const states = new Map();
   let stopping = false;
 
@@ -108,7 +109,7 @@ export function startSynthiaSupervisor({
   const probe = async (child, state, generation) => {
     while (!stopping && state.generation === generation && state.state === 'starting') {
       try {
-        const response = await fetchImpl(`http://${LOOPBACK}:${child.port}/health`, { signal: AbortSignal.timeout(1500) });
+        const response = await fetchImpl(`http://${LOOPBACK}:${child.port}${child.healthPath ?? '/health'}`, { signal: AbortSignal.timeout(1500) });
         if (response.ok) {
           state.state = 'ready';
           state.readyAt = new Date().toISOString();

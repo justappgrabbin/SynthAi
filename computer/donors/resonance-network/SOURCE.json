@@ -1,0 +1,18 @@
+{
+  "name": "Resonance-Network-Social-Organism-MCP-Wired.zip",
+  "bytes": 74697605,
+  "sha256": "75de567550efd6f0816a0225c847aa7e29aa1b50565fad7c56796b07f20c040b",
+  "driveFileId": "18GqsWxe42vBFEeTwOjUep5jCowza88va",
+  "runtimeDirectories": [
+    "backend",
+    "frontend",
+    "hub-services",
+    "external-opportunity"
+  ],
+  "excluded": [
+    "platform-specific venv",
+    "cache/build outputs",
+    "installation state and MCP server configuration",
+    "biverse preserved data/reference copies (not imported by this app)"
+  ]
+}

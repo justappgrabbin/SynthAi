@@ -860,6 +860,8 @@ export class FederatedSynthia {
       type: 'chat-task',
       payload: String(message),
       relationalContext: {
+        phonePerception: safe(context.phonePerception ?? null),
+        actionReceipt: safe(context.actionReceipt ?? null),
         personId: context.personId ?? 'default-person',
         agentId: context.agentId ?? 'synthia',
         birthMirrorConfigurationId: context.birthMirrorConfigurationId ?? null,

@@ -5,9 +5,11 @@ on:
     branches:
       - integration/github-only-app-20260923
       - 'hover/**'
+      - 'fix/venom-hover-runtime-*'
   pull_request:
     branches:
       - main
+      - integrate/canonical-hover
       - integration/github-only-app-20260923
       - recovery/computer-visible-home-smoke-20260925
     paths:
@@ -26,7 +28,7 @@ concurrency:
   cancel-in-progress: true
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   verify-and-build:
@@ -55,13 +57,27 @@ jobs:
       - name: Verify canonical Computer and local backend
         run: npm test
 
+      - name: Verify the supplied Resonance Network is executable
+        run: |
+          python -m venv /tmp/resonance-test
+          /tmp/resonance-test/bin/pip install -r computer/donors/resonance-network/backend/requirements.txt
+          npm ci --prefix computer/donors/resonance-network/frontend --no-audit --no-fund
+          npm run build --prefix computer/donors/resonance-network/frontend
+          RESONANCE_PYTHON=/tmp/resonance-test/bin/python3 node computer/tests/resonance-live-smoke.mjs
+
       - name: Verify Hover birth entry, task queue and embedded Talk
         run: |
           python -m pip install -r computer/donors/synthia58/extras/Cynthia-Talk-v1-unmodified/requirements.txt
-          node --test --test-concurrency=1 computer/hover/test/09-front-screen.test.mjs computer/hover/test/11-birth-mirror-runtime.test.mjs computer/hover/test/20-hover-task-worker.test.mjs
+          node --test --test-concurrency=1 computer/hover/test/22-phone-contact.test.mjs computer/hover/test/09-front-screen.test.mjs computer/hover/test/11-birth-mirror-runtime.test.mjs computer/hover/test/20-hover-task-worker.test.mjs
           npm install --prefix /tmp/hover-ui-test playwright@1.58.2
           /tmp/hover-ui-test/node_modules/.bin/playwright install --with-deps chromium
           node .github/scripts/hover-ui-smoke.mjs
+
+      - name: Verify real Resonance onboarding and returning-profile sign-in
+        run: node .github/scripts/resonance-entry-smoke.mjs
+
+      - name: Build the actual Consciousness Realm phone renderer
+        run: npm run build:realm
 
       - name: Copy the verified browser surface into Android assets
         run: |
@@ -70,6 +86,37 @@ jobs:
           mkdir -p android-app/app/src/main/assets/licenses android-app/app/src/venom/assets android-app/app/src/hover/assets
           cp -R public/. android-app/app/src/venom/assets/
           cp android-app/THIRD_PARTY_NOTICES.md android-app/app/src/main/assets/licenses/THIRD_PARTY_NOTICES.md
+
+      - name: Build and verify native Synthworld game pack
+        run: |
+          curl --fail --location --retry 3 https://github.com/godotengine/godot/releases/download/4.6.3-stable/Godot_v4.6.3-stable_linux.x86_64.zip -o /tmp/godot.zip
+          unzip -q /tmp/godot.zip -d /tmp/godot
+          GODOT=/tmp/godot/Godot_v4.6.3-stable_linux.x86_64
+          "$GODOT" --headless --path computer/native/synthworld/game --editor --import
+          timeout 30 "$GODOT" --headless --path computer/native/synthworld/game --script res://tests/execution_test.gd
+          mkdir -p android-app/app/src/main/assets/synthworld
+          "$GODOT" --headless --path computer/native/synthworld/game --export-pack Android "$PWD/android-app/app/src/main/assets/synthworld/synthworld.pck"
+          test -s android-app/app/src/main/assets/synthworld/synthworld.pck
+          cp computer/native/synthworld/GODOT-LICENSE.txt android-app/app/src/main/assets/licenses/GODOT-LICENSE.txt
+
+      - name: Configure persistent APK signing and increasing version
+        env:
+          UPDATE_KEYSTORE: ${{ secrets.SYNTHAI_UPDATE_KEYSTORE_BASE64 }}
+          UPDATE_STORE_PASSWORD: ${{ secrets.SYNTHAI_UPDATE_STORE_PASSWORD }}
+          UPDATE_KEY_ALIAS: ${{ secrets.SYNTHAI_UPDATE_KEY_ALIAS }}
+          UPDATE_KEY_PASSWORD: ${{ secrets.SYNTHAI_UPDATE_KEY_PASSWORD }}
+        run: |
+          echo "SYNTHAI_VERSION_CODE=$((1000 + GITHUB_RUN_NUMBER))" >> "$GITHUB_ENV"
+          if [[ -n "$UPDATE_KEYSTORE" ]]; then
+            printf '%s' "$UPDATE_KEYSTORE" | base64 --decode > "$RUNNER_TEMP/computer-updates.jks"
+            chmod 600 "$RUNNER_TEMP/computer-updates.jks"
+            echo "SYNTHAI_KEYSTORE=$RUNNER_TEMP/computer-updates.jks" >> "$GITHUB_ENV"
+            echo "SYNTHAI_STORE_PASSWORD=$UPDATE_STORE_PASSWORD" >> "$GITHUB_ENV"
+            echo "SYNTHAI_KEY_ALIAS=$UPDATE_KEY_ALIAS" >> "$GITHUB_ENV"
+            echo "SYNTHAI_KEY_PASSWORD=$UPDATE_KEY_PASSWORD" >> "$GITHUB_ENV"
+          else
+            echo "Persistent signing is not configured; this build cannot publish automatic updates."
+          fi
 
       - name: Enable ARM64 container image builds
         uses: docker/setup-qemu-action@v3
@@ -148,7 +195,9 @@ jobs:
           test ! -e /tmp/synthia-hover-rootfs/opt/synthia-server
           test ! -e /tmp/synthia-hover-rootfs/opt/synthai
           # Vendored 5.8 app must be byte-identical inside the rootfs.
-          diff -r computer/hover /tmp/synthia-hover-rootfs/opt/synthia58
+          # Python surface-morph verification creates bytecode in the checkout;
+          # Docker intentionally excludes it. Compare preserved source only.
+          diff -r --exclude=__pycache__ --exclude='*.pyc' computer/hover /tmp/synthia-hover-rootfs/opt/synthia58
           tar --hard-dereference -C /tmp/synthia-hover-rootfs -czf android-app/app/src/hover/assets/linux-rootfs.bundle .
           printf '%s-synthia58-hover-1\n' "$GITHUB_SHA" > android-app/app/src/hover/assets/linux-rootfs.version
           du -h android-app/app/src/hover/assets/linux-rootfs.bundle
@@ -159,6 +208,12 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
+
+      - name: Verify Android update acceptance policy
+        run: |
+          mkdir -p /tmp/update-policy
+          javac -d /tmp/update-policy android-app/app/src/main/java/app/synthai/updates/UpdatePolicy.java android-app/tests/UpdatePolicyTest.java
+          java -cp /tmp/update-policy UpdatePolicyTest
 
       - name: Install Android SDK 35 without obsolete tools package
         uses: android-actions/setup-android@v3
@@ -230,6 +285,8 @@ jobs:
         run: |
           APK=android-app/app/build/outputs/apk/venom/debug/app-venom-debug.apk
           unzip -l "$APK" | tee /tmp/apk-tree.txt
+          grep -q 'assets/synthworld/synthworld.pck' /tmp/apk-tree.txt
+          grep -q 'lib/arm64-v8a/libgodot_android.so' /tmp/apk-tree.txt
           grep -q 'assets/linux-rootfs.bundle' /tmp/apk-tree.txt
           unzip -p "$APK" assets/linux-rootfs.bundle | gzip -t
           grep -q 'assets/linux-rootfs.version' /tmp/apk-tree.txt
@@ -294,7 +351,7 @@ jobs:
           profile: pixel_6
           disable-animations: true
           script: |
-            if [[ "$GITHUB_REF_NAME" != hover/repair-* ]]; then bash .github/scripts/android-smoke.sh; fi
+            if [[ "$GITHUB_REF_NAME" != hover/repair-* ]]; then bash .github/scripts/android-smoke.sh; python .github/scripts/android-synthworld-smoke.py; fi
             bash .github/scripts/android-hover-smoke.sh
 
       - name: Record APK checksums
@@ -322,3 +379,11 @@ jobs:
             android-app/app/build/outputs/apk/hover/debug/app-hover-debug.apk
             android-app/app/build/outputs/apk/hover/debug/app-hover-debug.apk.sha256
           if-no-files-found: error
+
+      - name: Publish verified APK update channel
+        if: ${{ (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) && env.SYNTHAI_KEYSTORE != '' && !startsWith(github.ref_name, 'hover/repair-') }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release view computer-updates --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1 || gh release create computer-updates --repo "$GITHUB_REPOSITORY" --prerelease --title "Computer automatic updates" --notes "Verified phone builds. Android requires installation approval."
+          gh release upload computer-updates --repo "$GITHUB_REPOSITORY" --clobber android-app/app/build/outputs/apk/venom/debug/app-venom-debug.apk android-app/app/build/outputs/apk/hover/debug/app-hover-debug.apk
