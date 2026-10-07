@@ -6,6 +6,16 @@ type Item = {
   digest: string; encoding: string; size?: number; dna?: { pieces: number };
 };
 
+type ProjectAnalysis = {
+  name: string; root: string; framework: string; runtime: string; packageManager?: string | null;
+  entrypoint?: string | null; fileCount: number; totalBytes: number; projectDigest: string;
+  extensionCounts: Record<string, number>; scripts: Record<string, string>;
+};
+
+type MountReceipt = {
+  appId: string; appName: string; artifactId: string; mountId: string; shell: string; mountedAt: number;
+};
+
 const readBase64 = (file: File): Promise<string> => new Promise((resolve, reject) => {
   const reader = new FileReader();
   reader.onload = () => resolve(String(reader.result).split(',')[1] || '');
@@ -19,6 +29,8 @@ export default function Ingest() {
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
   const [output, setOutput] = useState('');
+  const [analysis, setAnalysis] = useState<ProjectAnalysis | null>(null);
+  const [mountReceipt, setMountReceipt] = useState<MountReceipt | null>(null);
   const refresh = async () => {
     const response = await fetch('/api/files');
     if (!response.ok) throw new Error('Could not load computer files.');
@@ -51,13 +63,43 @@ export default function Ingest() {
   };
 
   const open = async (item: Item) => {
-    setOutput(''); setMessage('Activating addressed file…');
+    setOutput(''); setAnalysis(null); setMountReceipt(null); setMessage('Activating addressed file…');
     try {
       const response = await fetch(`/api/activate-file?address=${encodeURIComponent(item.addressKey)}&path=${encodeURIComponent(item.path)}`);
       const record = await response.json();
       if (!response.ok) throw new Error(record.error || 'ATO file recall failed.');
       setActive({ ...item, content: record.content });
       setMessage(`Loaded through ${record.activation.automatonId}; exact address and SHA-256 verified.`);
+    } catch (error) { setMessage(String(error)); }
+  };
+
+  const analyzeProject = async (item: Item) => {
+    setMessage('Analyzing project structure, runtime and entrypoint…');
+    setAnalysis(null); setMountReceipt(null);
+    try {
+      const response = await fetch('/api/analyze-project', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ path: item.path }),
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || 'Project analysis failed.');
+      setAnalysis(result);
+      setMessage(`Analyzed ${result.fileCount} files. Ready to root and mount into the workspace.`);
+    } catch (error) { setMessage(String(error)); }
+  };
+
+  const mountProject = async (item: Item) => {
+    setMessage('Rooting project into Synthia and mounting it…');
+    try {
+      const response = await fetch('/api/mount-project', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ path: item.path }),
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || 'Project mount failed.');
+      setMountReceipt(result);
+      setAnalysis(result.analysis);
+      setMessage(`Mounted ${result.appName} as ${result.appId} in ${result.shell}.`);
     } catch (error) { setMessage(String(error)); }
   };
 
@@ -102,7 +144,27 @@ export default function Ingest() {
         <p className="mt-4">{active.address.dimension} · Gate {active.address.gate} · {active.size ?? 0} bytes</p>
         <p className="text-xs text-[var(--text-secondary)] break-all mt-2">SHA-256: {active.digest}</p>
         <p className="text-xs text-[var(--text-secondary)] mt-1">Code DNA pieces: {active.dna?.pieces ?? 0}</p>
-        {active.encoding !== 'base64' && <button onClick={() => run(active)} className="flex gap-2 items-center mt-5 px-3 py-2 rounded bg-[var(--accent-primary)] text-white"><Play size={16} /> Run through Synthia</button>}
+        <div className="mt-5 flex flex-wrap gap-2">
+          <button onClick={() => analyzeProject(active)} className="flex gap-2 items-center px-3 py-2 rounded border border-[var(--accent-primary)] text-[var(--accent-primary)]"><FolderOpen size={16} /> Analyze app</button>
+          <button onClick={() => mountProject(active)} className="flex gap-2 items-center px-3 py-2 rounded bg-[var(--accent-primary)] text-white"><FileUp size={16} /> Root & mount</button>
+          {active.encoding !== 'base64' && <button onClick={() => run(active)} className="flex gap-2 items-center px-3 py-2 rounded bg-[var(--bg-hover)]"><Play size={16} /> Run file</button>}
+        </div>
+        {analysis && <div className="mt-4 p-3 rounded border border-[var(--border-subtle)] bg-[var(--bg-titlebar)]">
+          <div className="font-semibold">Project analysis</div>
+          <div className="mt-2 grid grid-cols-1 md:grid-cols-2 gap-1 text-xs">
+            <span>Name: {analysis.name}</span><span>Runtime: {analysis.runtime}</span>
+            <span>Framework: {analysis.framework}</span><span>Files: {analysis.fileCount}</span>
+            <span>Entrypoint: {analysis.entrypoint || 'unresolved'}</span><span>Package manager: {analysis.packageManager || 'none detected'}</span>
+          </div>
+          <div className="mt-2 text-xs text-[var(--text-secondary)] break-all">Root: {analysis.root}</div>
+          <div className="mt-1 text-xs text-[var(--text-secondary)] break-all">Project SHA-256: {analysis.projectDigest}</div>
+        </div>}
+        {mountReceipt && <div className="mt-4 p-3 rounded border border-[var(--accent-primary)]">
+          <div className="font-semibold">Mounted into Synthia</div>
+          <div className="mt-1 text-xs break-all">App: {mountReceipt.appId}</div>
+          <div className="text-xs break-all">Mount: {mountReceipt.mountId}</div>
+          <div className="text-xs">Space: {mountReceipt.shell}</div>
+        </div>}
         {output && <pre className="mt-4 p-3 rounded bg-[var(--bg-titlebar)] whitespace-pre-wrap break-words">{output}</pre>}
         {active.encoding !== 'base64' && <pre className="mt-4 p-3 rounded bg-[var(--bg-titlebar)] whitespace-pre-wrap break-words max-h-72 overflow-auto">{active.content}</pre>}
       </> : <p className="text-[var(--text-secondary)]">Choose a file to inspect its address and content.</p>}
