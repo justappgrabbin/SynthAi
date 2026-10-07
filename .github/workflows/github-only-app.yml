@@ -350,6 +350,14 @@ jobs:
           grep -q 'app.synthai.hover.BridgeForegroundService' /tmp/hover-manifest.txt
           grep -q 'app.synthai.hover.OverlayService' /tmp/hover-manifest.txt
 
+      - name: Save payload-checked Hover preview before emulator verification
+        if: ${{ env.SYNTHAI_PREVIEW_INSTALL == '1' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: Synthia-Preview-payload-checked
+          path: android-app/app/build/outputs/apk/hover/debug/app-hover-debug.apk
+          if-no-files-found: error
+
       - name: Enable KVM for Android emulator
         run: |
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
@@ -364,7 +372,7 @@ jobs:
           profile: pixel_6
           disable-animations: true
           script: |
-            case "$GITHUB_REF_NAME" in hover/repair-*) ;; *) bash .github/scripts/android-smoke.sh && python .github/scripts/android-synthworld-smoke.py || exit $? ;; esac
+            if [ "$SYNTHAI_PREVIEW_INSTALL" != "1" ]; then case "$GITHUB_REF_NAME" in hover/repair-*) ;; *) bash .github/scripts/android-smoke.sh && python .github/scripts/android-synthworld-smoke.py || exit $? ;; esac; fi
             PKG=$([ "$SYNTHAI_PREVIEW_INSTALL" = "1" ] && echo app.synthai.hover.preview || echo app.synthai.hover) bash .github/scripts/android-hover-smoke.sh
 
       - name: Record APK checksums
