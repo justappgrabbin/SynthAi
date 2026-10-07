@@ -38,7 +38,15 @@ try {
   await page.locator('#chat-form button').click();
   await page.locator('#setup-dialog[open]').waitFor();
   assert.equal(await page.locator('#birth-place').inputValue(), 'Test Place');
-  for (const [id, value] of Object.entries({ 'birth-date':'2000-01-01', 'birth-time':'12:34:56', 'birth-timezone':'America/New_York', 'birth-latitude':'40.7128', 'birth-longitude':'-74.006' })) await page.locator('#' + id).fill(value);
+  await page.locator('#birth-date').fill('2000-01-01');
+  await page.locator('#birth-time').fill('12:34');
+  await page.locator('#birth-place').fill('Los Angles California');
+  const losAngeles = page.locator('#place-results button').filter({ hasText: /Los Angeles/ }).first();
+  await losAngeles.waitFor({ timeout: 10000 });
+  await losAngeles.click();
+  assert.equal(await page.locator('#birth-timezone').inputValue(), 'America/Los_Angeles');
+  assert.notEqual(await page.locator('#birth-latitude').inputValue(), '');
+  assert.notEqual(await page.locator('#birth-longitude').inputValue(), '');
   await page.locator('#identity-form button[type=submit]').click();
   await page.locator('#setup-dialog').waitFor({ state: 'hidden', timeout: 60000 });
   await page.waitForFunction(() => document.querySelector('#planet-label').textContent.includes('online'));

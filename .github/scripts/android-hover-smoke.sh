@@ -6,7 +6,7 @@
 set -Eeuo pipefail
 
 APK="${APK:-android-app/app/build/outputs/apk/hover/debug/app-hover-debug.apk}"
-PKG="app.synthai.hover"
+PKG="${PKG:-app.synthai.hover}"
 TAG="SynthiaHover"
 
 adb install -r "$APK"
@@ -15,7 +15,7 @@ adb shell pm grant "$PKG" android.permission.POST_NOTIFICATIONS || true
 adb forward tcp:18797 tcp:8797
 adb logcat -c
 adb shell am force-stop "$PKG" || true
-adb shell am start -n "$PKG/.MainActivity" || true
+adb shell am start -n "$PKG/app.synthai.hover.MainActivity"
 
 for attempt in $(seq 1 90); do
   LOGS="$(adb logcat -d -s "$TAG:*" 'AndroidRuntime:E' '*:S' 2>/dev/null || true)"

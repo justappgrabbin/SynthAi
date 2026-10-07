@@ -21,7 +21,7 @@ public final class IdentityActivity extends Activity {
         editor.setFocusableInTouchMode(true);
         editor.setWebViewClient(new WebViewClient());
         setContentView(editor);
-        editor.loadUrl(HoverPorts.RUNTIME_URL + "/?setup=1");
+        editor.loadUrl(HoverPorts.RUNTIME_URL + (getIntent().getBooleanExtra("full-app", false) ? "/?surface=chat" : "/?setup=1"));
     }
 
     @Override protected void onResume() {

@@ -1,0 +1,30 @@
+{
+  "name": "synthaipro-os",
+  "version": "0.1.0",
+  "private": true,
+  "description": "SynthAIPro Resonance OS - browser-native operating system shell",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 0.0.0.0",
+    "build": "vite build",
+    "preview": "vite preview --host 0.0.0.0",
+    "start": "node server.js",
+    "test": "node --test tests/*.test.mjs"
+  },
+  "dependencies": {
+    "@capacitor/android": "7.6.9",
+    "@capacitor/core": "7.6.9",
+    "@vitejs/plugin-react": "latest",
+    "express": "latest",
+    "lucide-react": "latest",
+    "react": "latest",
+    "react-dom": "latest",
+    "sonner": "latest",
+    "typescript": "latest",
+    "vite": "latest",
+    "wouter": "latest"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "7.6.9"
+  }
+}

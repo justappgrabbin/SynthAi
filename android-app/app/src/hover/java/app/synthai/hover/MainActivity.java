@@ -46,7 +46,7 @@ public final class MainActivity extends Activity {
     @Override
     protected void onCreate(Bundle state) {
         super.onCreate(state);
-        app.synthai.updates.AutoUpdates.start(this);
+        if (!getPackageName().endsWith(".preview")) app.synthai.updates.AutoUpdates.start(this);
         if (state != null) {
             askedOverlay = state.getBoolean(STATE_ASKED_OVERLAY, false);
             askedHands = state.getBoolean(STATE_ASKED_HANDS, false);
@@ -83,21 +83,11 @@ public final class MainActivity extends Activity {
         super.onPause();
     }
 
-    /** Overlay first (needed for the planet), then Accessibility (needed for hands), then the planet. */
+    /** The full app can open without overlay or Accessibility permissions. */
     private void guidePermissionsThenStartPlanet() {
-        if (!Settings.canDrawOverlays(this)) {
-            if (!askedOverlay) {
-                askedOverlay = true;
-                Log.i(HoverPorts.TAG, "HOVER_ASK_OVERLAY");
-                openOverlaySettings();
-            }
-            return;
-        }
-        startPlanet();
-        if (!handsEnabled() && !askedHands) {
-            askedHands = true;
-            Log.i(HoverPorts.TAG, "HOVER_ASK_ACCESSIBILITY");
-            startActivity(new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS));
+        if (Settings.canDrawOverlays(this)
+                && getPreferences(MODE_PRIVATE).getBoolean("planet-enabled", true)) {
+            startPlanet();
         }
     }
 
@@ -126,6 +116,26 @@ public final class MainActivity extends Activity {
         status.setTextColor(0xFF333333);
         status.setPadding(0, dp(12), 0, dp(12));
         root.addView(status, matchWrap());
+
+        Button openApp = button("Open app");
+        openApp.setOnClickListener(v -> {
+            if (!HoverRuntime.isReady()) {
+                android.widget.Toast.makeText(this, "The local runtime is still starting. Please wait.", android.widget.Toast.LENGTH_SHORT).show();
+                return;
+            }
+            Intent open = new Intent(this, IdentityActivity.class);
+            open.putExtra("full-app", true);
+            startActivity(open);
+        });
+        root.addView(openApp, matchWrap());
+
+        Button stopPlanet = button("Hide planet");
+        stopPlanet.setOnClickListener(v -> {
+            getPreferences(MODE_PRIVATE).edit().putBoolean("planet-enabled", false).apply();
+            stopService(new Intent(this, OverlayService.class));
+            updateStatus();
+        });
+        root.addView(stopPlanet, matchWrap());
 
         Button overlay = button("1. Allow hover (display over other apps)");
         overlay.setOnClickListener(v -> openOverlaySettings());
@@ -177,6 +187,7 @@ public final class MainActivity extends Activity {
 
     private void startPlanet() {
         if (!Settings.canDrawOverlays(this)) return;
+        getPreferences(MODE_PRIVATE).edit().putBoolean("planet-enabled", true).apply();
         startService(new Intent(this, OverlayService.class));
         Log.i(HoverPorts.TAG, "HOVER_PLANET_STARTED");
     }

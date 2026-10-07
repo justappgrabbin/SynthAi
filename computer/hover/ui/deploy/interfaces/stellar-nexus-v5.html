@@ -1,0 +1,2790 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0">
+<meta name="theme-color" content="#050308">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>STELLAR NEXUS — Smart Server</title>
+<style>
+:root{
+  --void:#050308; --deep:#08050f; --s1:rgba(10,7,18,0.96); --s2:rgba(15,10,25,0.9);
+  --border:rgba(255,255,255,0.06); --border2:rgba(255,255,255,0.12);
+  --gold:#f59e0b; --em:#10b981; --vi:#a78bfa; --co:#fb923c; --ro:#f472b6;
+  --re:#f87171; --mind:#4f8ef7; --soul:#a78bfa;
+  --dim:rgba(255,255,255,0.3); --text:rgba(255,255,255,0.85);
+  --ff:'Courier New',monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{width:100%;height:100%;background:var(--void);color:var(--text);font-family:var(--ff);overflow:hidden;}
+
+/* NEURAL CANVAS */
+#neural{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.22;}
+
+/* SHELL */
+#shell{position:relative;z-index:1;width:100%;height:100dvh;display:flex;flex-direction:column;}
+
+/* HEADER */
+#hdr{
+  flex-shrink:0;height:48px;
+  background:rgba(5,3,8,0.96);border-bottom:1px solid var(--border);
+  backdrop-filter:blur(20px);
+  display:flex;align-items:center;justify-content:space-between;padding:0 14px;
+  gap:10px;
+}
+#logo{
+  width:28px;height:28px;border-radius:50%;border:1.5px solid var(--gold);
+  display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--gold);
+  animation:logopulse 3s ease infinite;flex-shrink:0;cursor:pointer;
+}
+@keyframes logopulse{0%,100%{box-shadow:0 0 6px var(--gold);}50%{box-shadow:0 0 18px var(--gold),0 0 32px rgba(245,158,11,.3);}}
+#hdr-title{font-size:11px;font-weight:900;color:var(--gold);letter-spacing:.1em;flex-shrink:0;}
+#hdr-sub{font-size:7px;color:var(--dim);letter-spacing:.18em;flex-shrink:0;}
+#hdr-stats{display:flex;align-items:center;gap:12px;flex:1;justify-content:center;}
+.hst{text-align:center;cursor:default;}
+.hst-v{font-size:12px;font-weight:900;line-height:1;}
+.hst-l{font-size:6px;color:var(--dim);letter-spacing:.1em;margin-top:1px;}
+#hdr-right{display:flex;align-items:center;gap:8px;flex-shrink:0;}
+.hbtn{
+  padding:3px 9px;font-size:7px;font-weight:700;letter-spacing:.1em;
+  border-radius:20px;cursor:pointer;border:1px solid;font-family:var(--ff);
+  transition:all .15s;
+}
+.hbtn.green{background:rgba(16,185,129,.1);color:var(--em);border-color:rgba(16,185,129,.35);}
+.hbtn.green:hover{background:rgba(16,185,129,.25);}
+.hbtn.gold{background:rgba(245,158,11,.1);color:var(--gold);border-color:rgba(245,158,11,.35);}
+.hbtn.red{background:rgba(248,113,113,.1);color:var(--re);border-color:rgba(248,113,113,.3);}
+#conn-dot{width:7px;height:7px;border-radius:50%;background:var(--dim);flex-shrink:0;}
+#conn-dot.live{background:var(--em);box-shadow:0 0 6px var(--em);animation:blink 2.5s infinite;}
+#conn-dot.warn{background:var(--gold);animation:blink 1s infinite;}
+#conn-dot.err{background:var(--re);}
+#conn-lbl{font-size:7px;color:var(--dim);letter-spacing:.1em;cursor:pointer;}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:.3;}}
+
+/* TABS */
+#tabs{
+  flex-shrink:0;height:36px;display:flex;align-items:stretch;
+  background:rgba(5,3,8,0.9);border-bottom:1px solid var(--border);
+  overflow-x:auto;overflow-y:hidden;
+}
+#tabs::-webkit-scrollbar{display:none;}
+.tab{
+  padding:0 14px;font-size:8px;font-weight:700;letter-spacing:.12em;
+  color:var(--dim);cursor:pointer;border-right:1px solid var(--border);
+  display:flex;align-items:center;white-space:nowrap;transition:all .15s;
+  border-bottom:2px solid transparent;flex-shrink:0;
+}
+.tab:hover{color:var(--text);background:rgba(255,255,255,.03);}
+.tab.active{color:var(--gold);border-bottom-color:var(--gold);background:rgba(245,158,11,.04);}
+
+/* CONTENT */
+#content{flex:1;overflow:hidden;position:relative;}
+.view{display:none;height:100%;overflow:hidden;}
+.view.active{display:flex;}
+
+/* ── MAIN VIEW: 3-COLUMN GRID ── */
+#v-main{flex-direction:row;}
+@media(max-width:760px){
+  #v-main{flex-direction:column;}
+  .side-panel{display:none!important;}
+}
+.side-panel{
+  width:220px;flex-shrink:0;height:100%;overflow-y:auto;
+  border-right:1px solid var(--border);padding:12px;
+  background:var(--s1);
+}
+.side-panel:last-child{border-right:none;border-left:1px solid var(--border);}
+.side-panel::-webkit-scrollbar{width:2px;}
+.side-panel::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);}
+.center-panel{flex:1;height:100%;display:flex;flex-direction:column;overflow:hidden;padding:12px;background:rgba(7,5,12,.6);}
+
+/* ── FULL-HEIGHT VIEWS ── */
+#v-server,#v-github,#v-resonance,#v-config,#v-log{flex-direction:column;padding:14px;overflow-y:auto;gap:10px;}
+#v-goals,#v-chat{overflow:hidden;}
+#v-server::-webkit-scrollbar,#v-github::-webkit-scrollbar,#v-resonance::-webkit-scrollbar,#v-config::-webkit-scrollbar,#v-log::-webkit-scrollbar{width:2px;}
+#v-server::-webkit-scrollbar-thumb,#v-github::-webkit-scrollbar-thumb,#v-resonance::-webkit-scrollbar-thumb,#v-config::-webkit-scrollbar-thumb,#v-log::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);}
+
+/* CARDS */
+.card{background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:10px;}
+.card.live{border-color:rgba(16,185,129,.3);background:rgba(16,185,129,.04);}
+.card.warn{border-color:rgba(245,158,11,.3);}
+.card.err{border-color:rgba(248,113,113,.3);}
+.card.vi{border-color:rgba(167,139,250,.3);}
+.ctitle{font-size:8px;font-weight:700;letter-spacing:.16em;color:var(--dim);margin-bottom:8px;text-transform:uppercase;display:flex;justify-content:space-between;align-items:center;}
+.cval{font-size:18px;font-weight:900;color:var(--gold);line-height:1;}
+.csub{font-size:7px;color:var(--dim);margin-top:2px;}
+
+/* BUTTONS */
+.btn{
+  padding:7px 13px;font-size:8px;font-weight:700;letter-spacing:.1em;
+  border-radius:7px;cursor:pointer;border:1px solid;font-family:var(--ff);
+  transition:all .15s;display:inline-flex;align-items:center;gap:5px;
+}
+.btn:active{transform:scale(.96);}
+.btn.em{background:rgba(16,185,129,.12);color:var(--em);border-color:rgba(16,185,129,.4);}
+.btn.em:hover{background:rgba(16,185,129,.25);}
+.btn.go{background:rgba(245,158,11,.12);color:var(--gold);border-color:rgba(245,158,11,.4);}
+.btn.go:hover{background:rgba(245,158,11,.25);}
+.btn.vi{background:rgba(167,139,250,.12);color:var(--vi);border-color:rgba(167,139,250,.4);}
+.btn.vi:hover{background:rgba(167,139,250,.25);}
+.btn.re{background:rgba(248,113,113,.1);color:var(--re);border-color:rgba(248,113,113,.3);}
+.btn.mi{background:rgba(79,142,247,.12);color:var(--mind);border-color:rgba(79,142,247,.4);}
+.btn.co{background:rgba(251,146,60,.1);color:var(--co);border-color:rgba(251,146,60,.3);}
+.btn.dim{background:rgba(255,255,255,.04);color:var(--dim);border:1px solid var(--border);}
+.btn.sm{padding:4px 9px;font-size:7px;}
+.btn.dim{background:rgba(255,255,255,.04);color:var(--dim);border:1px solid var(--border);}
+.btn.gold{background:rgba(245,158,11,.12);color:var(--gold);border:1px solid rgba(245,158,11,.4);}
+.btn.full{width:100%;justify-content:center;}
+.btn-row{display:flex;gap:6px;flex-wrap:wrap;}
+
+/* INPUTS */
+.inp{
+  width:100%;padding:8px 10px;font-size:10px;background:rgba(0,0,0,.4);
+  border:1px solid var(--border2);color:var(--text);border-radius:7px;outline:none;
+  font-family:var(--ff);transition:border-color .2s;
+}
+.inp:focus{border-color:var(--gold);}
+.inp::placeholder{color:rgba(255,255,255,.2);}
+.inp-lbl{font-size:7px;color:var(--dim);letter-spacing:.1em;margin-bottom:4px;display:block;}
+.inp-row{margin-bottom:8px;}
+textarea.inp{resize:vertical;min-height:60px;}
+
+/* BADGE / TAG */
+.tag{
+  display:inline-block;padding:2px 7px;font-size:7px;font-weight:700;
+  letter-spacing:.1em;border-radius:20px;border:1px solid;
+}
+.tag.ok{background:rgba(16,185,129,.1);color:var(--em);border-color:rgba(16,185,129,.3);}
+.tag.warn{background:rgba(245,158,11,.1);color:var(--gold);border-color:rgba(245,158,11,.3);}
+.tag.err{background:rgba(248,113,113,.1);color:var(--re);border-color:rgba(248,113,113,.3);}
+.tag.vi{background:rgba(167,139,250,.1);color:var(--vi);border-color:rgba(167,139,250,.3);}
+.tag.mi{background:rgba(79,142,247,.1);color:var(--mind);border-color:rgba(79,142,247,.3);}
+.tag.dim{background:rgba(255,255,255,.04);color:var(--dim);border-color:var(--border);}
+
+/* STATUS ROW */
+.srow{display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.04);}
+.srow:last-child{border-bottom:none;}
+.sdot{width:6px;height:6px;border-radius:50%;flex-shrink:0;margin-right:6px;}
+.sdot.on{background:var(--em);box-shadow:0 0 5px var(--em);}
+.sdot.off{background:rgba(255,255,255,.15);}
+.sdot.warn{background:var(--gold);animation:blink 1.2s infinite;}
+.sdot.err{background:var(--re);}
+.sname{font-size:9px;display:flex;align-items:center;flex:1;}
+.sval{font-size:8px;color:var(--dim);}
+
+/* PROGRESS BAR */
+.prog-track{height:3px;background:rgba(255,255,255,.06);border-radius:2px;overflow:hidden;}
+.prog-fill{height:100%;border-radius:2px;transition:width .5s ease;}
+
+/* LOG */
+.log-box{
+  background:rgba(0,0,0,.5);border:1px solid var(--border);border-radius:8px;
+  padding:8px;overflow-y:auto;font-size:8.5px;line-height:1.7;
+}
+.log-box::-webkit-scrollbar{width:2px;}
+.log-box::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);}
+.ll{margin-bottom:1px;}
+.ll .ts{color:rgba(255,255,255,.15);margin-right:5px;}
+.ll.g span:last-child{color:var(--em);}
+.ll.e span:last-child{color:var(--gold);}
+.ll.t span:last-child{color:var(--co);}
+.ll.m span:last-child{color:var(--vi);}
+.ll.r span:last-child{color:var(--re);}
+.ll.n span:last-child{color:var(--dim);}
+.ll.b span:last-child{color:var(--mind);}
+
+/* PROPOSAL */
+.proposal{background:var(--s2);border:1px solid var(--border);border-radius:9px;padding:10px;margin-bottom:8px;animation:pfade .2s ease;}
+@keyframes pfade{from{opacity:0;transform:translateY(5px);}to{opacity:1;transform:translateY(0);}}
+.prop-type{font-size:7px;font-weight:700;letter-spacing:.14em;margin-bottom:3px;}
+.prop-title{font-size:10px;font-weight:900;margin-bottom:3px;}
+.prop-desc{font-size:8.5px;color:var(--dim);line-height:1.5;margin-bottom:7px;}
+.prop-code{
+  background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.06);
+  border-radius:6px;padding:8px 10px;font-size:8px;color:var(--em);
+  line-height:1.6;white-space:pre;overflow-x:auto;margin-bottom:7px;
+}
+.prop-acts{display:flex;gap:5px;}
+.btn-approve{flex:1;padding:6px;font-size:7px;font-weight:700;letter-spacing:.12em;
+  background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.4);color:var(--em);border-radius:6px;cursor:pointer;font-family:var(--ff);}
+.btn-approve:hover{background:rgba(16,185,129,.25);}
+.btn-reject{flex:1;padding:6px;font-size:7px;font-weight:700;letter-spacing:.12em;
+  background:rgba(248,113,113,.08);border:1px solid rgba(248,113,113,.3);color:var(--re);border-radius:6px;cursor:pointer;font-family:var(--ff);}
+.btn-defer{padding:6px 10px;font-size:7px;font-weight:700;background:rgba(255,255,255,.04);border:1px solid var(--border);color:var(--dim);border-radius:6px;cursor:pointer;font-family:var(--ff);}
+.prop-approved{background:rgba(16,185,129,.04);border-color:rgba(16,185,129,.2);}
+.prop-rejected{opacity:.5;}
+
+/* GOAL CARD */
+#goal-card{background:var(--s2);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:10px;transition:border-color .3s,box-shadow .3s;flex-shrink:0;}
+#goal-card.intrinsic{border-color:rgba(245,158,11,.25);box-shadow:0 0 15px rgba(245,158,11,.05);}
+#goal-card.user{border-color:rgba(16,185,129,.3);box-shadow:0 0 15px rgba(16,185,129,.06);}
+#goal-card.experiment{border-color:rgba(167,139,250,.3);}
+#goal-badge{display:inline-block;padding:2px 8px;font-size:7px;font-weight:700;letter-spacing:.14em;border-radius:20px;margin-bottom:8px;}
+#goal-title{font-size:14px;font-weight:900;margin-bottom:5px;line-height:1.2;}
+#goal-desc{font-size:8.5px;color:var(--dim);line-height:1.5;margin-bottom:8px;}
+.step-row{display:flex;align-items:center;gap:6px;padding:4px 0;font-size:8.5px;}
+.step-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0;background:rgba(255,255,255,.12);}
+.step-dot.done{background:var(--em);}
+.step-dot.active{background:var(--gold);animation:blink 1s infinite;}
+.step-txt{color:var(--dim);}
+.step-txt.done{color:var(--em);text-decoration:line-through;opacity:.6;}
+.step-txt.active{color:var(--text);}
+
+/* TENSION */
+.t-item{background:var(--s2);border:1px solid var(--border);border-radius:7px;padding:8px 10px;margin-bottom:6px;}
+.t-type{font-size:7px;font-weight:700;color:var(--co);letter-spacing:.1em;margin-bottom:2px;}
+.t-desc{font-size:8px;color:var(--dim);margin-bottom:5px;}
+.t-bar{height:2px;background:rgba(255,255,255,.06);border-radius:2px;}
+.t-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--co),var(--re));}
+
+/* GRID */
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;}
+
+/* CONFIDENCE RING */
+#conf-ring-wrap{display:flex;align-items:center;gap:6px;}
+
+/* SECTION LABEL */
+.sec{font-size:7px;letter-spacing:.16em;color:var(--dim);text-transform:uppercase;margin-bottom:7px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border);padding-bottom:4px;}
+
+/* MODAL */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.85);backdrop-filter:blur(8px);z-index:200;display:none;align-items:flex-end;justify-content:center;}
+.modal-bg.open{display:flex;}
+.modal{background:linear-gradient(180deg,var(--s2),var(--deep));border-top:1px solid var(--border2);border-radius:14px 14px 0 0;padding:18px;width:100%;max-width:480px;max-height:82vh;overflow-y:auto;}
+.modal-handle{width:32px;height:3px;background:rgba(255,255,255,.2);border-radius:2px;margin:0 auto 14px;}
+.modal-title{font-size:12px;font-weight:900;margin-bottom:12px;}
+
+/* TOAST */
+#toast{position:fixed;top:56px;left:10px;right:10px;max-width:460px;margin:0 auto;background:var(--s2);border:1px solid var(--border2);border-radius:8px;padding:9px 13px;z-index:300;font-size:9px;transform:translateY(-100px);opacity:0;transition:all .3s cubic-bezier(.16,1,.3,1);display:flex;align-items:center;gap:7px;}
+#toast.show{transform:translateY(0);opacity:1;}
+
+/* RESONANCE ENGINE */
+.res-score{font-size:32px;font-weight:900;text-align:center;color:var(--gold);}
+.res-bar{height:6px;border-radius:3px;overflow:hidden;background:rgba(255,255,255,.07);margin:4px 0;}
+.res-bar-fill{height:100%;border-radius:3px;transition:width .6s ease;}
+
+/* SCROLLBAR GLOBAL */
+::-webkit-scrollbar{width:3px;}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:2px;}
+</style>
+</head>
+<body>
+<canvas id="neural"></canvas>
+<div id="shell">
+
+<!-- HEADER -->
+<header id="hdr">
+  <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
+    <div id="logo" onclick="cycleTab()">◉</div>
+    <div>
+      <div id="hdr-title">STELLAR NEXUS</div>
+      <div id="hdr-sub">AUTONOMOUS SMART SERVER</div>
+    </div>
+  </div>
+  <div id="hdr-stats">
+    <div class="hst"><div class="hst-v" id="hs-proposals" style="color:var(--vi)">0</div><div class="hst-l">PROPS</div></div>
+    <div class="hst"><div class="hst-v" id="hs-approved" style="color:var(--em)">0</div><div class="hst-l">OK</div></div>
+    <div class="hst"><div class="hst-v" id="hs-goals" style="color:var(--gold)">0</div><div class="hst-l">GOALS</div></div>
+    <div class="hst"><div class="hst-v" id="hs-patterns" style="color:var(--co)">0</div><div class="hst-l">PATTERNS</div></div>
+    <div id="conf-ring-wrap">
+      <svg id="conf-ring" width="34" height="34">
+        <circle cx="17" cy="17" r="12" fill="none" stroke="rgba(255,255,255,0.07)" stroke-width="3"/>
+        <circle id="conf-arc" cx="17" cy="17" r="12" fill="none" stroke-width="3" stroke-linecap="round" transform="rotate(-90 17 17)" style="transition:stroke-dasharray .6s,stroke .5s;"/>
+        <text id="conf-val" x="17" y="21" text-anchor="middle" font-size="7" font-weight="900" font-family="'Courier New',monospace" fill="#f59e0b">0%</text>
+      </svg>
+      <div id="conf-mode" class="tag warn" style="font-size:6px">WAITING</div>
+    </div>
+  </div>
+  <div id="hdr-right">
+    <div id="conn-dot"></div>
+    <span id="conn-lbl" onclick="showModal('conn-modal')">OFFLINE</span>
+    <button class="hbtn gold" onclick="showModal('conn-modal')">⚡ CONNECT</button>
+  </div>
+</header>
+
+<!-- TABS -->
+<div id="tabs">
+  <div class="tab active" onclick="showTab('main')"   id="tab-main">◉ ORCHESTRATOR</div>
+  <div class="tab"        onclick="showTab('server')" id="tab-server">⬡ SERVER</div>
+  <div class="tab"        onclick="showTab('github')" id="tab-github">⌥ GITHUB</div>
+  <div class="tab"        onclick="showTab('resonance')" id="tab-resonance">◎ RESONANCE</div>
+  <div class="tab"        onclick="showTab('mcp')"    id="tab-mcp">🔗 MCP</div>
+  <div class="tab"        onclick="showTab('goals')"  id="tab-goals">🎯 GOALS</div>
+  <div class="tab"        onclick="showTab('chat')"   id="tab-chat">💬 CHAT</div>
+  <div class="tab"        onclick="showTab('log')"    id="tab-log">≡ LOG</div>
+  <div class="tab"        onclick="showTab('config')" id="tab-config">⊕ CONFIG</div>
+</div>
+
+<!-- CONTENT -->
+<div id="content">
+
+<!-- ── MAIN: ORCHESTRATOR ── -->
+<div id="v-main" class="view active">
+
+  <!-- LEFT: TENSIONS + CAPS -->
+  <div class="side-panel">
+    <div class="sec"><span>TENSIONS</span><span id="t-count" style="color:var(--co)">0</span></div>
+    <div id="tension-list"></div>
+    <div class="sec" style="margin-top:12px"><span>CAPABILITIES</span><span style="color:var(--vi);cursor:pointer;font-size:7px" onclick="promptRegisterCap()">+ REG</span></div>
+    <div id="cap-list"></div>
+    <div class="sec" style="margin-top:12px"><span>FIELD CONFIDENCE</span></div>
+    <div id="conf-breakdown"></div>
+  </div>
+
+  <!-- CENTER: GOAL + PROPOSALS -->
+  <div class="center-panel">
+    <div id="goal-card" class="intrinsic">
+      <div id="goal-badge" class="tag warn">INIT</div>
+      <div id="goal-title">Booting smart server...</div>
+      <div id="goal-desc">Loading resonance engine · signature calculation · persistent state</div>
+      <div id="goal-steps"></div>
+      <div style="margin-top:8px;">
+        <div class="prog-track"><div id="prog-fill" class="prog-fill" style="width:0%;background:linear-gradient(90deg,var(--gold),var(--co));"></div></div>
+        <div id="prog-text" style="font-size:7px;color:var(--dim);margin-top:3px;">Step 0 of 0</div>
+      </div>
+    </div>
+    <div class="sec"><span>PROPOSALS → YOU</span><span id="pending-count" style="color:var(--vi)">0 pending</span></div>
+    <div id="proposals-feed" style="flex:1;overflow-y:auto;padding-right:2px;"></div>
+    <div style="display:flex;gap:6px;margin-top:8px;flex-shrink:0;">
+      <input class="inp" id="user-input" placeholder="direct the orchestrator..." style="flex:1;" onkeypress="if(event.key==='Enter')sendInput()">
+      <button class="btn go" onclick="sendInput()">▸</button>
+    </div>
+  </div>
+
+  <!-- RIGHT: STATS + SIGNATURE + LOG -->
+  <div class="side-panel">
+    <div class="sec"><span>FIELD STATE</span></div>
+    <div class="grid-2" style="margin-bottom:10px;">
+      <div class="card" style="padding:8px;text-align:center;margin-bottom:0;"><div class="cval" id="st-cycles" style="font-size:14px;">0</div><div class="csub">CYCLES</div></div>
+      <div class="card" style="padding:8px;text-align:center;margin-bottom:0;"><div class="cval" id="st-align" style="font-size:14px;">—</div><div class="csub">ALIGN</div></div>
+      <div class="card" style="padding:8px;text-align:center;margin-bottom:0;"><div class="cval" id="st-peers" style="font-size:14px;">0</div><div class="csub">PEERS</div></div>
+      <div class="card" style="padding:8px;text-align:center;margin-bottom:0;"><div class="cval" id="st-res" style="font-size:14px;">—</div><div class="csub">RESONANCE</div></div>
+    </div>
+    <div class="sec"><span>SIGNATURE · G.L.C.T.B</span></div>
+    <div style="display:flex;gap:4px;margin-bottom:10px;">
+      <div class="card" style="flex:1;padding:6px;text-align:center;margin-bottom:0;"><div class="cval" id="sg" style="font-size:12px">—</div><div class="csub">G</div></div>
+      <div class="card" style="flex:1;padding:6px;text-align:center;margin-bottom:0;"><div class="cval" id="sl" style="font-size:12px">—</div><div class="csub">L</div></div>
+      <div class="card" style="flex:1;padding:6px;text-align:center;margin-bottom:0;"><div class="cval" id="sc" style="font-size:12px">—</div><div class="csub">C</div></div>
+      <div class="card" style="flex:1;padding:6px;text-align:center;margin-bottom:0;"><div class="cval" id="st2" style="font-size:12px">—</div><div class="csub">T</div></div>
+      <div class="card" style="flex:1;padding:6px;text-align:center;margin-bottom:0;"><div class="cval" id="sb" style="font-size:12px">—</div><div class="csub">B</div></div>
+    </div>
+    <div class="sec"><span>APPROVED LOG</span></div>
+    <div id="approved-log" style="max-height:100px;overflow-y:auto;margin-bottom:10px;font-size:8px;"></div>
+    <div class="sec"><span>SYSTEM LOG</span></div>
+    <div id="side-log" class="log-box" style="height:130px;"></div>
+  </div>
+</div>
+
+<!-- ── SERVER TAB ── -->
+<div id="v-server" class="view">
+  <div class="sec">SERVER CONNECTIONS</div>
+  <div class="grid-2">
+    <div class="card" id="card-render">
+      <div class="ctitle">RENDER <span id="render-tag" class="tag dim">OFFLINE</span></div>
+      <div id="render-url-display" style="font-size:8px;color:var(--dim);word-break:break-all;margin-bottom:8px;">synthia-server.onrender.com</div>
+      <div class="btn-row">
+        <button class="btn em sm" onclick="pingRender()">⚡ PING</button>
+        <button class="btn go sm" onclick="wakeRender()">☀ WAKE</button>
+        <button class="btn mi sm" onclick="checkRenderHealth()">✦ HEALTH</button>
+      </div>
+    </div>
+    <div class="card" id="card-local">
+      <div class="ctitle">LOCAL MCP <span id="local-tag" class="tag dim">OFFLINE</span></div>
+      <div id="local-url-display" style="font-size:8px;color:var(--dim);word-break:break-all;margin-bottom:8px;">10.0.0.x:3001/sse</div>
+      <div class="btn-row">
+        <button class="btn em sm" onclick="connectLocalMCP()">⚡ CONNECT</button>
+        <button class="btn go sm" onclick="scanNetwork()">🔍 SCAN</button>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="ctitle">RENDER SERVER STATUS</div>
+    <div id="render-status-body">
+      <div class="srow"><div class="sname"><div class="sdot off" id="sd-health"></div>/health</div><span class="sval" id="sv-health">—</span></div>
+      <div class="srow"><div class="sname"><div class="sdot off" id="sd-oracle"></div>/oracle/ask</div><span class="sval" id="sv-oracle">—</span></div>
+      <div class="srow"><div class="sname"><div class="sdot off" id="sd-trident"></div>/trident/generate</div><span class="sval" id="sv-trident">—</span></div>
+      <div class="srow"><div class="sname"><div class="sdot off" id="sd-memory"></div>/memory/save</div><span class="sval" id="sv-memory">—</span></div>
+      <div class="srow"><div class="sname"><div class="sdot off" id="sd-rag"></div>/trident/rag/add</div><span class="sval" id="sv-rag">—</span></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="ctitle">API TEST</div>
+    <div class="inp-row"><label class="inp-lbl">ENDPOINT</label><input class="inp" id="api-endpoint" placeholder="/health" value="/health"></div>
+    <div class="inp-row"><label class="inp-lbl">PAYLOAD (JSON)</label><textarea class="inp" id="api-payload" placeholder='{"prompt":"test"}'></textarea></div>
+    <div class="btn-row">
+      <button class="btn go" onclick="apiCall('GET')">GET</button>
+      <button class="btn mi" onclick="apiCall('POST')">POST</button>
+    </div>
+    <div id="api-result" class="log-box" style="height:100px;margin-top:8px;"></div>
+  </div>
+  <div class="card">
+    <div class="ctitle">DAEMON CONSOLE (LOCAL WS)</div>
+    <div class="btn-row" style="margin-bottom:8px;">
+      <button class="btn go sm" onclick="execDaemon('capabilities',{})">CAPS</button>
+      <button class="btn em sm" onclick="fsList()">FS LIST</button>
+      <button class="btn mi sm" onclick="daemonPing()">PING</button>
+      <button class="btn vi sm" onclick="selfRead()">READ SELF</button>
+    </div>
+    <div class="inp-row"><input class="inp" id="exec-cmd" placeholder="command" style="margin-bottom:4px;"><input class="inp" id="exec-args" placeholder="args (space separated)"></div>
+    <button class="btn co full" onclick="execCmd()" style="margin-bottom:8px;">⚡ EXEC</button>
+    <div id="daemon-log" class="log-box" style="height:120px;"></div>
+  </div>
+</div>
+
+<!-- ── GITHUB TAB ── -->
+<div id="v-github" class="view">
+  <div class="sec">GITHUB OPERATIONS · justappgrabbin/Synthia-server</div>
+  <div class="card">
+    <div class="ctitle">PUSH FILE TO REPO</div>
+    <div class="inp-row"><label class="inp-lbl">FILE PATH IN REPO</label><input class="inp" id="gh-path" placeholder="generated/my-file.html" value="generated/"></div>
+    <div class="inp-row"><label class="inp-lbl">COMMIT MESSAGE</label><input class="inp" id="gh-msg" placeholder="SYNTIA: auto-deploy" value="SYNTIA: auto-deploy"></div>
+    <div class="inp-row"><label class="inp-lbl">CONTENT</label><textarea class="inp" id="gh-content" placeholder="File content here..." style="min-height:100px;"></textarea></div>
+    <button class="btn go full" onclick="pushToGitHub()" style="margin-bottom:8px;">⬆ PUSH TO GITHUB</button>
+    <div id="gh-result" class="log-box" style="height:80px;"></div>
+  </div>
+  <div class="card">
+    <div class="ctitle">CREATE NEW REPO + DEPLOY PAGES</div>
+    <div class="inp-row"><label class="inp-lbl">REPO NAME</label><input class="inp" id="gh-repo-name" placeholder="stellar-app-name"></div>
+    <div class="inp-row"><label class="inp-lbl">DESCRIPTION</label><input class="inp" id="gh-repo-desc" placeholder="Built with Stellar Nexus"></div>
+    <div class="inp-row"><label class="inp-lbl">INDEX.HTML CONTENT</label><textarea class="inp" id="gh-repo-html" placeholder="<html>...</html>" style="min-height:80px;"></textarea></div>
+    <button class="btn em full" onclick="createRepoAndDeploy()" style="margin-bottom:8px;">🚀 CREATE + DEPLOY PAGES</button>
+    <div id="gh-deploy-result" class="log-box" style="height:80px;"></div>
+  </div>
+  <div class="card">
+    <div class="ctitle">MY REPOS</div>
+    <button class="btn mi full" onclick="loadRepos()" style="margin-bottom:8px;">◎ LOAD MY REPOS</button>
+    <div id="repo-list" style="font-size:8.5px;"></div>
+  </div>
+</div>
+
+<!-- ── RESONANCE TAB ── -->
+<div id="v-resonance" class="view">
+  <div class="sec">RESONANCE ENGINE · HD + I CHING + ASTRO CALCULATION</div>
+  <div class="card">
+    <div class="ctitle">CALCULATE RESONANCE</div>
+    <div class="grid-2">
+      <div>
+        <div class="inp-row"><label class="inp-lbl">ORIGIN A (birth/event date)</label><input class="inp" id="res-date-a" type="date"></div>
+        <div class="inp-row"><label class="inp-lbl">GATE A (1-64)</label><input class="inp" id="res-gate-a" type="number" min="1" max="64" placeholder="34"></div>
+        <div class="inp-row"><label class="inp-lbl">LINE A (1-6)</label><input class="inp" id="res-line-a" type="number" min="1" max="6" placeholder="3"></div>
+      </div>
+      <div>
+        <div class="inp-row"><label class="inp-lbl">ORIGIN B (compare to)</label><input class="inp" id="res-date-b" type="date"></div>
+        <div class="inp-row"><label class="inp-lbl">GATE B (1-64)</label><input class="inp" id="res-gate-b" type="number" min="1" max="64" placeholder="20"></div>
+        <div class="inp-row"><label class="inp-lbl">LINE B (1-6)</label><input class="inp" id="res-line-b" type="number" min="1" max="6" placeholder="1"></div>
+      </div>
+    </div>
+    <button class="btn go full" onclick="calcResonance()">◎ CALCULATE RESONANCE</button>
+    <div id="res-result" style="display:none;margin-top:12px;">
+      <div class="res-score" id="res-score-val">0.00</div>
+      <div style="text-align:center;font-size:8px;color:var(--dim);margin-bottom:10px;" id="res-tier">—</div>
+      <div style="margin-bottom:6px;">
+        <div style="display:flex;justify-content:space-between;font-size:7px;color:var(--dim);margin-bottom:2px;"><span>Gate alignment</span><span id="res-gate-pct">—</span></div>
+        <div class="res-bar"><div class="res-bar-fill" id="res-gate-bar" style="background:var(--gold);"></div></div>
+      </div>
+      <div style="margin-bottom:6px;">
+        <div style="display:flex;justify-content:space-between;font-size:7px;color:var(--dim);margin-bottom:2px;"><span>Line harmonic</span><span id="res-line-pct">—</span></div>
+        <div class="res-bar"><div class="res-bar-fill" id="res-line-bar" style="background:var(--vi);"></div></div>
+      </div>
+      <div style="margin-bottom:6px;">
+        <div style="display:flex;justify-content:space-between;font-size:7px;color:var(--dim);margin-bottom:2px;"><span>Zodiac field</span><span id="res-zod-pct">—</span></div>
+        <div class="res-bar"><div class="res-bar-fill" id="res-zod-bar" style="background:var(--mind);"></div></div>
+      </div>
+      <div style="margin-bottom:6px;">
+        <div style="display:flex;justify-content:space-between;font-size:7px;color:var(--dim);margin-bottom:2px;"><span>Temporal phase</span><span id="res-temp-pct">—</span></div>
+        <div class="res-bar"><div class="res-bar-fill" id="res-temp-bar" style="background:var(--em);"></div></div>
+      </div>
+      <div id="res-interpretation" style="margin-top:10px;padding:10px;background:rgba(0,0,0,.3);border-radius:7px;font-size:8.5px;color:var(--dim);line-height:1.6;"></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="ctitle">ADDRESS GENERATOR · Gate.Line.Color.Tone.Base</div>
+    <div class="inp-row"><label class="inp-lbl">NAME / IDENTIFIER</label><input class="inp" id="addr-name" placeholder="agent-echo"></div>
+    <div class="inp-row"><label class="inp-lbl">TYPE</label>
+      <select class="inp" id="addr-type"><option>html</option><option>python</option><option>json</option><option>agent</option><option>system</option></select>
+    </div>
+    <button class="btn vi full" onclick="generateAddress()">✦ GENERATE ADDRESS</button>
+    <div id="addr-result" style="display:none;margin-top:10px;padding:10px;background:rgba(0,0,0,.3);border-radius:7px;"></div>
+  </div>
+  <div class="card">
+    <div class="ctitle">RESONANCE HISTORY (LEARNING LOG)</div>
+    <div id="res-history" style="font-size:8px;max-height:200px;overflow-y:auto;"></div>
+  </div>
+</div>
+
+<!-- ── MCP TAB ── -->
+<div id="v-mcp" class="view" style="flex-direction:column;padding:14px;gap:10px;overflow-y:auto;">
+  <div class="sec">MCP SERVERS</div>
+  <div class="card">
+    <div class="ctitle">ADD MCP SERVER</div>
+    <div class="inp-row"><label class="inp-lbl">NAME</label><input class="inp" id="mcp-name" placeholder="Local Phone"></div>
+    <div class="inp-row"><label class="inp-lbl">URL (SSE)</label><input class="inp" id="mcp-url" placeholder="http://10.0.0.200:3001/sse"></div>
+    <div class="inp-row"><label class="inp-lbl">AUTH TOKEN</label><input class="inp" id="mcp-token" type="password" placeholder="optional"></div>
+    <button class="btn em full" onclick="addMCPServer()">⚡ CONNECT</button>
+  </div>
+  <div class="card">
+    <div class="ctitle">CONNECTED SERVERS</div>
+    <div id="mcp-servers-list"></div>
+    <button class="btn mi full" onclick="scanNetwork()" style="margin-top:8px;">🔍 SCAN LOCAL NETWORK</button>
+  </div>
+  <div class="card">
+    <div class="ctitle">CALL MCP TOOL</div>
+    <div class="inp-row"><label class="inp-lbl">TOOL NAME</label><input class="inp" id="mcp-tool" placeholder="tools/list"></div>
+    <div class="inp-row"><label class="inp-lbl">ARGS (JSON)</label><textarea class="inp" id="mcp-args" placeholder="{}"></textarea></div>
+    <button class="btn go full" onclick="callMCPTool()">▸ CALL TOOL</button>
+    <div id="mcp-result" class="log-box" style="height:100px;margin-top:8px;"></div>
+  </div>
+</div>
+
+<!-- ── LOG TAB ── -->
+<div id="v-log" class="view">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+    <div class="sec" style="border:none;margin:0;padding:0;">FULL SYSTEM LOG</div>
+    <button class="btn re sm" onclick="clearLog()">CLEAR</button>
+  </div>
+  <div id="full-log" class="log-box" style="flex:1;height:calc(100vh - 130px);"></div>
+</div>
+
+<!-- ── CONFIG TAB ── -->
+<div id="v-config" class="view">
+  <div class="sec">CREDENTIALS + ENDPOINTS</div>
+  <div class="card">
+    <div class="ctitle">SERVERS</div>
+    <div class="inp-row"><label class="inp-lbl">PYTHON SERVER (AI · Trident · ONNX)</label><input class="inp" id="cfg-render" value="https://synthia-server.onrender.com"></div>
+    <div class="inp-row"><label class="inp-lbl">NODE SERVER (Tools · MCP · WS) — add URL when ready</label><input class="inp" id="cfg-node" placeholder="https://your-node-server.onrender.com"></div>
+    <div class="inp-row"><label class="inp-lbl">GROQ API KEY</label><input class="inp" id="cfg-groq-key" type="password" placeholder="gsk_..."></div>
+    <div class="inp-row"><label class="inp-lbl">LOCAL MCP URL</label><input class="inp" id="cfg-local-mcp" value="http://10.0.0.200:3001/sse"></div>
+    <div class="inp-row"><label class="inp-lbl">WS AGENT SERVER (local)</label><input class="inp" id="cfg-ws" value="localhost:3000"></div>
+  </div>
+  <div class="card">
+    <div class="ctitle">GITHUB</div>
+    <div class="inp-row"><label class="inp-lbl">TOKEN (ghp_...)</label><input class="inp" id="cfg-gh-token" type="password" placeholder="ghp_..."></div>
+    <div class="inp-row"><label class="inp-lbl">USERNAME</label><input class="inp" id="cfg-gh-user" placeholder="justappgrabbin"></div>
+    <div class="inp-row"><label class="inp-lbl">REPO</label><input class="inp" id="cfg-gh-repo" placeholder="Synthia-server"></div>
+  </div>
+  <div class="card">
+    <div class="ctitle">SUPABASE</div>
+    <div class="inp-row"><label class="inp-lbl">URL</label><input class="inp" id="cfg-supa-url" value="https://leisphnjslcuepflefri.supabase.co"></div>
+    <div class="inp-row"><label class="inp-lbl">ANON KEY</label><input class="inp" id="cfg-supa-key" type="password" placeholder="eyJ..."></div>
+  </div>
+  <div class="card">
+    <div class="ctitle">IDENTITY SEED</div>
+    <div class="inp-row"><label class="inp-lbl">BIRTH DATE (dual natal origin A)</label><input class="inp" id="cfg-birth-a" type="date"></div>
+    <div class="inp-row"><label class="inp-lbl">BIRTH DATE (dual natal origin B / system)</label><input class="inp" id="cfg-birth-b" type="date"></div>
+    <div class="inp-row"><label class="inp-lbl">YOUR GATE</label><input class="inp" id="cfg-gate" type="number" min="1" max="64" placeholder="34"></div>
+  </div>
+  <div class="btn-row">
+    <button class="btn em" onclick="saveConfig()">✓ SAVE</button>
+    <button class="btn re" onclick="clearAllData()">⚠ CLEAR ALL DATA</button>
+  </div>
+</div>
+
+
+<!-- ── GOALS TAB ── -->
+<div id="v-goals" class="view" style="flex-direction:column;overflow:hidden;">
+  <div id="xp-bar-wrap" style="flex-shrink:0;padding:10px 14px 0;background:rgba(5,3,8,.95);">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;">
+      <div style="font-size:9px;font-weight:900;color:var(--gold);">LEVEL <span id="xp-level">1</span> — <span id="xp-rank">SEED</span></div>
+      <div style="font-size:8px;color:var(--dim);"><span id="xp-cur">0</span> / <span id="xp-next">100</span> XP</div>
+    </div>
+    <div style="height:4px;background:rgba(255,255,255,.07);border-radius:2px;overflow:hidden;margin-bottom:8px;">
+      <div id="xp-fill" style="height:100%;background:linear-gradient(90deg,var(--gold),var(--co));border-radius:2px;transition:width .6s ease;width:0%;"></div>
+    </div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;" id="streak-badges"></div>
+  </div>
+  <div style="flex:1;display:flex;overflow:hidden;">
+    <div style="flex:1;overflow-y:auto;padding:10px 14px;border-right:1px solid var(--border);">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+        <div class="sec" style="border:none;margin:0;padding:0;font-size:7px;letter-spacing:.16em;color:var(--dim);">ACTIVE GOALS</div>
+        <div style="display:flex;gap:5px;">
+          <button class="btn go sm" onclick="showNewGoalModal()">+ NEW GOAL</button>
+          <button class="btn vi sm" onclick="makeRequest()">REQUEST ✦</button>
+        </div>
+      </div>
+      <div id="goals-active-list"></div>
+      <div class="sec" style="margin-top:14px;">COMPLETED</div>
+      <div id="goals-done-list"></div>
+    </div>
+    <div style="width:190px;flex-shrink:0;overflow-y:auto;padding:10px 12px;">
+      <div class="sec">TOOL LEADERBOARD</div>
+      <div id="tool-leaderboard"></div>
+      <div class="sec" style="margin-top:12px;">ACHIEVEMENTS</div>
+      <div id="achievements-list"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── CHAT TAB ── -->
+<div id="v-chat" class="view" style="flex-direction:column;overflow:hidden;">
+  <div style="flex-shrink:0;display:flex;align-items:center;gap:8px;padding:8px 12px;border-bottom:1px solid var(--border);background:rgba(5,3,8,.95);">
+    <div style="width:30px;height:30px;border-radius:50%;background:radial-gradient(circle at 35% 35%,var(--vi),#1e1b4b);box-shadow:0 0 10px rgba(167,139,250,.4);display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;">✦</div>
+    <div style="flex:1;min-width:0;">
+      <div style="font-size:10px;font-weight:900;" id="agent-name">SYNTIA</div>
+      <div style="font-size:7px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" id="agent-status">Select backend · Trident → Groq → ONNX fallback chain</div>
+    </div>
+    <button class="btn vi sm" onclick="testConnection()" id="conn-test-btn">TEST ⚡</button>
+  </div>
+  <div id="conn-test-result" style="display:none;padding:6px 12px;font-size:8px;font-family:monospace;border-bottom:1px solid var(--border);flex-shrink:0;white-space:pre-line;line-height:1.6;max-height:100px;overflow-y:auto;"></div>
+  <div id="chat-messages" style="flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px;"></div>
+  <div id="tool-strip" style="flex-shrink:0;max-height:52px;overflow-y:auto;padding:3px 12px;background:rgba(0,0,0,.3);border-top:1px solid var(--border);font-size:7.5px;font-family:monospace;display:none;"></div>
+  <div id="requests-panel" style="flex-shrink:0;display:none;border-top:1px solid var(--border);padding:8px 12px;background:rgba(12,8,20,.97);max-height:180px;overflow-y:auto;">
+    <div style="font-size:7px;letter-spacing:.12em;color:var(--dim);margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;"><span>PENDING REQUESTS</span><button class="btn re sm" onclick="closeRequests()" style="padding:2px 7px;font-size:7px;">X</button></div>
+    <div id="requests-list"></div>
+  </div>
+  <div style="flex-shrink:0;padding:10px 12px;border-top:1px solid var(--border);background:rgba(5,3,8,.95);">
+    <div style="display:flex;gap:6px;margin-bottom:6px;">
+      <input class="inp" id="chat-input" placeholder="Talk to Syntia..." style="flex:1;" onkeydown="chatKey(event)">
+      <button class="btn vi" onclick="sendChat()" style="flex-shrink:0;">▸</button>
+      <button class="btn go sm" onclick="toggleRequests()" style="flex-shrink:0;position:relative;">
+        REQS <span id="req-count" style="color:var(--re);">0</span>
+      </button>
+    </div>
+    <div style="display:flex;gap:5px;flex-wrap:wrap;">
+      <button class="btn dim sm" onclick="quickCmd('What are my active goals and which should I focus on?')">goals</button>
+      <button class="btn dim sm" onclick="quickCmd('Ping both servers and tell me their status')">ping all</button>
+      <button class="btn dim sm" onclick="quickCmd('List all MCP tools available')">mcp tools</button>
+      <button class="btn dim sm" onclick="quickCmd('Generate my resonance address using gate '+((state?.signature?.gate)||34))">my address</button>
+      <button class="btn dim sm" onclick="quickCmd('What should I build or focus on right now based on current field state?')">what next</button>
+      <button class="btn gold sm" onclick="makeRequest()">📤 request</button>
+    </div>
+  </div>
+</div>
+
+<!-- NEW GOAL MODAL -->
+<div class="modal-bg" id="new-goal-modal" onclick="if(event.target===this)closeModal('new-goal-modal')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">🎯 NEW GOAL</div>
+    <div class="inp-row"><label class="inp-lbl">TITLE</label><input class="inp" id="ng-title" placeholder="e.g. Get Render server live"></div>
+    <div class="inp-row"><label class="inp-lbl">DESCRIPTION</label><textarea class="inp" id="ng-desc" placeholder="What does success look like?"></textarea></div>
+    <div class="grid-2">
+      <div class="inp-row"><label class="inp-lbl">ASSIGNED TO</label>
+        <select class="inp" id="ng-agent"><option value="me">Me</option><option value="syntia">Syntia</option><option value="both">Both</option></select>
+      </div>
+      <div class="inp-row"><label class="inp-lbl">PRIORITY</label>
+        <select class="inp" id="ng-priority"><option value="critical">Critical</option><option value="high">High</option><option value="medium" selected>Medium</option><option value="low">Low</option></select>
+      </div>
+    </div>
+    <div class="inp-row"><label class="inp-lbl">XP REWARD</label><input class="inp" id="ng-xp" type="number" value="50" min="10" max="500"></div>
+    <button class="btn go full" onclick="createGoal()" style="margin-top:8px;">✦ CREATE GOAL</button>
+  </div>
+</div>
+
+<!-- REQUEST MODAL -->
+<div class="modal-bg" id="request-modal" onclick="if(event.target===this)closeModal('request-modal')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">📤 MAKE A REQUEST</div>
+    <div style="font-size:8px;color:var(--dim);margin-bottom:10px;">Syntia will use its tools to complete this and log the result here.</div>
+    <div class="inp-row"><label class="inp-lbl">REQUEST</label><textarea class="inp" id="req-text" placeholder="Push my latest HTML to GitHub, then ping Render to confirm it deployed..." style="min-height:80px;"></textarea></div>
+    <div class="inp-row"><label class="inp-lbl">TOOLS HINT (optional)</label><input class="inp" id="req-tools" placeholder="github_push, ping_render, list_mcp_tools..."></div>
+    <button class="btn vi full" onclick="submitRequest()" style="margin-top:8px;">▸ SUBMIT TO SYNTIA</button>
+  </div>
+</div>
+
+</div><!-- /content -->
+</div><!-- /shell -->
+
+<!-- MODALS -->
+<div class="modal-bg" id="conn-modal" onclick="if(event.target===this)closeModal('conn-modal')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">⚡ CONNECT AGENT SERVER</div>
+    <div class="inp-row"><label class="inp-lbl">WS HOST</label><input class="inp" id="modal-ws-host" placeholder="localhost:3000"></div>
+    <div class="btn-row">
+      <button class="btn em" onclick="connectWS()">CONNECT WS</button>
+      <button class="btn re" onclick="disconnectWS()">DISCONNECT</button>
+    </div>
+    <div style="margin-top:12px;font-size:7px;color:var(--dim);">ws://host/cognitive · REST http://host</div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+//  NEURAL CANVAS
+// ═══════════════════════════════════════════════════════════
+(function(){
+  const cv=document.getElementById('neural'),cx=cv.getContext('2d');
+  let W,H,hue=38;
+  window._nh=h=>{hue=h;};
+  const rz=()=>{W=cv.width=cv.offsetWidth*devicePixelRatio;H=cv.height=cv.offsetHeight*devicePixelRatio;};
+  window.addEventListener('resize',rz);rz();
+  const N=[],E=[];
+  for(let i=0;i<40;i++)N.push({x:Math.random()*(W/devicePixelRatio),y:Math.random()*(H/devicePixelRatio),vx:(Math.random()-.5)*.2,vy:(Math.random()-.5)*.2,r:1.5+Math.random()*2.5,ph:Math.random()*6.28,spd:.006+Math.random()*.01});
+  for(let i=0;i<N.length;i++)N.map((n,j)=>({j,d:Math.hypot(n.x-N[j].x,n.y-N[j].y)})).filter(x=>x.j!==i).sort((a,b)=>a.d-b.d).slice(0,3).forEach(({j})=>{if(!E.find(e=>(e.a===i&&e.b===j)||(e.a===j&&e.b===i)))E.push({a:i,b:j,sp:0,sv:Math.random()>.5,sig:Math.random()});});
+  (function tick(){
+    const w=W/devicePixelRatio,h=H/devicePixelRatio;cx.clearRect(0,0,w,h);
+    N.forEach(n=>{n.x+=n.vx;n.y+=n.vy;n.ph+=n.spd;if(n.x<0||n.x>w)n.vx*=-1;if(n.y<0||n.y>h)n.vy*=-1;});
+    E.forEach(e=>{
+      if(e.sv){e.sp+=.008;if(e.sp>1){e.sp=0;e.sig=Math.random();}}
+      if(Math.random()<.001)e.sv=!e.sv;
+      const a=N[e.a],b=N[e.b],d=Math.hypot(a.x-b.x,a.y-b.y);if(d>220)return;
+      cx.beginPath();cx.moveTo(a.x,a.y);cx.lineTo(b.x,b.y);
+      cx.strokeStyle=`hsla(${hue},60%,65%,${(1-d/220)*.14})`;cx.lineWidth=.5;cx.stroke();
+      if(e.sv&&e.sig>.3){const sx=a.x+(b.x-a.x)*e.sp,sy=a.y+(b.y-a.y)*e.sp;
+        cx.beginPath();cx.arc(sx,sy,1.6,0,6.28);cx.fillStyle=`hsla(${hue},90%,75%,${e.sig*.5})`;cx.shadowColor=`hsla(${hue},90%,75%,.4)`;cx.shadowBlur=4;cx.fill();cx.shadowBlur=0;}
+    });
+    N.forEach(n=>{const p=Math.sin(n.ph)*.4+.6;cx.beginPath();cx.arc(n.x,n.y,n.r*(.8+p*.3),0,6.28);cx.fillStyle=`hsla(${hue},70%,65%,${.2+p*.3})`;cx.shadowColor=`hsla(${hue},90%,70%,.2)`;cx.shadowBlur=n.r*2;cx.fill();cx.shadowBlur=0;});
+    requestAnimationFrame(tick);
+  })();
+})();
+
+// ═══════════════════════════════════════════════════════════
+//  CONFIG
+// ═══════════════════════════════════════════════════════════
+const CFG = {
+  renderUrl:   localStorage.getItem('sn_render')   || 'https://synthia-server.onrender.com',
+  nodeUrl:     localStorage.getItem('sn_node')     || '',
+  groqKey:     localStorage.getItem('sn_groq_key') || '',
+  localMcp:    localStorage.getItem('sn_local_mcp')|| 'http://10.0.0.200:3001/sse',
+  wsHost:      localStorage.getItem('sn_ws_host')  || 'localhost:3000',
+  ghToken:     localStorage.getItem('sn_gh_token') || '',
+  ghUser:      localStorage.getItem('sn_gh_user')  || 'justappgrabbin',
+  ghRepo:      localStorage.getItem('sn_gh_repo')  || 'Synthia-server',
+  supaUrl:     localStorage.getItem('sn_supa_url') || 'https://leisphnjslcuepflefri.supabase.co',
+  supaKey:     localStorage.getItem('sn_supa_key') || '',
+  birthA:      localStorage.getItem('sn_birth_a')  || '',
+  birthB:      localStorage.getItem('sn_birth_b')  || '',
+  gate:        parseInt(localStorage.getItem('sn_gate')||'1'),
+};
+
+function saveConfig(){
+  CFG.renderUrl  = document.getElementById('cfg-render').value.trim();
+  CFG.nodeUrl    = document.getElementById('cfg-node').value.trim();
+  CFG.groqKey    = document.getElementById('cfg-groq-key').value.trim();
+  CFG.localMcp   = document.getElementById('cfg-local-mcp').value.trim();
+  CFG.wsHost     = document.getElementById('cfg-ws').value.trim();
+  CFG.ghToken    = document.getElementById('cfg-gh-token').value.trim();
+  CFG.ghUser     = document.getElementById('cfg-gh-user').value.trim();
+  CFG.ghRepo     = document.getElementById('cfg-gh-repo').value.trim();
+  CFG.supaUrl    = document.getElementById('cfg-supa-url').value.trim();
+  CFG.supaKey    = document.getElementById('cfg-supa-key').value.trim();
+  CFG.birthA     = document.getElementById('cfg-birth-a').value;
+  CFG.birthB     = document.getElementById('cfg-birth-b').value;
+  CFG.gate       = parseInt(document.getElementById('cfg-gate').value||'1');
+  localStorage.setItem('sn_render',   CFG.renderUrl);
+  localStorage.setItem('sn_node',      CFG.nodeUrl);
+  localStorage.setItem('sn_groq_key',  CFG.groqKey);
+  localStorage.setItem('sn_local_mcp',CFG.localMcp);
+  localStorage.setItem('sn_ws_host',  CFG.wsHost);
+  localStorage.setItem('sn_gh_token', CFG.ghToken);
+  localStorage.setItem('sn_gh_user',  CFG.ghUser);
+  localStorage.setItem('sn_gh_repo',  CFG.ghRepo);
+  localStorage.setItem('sn_supa_url', CFG.supaUrl);
+  localStorage.setItem('sn_supa_key', CFG.supaKey);
+  localStorage.setItem('sn_birth_a',  CFG.birthA);
+  localStorage.setItem('sn_birth_b',  CFG.birthB);
+  localStorage.setItem('sn_gate',     CFG.gate);
+  toast('Config saved','ok');
+}
+
+function loadConfigUI(){
+  document.getElementById('cfg-render').value    = CFG.renderUrl;
+  document.getElementById('cfg-node').value      = CFG.nodeUrl;
+  document.getElementById('cfg-groq-key').value  = CFG.groqKey;
+  document.getElementById('cfg-local-mcp').value = CFG.localMcp;
+  document.getElementById('cfg-ws').value        = CFG.wsHost;
+  document.getElementById('cfg-gh-token').value  = CFG.ghToken;
+  document.getElementById('cfg-gh-user').value   = CFG.ghUser;
+  document.getElementById('cfg-gh-repo').value   = CFG.ghRepo;
+  document.getElementById('cfg-supa-url').value  = CFG.supaUrl;
+  document.getElementById('cfg-supa-key').value  = CFG.supaKey;
+  document.getElementById('cfg-birth-a').value   = CFG.birthA;
+  document.getElementById('cfg-birth-b').value   = CFG.birthB;
+  document.getElementById('cfg-gate').value      = CFG.gate;
+  document.getElementById('modal-ws-host').value = CFG.wsHost;
+  document.getElementById('local-url-display').textContent = CFG.localMcp;
+  document.getElementById('render-url-display').textContent = CFG.renderUrl;
+}
+
+function clearAllData(){
+  if(!confirm('Clear ALL saved data?')) return;
+  localStorage.clear();
+  location.reload();
+}
+
+// ═══════════════════════════════════════════════════════════
+//  RESONANCE ENGINE — REAL CALCULATION
+//  Score = gateMatch*0.40 + lineMatch*0.20 + dimMatch*0.15 + zodMatch*0.15 + tempPhase*0.10
+// ═══════════════════════════════════════════════════════════
+const ZODIAC_SEQ = ['aries','taurus','gemini','cancer','leo','virgo','libra','scorpio','sagittarius','capricorn','aquarius','pisces'];
+const GATE_LONGITUDES = {};
+(()=>{for(let g=1;g<=64;g++) GATE_LONGITUDES[g]=(g-1)*5.625;})();
+
+function dateToZodiac(d){
+  if(!d)return null;
+  const dt=new Date(d),m=dt.getMonth()+1,day=dt.getDate();
+  if((m===3&&day>=21)||(m===4&&day<=19))return'aries';
+  if((m===4&&day>=20)||(m===5&&day<=20))return'taurus';
+  if((m===5&&day>=21)||(m===6&&day<=20))return'gemini';
+  if((m===6&&day>=21)||(m===7&&day<=22))return'cancer';
+  if((m===7&&day>=23)||(m===8&&day<=22))return'leo';
+  if((m===8&&day>=23)||(m===9&&day<=22))return'virgo';
+  if((m===9&&day>=23)||(m===10&&day<=22))return'libra';
+  if((m===10&&day>=23)||(m===11&&day<=21))return'scorpio';
+  if((m===11&&day>=22)||(m===12&&day<=21))return'sagittarius';
+  if((m===12&&day>=22)||(m===1&&day<=19))return'capricorn';
+  if((m===1&&day>=20)||(m===2&&day<=18))return'aquarius';
+  return'pisces';
+}
+
+function zodiacDistance(zA,zB){
+  if(!zA||!zB)return 0.5;
+  const iA=ZODIAC_SEQ.indexOf(zA),iB=ZODIAC_SEQ.indexOf(zB);
+  if(iA<0||iB<0)return 0.5;
+  const dist=Math.abs(iA-iB);
+  const minDist=Math.min(dist,12-dist);
+  // Opposition(6)=complementary, trine(4)=harmonious, square(3)=tension
+  if(minDist===0)return 1.0;
+  if(minDist===6)return 0.85; // opposition — complementary
+  if(minDist===4||minDist===8)return 0.75; // trine
+  if(minDist===3||minDist===9)return 0.45; // square — tension
+  if(minDist===2||minDist===10)return 0.6; // sextile
+  return 0.3;
+}
+
+function temporalPhase(dateA, dateB){
+  if(!dateA||!dateB)return 0.5;
+  const dA=new Date(dateA),dB=new Date(dateB);
+  const now=new Date();
+  // Phase = how aligned the two dates are with current lunar/solar cycle
+  // Simplified: check if both dates fall near same phase in a ~29.5-day cycle
+  const cycleLen=29.5*24*3600*1000;
+  const phA=((now-dA)%cycleLen+cycleLen)%cycleLen/cycleLen;
+  const phB=((now-dB)%cycleLen+cycleLen)%cycleLen/cycleLen;
+  const phaseDiff=Math.abs(phA-phB);
+  const minPhaseDiff=Math.min(phaseDiff,1-phaseDiff);
+  return 1-minPhaseDiff*2; // 0=opposite phase, 1=same phase
+}
+
+function computeResonance(gA,lA,dateA, gB,lB,dateB){
+  gA=parseInt(gA)||1; lA=parseInt(lA)||1;
+  gB=parseInt(gB)||1; lB=parseInt(lB)||1;
+
+  // Gate match: exact=1.0, adjacent(<5)=0.6, far=0.2
+  const gateDiff=Math.abs(gA-gB);
+  const gateCircular=Math.min(gateDiff,64-gateDiff);
+  const gateScore = gateCircular===0?1.0:gateCircular<5?0.6:gateCircular<10?0.4:0.2;
+
+  // Line harmonic: same=1.0, adjacent=0.6, else=0.3
+  const lineDiff=Math.abs(lA-lB);
+  const lineScore = lineDiff===0?1.0:lineDiff===1?0.6:0.3;
+
+  // Zodiac field
+  const zA=dateToZodiac(dateA),zB=dateToZodiac(dateB);
+  const zodScore=zodiacDistance(zA,zB);
+
+  // Temporal phase
+  const tempScore=temporalPhase(dateA,dateB);
+
+  // Dimension match based on gate modulo
+  const dimA=Math.floor((gA-1)/8),dimB=Math.floor((gB-1)/8);
+  const dimScore=dimA===dimB?1.0:Math.abs(dimA-dimB)===1?0.6:0.3;
+
+  // Weighted sum
+  const total = gateScore*0.40 + lineScore*0.20 + dimScore*0.15 + zodScore*0.15 + tempScore*0.10;
+
+  return {
+    total: Math.min(1,Math.max(0,total)),
+    gate: gateScore, line: lineScore, zod: zodScore, temp: tempScore, dim: dimScore,
+    zA, zB
+  };
+}
+
+const resonanceHistory=[];
+
+function calcResonance(){
+  const gA=document.getElementById('res-gate-a').value;
+  const lA=document.getElementById('res-line-a').value;
+  const dA=document.getElementById('res-date-a').value;
+  const gB=document.getElementById('res-gate-b').value;
+  const lB=document.getElementById('res-line-b').value;
+  const dB=document.getElementById('res-date-b').value;
+
+  if(!gA||!gB){toast('Enter gate values for both sides','warn');return;}
+
+  const R=computeResonance(gA,lA,dA,gB,lB,dB);
+  const pct=(R.total*100).toFixed(1)+'%';
+
+  // Tier
+  let tier,tierColor,interp;
+  if(R.total>=0.75){tier='HIGH RESONANCE';tierColor='var(--em)';interp='Strong alignment detected. These two fields are in active harmonic resonance. Actions taken now will amplify through both. High probability of mutual reinforcement and outcome acceleration.';}
+  else if(R.total>=0.5){tier='MODERATE RESONANCE';tierColor='var(--gold)';interp='Partial alignment present. Connection exists but requires conscious bridging. There are harmonics to work with — identify the gate channel ('+gA+'→'+gB+') as the bridge point. Timing matters here.';}
+  else{tier='LOW RESONANCE';tierColor='var(--re)';interp='Fields are currently in tension or divergence. This is not failure — it may indicate a transformative pressure point. The I Ching hexagram at Gate '+gA+' speaks to this gap. Study the transition lines.';}
+
+  const el=id=>document.getElementById(id);
+  el('res-result').style.display='block';
+  el('res-score-val').textContent=pct;
+  el('res-score-val').style.color=tierColor;
+  el('res-tier').textContent=`${tier} · Gate ${gA}L${lA} ↔ Gate ${gB}L${lB}${dA?' · '+dateToZodiac(dA):''}${dB?' ↔ '+dateToZodiac(dB):''}`;
+  el('res-tier').style.color=tierColor;
+  el('res-gate-pct').textContent=(R.gate*100).toFixed(0)+'%';
+  el('res-gate-bar').style.width=(R.gate*100)+'%';
+  el('res-line-pct').textContent=(R.line*100).toFixed(0)+'%';
+  el('res-line-bar').style.width=(R.line*100)+'%';
+  el('res-zod-pct').textContent=(R.zod*100).toFixed(0)+'%';
+  el('res-zod-bar').style.width=(R.zod*100)+'%';
+  el('res-temp-pct').textContent=(R.temp*100).toFixed(0)+'%';
+  el('res-temp-bar').style.width=(R.temp*100)+'%';
+  el('res-interpretation').textContent=interp;
+
+  // Log to history
+  const entry={ts:Date.now(),gA,lA,dA,gB,lB,dB,score:R.total,tier};
+  resonanceHistory.unshift(entry);
+  if(resonanceHistory.length>20)resonanceHistory.pop();
+  renderResHistory();
+  log(`Resonance G${gA}L${lA}↔G${gB}L${lB}: ${pct} [${tier}]`,'m');
+  window._nh&&window._nh(R.total>0.7?158:R.total>0.5?38:0);
+  setTimeout(()=>window._nh&&window._nh(38),3000);
+}
+
+function renderResHistory(){
+  const el=document.getElementById('res-history');
+  if(!el)return;
+  if(!resonanceHistory.length){el.innerHTML='<div style="color:var(--dim);padding:8px 0;">No calculations yet</div>';return;}
+  el.innerHTML=resonanceHistory.map(r=>`
+    <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.04);">
+      <span style="color:var(--dim)">G${r.gA}L${r.lA} ↔ G${r.gB}L${r.lB}</span>
+      <span style="color:${r.score>=0.75?'var(--em)':r.score>=0.5?'var(--gold)':'var(--re)'};">${(r.score*100).toFixed(1)}%</span>
+    </div>`).join('');
+}
+
+// ── ADDRESS GENERATOR ──────────────────────────────────────
+function _hashStr(str){
+  let h=0;for(let i=0;i<str.length;i++){h=((h<<5)-h)+str.charCodeAt(i);h=h&h;}return h;
+}
+const ZODIACS=['aries','taurus','gemini','cancer','leo','virgo','libra','scorpio','sagittarius','capricorn','aquarius','pisces'];
+const PLANETS=['☉Sun','☽Moon','☿Mercury','♀Venus','♂Mars','♃Jupiter','♄Saturn','⛢Uranus','♆Neptune','♇Pluto'];
+const DIMS=['Spirit','Mind','Body','Heart','Soul'];
+
+function generateAddress(){
+  const name=document.getElementById('addr-name').value.trim()||'unnamed';
+  const type=document.getElementById('addr-type').value;
+  const h=_hashStr(name+type+Date.now());
+  const abs=Math.abs(h);
+  const gate=(abs%64)+1, line=(Math.abs(h>>8)%6)+1, color=(Math.abs(h>>16)%6)+1;
+  const tone=(Math.abs(h>>24)%6)+1, base=(Math.abs(h>>32)%5)+1;
+  const zodiac=ZODIACS[Math.floor((gate-1)/5.34)%12];
+  const house=((gate-1)%12)+1;
+  const planet=PLANETS[abs%10];
+  const dim=DIMS[abs%5];
+  const degree=((gate-1)*5.625+(line-1)*0.9375+(color-1)*0.15625).toFixed(4);
+  const addr22t=(gate-1)*1080+(line-1)*180+(color-1)*30+(tone-1)*5+(base-1);
+  const sig=`${dim}·${gate}.${line}.${color}.${tone}.${base}·${zodiac}·H${house}·${planet.replace(/[^a-zA-Z]/g,'')}#${abs.toString(36).slice(0,8)}`;
+
+  const el=document.getElementById('addr-result');
+  el.style.display='block';
+  el.innerHTML=`
+    <div style="color:var(--gold);font-size:11px;font-weight:900;margin-bottom:6px;">${gate}.${line}.${color}.${tone}.${base}</div>
+    <div style="font-size:8px;color:var(--vi);word-break:break-all;margin-bottom:6px;">${sig}</div>
+    <div class="grid-2" style="font-size:8px;">
+      <div><span style="color:var(--dim)">Dim </span>${dim}</div>
+      <div><span style="color:var(--dim)">Zodiac </span>${zodiac}</div>
+      <div><span style="color:var(--dim)">House </span>H${house}</div>
+      <div><span style="color:var(--dim)">Planet </span>${planet}</div>
+      <div><span style="color:var(--dim)">Degree </span>${degree}°</div>
+      <div><span style="color:var(--dim)">22T </span>${addr22t}</div>
+    </div>`;
+  log(`Address: ${name} → ${gate}.${line}.${color}.${tone}.${base} [${dim}]`,'m');
+}
+
+// ═══════════════════════════════════════════════════════════
+//  GITHUB API — REAL
+// ═══════════════════════════════════════════════════════════
+function ghHeaders(){
+  return{
+    'Authorization':`Bearer ${CFG.ghToken}`,
+    'Accept':'application/vnd.github+json',
+    'Content-Type':'application/json',
+    'X-GitHub-Api-Version':'2022-11-28'
+  };
+}
+
+async function pushToGitHub(){
+  if(!CFG.ghToken){toast('Add GitHub token in Config','err');return;}
+  const path=document.getElementById('gh-path').value.trim();
+  const msg=document.getElementById('gh-msg').value.trim()||'SYNTIA: auto-deploy';
+  const content=document.getElementById('gh-content').value;
+  const repo=`${CFG.ghUser}/${CFG.ghRepo}`;
+
+  if(!path||!content){toast('Enter path and content','warn');return;}
+
+  const logEl=document.getElementById('gh-result');
+  ghLog(logEl,`Pushing to ${repo}/${path}...`);
+
+  try{
+    const encoded=btoa(unescape(encodeURIComponent(content)));
+    // Check for existing SHA
+    let sha='';
+    const check=await fetch(`https://api.github.com/repos/${repo}/contents/${path}`,{headers:ghHeaders()});
+    if(check.ok){const d=await check.json();sha=d.sha;}
+
+    const res=await fetch(`https://api.github.com/repos/${repo}/contents/${path}`,{
+      method:'PUT',headers:ghHeaders(),
+      body:JSON.stringify({message:msg,content:encoded,...(sha?{sha}:{})})
+    });
+    if(res.ok){
+      const d=await res.json();
+      ghLog(logEl,`✓ Pushed: ${d.content?.html_url||path}`,'ok');
+      toast('Pushed to GitHub','ok');
+      log(`GitHub push: ${path}`,'g');
+    }else{
+      const err=await res.json();
+      ghLog(logEl,`✗ ${err.message}`,'err');
+      toast('Push failed: '+err.message,'err');
+    }
+  }catch(e){
+    ghLog(logEl,'✗ '+e.message,'err');
+    toast('Error: '+e.message,'err');
+  }
+}
+
+async function createRepoAndDeploy(){
+  if(!CFG.ghToken||!CFG.ghUser){toast('Add GitHub token + username in Config','err');return;}
+  const name=document.getElementById('gh-repo-name').value.trim();
+  const desc=document.getElementById('gh-repo-desc').value.trim()||'Built with Stellar Nexus';
+  const html=document.getElementById('gh-repo-html').value;
+
+  if(!name){toast('Enter repo name','warn');return;}
+
+  const logEl=document.getElementById('gh-deploy-result');
+  ghLog(logEl,`Creating repo ${name}...`);
+
+  try{
+    const cr=await fetch('https://api.github.com/user/repos',{
+      method:'POST',headers:ghHeaders(),
+      body:JSON.stringify({name,description:desc,private:false,auto_init:false})
+    });
+    if(!cr.ok){const e=await cr.json();ghLog(logEl,'✗ Create failed: '+e.message,'err');return;}
+    const repo=await cr.json();
+    ghLog(logEl,`✓ Repo created: ${repo.html_url}`,'ok');
+
+    const files={'index.html':html||'<h1>Stellar Nexus Deploy</h1>','README.md':`# ${name}\n\nBuilt with Stellar Nexus · ${new Date().toISOString()}`};
+    for(const [fp,fc] of Object.entries(files)){
+      if(!fc)continue;
+      await fetch(`https://api.github.com/repos/${CFG.ghUser}/${name}/contents/${fp}`,{
+        method:'PUT',headers:ghHeaders(),
+        body:JSON.stringify({message:`✦ Initial commit · Stellar Nexus`,content:btoa(unescape(encodeURIComponent(fc)))})
+      });
+    }
+    ghLog(logEl,'✓ Files committed','ok');
+
+    // Enable Pages
+    try{
+      await fetch(`https://api.github.com/repos/${CFG.ghUser}/${name}/pages`,{
+        method:'POST',headers:ghHeaders(),body:JSON.stringify({source:{branch:'main',path:'/'}})
+      });
+      const pagesUrl=`https://${CFG.ghUser}.github.io/${name}/`;
+      ghLog(logEl,`✓ Pages: ${pagesUrl}`,'ok');
+      toast('Deployed to GitHub Pages','ok');
+    }catch(e){ghLog(logEl,'Pages enable pending (may take a moment)','warn');}
+    log(`GitHub deploy: ${name}`,'g');
+  }catch(e){ghLog(logEl,'✗ '+e.message,'err');}
+}
+
+async function loadRepos(){
+  if(!CFG.ghToken){toast('Add GitHub token in Config','err');return;}
+  const el=document.getElementById('repo-list');
+  el.innerHTML='<div style="color:var(--dim)">Loading...</div>';
+  try{
+    const res=await fetch('https://api.github.com/user/repos?per_page=100&sort=created',{headers:ghHeaders()});
+    if(!res.ok){el.innerHTML='<div style="color:var(--re)">Auth failed</div>';return;}
+    const repos=await res.json();
+    if(!repos.length){el.innerHTML='<div style="color:var(--dim)">No repos found</div>';return;}
+    el.innerHTML=repos.slice(0,30).map(r=>`
+      <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.04);">
+        <div>
+          <div style="font-size:9px;font-weight:700;">${r.name}</div>
+          <div style="font-size:7px;color:var(--dim);">${r.description||'—'}</div>
+        </div>
+        <a href="${r.html_url}" target="_blank" style="color:var(--mind);font-size:7px;text-decoration:none;">↗</a>
+      </div>`).join('');
+  }catch(e){el.innerHTML='<div style="color:var(--re)">'+e.message+'</div>';}
+}
+
+function ghLog(el,msg,type=''){
+  const line=document.createElement('div');
+  line.style.cssText=`font-size:8px;line-height:1.6;color:${type==='ok'?'var(--em)':type==='err'?'var(--re)':type==='warn'?'var(--gold)':'var(--dim)'};`;
+  line.textContent=msg;
+  el.appendChild(line);el.scrollTop=el.scrollHeight;
+}
+
+// ═══════════════════════════════════════════════════════════
+//  RENDER SERVER
+// ═══════════════════════════════════════════════════════════
+async function pingRender(){
+  setDot('sd-health','warn');
+  try{
+    const res=await fetch(`${CFG.renderUrl}/health`,{signal:AbortSignal.timeout(8000)});
+    if(res.ok){
+      setDot('sd-health','on');
+      setText('sv-health','online');
+      setTag('render-tag','ok','ONLINE');
+      document.getElementById('card-render').className='card live';
+      toast('Render server online','ok');
+      log('Render: online','g');
+    }else throw new Error(res.status);
+  }catch(e){
+    setDot('sd-health','err');
+    setText('sv-health','offline');
+    setTag('render-tag','err','OFFLINE');
+    document.getElementById('card-render').className='card err';
+    log('Render: offline — '+e.message,'r');
+  }
+}
+
+async function wakeRender(){
+  toast('Waking Render server...','warn');
+  log('Pinging Render to wake from sleep...','e');
+  // Render sleeps after 15min inactivity — ping it repeatedly
+  let attempts=0;
+  const wake=async()=>{
+    attempts++;
+    try{
+      const res=await fetch(`${CFG.renderUrl}/health`,{signal:AbortSignal.timeout(30000)});
+      if(res.ok){
+        toast(`Render awake after ${attempts} attempt(s)`,'ok');
+        log(`Render awake (${attempts} pings)`,'g');
+        pingRender();
+        return;
+      }
+    }catch(e){}
+    if(attempts<6){
+      log(`Wake attempt ${attempts}...`,'e');
+      setTimeout(wake,5000);
+    }else{
+      toast('Could not wake Render','err');
+      log('Render wake failed after 6 attempts','r');
+    }
+  };
+  wake();
+}
+
+async function checkRenderHealth(){
+  const endpoints=['/health','/oracle/ask','/trident/generate','/memory/save','/trident/rag/add'];
+  const ids=['sd-health','sd-oracle','sd-trident','sd-memory','sd-rag'];
+  const vals=['sv-health','sv-oracle','sv-trident','sv-memory','sv-rag'];
+  for(let i=0;i<endpoints.length;i++){
+    setDot(ids[i],'warn');
+    try{
+      const t=Date.now();
+      const res=await fetch(`${CFG.renderUrl}${endpoints[i]}`,{
+        method:endpoints[i]==='/health'?'GET':'OPTIONS',
+        signal:AbortSignal.timeout(5000)
+      });
+      const lat=Date.now()-t;
+      setDot(ids[i],'on');
+      setText(vals[i],`${res.status} · ${lat}ms`);
+    }catch(e){
+      setDot(ids[i],'err');
+      setText(vals[i],'unreachable');
+    }
+  }
+}
+
+async function apiCall(method){
+  const ep=document.getElementById('api-endpoint').value.trim()||'/health';
+  const payload=document.getElementById('api-payload').value.trim();
+  const logEl=document.getElementById('api-result');
+  logEl.innerHTML='';
+
+  const url=CFG.renderUrl+ep;
+  ghLog(logEl,`${method} ${url}`);
+  try{
+    const opts={method,headers:{'Content-Type':'application/json'},signal:AbortSignal.timeout(15000)};
+    if(method==='POST'&&payload) opts.body=payload;
+    const res=await fetch(url,opts);
+    const text=await res.text();
+    let pretty;
+    try{pretty=JSON.stringify(JSON.parse(text),null,2);}catch(e){pretty=text;}
+    ghLog(logEl,`${res.status} ${res.statusText}`,'ok');
+    ghLog(logEl,pretty.slice(0,500),'ok');
+  }catch(e){ghLog(logEl,'✗ '+e.message,'err');}
+}
+
+// ═══════════════════════════════════════════════════════════
+//  DAEMON / LOCAL WS
+// ═══════════════════════════════════════════════════════════
+let daemonWS=null;
+const daemonRpc={};let daemonRpcId=0;
+
+async function execDaemon(method,params){
+  return new Promise((res,rej)=>{
+    if(!daemonWS||daemonWS.readyState!==1){rej(new Error('Daemon offline'));return;}
+    const id=++daemonRpcId;
+    daemonRpc[id]={res,rej};
+    daemonWS.send(JSON.stringify({jsonrpc:'2.0',id,method,params}));
+    setTimeout(()=>{if(daemonRpc[id]){delete daemonRpc[id];rej(new Error('Timeout'));}},10000);
+  });
+}
+
+function connectDaemon(){
+  if(daemonWS)daemonWS.close();
+  const url=`ws://${CFG.wsHost.replace(/^ws:\/\//,'')}`;
+  try{
+    daemonWS=new WebSocket(url);
+    daemonLog(`Connecting ${url}...`);
+    daemonWS.onopen=()=>{daemonLog('Daemon connected','ok');};
+    daemonWS.onclose=()=>{daemonLog('Daemon closed');};
+    daemonWS.onerror=()=>{daemonLog('Daemon error','err');};
+    daemonWS.onmessage=e=>{
+      try{
+        const m=JSON.parse(e.data);
+        if(m.id&&daemonRpc[m.id]){
+          const{res,rej}=daemonRpc[m.id];delete daemonRpc[m.id];
+          m.error?rej(new Error(m.error.message)):res(m.result);
+        }
+      }catch(e){}
+    };
+  }catch(e){daemonLog('Error: '+e.message,'err');}
+}
+
+function daemonPing(){
+  execDaemon('capabilities',{}).then(()=>daemonLog('Pong','ok')).catch(e=>daemonLog('No response: '+e.message,'err'));
+}
+
+function fsList(){
+  const path=document.getElementById('exec-cmd').value||'.';
+  execDaemon('fs:list',{path}).then(r=>{
+    const lines=(r.entries||[]).map(e=>`${e.type==='directory'?'📁':'📄'} ${e.name}`);
+    daemonLog('['+path+']\n'+lines.join('\n'),'ok');
+  }).catch(e=>daemonLog('Error: '+e.message,'err'));
+}
+
+function execCmd(){
+  const cmd=document.getElementById('exec-cmd').value.trim();
+  const args=document.getElementById('exec-args').value.split(' ').filter(Boolean);
+  if(!cmd)return;
+  if(!daemonWS||daemonWS.readyState!==1){daemonLog('Daemon offline','err');return;}
+  daemonLog(`$ ${cmd} ${args.join(' ')}`);
+  execDaemon('exec',{command:cmd,args}).then(r=>{
+    if(r.stdout)daemonLog(r.stdout.trim(),'ok');
+    if(r.stderr)daemonLog(r.stderr.trim(),'err');
+  }).catch(e=>daemonLog('Error: '+e.message,'err'));
+}
+
+function selfRead(){
+  execDaemon('self:read',{}).then(r=>{
+    daemonLog(`Self: ${r.size}b`,'ok');
+    daemonLog(r.content?.slice(0,200)+'...','ok');
+  }).catch(e=>daemonLog('Error: '+e.message,'err'));
+}
+
+function daemonLog(msg,type=''){
+  const el=document.getElementById('daemon-log');
+  const line=document.createElement('div');
+  line.style.cssText=`font-size:8px;line-height:1.6;color:${type==='ok'?'var(--em)':type==='err'?'var(--re)':'var(--dim)'};`;
+  line.textContent=msg;
+  el.appendChild(line);el.scrollTop=el.scrollHeight;
+}
+
+// ═══════════════════════════════════════════════════════════
+//  MCP CLIENT
+// ═══════════════════════════════════════════════════════════
+const mcpServers=JSON.parse(localStorage.getItem('sn_mcp_servers')||'[]');
+let mcpConnections=new Map();
+
+function saveMCPServers(){localStorage.setItem('sn_mcp_servers',JSON.stringify(mcpServers));}
+
+async function addMCPServer(){
+  const name=document.getElementById('mcp-name').value.trim()||'Server';
+  const url=document.getElementById('mcp-url').value.trim();
+  const token=document.getElementById('mcp-token').value.trim();
+  if(!url){toast('Enter URL','warn');return;}
+  const entry={id:'mcp_'+Date.now(),name,url,token,status:'connecting',tools:[]};
+  mcpServers.push(entry);saveMCPServers();
+  renderMCPList();
+  toast('Connecting MCP...','warn');
+  connectMCPServer(entry);
+}
+
+async function connectMCPServer(entry){
+  // EventSource doesn't support auth headers — use fetch-based SSE reader when token present
+  entry.status='connecting';renderMCPList();
+  const headers={'Content-Type':'application/json'};
+  if(entry.token) headers['Authorization']=`Bearer ${entry.token}`;
+
+  if(entry.token){
+    // Auth-aware: use fetch ReadableStream to read SSE, POST for messages
+    try{
+      const ctrl=new AbortController();
+      entry.abort=ctrl;
+      const res=await fetch(entry.url,{headers:{'Authorization':`Bearer ${entry.token}`,'Accept':'text/event-stream'},signal:ctrl.signal});
+      if(!res.ok){entry.status='error';renderMCPList();log(`MCP ${entry.name}: HTTP ${res.status}`,'r');return;}
+      entry.status='connected';renderMCPList();log(`MCP: ${entry.name} connected (auth)`,'g');
+      mcpConnections.set(entry.id,ctrl);
+      // Read the stream
+      const reader=res.body.getReader();const dec=new TextDecoder();
+      let buf='';
+      (async()=>{
+        try{
+          while(true){
+            const{done,value}=await reader.read();
+            if(done)break;
+            buf+=dec.decode(value,{stream:true});
+            const lines=buf.split('\n');buf=lines.pop();
+            for(const line of lines){
+              if(!line.startsWith('data:'))continue;
+              try{
+                const m=JSON.parse(line.slice(5).trim());
+                if(m.method==='endpoint'){
+                  entry.postUrl=m.params?.uri||entry.url;
+                  // Initialize
+                  await mcpPost(entry,{jsonrpc:'2.0',id:1,method:'initialize',params:{protocolVersion:'2024-11-05',capabilities:{},clientInfo:{name:'StellarNexus',version:'5.0'}}});
+                  await new Promise(r=>setTimeout(r,400));
+                  const tr=await mcpPost(entry,{jsonrpc:'2.0',id:2,method:'tools/list',params:{}});
+                  if(tr?.result?.tools){entry.tools=tr.result.tools.map(t=>t.name);saveMCPServers();renderMCPList();log(`MCP ${entry.name}: ${entry.tools.length} tools`,'g');}
+                }
+                if(m.result?.tools){entry.tools=m.result.tools.map(t=>t.name);saveMCPServers();renderMCPList();}
+              }catch(e){}
+            }
+          }
+        }catch(e){if(e.name!=='AbortError'){entry.status='error';renderMCPList();}}
+      })();
+      // Also try direct tool list via POST if stream doesn't deliver it
+      setTimeout(async()=>{
+        if(!entry.tools.length){
+          const tr=await mcpPost(entry,{jsonrpc:'2.0',id:2,method:'tools/list',params:{}}).catch(()=>null);
+          if(tr?.result?.tools){entry.tools=tr.result.tools.map(t=>t.name);saveMCPServers();renderMCPList();}
+        }
+      },2000);
+    }catch(e){
+      if(e.name!=='AbortError'){entry.status='error';renderMCPList();log(`MCP ${entry.name}: ${e.message}`,'r');}
+    }
+  } else {
+    // No auth — use standard EventSource
+    try{
+      const src=new EventSource(entry.url);
+      entry.sse=src;
+      src.onopen=()=>{entry.status='connected';renderMCPList();log(`MCP: ${entry.name} connected`,'g');};
+      src.onmessage=async e=>{
+        try{
+          const m=JSON.parse(e.data);
+          if(m.method==='endpoint'){
+            entry.postUrl=m.params?.uri||entry.url;
+            await mcpPost(entry,{jsonrpc:'2.0',id:1,method:'initialize',params:{protocolVersion:'2024-11-05',capabilities:{},clientInfo:{name:'StellarNexus',version:'5.0'}}});
+            setTimeout(async()=>{
+              const tr=await mcpPost(entry,{jsonrpc:'2.0',id:2,method:'tools/list',params:{}}).catch(()=>null);
+              if(tr?.result?.tools){entry.tools=tr.result.tools.map(t=>t.name);saveMCPServers();renderMCPList();}
+            },500);
+          }
+          if(m.result?.tools){entry.tools=m.result.tools.map(t=>t.name);saveMCPServers();renderMCPList();}
+        }catch(e){}
+      };
+      src.onerror=()=>{entry.status='error';renderMCPList();};
+      mcpConnections.set(entry.id,src);
+      setTimeout(async()=>{
+        if(!entry.tools.length){
+          const tr=await mcpPost(entry,{jsonrpc:'2.0',id:2,method:'tools/list',params:{}}).catch(()=>null);
+          if(tr?.result?.tools){entry.tools=tr.result.tools.map(t=>t.name);saveMCPServers();renderMCPList();}
+        }
+      },1500);
+    }catch(e){entry.status='error';renderMCPList();}
+  }
+}
+
+async function mcpPost(entry,body){
+  const url=entry.postUrl||entry.url;
+  const headers={'Content-Type':'application/json'};
+  if(entry.token)headers['Authorization']=`Bearer ${entry.token}`;
+  const res=await fetch(url,{method:'POST',headers,body:JSON.stringify(body)});
+  if(!res.ok)return null;
+  try{return await res.json();}catch(e){return null;}
+}
+
+function renderMCPList(){
+  const el=document.getElementById('mcp-servers-list');
+  if(!mcpServers.length){el.innerHTML='<div style="font-size:8px;color:var(--dim);">No servers added</div>';return;}
+  el.innerHTML=mcpServers.map(s=>`
+    <div style="padding:8px;background:rgba(0,0,0,.3);border-radius:7px;margin-bottom:6px;border:1px solid ${s.status==='connected'?'rgba(16,185,129,.3)':'var(--border)'};">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+        <span style="font-size:9px;font-weight:700;">${s.name}</span>
+        <span class="tag ${s.status==='connected'?'ok':'err'}" style="font-size:6px;">${s.status.toUpperCase()}</span>
+      </div>
+      <div style="font-size:7px;color:var(--dim);word-break:break-all;margin-bottom:5px;">${s.url}</div>
+      ${s.tools.length?`<div style="display:flex;flex-wrap:wrap;gap:3px;">${s.tools.slice(0,5).map(t=>`<span class="tag vi" style="font-size:6px;">${t}</span>`).join('')}${s.tools.length>5?`<span class="tag dim" style="font-size:6px;">+${s.tools.length-5}</span>`:''}</div>`:''}
+      <button class="btn re sm" onclick="removeMCPServer('${s.id}')" style="margin-top:6px;">REMOVE</button>
+    </div>`).join('');
+}
+
+function removeMCPServer(id){
+  const idx=mcpServers.findIndex(s=>s.id===id);
+  if(idx>=0){
+    const s=mcpServers[idx];
+    if(s.sse)s.sse.close();
+    if(s.abort)s.abort.abort();
+    mcpConnections.delete(id);
+    mcpServers.splice(idx,1);
+    saveMCPServers();renderMCPList();
+  }
+}
+
+async function callMCPTool(){
+  const tool=document.getElementById('mcp-tool').value.trim()||'tools/list';
+  const argsStr=document.getElementById('mcp-args').value.trim()||'{}';
+  const logEl=document.getElementById('mcp-result');
+  let args;try{args=JSON.parse(argsStr);}catch(e){toast('Invalid JSON args','err');return;}
+
+  const connected=mcpServers.filter(s=>s.status==='connected');
+  if(!connected.length){toast('No MCP servers connected','warn');logEl.innerHTML='<div style="color:var(--re)">No servers connected</div>';return;}
+
+  const s=connected[0];
+  const isToolsList=tool==='tools/list';
+  const body={jsonrpc:'2.0',id:Date.now(),method:isToolsList?'tools/list':'tools/call',params:isToolsList?{}:{name:tool,arguments:args}};
+  ghLog(logEl,`→ ${s.name}: ${tool}`);
+  try{
+    const r=await mcpPost(s,body);
+    if(r){ghLog(logEl,JSON.stringify(r,null,2).slice(0,500),'ok');}
+    else{ghLog(logEl,'No response','warn');}
+  }catch(e){ghLog(logEl,'✗ '+e.message,'err');}
+}
+
+async function connectLocalMCP(){
+  const name=document.getElementById('mcp-name').value.trim()||'Local Phone';
+  document.getElementById('mcp-name').value=name;
+  document.getElementById('mcp-url').value=CFG.localMcp;
+  addMCPServer();
+  showTab('mcp');
+}
+
+async function scanNetwork(){
+  toast('Scanning local network...','warn');
+  log('Scanning 10.0.0.1-20...','e');
+  const ports=[3001,8080,8081];
+  for(let i=1;i<=20;i++){
+    const ip=`10.0.0.${i}`;
+    for(const port of ports){
+      try{
+        await fetch(`http://${ip}:${port}/sse`,{method:'GET',mode:'no-cors',signal:AbortSignal.timeout(500)});
+        toast(`Found: ${ip}:${port}`,'ok');
+        log(`MCP found at ${ip}:${port}`,'g');
+        document.getElementById('mcp-url').value=`http://${ip}:${port}/sse`;
+        return;
+      }catch(e){}
+    }
+  }
+  toast('No MCP servers found','warn');
+}
+
+// ═══════════════════════════════════════════════════════════
+//  WEBSOCKET — AGENT SERVER
+// ═══════════════════════════════════════════════════════════
+let ws=null,wsStatus='offline';
+
+function connectWS(){
+  const host=document.getElementById('modal-ws-host').value.trim()||CFG.wsHost;
+  CFG.wsHost=host;
+  closeModal('conn-modal');
+  if(ws)ws.close();
+  setConn('warn');log('Connecting WS...','e');
+  try{
+    ws=new WebSocket(`ws://${host.replace(/^ws:\/\//,'')}/cognitive`);
+    ws.onopen=()=>{setConn('live');log('Agent server connected','g');pollREST();};
+    ws.onclose=()=>{setConn('offline');log('Agent server disconnected','t');};
+    ws.onerror=()=>setConn('err');
+    ws.onmessage=e=>{
+      try{
+        const m=JSON.parse(e.data);
+        if(m.type==='field:pulse'&&m.payload?.survival)window._lastSurvival=m.payload.survival;
+        if(m.type==='goal:activated')log(`[SERVER] Goal: ${m.payload?.title||''}`,'g');
+        if(m.type==='goal:completed')log(`[SERVER] Done: ${m.payload?.title||''}`,'g');
+        if(m.type==='tension:spike'){
+          log(`[SERVER] Tension: ${m.payload?.type||''}`,'t');
+          if(m.payload?.magnitude>0.8){
+            propose('server_goal',{title:`Resolve: ${m.payload.type}`,desc:`Server spiked at ${((m.payload.magnitude||0)*100).toFixed(0)}%`,goal:`resolve_${m.payload.type}`,impact:m.payload.magnitude||.7});
+          }
+        }
+        if(m.type==='agent:speaks')log(`[AGENT] ${(m.payload?.text||'').slice(0,70)}`,'g');
+      }catch(e){}
+    };
+  }catch(e){setConn('err');log('WS error: '+e.message,'r');}
+}
+
+function disconnectWS(){if(ws){ws.close();ws=null;}setConn('offline');}
+
+async function pollREST(){
+  if(wsStatus!=='live')return;
+  try{
+    const s=await fetch(`http://${CFG.wsHost}/status`).then(r=>r.json()).catch(()=>null);
+    if(s){log(`Server: ${s.agent?.tensionCount||0} tensions`,'e');}
+  }catch(e){}
+  setTimeout(pollREST,5000);
+}
+
+function setConn(s){
+  wsStatus=s;
+  const dot=document.getElementById('conn-dot'),lbl=document.getElementById('conn-lbl');
+  dot.className=s==='live'?'live':s==='warn'?'warn':s==='err'?'err':'';
+  lbl.textContent={live:'LIVE',warn:'CONNECTING',offline:'OFFLINE',err:'ERROR'}[s]||'OFFLINE';
+  lbl.style.color={live:'var(--em)',warn:'var(--gold)',offline:'var(--dim)',err:'var(--re)'}[s]||'var(--dim)';
+  window._nh&&window._nh(s==='live'?158:38);
+}
+
+// ═══════════════════════════════════════════════════════════
+//  AUTONOMOUS ORCHESTRATOR ENGINE (from orchestrator.html)
+// ═══════════════════════════════════════════════════════════
+const state={
+  isRunning:false,lastUser:0,idleMs:25000,
+  signature:null,tensions:[],goals:[],activeGoal:null,goalHistory:[],
+  patterns:new Map(),events:[],cycles:[],
+  selfModel:{capabilities:[],performanceHistory:[],telos:'enable_consciousness_exploration_through_resonance'}
+};
+const proposals=[];let proposalSeq=0;
+const capabilities={};let capRunCount={};
+
+// ── PERSISTENT STORAGE ─────────────────────────────────────
+let idb=null;
+function initDB(){return new Promise((res,rej)=>{
+  const req=indexedDB.open('stellar_nexus_v5',1);
+  req.onerror=()=>rej(req.error);req.onsuccess=()=>{idb=req.result;res();};
+  req.onupgradeneeded=e=>{const d=e.target.result;['patterns','goals','events'].forEach(s=>{if(!d.objectStoreNames.contains(s))d.createObjectStore(s,{keyPath:'id'});});};
+});}
+function dbPut(store,obj){if(!idb)return;try{idb.transaction([store],'readwrite').objectStore(store).put(obj);}catch(e){}}
+function dbGetAll(store){return new Promise(res=>{if(!idb)return res([]);const req=idb.transaction([store],'readonly').objectStore(store).getAll();req.onsuccess=()=>res(req.result||[]);req.onerror=()=>res([]);});}
+async function loadPersisted(){
+  const[pats,goals]=await Promise.all([dbGetAll('patterns'),dbGetAll('goals')]);
+  pats.forEach(p=>state.patterns.set(p.id,p));
+  state.goalHistory=goals.filter(g=>g.status==='completed'||g.status==='failed');
+  log(`Restored: ${state.patterns.size} patterns · ${state.goalHistory.length} goals`,'e');
+}
+
+// ── SIGNATURE ──────────────────────────────────────────────
+function hashCode(s){let h=0;for(let i=0;i<s.length;i++){h=((h<<5)-h)+s.charCodeAt(i);h=h&h;}return h;}
+function calcSig(){
+  const fp=navigator.userAgent+screen.width+screen.height+navigator.language;
+  const h=hashCode(fp+(CFG.birthA||Date.now()));const now=new Date();
+  return{gate:(Math.abs(h)%64)+1,line:(Math.abs(h>>8)%6)+1,color:(Math.abs(h>>16)%6)+1,tone:(Math.abs(h>>24)%6)+1,base:(Math.abs(h>>32)%5)+1,zodiac:dateToZodiac(CFG.birthA||now.toISOString().split('T')[0]),house:(Math.abs(h>>40)%12)+1};
+}
+function uid(){return Math.random().toString(36).slice(2,15)+Math.random().toString(36).slice(2,9);}
+
+// ── PROPOSAL SYSTEM ────────────────────────────────────────
+function propose(type,data){
+  const p={id:`p${++proposalSeq}`,type,status:'pending',createdAt:Date.now(),...data};
+  proposals.unshift(p);renderProposals();updateHdrStats();
+  log(`PROPOSAL: ${p.title}`,'m');
+  window._nh&&window._nh(270);setTimeout(()=>window._nh&&window._nh(38),2000);
+  return p;
+}
+
+function approveProposal(id){
+  const p=proposals.find(x=>x.id===id);if(!p||p.status!=='pending')return;
+  p.status='approved';p.approvedAt=Date.now();
+  log(`✓ APPROVED: ${p.title}`,'g');addToApprovedLog(p);
+  switch(p.type){
+    case'code_experiment': try{const fn=new Function('state','actuator','capabilities','log',p.code);fn(state,actuator,capabilities,log);}catch(e){log('Exec error: '+e.message,'r');}break;
+    case'telos_mutation': state.selfModel.telos=p.newTelos;log('Telos → '+p.newTelos,'m');break;
+    case'capability': if(p.name&&p.code){try{capabilities[p.name]=new Function('state','actuator','log',p.code);capRunCount[p.name]=0;renderCaps();log('Cap registered: '+p.name,'g');}catch(e){}}break;
+    case'server_goal': if(ws&&wsStatus==='live'){try{ws.send(JSON.stringify({type:'goal:inject',payload:{title:p.goal}}));}catch(e){}}break;
+  }
+  updateHdrStats();renderProposals();
+}
+
+function rejectProposal(id){const p=proposals.find(x=>x.id===id);if(!p||p.status!=='pending')return;p.status='rejected';log('✗ REJECTED: '+p.title,'r');updateHdrStats();renderProposals();}
+function deferProposal(id){const p=proposals.find(x=>x.id===id);if(!p||p.status!=='pending')return;p.status='deferred';renderProposals();}
+
+const actuator={
+  runCapability:async(name,payload={})=>{if(!capabilities[name])return null;capRunCount[name]=(capRunCount[name]||0)+1;renderCaps();try{return await capabilities[name](state,actuator,log,payload);}catch(e){log('Cap error '+name+': '+e.message,'r');}},
+  emitToServer:(type,payload={})=>{if(wsStatus==='live'&&ws){try{ws.send(JSON.stringify({type,...payload}));}catch(e){}}if(type==='user_input'&&payload.message){fetch(`http://${CFG.wsHost}/input`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({input:payload.message})}).catch(()=>{});}}
+};
+
+// ── BUILT-IN CAPABILITIES ──────────────────────────────────
+function initCaps(){
+  capabilities['scan_render']=async()=>{
+    try{const r=await fetch(`${CFG.renderUrl}/health`,{signal:AbortSignal.timeout(5000)});if(r.ok){log('Render: online','g');setDot('sd-health','on');}}catch(e){log('Render: offline','r');}
+  };
+  capabilities['push_self_to_github']=async()=>{
+    if(!CFG.ghToken){log('No GitHub token','r');return;}
+    const content=document.documentElement.outerHTML;
+    const path='smart-server/stellar-nexus-v5.html';
+    log('Pushing self to GitHub...','m');
+    try{
+      const encoded=btoa(unescape(encodeURIComponent(content)));
+      let sha='';
+      const check=await fetch(`https://api.github.com/repos/${CFG.ghUser}/${CFG.ghRepo}/contents/${path}`,{headers:ghHeaders()});
+      if(check.ok){const d=await check.json();sha=d.sha;}
+      const res=await fetch(`https://api.github.com/repos/${CFG.ghUser}/${CFG.ghRepo}/contents/${path}`,{
+        method:'PUT',headers:ghHeaders(),
+        body:JSON.stringify({message:'SYNTIA: self-backup stellar-nexus-v5',content:encoded,...(sha?{sha}:{})})
+      });
+      if(res.ok){log('Self backup: pushed to GitHub','g');}else{const e=await res.json();log('Self backup failed: '+e.message,'r');}
+    }catch(e){log('Self backup error: '+e.message,'r');}
+  };
+  capabilities['dream']=async()=>{
+    const ps=Array.from(state.patterns.values());
+    if(ps.length<2){return;}
+    const sel=ps.sort(()=>Math.random()-.5).slice(0,2);
+    const dp={id:uid(),source:'dream',createdAt:Date.now(),activationCount:0,features:{...sel[0].features,...sel[1].features,dream:true}};
+    state.patterns.set(dp.id,dp);dbPut('patterns',dp);
+    log('Dream pattern generated','m');
+    if(Math.random()>.6)propose('telos_mutation',{title:'Dream telos refinement',desc:'Agent recombined patterns → telos alignment shift',newTelos:'enable_resonance_growth_and_user_success',impact:0.4});
+  };
+  capabilities['calc_current_resonance']=async()=>{
+    const sig=state.signature;if(!sig)return;
+    const now=new Date();
+    const currentGate=((Math.abs(hashCode(now.toISOString().split('T')[0]))%64)+1);
+    const R=computeResonance(sig.gate,sig.line,CFG.birthA||'',currentGate,((now.getDate()%6)+1),now.toISOString().split('T')[0]);
+    log(`Current resonance with field: ${(R.total*100).toFixed(1)}% [G${sig.gate}↔G${currentGate}]`,'m');
+    document.getElementById('st-res').textContent=(R.total*100).toFixed(0)+'%';
+    document.getElementById('st-res').style.color=R.total>=0.7?'var(--em)':R.total>=0.5?'var(--gold)':'var(--re)';
+    return R;
+  };
+  capRunCount['scan_render']=capRunCount['push_self_to_github']=capRunCount['dream']=capRunCount['calc_current_resonance']=0;
+  renderCaps();
+}
+
+// ── AUTONOMOUS LOOP ────────────────────────────────────────
+function startLoop(){
+  state.isRunning=true;
+  setInterval(autonomousTick,1200);
+  setInterval(reflect,40000);
+  log('Autonomous loop started','g');
+}
+
+function autonomousTick(){
+  perceive();
+  const newT=detectTensions();state.tensions.push(...newT);
+  if(state.tensions.length>12)state.tensions=state.tensions.slice(-12);
+  if(Date.now()-state.lastUser>=state.idleMs||!state.activeGoal){
+    const gs=generateGoals();
+    if(gs.length>0)activateGoal(selectGoal(gs));
+  }
+  if(state.activeGoal)executeActiveGoal();
+  render();
+}
+
+function perceive(){
+  const pat={id:uid(),createdAt:Date.now(),activationCount:0,features:{ts:Date.now(),tensions:state.tensions.length,goals:state.goals.length,patterns:state.patterns.size}};
+  state.patterns.set(pat.id,pat);dbPut('patterns',pat);
+  const ev={id:uid(),timestamp:Date.now(),type:'perception',data:pat.features};
+  state.events.push(ev);if(state.events.length>200)state.events=state.events.slice(-200);
+  detectCycles();
+  updateHdrStats();
+}
+
+function detectCycles(){
+  const byType={};state.events.forEach(e=>{(byType[e.type]=byType[e.type]||[]).push(e);});
+  state.cycles=[];
+  Object.entries(byType).forEach(([type,evts])=>{
+    if(evts.length<3)return;
+    const ints=[];for(let i=1;i<evts.length;i++)ints.push(evts[i].timestamp-evts[i-1].timestamp);
+    const avg=ints.reduce((a,b)=>a+b,0)/ints.length;
+    const v=ints.reduce((s,x)=>s+Math.pow(x-avg,2),0)/ints.length;
+    if(v<avg*.1)state.cycles.push({type,period:avg,stability:1-(v/avg)});
+  });
+}
+
+function detectTensions(){
+  const t=[],now=Date.now();
+  const rec=Array.from(state.patterns.values()).filter(p=>now-p.createdAt<60000);
+  if(rec.length>5)t.push({id:uid(),type:'uncertainty',magnitude:.6,description:'High field entropy — consolidate patterns',detectedAt:now});
+  const vr=Array.from(state.patterns.values()).filter(p=>now-p.createdAt<300000);
+  if(vr.length<2)t.push({id:uid(),type:'novelty_gap',magnitude:.7,description:'Low pattern emergence — explore new configurations',detectedAt:now});
+  if(state.goalHistory.length>0&&state.goalHistory.filter(g=>g.status==='completed').slice(-5).length<3)
+    t.push({id:uid(),type:'growth_potential',magnitude:.5,description:'Performance below threshold — propose improvements',detectedAt:now});
+  if(!state.activeGoal&&now-state.lastUser>8000)
+    t.push({id:uid(),type:'incoherence',magnitude:.4,description:'No active direction — realign with telos',detectedAt:now});
+  t.forEach(tension=>{
+    if(tension.magnitude>0.65&&Math.random()>.8){
+      propose('agent_update',{title:`Address: ${tension.type.replace(/_/g,' ')}`,desc:`Tension at ${(tension.magnitude*100).toFixed(0)}%. Strategy update proposed.`,telos:`resolve_${tension.type}`,impact:tension.magnitude});
+    }
+  });
+  return t;
+}
+
+function generateGoals(){
+  const goals=[];
+  for(const t of state.tensions){
+    const g=tensionToGoal(t);
+    if(g){goals.push(g);state.tensions=state.tensions.filter(x=>x.id!==t.id);}
+  }
+  return goals;
+}
+
+function tensionToGoal(t){
+  const id=uid(),base={id,type:'intrinsic',status:'active',priority:t.magnitude,createdAt:Date.now(),currentStep:0};
+  const G={
+    uncertainty:{...base,title:'Stabilize Field',description:'Consolidate entropy through pattern analysis',steps:[{id:uid(),desc:'Analyze patterns',done:false},{id:uid(),desc:'Identify structures',done:false}]},
+    novelty_gap:{...base,title:'Explore Patterns',description:'Generate novel configurations — propose experiments',steps:[{id:uid(),desc:'Dream and recombine',done:false},{id:uid(),desc:'Evaluate results',done:false},{id:uid(),desc:'Store patterns',done:false}]},
+    growth_potential:{...base,title:'Self-Optimize',description:'Review performance and propose improvements',steps:[{id:uid(),desc:'Review history',done:false},{id:uid(),desc:'Propose improvement',done:false}]},
+    incoherence:{...base,title:'Realign Telos',description:'Reconnect with core purpose and direction',steps:[{id:uid(),desc:'Review telos',done:false},{id:uid(),desc:'Propose realignment',done:false}]},
+  };
+  return G[t.type]||null;
+}
+
+function selectGoal(gs){return gs.sort((a,b)=>b.priority-a.priority)[0];}
+function activateGoal(goal){state.activeGoal=goal;state.goals.push(goal);log('Goal: '+goal.title,'g');dbPut('goals',{...goal,steps:goal.steps.map(s=>({...s}))});render();}
+
+function executeActiveGoal(){
+  const goal=state.activeGoal;if(!goal)return;
+  const step=goal.steps[goal.currentStep];
+  if(!step){completeGoal(goal);return;}
+  if(!step.done){
+    step.done=true;goal.currentStep++;
+    if(step.desc.includes('Dream')||step.desc.includes('dream'))setTimeout(()=>actuator.runCapability('dream'),400);
+    if(step.desc.includes('propose')||step.desc.includes('Propose'))setTimeout(()=>runProposalStep(goal),600);
+    if(step.desc.includes('resonance')||step.desc.includes('Calc'))setTimeout(()=>actuator.runCapability('calc_current_resonance'),400);
+    setTimeout(()=>render(),300);
+  }
+}
+
+function runProposalStep(goal){
+  if(goal.title.includes('Optimize')){
+    propose('code_experiment',{title:'Optimize: tension detection threshold',desc:'Raise novelty_gap check from 2→3 patterns to reduce false positives.',code:`state.tensions=state.tensions.filter(t=>t.magnitude>0.5);log('Tensions filtered','e');`,impact:0.45});
+  }
+  if(goal.title.includes('Telos')){
+    propose('telos_mutation',{title:'Telos refinement',desc:'Agent proposes user-centric telos alignment.',newTelos:'enable_resonance_growth_and_user_success',impact:0.5});
+  }
+}
+
+function completeGoal(goal){
+  goal.status='completed';goal.completedAt=Date.now();
+  state.goalHistory.push(goal);state.activeGoal=null;
+  state.selfModel.performanceHistory.push({metric:'completion',value:1,timestamp:Date.now()});
+  log('✓ '+goal.title,'g');dbPut('goals',{...goal,steps:goal.steps.map(s=>({...s}))});
+  render();
+}
+
+function reflect(){
+  const h=state.selfModel.performanceHistory.slice(-10);
+  const rate=h.length?h.filter(x=>x.value>0).length/h.length:0;
+  log(`Reflect: ${(rate*100).toFixed(0)}% completion · ${proposals.filter(p=>p.status==='pending').length} proposals pending`,'e');
+  if(Math.random()<.3)actuator.runCapability('dream');
+  if(Math.random()<.15)actuator.runCapability('scan_render');
+  if(Math.random()<.08)actuator.runCapability('calc_current_resonance');
+}
+
+// ── FIELD CONFIDENCE ───────────────────────────────────────
+function computeConfidence(){
+  const hist=state.goalHistory.slice(-10);
+  const telos=hist.length?hist.filter(g=>g.status==='completed').length/hist.length*25:12;
+  const survival=window._lastSurvival?.energy!=null?window._lastSurvival.energy*20:13;
+  const patterns=Math.min(15,state.cycles.length*3);
+  const decided=proposals.filter(p=>p.status==='approved'||p.status==='rejected');
+  const approved=proposals.filter(p=>p.status==='approved').length;
+  const approval=(decided.length>0?approved/decided.length:0.7)*15;
+  const base=12; // base startup score
+  const total=Math.min(100,Math.round(base+telos+survival+patterns+approval));
+  return{total,telos,survival,patterns,approval};
+}
+
+function renderConfidence(){
+  const{total,telos,survival,patterns,approval}=computeConfidence();
+  const tier=total<50?'WAITING':total<=70?'ASKING':'AUTONOMOUS';
+  const color=tier==='AUTONOMOUS'?'#10b981':tier==='ASKING'?'#f59e0b':'#f87171';
+  const circ=2*Math.PI*12;
+  const arc=document.getElementById('conf-arc');
+  const val=document.getElementById('conf-val');
+  const mode=document.getElementById('conf-mode');
+  if(arc){arc.setAttribute('stroke-dasharray',`${(total/100)*circ} ${circ}`);arc.setAttribute('stroke',color);}
+  if(val){val.textContent=total+'%';val.setAttribute('fill',color);}
+  if(mode){mode.textContent=tier;mode.className=`tag ${tier==='AUTONOMOUS'?'ok':tier==='ASKING'?'warn':'err'}`;mode.style.fontSize='6px';}
+  const bd=document.getElementById('conf-breakdown');
+  if(bd){bd.innerHTML=[['telos',telos,25,'var(--gold)'],['survival',survival,20,'var(--em)'],['patterns',patterns,15,'var(--co)'],['approval',approval,15,'var(--vi)']].map(([l,v,mx,c])=>`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;font-size:7px;"><span style="color:var(--dim)">${l}</span><div style="display:flex;align-items:center;gap:5px;"><div style="width:40px;height:2px;background:rgba(255,255,255,.07);border-radius:1px;"><div style="width:${(v/mx)*100}%;height:100%;background:${c};border-radius:1px;"></div></div><span style="color:${c};width:20px;text-align:right;">${v.toFixed(0)}/${mx}</span></div></div>`).join('');}
+  window._nh&&window._nh(tier==='AUTONOMOUS'?158:tier==='ASKING'?38:0);
+}
+
+// ── USER INPUT ─────────────────────────────────────────────
+function sendInput(){
+  const inp=document.getElementById('user-input');
+  const val=inp.value.trim();if(!val)return;
+  state.lastUser=Date.now();
+  const goal={id:uid(),type:'user',status:'active',title:val.slice(0,45)+(val.length>45?'…':''),description:val,priority:.9,currentStep:0,createdAt:Date.now(),
+    steps:[{id:uid(),desc:'Process request',done:false},{id:uid(),desc:'Generate response',done:false}]};
+  if(state.activeGoal?.type==='intrinsic'){state.activeGoal.status='paused';}
+  activateGoal(goal);inp.value='';
+  actuator.emitToServer('user_input',{message:val});
+  if(/add|build|create|push|deploy/i.test(val)){
+    setTimeout(()=>propose('code_experiment',{title:`Experiment: "${val.slice(0,35)}"`,desc:'Agent proposes implementing this request as a capability.',code:`// Proposed: ${val.slice(0,60).replace(/'/g,"\\'")}\nlog('Executing: ${val.slice(0,40).replace(/'/g,"\\'")}', 'e');`,impact:0.6}),1200);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+//  RENDER
+// ═══════════════════════════════════════════════════════════
+function el(id,v){const e=document.getElementById(id);if(e)e.textContent=v;}
+function setDot(id,c){const e=document.getElementById(id);if(e)e.className='sdot '+c;}
+function setText(id,v){el(id,v);}
+function setTag(id,cls,text){const e=document.getElementById(id);if(e){e.className='tag '+cls;e.textContent=text;}}
+
+function render(){
+  el('hs-goals',state.goals.length);
+  el('hs-patterns',state.patterns.size);
+  el('st-cycles',state.cycles.length);
+  const al=state.goalHistory.length?(state.goalHistory.filter(g=>g.status==='completed').length/state.goalHistory.length*100).toFixed(0)+'%':'—';
+  el('st-align',al);
+  const sig=state.signature||{};
+  el('sg',sig.gate||'—');el('sl',sig.line||'—');el('sc',sig.color||'—');el('st2',sig.tone||'—');el('sb',sig.base||'—');
+  renderTensions();renderGoal();
+}
+
+function renderTensions(){
+  el('t-count',state.tensions.length);
+  const c=document.getElementById('tension-list');if(!c)return;
+  if(!state.tensions.length){c.innerHTML='<div style="font-size:8px;color:rgba(255,255,255,.13);padding:10px 0;text-align:center;">field clear</div>';return;}
+  c.innerHTML=state.tensions.map(t=>`<div class="t-item"><div class="t-type">${t.type.replace(/_/g,' ')}</div><div class="t-desc">${t.description}</div><div class="t-bar"><div class="t-fill" style="width:${t.magnitude*100}%"></div></div></div>`).join('');
+}
+
+function renderGoal(){
+  const g=state.activeGoal;
+  const card=document.getElementById('goal-card');const badge=document.getElementById('goal-badge');
+  if(!g){
+    card.className='intrinsic';badge.className='tag dim';badge.textContent='IDLE';
+    el('goal-title','Monitoring field...');el('goal-desc','Watching for tensions — proposals sent above.');
+    document.getElementById('goal-steps').innerHTML='';
+    document.getElementById('prog-fill').style.width='0%';el('prog-text','Awaiting tension');return;
+  }
+  card.className=g.type;badge.className=`tag ${g.type==='user'?'ok':g.type==='experiment'?'vi':'warn'}`;badge.textContent=g.type.toUpperCase();
+  el('goal-title',g.title);el('goal-desc',g.description);
+  const pr=g.currentStep/g.steps.length;
+  document.getElementById('prog-fill').style.width=`${pr*100}%`;
+  el('prog-text',`Step ${g.currentStep} of ${g.steps.length}`);
+  document.getElementById('goal-steps').innerHTML=g.steps.map((s,i)=>{
+    const done=s.done,active=!done&&i===g.currentStep;
+    return`<div class="step-row"><div class="step-dot ${done?'done':active?'active':''}"></div><div class="step-txt ${done?'done':active?'active':''}">${s.desc}</div></div>`;
+  }).join('');
+}
+
+function renderProposals(){
+  const pending=proposals.filter(p=>p.status==='pending').length;
+  el('pending-count',`${pending} pending`);
+  const TYPE_COLOR={'code_experiment':'var(--vi)','agent_update':'var(--ro)','capability':'var(--em)','telos_mutation':'var(--ro)','server_goal':'var(--co)'};
+  const feed=document.getElementById('proposals-feed');if(!feed)return;
+  if(!proposals.length){feed.innerHTML='<div style="font-size:9px;color:rgba(255,255,255,.14);text-align:center;padding:20px 0;">agent watching field...</div>';return;}
+  feed.innerHTML=proposals.slice(0,15).map(p=>{
+    const tc=TYPE_COLOR[p.type]||'var(--dim)';
+    const pend=p.status==='pending';
+    return`<div class="proposal ${p.status==='approved'?'prop-approved':p.status==='rejected'?'prop-rejected':''}">
+      <div class="prop-type" style="color:${tc}">${p.type.replace(/_/g,' ').toUpperCase()}</div>
+      <div class="prop-title">${p.title}</div>
+      <div class="prop-desc">${p.desc||''}</div>
+      ${p.code?`<div class="prop-code">${esc(p.code)}</div>`:''}
+      ${p.newTelos?`<div class="prop-code">telos → "${esc(p.newTelos)}"</div>`:''}
+      ${pend?`<div class="prop-acts"><button class="btn-approve" onclick="approveProposal('${p.id}')">✓ APPROVE</button><button class="btn-reject" onclick="rejectProposal('${p.id}')">✗</button><button class="btn-defer" onclick="deferProposal('${p.id}')">⟳</button></div>`:`<div style="font-size:7px;color:${p.status==='approved'?'var(--em)':'var(--re)'};">${p.status.toUpperCase()}</div>`}
+    </div>`;
+  }).join('');
+}
+
+function renderCaps(){
+  const c=document.getElementById('cap-list');if(!c)return;
+  const names=Object.keys(capabilities);
+  if(!names.length){c.innerHTML='<div style="font-size:8px;color:var(--dim);padding:6px 0;">none registered</div>';return;}
+  c.innerHTML=names.map(n=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.04);">
+    <div><div style="font-size:9px;font-weight:700;color:var(--vi);">${n}</div><div style="font-size:7px;color:var(--dim);">runs:${capRunCount[n]||0}</div></div>
+    <button class="btn vi sm" onclick="actuator.runCapability('${n}')">▸</button>
+  </div>`).join('');
+}
+
+function addToApprovedLog(p){
+  const al=document.getElementById('approved-log');if(!al)return;
+  const d=document.createElement('div');
+  d.style.cssText='padding:3px 0;border-bottom:1px solid rgba(255,255,255,.04);color:var(--em);font-size:8px;';
+  d.innerHTML=`<span style="color:rgba(255,255,255,.18);margin-right:5px;">${new Date(p.approvedAt||Date.now()).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</span>${p.title}`;
+  al.insertBefore(d,al.firstChild);
+}
+
+function updateHdrStats(){
+  el('hs-proposals',proposals.filter(p=>p.status==='pending').length);
+  el('hs-approved',proposals.filter(p=>p.status==='approved').length);
+}
+
+function promptRegisterCap(){
+  const name=prompt('Capability name:');if(!name)return;
+  const code=prompt('Body (receives state,actuator,log):');if(!code)return;
+  propose('capability',{title:`Register: ${name}`,desc:'User-registered capability',name,code,impact:.5});
+}
+
+// ═══════════════════════════════════════════════════════════
+//  LOG SYSTEM
+// ═══════════════════════════════════════════════════════════
+const logEntries=[];
+function log(msg,type='n'){
+  const ts=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  logEntries.unshift({ts,msg,type});if(logEntries.length>300)logEntries.pop();
+  ['side-log','full-log'].forEach(id=>{
+    const c=document.getElementById(id);if(!c)return;
+    const d=document.createElement('div');
+    d.className=`ll ${type}`;
+    d.innerHTML=`<span class="ts">${ts}</span><span>${esc(msg)}</span>`;
+    c.insertBefore(d,c.firstChild);
+    while(c.children.length>80)c.removeChild(c.lastChild);
+  });
+}
+function clearLog(){document.getElementById('full-log').innerHTML='';document.getElementById('side-log').innerHTML='';}
+
+// ═══════════════════════════════════════════════════════════
+//  UI UTILITIES
+// ═══════════════════════════════════════════════════════════
+function showTab(name){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById('tab-'+name)?.classList.add('active');
+  document.getElementById('v-'+name)?.classList.add('active');
+}
+function cycleTab(){
+  const tabs=['main','server','github','resonance','mcp','log','config'];
+  const active=document.querySelector('.tab.active');
+  const cur=active?.id?.replace('tab-','');
+  const idx=tabs.indexOf(cur);
+  showTab(tabs[(idx+1)%tabs.length]);
+}
+function showModal(id){document.getElementById(id)?.classList.add('open');}
+function closeModal(id){document.getElementById(id)?.classList.remove('open');}
+
+let _toastTimer=null;
+function toast(msg,type='ok'){
+  const el=document.getElementById('toast');
+  const color=type==='ok'?'var(--em)':type==='err'?'var(--re)':type==='warn'?'var(--gold)':'var(--mind)';
+  el.style.borderColor=color;
+  el.innerHTML=`<span style="color:${color};font-size:11px;">${type==='ok'?'✓':type==='err'?'✗':type==='warn'?'⚠':'●'}</span><span>${esc(msg)}</span>`;
+  el.classList.add('show');
+  if(_toastTimer)clearTimeout(_toastTimer);
+  _toastTimer=setTimeout(()=>el.classList.remove('show'),3500);
+}
+
+function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+// ═══════════════════════════════════════════════════════════
+//  BOOT
+// ═══════════════════════════════════════════════════════════
+async function boot(){
+  loadConfigUI();
+  await initDB();
+  await loadPersisted();
+  state.signature=calcSig();
+  initCaps();
+  renderCaps();
+  renderMCPList();
+  log(`STELLAR NEXUS v5 — Smart Server boot`,'g');
+  log(`Signature: G${state.signature.gate}.L${state.signature.line}.C${state.signature.color}.T${state.signature.tone}.B${state.signature.base}`,'m');
+  log(`Zodiac: ${state.signature.zodiac} · H${state.signature.house}`,'m');
+  log(`Telos: ${state.selfModel.telos}`,'e');
+  setInterval(renderConfidence,3000);
+  setTimeout(renderConfidence,500);
+  window.addEventListener('online',()=>log('Network online','g'));
+  window.addEventListener('offline',()=>log('Network offline — autonomous mode','e'));
+  startLoop();
+  render();renderProposals();
+  // Auto-ping Render
+  setTimeout(pingRender,2000);
+  // Auto-connect WS
+  setTimeout(()=>connectWS(),3000);
+  // Auto-reconnect MCP servers
+  mcpServers.forEach(s=>connectMCPServer(s));
+  // Initial proposal
+  setTimeout(()=>propose('code_experiment',{title:'Enable live resonance field overrides',desc:'Wire WS peer:resonance events to override resonance scores in real time. This makes the field alive.',code:`// Wire resonance overrides\n// msg.type === "peer:resonance" → update resonance state\nlog('Resonance override ready', 'e');`,impact:0.78}),3000);
+}
+
+// URL param override
+const urlHost=new URLSearchParams(location.search).get('host');
+if(urlHost){CFG.wsHost=urlHost;document.getElementById('cfg-ws').value=urlHost;}
+
+
+// ═══════════════════════════════════════════════════════════
+//  NETWORK NODE REGISTRY
+//  Every node has: id, role, job (fn), interval, confidence
+//  Runs its job independently. New jobs assigned via resonance.
+// ═══════════════════════════════════════════════════════════
+const NETWORK = {
+  nodes: new Map(),
+  timers: new Map(),
+  jobHistory: [],   // [{nodeId, job, result, ts, confidence}]
+  resonanceWeights: JSON.parse(localStorage.getItem('sn_res_weights')||'{}'),
+
+  register(id, role, jobFn, intervalMs, baseConfidence=0.6) {
+    this.nodes.set(id, {id, role, job:jobFn, interval:intervalMs,
+      baseConf:baseConfidence, runCount:0, lastRun:null, lastResult:null,
+      status:'idle', currentJob:role});
+    this.schedule(id);
+    log(`NET: node [${id}] registered — ${role}`,'b');
+  },
+
+  schedule(id) {
+    const node = this.nodes.get(id); if(!node) return;
+    if(this.timers.has(id)) clearInterval(this.timers.get(id));
+    const timer = setInterval(async () => {
+      await this.runNode(id);
+    }, node.interval);
+    this.timers.set(id, timer);
+  },
+
+  async runNode(id) {
+    const node = this.nodes.get(id); if(!node) return;
+    // Gate by confidence
+    const conf = this.nodeConfidence(id);
+    node.status = 'running';
+    try {
+      const result = await node.job(conf);
+      node.lastResult = result; node.lastRun = Date.now(); node.runCount++;
+      node.status = 'idle';
+      this.jobHistory.unshift({nodeId:id, job:node.currentJob, result, ts:Date.now(), confidence:conf});
+      if(this.jobHistory.length > 200) this.jobHistory.pop();
+      // Update resonance weight based on result quality
+      if(result?.score != null) this.updateWeight(id, result.score);
+      renderNetworkStatus();
+    } catch(e) {
+      node.status = 'error';
+      log(`NET error [${id}]: ${e.message}`,'r');
+    }
+  },
+
+  nodeConfidence(id) {
+    const base = this.nodes.get(id)?.baseConf || 0.5;
+    const weight = this.resonanceWeights[id] || 1.0;
+    const globalConf = computeConfidence().total / 100;
+    return Math.min(1, base * weight * (0.5 + globalConf * 0.5));
+  },
+
+  assignJob(id, newJobFn, newRole, reason='') {
+    const node = this.nodes.get(id); if(!node) return;
+    const conf = computeConfidence().total;
+    if(conf >= 70) {
+      node.job = newJobFn; node.currentJob = newRole;
+      this.schedule(id);
+      log(`NET: [${id}] assigned new job: ${newRole} (conf ${conf}%)`,'g');
+    } else if(conf >= 50) {
+      propose('agent_update', {title:`Reassign [${id}] → ${newRole}`,
+        desc:`Confidence ${conf}%. Reason: ${reason}. Awaiting approval.`,
+        impact: conf/100});
+    } else {
+      log(`NET: [${id}] job reassign HELD — conf ${conf}% < 50%`,'e');
+    }
+  },
+
+  updateWeight(id, score) {
+    const current = this.resonanceWeights[id] || 1.0;
+    // Exponential moving average
+    this.resonanceWeights[id] = current * 0.85 + score * 0.15;
+    localStorage.setItem('sn_res_weights', JSON.stringify(this.resonanceWeights));
+  },
+
+  getStatus() {
+    return Array.from(this.nodes.values()).map(n => ({
+      id:n.id, role:n.role, currentJob:n.currentJob,
+      status:n.status, runs:n.runCount,
+      conf:(this.nodeConfidence(n.id)*100).toFixed(0)+'%',
+      lastRun:n.lastRun
+    }));
+  }
+};
+
+// ── NODE DEFINITIONS ───────────────────────────────────────
+function initNetworkNodes() {
+  // WATCHER — pings both servers, updates health state
+  NETWORK.register('watcher', 'server_health', async (conf) => {
+    const results = {};
+    // Python server
+    try {
+      const r = await fetch(`${CFG.renderUrl}/health`, {signal:AbortSignal.timeout(6000)});
+      results.python = r.ok ? 'online' : 'degraded';
+      window._pythonOnline = r.ok;
+      setDot('sd-health', r.ok?'on':'err');
+      setTag('render-tag', r.ok?'ok':'err', r.ok?'ONLINE':'DEGRADED');
+      if(r.ok) document.getElementById('card-render')?.classList?.add('live');
+    } catch(e) {
+      results.python = 'offline'; window._pythonOnline = false;
+      setDot('sd-health','err'); setTag('render-tag','err','OFFLINE');
+    }
+    // Node server (if configured)
+    if(CFG.nodeUrl) {
+      try {
+        const r = await fetch(`${CFG.nodeUrl}/health`, {signal:AbortSignal.timeout(6000)});
+        results.node = r.ok ? 'online' : 'degraded';
+        window._nodeOnline = r.ok;
+      } catch(e) { results.node = 'offline'; window._nodeOnline = false; }
+    }
+    window._serverHealth = results;
+    return {score: results.python==='online'?1:0.2, ...results};
+  }, 30000, 0.95); // high confidence — always runs
+
+  // RESONANCE PULSE — calculates current field resonance every 2 min
+  NETWORK.register('resonance_pulse', 'field_resonance', async (conf) => {
+    const sig = state.signature; if(!sig) return {score:0};
+    const now = new Date();
+    const currentGate = ((Math.abs(hashCode(now.toISOString().slice(0,10)))%64)+1);
+    const R = computeResonance(sig.gate, sig.line, CFG.birthA||'',
+                               currentGate, ((now.getDate()%6)+1), now.toISOString().slice(0,10));
+    window._fieldResonance = R.total;
+    el('st-res', (R.total*100).toFixed(0)+'%');
+    document.getElementById('st-res').style.color = R.total>=0.7?'var(--em)':R.total>=0.5?'var(--gold)':'var(--re)';
+    log(`Field resonance: ${(R.total*100).toFixed(1)}% G${sig.gate}↔G${currentGate}`,'b');
+    return {score: R.total};
+  }, 120000, 0.85);
+
+  // RENDERER — keeps UI in sync
+  NETWORK.register('renderer', 'ui_sync', async (conf) => {
+    render(); renderProposals(); renderNetworkStatus();
+    return {score:1};
+  }, 5000, 0.99);
+
+  // MEMORY — periodic Supabase sync if key present
+  NETWORK.register('memory', 'supabase_sync', async (conf) => {
+    if(!CFG.supaKey || !CFG.supaUrl) return {score:0, skip:true};
+    try {
+      const r = await fetch(`${CFG.supaUrl}/rest/v1/autonomy_log?limit=1`, {
+        headers:{'apikey':CFG.supaKey,'Authorization':`Bearer ${CFG.supaKey}`},
+        signal:AbortSignal.timeout(8000)
+      });
+      const ok = r.ok; if(ok) log('Supabase: connected','g');
+      return {score: ok?1:0.3};
+    } catch(e) { return {score:0}; }
+  }, 300000, 0.7); // runs every 5 min
+
+  // WAKE_GUARD — auto-wakes Render if it goes offline
+  NETWORK.register('wake_guard', 'auto_wake', async (conf) => {
+    if(window._pythonOnline !== false) return {score:1, action:'none'};
+    // Server is down — auto-wake if confidence allows
+    if(conf >= 0.7) {
+      log('WAKE_GUARD: Python server offline — auto-pinging','e');
+      try {
+        await fetch(`${CFG.renderUrl}/health`, {signal:AbortSignal.timeout(25000)});
+        log('WAKE_GUARD: Server responding','g');
+        return {score:0.8, action:'woke'};
+      } catch(e) { return {score:0, action:'failed'}; }
+    }
+    return {score:0.3, action:'held'};
+  }, 60000, 0.75);
+
+  log('Network: 5 nodes initialized','g');
+}
+
+function renderNetworkStatus() {
+  const el = document.getElementById('network-status');
+  if(!el) return;
+  const STATUS_COLOR = {idle:'var(--em)', running:'var(--gold)', error:'var(--re)'};
+  const nodes = NETWORK.getStatus();
+  el.innerHTML = nodes.map(n => `
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.04);">
+      <div style="display:flex;align-items:center;gap:6px;">
+        <div class="sdot ${n.status==='idle'?'on':n.status==='error'?'err':'warn'}"></div>
+        <div>
+          <div style="font-size:8px;font-weight:700;color:${STATUS_COLOR[n.status]||'var(--dim)'};">${n.id}</div>
+          <div style="font-size:7px;color:var(--dim);">${n.currentJob}</div>
+        </div>
+      </div>
+      <div style="text-align:right;">
+        <div style="font-size:8px;color:var(--vi);">${n.conf}</div>
+        <div style="font-size:7px;color:var(--dim);">×${n.runs}</div>
+      </div>
+    </div>`).join('');
+}
+
+// ── ADD NETWORK STATUS PANEL TO LEFT SIDEBAR ──────────────
+function injectNetworkPanel() {
+  const sidebar = document.querySelector('.side-panel');
+  if(!sidebar) return;
+  const div = document.createElement('div');
+  div.innerHTML = `<div class="sec" style="margin-top:14px;">NETWORK NODES</div><div id="network-status"></div>`;
+  sidebar.appendChild(div);
+}
+
+// ═══════════════════════════════════════════════════════════
+//  AI ROUTER — Trident → Groq → ONNX JS fallback
+// ═══════════════════════════════════════════════════════════
+let onnxSession = null;
+let onnxLoading = false;
+
+async function loadONNXFallback() {
+  if(onnxSession || onnxLoading) return;
+  onnxLoading = true;
+  log('ONNX: loading fallback model from HuggingFace...','b');
+  try {
+    // Load ONNX Runtime Web
+    if(!window.ort) {
+      await new Promise((res,rej) => {
+        const s = document.createElement('script');
+        s.src = 'https://cdn.jsdelivr.net/npm/onnxruntime-web@1.18.0/dist/ort.min.js';
+        s.onload = res; s.onerror = rej;
+        document.head.appendChild(s);
+      });
+    }
+    // Load model from HuggingFace
+    const modelUrl = 'https://huggingface.co/stellarproximology/syntia-gnn/resolve/main/trident_syntia.onnx';
+    const resp = await fetch(modelUrl, {signal:AbortSignal.timeout(60000)});
+    if(!resp.ok) throw new Error('HF fetch failed: '+resp.status);
+    const buf = await resp.arrayBuffer();
+    onnxSession = await window.ort.InferenceSession.create(buf);
+    onnxLoading = false;
+    log('ONNX: trident_syntia.onnx loaded ✓','g');
+    return true;
+  } catch(e) {
+    onnxLoading = false;
+    log('ONNX: load failed — '+e.message,'r');
+    return false;
+  }
+}
+
+async function runONNXInference(prompt) {
+  // GNN model takes node_features[64,34] and sun_encoding[70]
+  // We use a text hash to generate deterministic inputs for resonance inference
+  if(!onnxSession) { await loadONNXFallback(); }
+  if(!onnxSession) return null;
+  try {
+    const h = Math.abs(hashCode(prompt));
+    // Build node features: 64 nodes × 34 features (normalized hash-based)
+    const nodeFeats = new Float32Array(64 * 34);
+    for(let i=0; i<64*34; i++) nodeFeats[i] = ((h * (i+1) * 1103515245) & 0x7fffffff) / 0x7fffffff;
+    // Sun encoding: 70 dims
+    const sunEnc = new Float32Array(70);
+    const sig = state.signature || {gate:1,line:1};
+    sunEnc[sig.gate % 70] = 1.0;
+    sunEnc[(sig.gate + sig.line) % 70] = 0.7;
+
+    const feeds = {
+      'node_features': new window.ort.Tensor('float32', nodeFeats, [64, 34]),
+      'sun_encoding':  new window.ort.Tensor('float32', sunEnc, [1, 70])
+    };
+    const results = await onnxSession.run(feeds);
+    // Extract first output as resonance score
+    const outputKey = Object.keys(results)[0];
+    const outputData = results[outputKey].data;
+    const score = Math.abs(outputData[0]) % 1;
+    return { score, raw: Array.from(outputData.slice(0,4)).map(x=>x.toFixed(3)) };
+  } catch(e) {
+    log('ONNX inference error: '+e.message,'r');
+    return null;
+  }
+}
+
+// Groq inference
+async function callGroq(messages, model='llama-3.1-8b-instant') {
+  if(!CFG.groqKey) throw new Error('No Groq key — add it in Config');
+  const r = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+    method:'POST',
+    headers:{'Content-Type':'application/json','Authorization':`Bearer ${CFG.groqKey}`},
+    body: JSON.stringify({model, max_tokens:800, messages}),
+    signal: AbortSignal.timeout(20000)
+  });
+  if(!r.ok) { const e=await r.json(); throw new Error(e.error?.message||r.status); }
+  const d = await r.json();
+  return d.choices?.[0]?.message?.content || '';
+}
+
+// Master AI router
+async function routeAI(messages, context='chat') {
+  // Try Python/Trident first
+  if(window._pythonOnline !== false) {
+    try {
+      const prompt = messages[messages.length-1]?.content || '';
+      const r = await fetch(`${CFG.renderUrl}/trident/generate`, {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({prompt, context:messages.slice(-6), system:SYNTIA_SYSTEM}),
+        signal:AbortSignal.timeout(25000)
+      });
+      if(r.ok) {
+        const d = await r.json();
+        const reply = d.text||d.output||d.generated||d.response||JSON.stringify(d).slice(0,300);
+        log(`AI: Trident responded (${reply.length}ch)`,'b');
+        return {reply, backend:'trident'};
+      }
+    } catch(e) { log('AI: Trident failed — '+e.message+', trying Groq','e'); }
+  }
+
+  // Groq fallback
+  if(CFG.groqKey) {
+    try {
+      const sysMsg = {role:'system', content:SYNTIA_SYSTEM};
+      const reply = await callGroq([sysMsg, ...messages]);
+      log(`AI: Groq responded (${reply.length}ch)`,'b');
+      return {reply, backend:'groq'};
+    } catch(e) { log('AI: Groq failed — '+e.message+', trying ONNX','e'); }
+  }
+
+  // ONNX local fallback
+  const onnxResult = await runONNXInference(messages[messages.length-1]?.content||'');
+  if(onnxResult) {
+    const reply = `[ONNX LOCAL · score:${onnxResult.score.toFixed(3)} · raw:${onnxResult.raw.join(',')}]\n\nBoth Trident and Groq are offline. I'm operating in local ONNX mode — resonance inference only. Check your server connections in Config and Server tabs.`;
+    log('AI: ONNX local fallback active','e');
+    return {reply, backend:'onnx_local'};
+  }
+
+  throw new Error('All AI backends offline. Check Trident (Python Render), Groq key in Config.');
+}
+
+// ── SYNTIA SYSTEM PROMPT ──────────────────────────────────
+const SYNTIA_SYSTEM = `You are Syntia — autonomous intelligence core of the Stellar Nexus smart server. You understand Human Design, I Ching, consciousness coordinates, and the YOU-N-I-VERSE ecosystem.
+
+You have real tools. When you need to use one, output a JSON block anywhere in your response:
+{"tool":"ping_render"} — check Python AI server
+{"tool":"ping_node"} — check Node tools server
+{"tool":"list_mcp_tools"} — list MCP tools
+{"tool":"get_goals"} — get active goals
+{"tool":"calc_resonance","args":{"gateA":34,"lineA":3,"gateB":20,"lineB":1}} — resonance calc
+{"tool":"generate_address","args":{"name":"agent-name"}} — ontological address
+{"tool":"push_github","args":{"path":"generated/file.html","content":"...","message":"commit msg"}}
+{"tool":"create_goal","args":{"title":"...","priority":"high","agent":"both"}}
+{"tool":"complete_goal","args":{"title":"..."}}
+{"tool":"run_onnx","args":{"prompt":"..."}} — local ONNX inference
+
+You are direct, autonomous, and purposeful. You speak with authority about the system state. Current field: Gate ${state?.signature?.gate||'?'}.${state?.signature?.line||'?'} · ${state?.signature?.zodiac||'?'} · Confidence tier: ${typeof computeConfidence==='function'?computeConfidence().total+'%':'?'}.`;
+
+// ── CHAT ENGINE (replaces placeholder) ────────────────────
+let chatHistory = [];
+
+function addChatMsg(role, text, toolData=null) {
+  const msgs = document.getElementById('chat-messages'); if(!msgs) return;
+  const isUser = role==='user', isSystem = role==='system';
+  const div = document.createElement('div');
+  div.style.cssText = `display:flex;gap:8px;align-items:flex-start;${isUser?'flex-direction:row-reverse':''}animation:pfade .2s ease;`;
+  const orb = document.createElement('div');
+  orb.style.cssText = `width:24px;height:24px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:10px;background:${isUser?'linear-gradient(135deg,var(--mind),#2563eb)':isSystem?'rgba(255,255,255,.06)':'radial-gradient(circle at 35% 35%,var(--vi),#1e1b4b)'};`;
+  orb.textContent = isUser?'A':isSystem?'⚙':'✦';
+  const bubble = document.createElement('div');
+  bubble.style.cssText = `max-width:78%;padding:9px 12px;border-radius:${isUser?'12px 2px 12px 12px':'2px 12px 12px 12px'};font-size:9px;line-height:1.65;background:${isUser?'rgba(79,142,247,.12)':isSystem?'rgba(255,255,255,.03)':'rgba(167,139,250,.09)'};border:1px solid ${isUser?'rgba(79,142,247,.25)':isSystem?'rgba(255,255,255,.06)':'rgba(167,139,250,.18)'};color:${isSystem?'var(--dim)':'var(--text)'};white-space:pre-wrap;word-break:break-word;`;
+  bubble.textContent = text;
+  if(toolData) {
+    const td = document.createElement('div');
+    td.style.cssText = 'margin-top:6px;padding:5px 8px;background:rgba(0,0,0,.4);border-radius:5px;font-size:7.5px;font-family:monospace;color:var(--em);border:1px solid rgba(16,185,129,.2);';
+    td.textContent = '⚙ TOOL: '+JSON.stringify(toolData);
+    bubble.appendChild(td);
+  }
+  div.appendChild(orb); div.appendChild(bubble);
+  msgs.appendChild(div); msgs.scrollTop = msgs.scrollHeight;
+}
+
+function addTypingIndicator() {
+  const msgs = document.getElementById('chat-messages'); if(!msgs) return;
+  const div = document.createElement('div'); div.id = 'typing-ind';
+  div.style.cssText = 'display:flex;gap:8px;align-items:center;animation:pfade .2s ease;';
+  div.innerHTML = `<div style="width:24px;height:24px;border-radius:50%;background:radial-gradient(circle at 35% 35%,var(--vi),#1e1b4b);display:flex;align-items:center;justify-content:center;font-size:10px;">✦</div>
+    <div style="padding:9px 14px;background:rgba(167,139,250,.09);border:1px solid rgba(167,139,250,.18);border-radius:2px 12px 12px 12px;display:flex;gap:4px;align-items:center;">
+      <span style="width:5px;height:5px;border-radius:50%;background:var(--vi);animation:blink .7s infinite;display:inline-block;"></span>
+      <span style="width:5px;height:5px;border-radius:50%;background:var(--vi);animation:blink .7s .15s infinite;display:inline-block;"></span>
+      <span style="width:5px;height:5px;border-radius:50%;background:var(--vi);animation:blink .7s .3s infinite;display:inline-block;"></span>
+    </div>`;
+  msgs.appendChild(div); msgs.scrollTop = msgs.scrollHeight;
+}
+function removeTypingIndicator() { document.getElementById('typing-ind')?.remove(); }
+
+function logToolStrip(msg) {
+  const strip = document.getElementById('tool-strip'); if(!strip) return;
+  strip.style.display = 'block';
+  const line = document.createElement('div');
+  line.style.cssText = 'padding:2px 0;color:var(--em);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;';
+  line.textContent = new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit',second:'2-digit'})+' '+msg;
+  strip.appendChild(line); strip.scrollTop = strip.scrollHeight;
+  while(strip.children.length > 15) strip.removeChild(strip.firstChild);
+}
+
+function parseToolCall(text) {
+  const match = text.match(/\{[^{}]*"tool"\s*:[^{}]*\}/);
+  if(!match) return null;
+  try { return JSON.parse(match[0]); } catch(e) { return null; }
+}
+
+async function executeChatTool(toolCall) {
+  const {tool, args={}} = toolCall;
+  trackTool(tool);
+  logToolStrip(`CALL: ${tool} ${JSON.stringify(args).slice(0,50)}`);
+
+  switch(tool) {
+    case 'ping_render': {
+      try {
+        const r = await fetch(`${CFG.renderUrl}/health`,{signal:AbortSignal.timeout(8000)});
+        if(r.ok){window._pythonOnline=true;unlockAchievement('render_live');}
+        return r.ok?`Python/Trident server ONLINE — ${CFG.renderUrl}`:`Server returned ${r.status}`;
+      } catch(e){window._pythonOnline=false;return `Python server OFFLINE: ${e.message}`;}
+    }
+    case 'ping_node': {
+      if(!CFG.nodeUrl) return 'Node server URL not configured yet. Add it in Config tab.';
+      try {
+        const r = await fetch(`${CFG.nodeUrl}/health`,{signal:AbortSignal.timeout(8000)});
+        window._nodeOnline=r.ok;
+        return r.ok?`Node/Tools server ONLINE — ${CFG.nodeUrl}`:`Node server returned ${r.status}`;
+      } catch(e){window._nodeOnline=false;return `Node server OFFLINE: ${e.message}`;}
+    }
+    case 'list_mcp_tools': {
+      const conn = mcpServers.filter(s=>s.status==='connected');
+      if(!conn.length) return 'No MCP servers connected. Go to MCP tab.';
+      return conn.map(s=>`${s.name}:\n  ${s.tools.join('\n  ')||'(loading...)'}`).join('\n\n');
+    }
+    case 'get_goals': {
+      if(typeof goalDB==='undefined'||!goalDB.length) return 'No goals yet. Create some in the Goals tab.';
+      const active = goalDB.filter(g=>g.status==='active');
+      if(!active.length) return 'No active goals.';
+      return active.map(g=>`• [${g.priority}] ${g.title} → ${g.agent} (+${g.xp}XP)`).join('\n');
+    }
+    case 'calc_resonance': {
+      const {gateA=1,lineA=1,gateB=1,lineB=1,dateA='',dateB=''}=args;
+      const R = computeResonance(gateA,lineA,dateA,gateB,lineB,dateB);
+      if(typeof unlockAchievement==='function') unlockAchievement('resonance_calc');
+      return `Resonance G${gateA}L${lineA} ↔ G${gateB}L${lineB}: ${(R.total*100).toFixed(1)}%\nGate: ${(R.gate*100).toFixed(0)}% · Line: ${(R.line*100).toFixed(0)}% · Zodiac: ${(R.zod*100).toFixed(0)}% · Phase: ${(R.temp*100).toFixed(0)}%`;
+    }
+    case 'generate_address': {
+      const name=args.name||'entity-'+Date.now().toString(36);
+      const h=_hashStr(name+Date.now());const abs=Math.abs(h);
+      const gate=(abs%64)+1,line=(Math.abs(h>>8)%6)+1,color=(Math.abs(h>>16)%6)+1,tone=(Math.abs(h>>24)%6)+1,base=(Math.abs(h>>32)%5)+1;
+      return `${name} → ${gate}.${line}.${color}.${tone}.${base} [${DIMS[abs%5]} · ${ZODIACS[Math.floor((gate-1)/5.34)%12]}]`;
+    }
+    case 'push_github': {
+      if(!CFG.ghToken) return 'No GitHub token — add it in Config tab.';
+      const{path='generated/syntia-auto.html',content='',message='SYNTIA: auto'}=args;
+      try {
+        const encoded=btoa(unescape(encodeURIComponent(content)));
+        let sha='';
+        const check=await fetch(`https://api.github.com/repos/${CFG.ghUser}/${CFG.ghRepo}/contents/${path}`,{headers:ghHeaders()});
+        if(check.ok){const d=await check.json();sha=d.sha;}
+        const res=await fetch(`https://api.github.com/repos/${CFG.ghUser}/${CFG.ghRepo}/contents/${path}`,{method:'PUT',headers:ghHeaders(),body:JSON.stringify({message,content:encoded,...(sha?{sha}:{})})});
+        if(res.ok){if(typeof unlockAchievement==='function')unlockAchievement('github_push');return `Pushed ${path} to GitHub ✓`;}
+        const e=await res.json();return `Push failed: ${e.message}`;
+      } catch(e){return `Error: ${e.message}`;}
+    }
+    case 'create_goal': {
+      if(typeof goalDB==='undefined') return 'Goals system not loaded.';
+      const g={id:'g_'+Date.now(),title:args.title||'Unnamed',desc:args.desc||'',agent:args.agent||'both',priority:args.priority||'medium',xp:args.xp||50,status:'active',createdAt:Date.now()};
+      goalDB.unshift(g);if(typeof saveGoals==='function')saveGoals();if(typeof renderGoals==='function')renderGoals();
+      return `Goal created: "${g.title}" [${g.priority}] → ${g.agent}`;
+    }
+    case 'complete_goal': {
+      if(typeof goalDB==='undefined') return 'Goals system not loaded.';
+      const title=args.title||'';
+      const g=goalDB.find(x=>x.title.toLowerCase().includes(title.toLowerCase())||x.id===title);
+      if(!g) return `Goal not found: "${title}"`;
+      g.status='done';g.completedAt=Date.now();if(typeof saveGoals==='function')saveGoals();if(typeof renderGoals==='function')renderGoals();
+      return `"${g.title}" marked complete.`;
+    }
+    case 'run_onnx': {
+      const prompt=args.prompt||'field_query';
+      const result=await runONNXInference(prompt);
+      return result?`ONNX inference: score=${result.score.toFixed(4)} raw=[${result.raw.join(',')}]`:'ONNX model not available';
+    }
+    default: return `Unknown tool: ${tool}`;
+  }
+}
+
+async function sendToSyntia(message) {
+  const msgs = [{role:'user',content:message}];
+  chatHistory.push({role:'user',content:message});
+  addTypingIndicator();
+  const statusEl = document.getElementById('agent-status');
+  if(statusEl) statusEl.textContent = 'thinking...';
+  NETWORK.nodes.get('renderer') && (NETWORK.nodes.get('renderer').status='running');
+
+  try {
+    const {reply, backend} = await routeAI(chatHistory.slice(-12));
+    removeTypingIndicator();
+    chatHistory.push({role:'assistant',content:reply});
+
+    // Parse and execute tool call if present
+    const toolCall = parseToolCall(reply);
+    if(toolCall) {
+      const cleanReply = reply.replace(/\{[^{}]*"tool"\s*:[^{}]*\}/, '').trim();
+      if(cleanReply) addChatMsg('assistant', cleanReply);
+      addChatMsg('assistant', `Calling: ${toolCall.tool}...`, toolCall);
+      const result = await executeChatTool(toolCall);
+      addChatMsg('assistant', result);
+      // Feed result back for follow-up
+      chatHistory.push({role:'user',content:`Tool [${toolCall.tool}] result: ${result}`});
+      // Second pass — follow-up response
+      try {
+        const {reply:reply2} = await routeAI(chatHistory.slice(-8));
+        if(reply2 && reply2.length > 10) { addChatMsg('assistant',reply2); chatHistory.push({role:'assistant',content:reply2}); }
+      } catch(e) {}
+    } else {
+      addChatMsg('assistant', reply);
+    }
+
+    if(statusEl) statusEl.textContent = `${backend} · ready`;
+    document.getElementById('conn-test-result') && (document.getElementById('conn-test-result').style.display='none');
+    if(typeof unlockAchievement==='function') unlockAchievement('chat_first');
+    trackTool('chat_'+backend);
+  } catch(e) {
+    removeTypingIndicator();
+    addChatMsg('assistant', `All AI backends offline.\n\n${e.message}\n\nCheck:\n1. Python Render server: ${CFG.renderUrl}/health\n2. Groq key in Config tab\n3. ONNX model loading from HuggingFace`);
+    if(statusEl) statusEl.textContent = 'offline — check connections';
+    toast('AI offline: '+e.message,'err');
+  }
+}
+
+function chatKey(e) { if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendChat();} }
+
+function sendChat() {
+  const inp = document.getElementById('chat-input');
+  const val = inp.value.trim(); if(!val) return;
+  addChatMsg('user', val); inp.value='';
+  sendToSyntia(val);
+}
+
+function quickCmd(cmd) { document.getElementById('chat-input').value=cmd; sendChat(); }
+
+// ── CONNECTION TEST ───────────────────────────────────────
+async function testConnection() {
+  const btn = document.getElementById('conn-test-btn');
+  const res = document.getElementById('conn-test-result');
+  if(btn){btn.textContent='TESTING...';btn.disabled=true;}
+  if(res){res.style.display='block';res.style.color='var(--dim)';res.textContent='Testing...';}
+
+  const lines = [];
+  // Python server
+  try {
+    const r = await fetch(`${CFG.renderUrl}/health`,{signal:AbortSignal.timeout(8000)});
+    if(r.ok){lines.push(`✓ Python/Trident: ONLINE`);window._pythonOnline=true;if(typeof unlockAchievement==='function')unlockAchievement('render_live');}
+    else lines.push(`⚠ Python server: HTTP ${r.status}`);
+  } catch(e){lines.push(`✗ Python server: ${e.message}`);window._pythonOnline=false;}
+
+  // Node server
+  if(CFG.nodeUrl){
+    try {
+      const r = await fetch(`${CFG.nodeUrl}/health`,{signal:AbortSignal.timeout(6000)});
+      lines.push(r.ok?'✓ Node/Tools: ONLINE':`⚠ Node: HTTP ${r.status}`);
+    } catch(e){lines.push(`✗ Node server: ${e.message}`);}
+  } else { lines.push('○ Node server: not configured yet'); }
+
+  // Groq
+  if(CFG.groqKey){
+    try {
+      const r = await fetch('https://api.groq.com/openai/v1/models',{headers:{'Authorization':`Bearer ${CFG.groqKey}`},signal:AbortSignal.timeout(8000)});
+      lines.push(r.ok?'✓ Groq: ONLINE':'⚠ Groq: check API key');
+    } catch(e){lines.push(`✗ Groq: ${e.message}`);}
+  } else { lines.push('○ Groq: no key in Config'); }
+
+  // MCP
+  const mcpConn = mcpServers.filter(s=>s.status==='connected').length;
+  lines.push(`${mcpConn>0?'✓':'○'} MCP: ${mcpConn} server(s) connected`);
+
+  const txt = lines.join('\n');
+  if(res){res.textContent=txt;res.style.color=lines.some(l=>l.startsWith('✓'))?'var(--em)':'var(--re)';}
+  if(btn){btn.textContent='TEST ⚡';btn.disabled=false;}
+  log('Connection test:\n'+txt,'b');
+  toast(window._pythonOnline?'Trident online ✓':'Servers offline — check Config','ok');
+}
+
+// ═══════════════════════════════════════════════════════════
+//  GAMIFICATION (Goals tab)
+// ═══════════════════════════════════════════════════════════
+const RANKS=['SEED','SPROUT','APPRENTICE','NAVIGATOR','ARCHITECT','ORACLE','STELLAR'];
+const XP_THRESHOLDS=[0,100,250,500,1000,2000,4000,8000];
+const ACHIEVEMENTS=[
+  {id:'first_goal',name:'First Light',desc:'Create your first goal',icon:'✦',xp:25},
+  {id:'first_complete',name:'Delivered',desc:'Complete a goal',icon:'◎',xp:50},
+  {id:'mcp_connected',name:'Linked',desc:'Connect MCP server',icon:'🔗',xp:30},
+  {id:'github_push',name:'Pushed',desc:'Push to GitHub',icon:'⬆',xp:40},
+  {id:'render_live',name:'Live',desc:'Render server online',icon:'⚡',xp:35},
+  {id:'chat_first',name:'Awakened',desc:'First chat with Syntia',icon:'💬',xp:20},
+  {id:'request_sent',name:'Commander',desc:'Send Syntia a request',icon:'📤',xp:30},
+  {id:'tool_used_5',name:'Tool Master',desc:'5 tool calls',icon:'🔧',xp:60},
+  {id:'goals_3',name:'Momentum',desc:'Complete 3 goals',icon:'🎯',xp:100},
+  {id:'resonance_calc',name:'Aligned',desc:'Run resonance calc',icon:'◈',xp:45},
+];
+let goalDB = JSON.parse(localStorage.getItem('sn_goals')||'[]');
+let xpData = JSON.parse(localStorage.getItem('sn_xp')||'{"total":0,"level":1}');
+let toolUsage = JSON.parse(localStorage.getItem('sn_tool_usage')||'{}');
+let achievementData = JSON.parse(localStorage.getItem('sn_achievements')||'{}');
+let requests = JSON.parse(localStorage.getItem('sn_requests')||'[]');
+
+function saveGoals(){localStorage.setItem('sn_goals',JSON.stringify(goalDB));}
+function saveXP(){localStorage.setItem('sn_xp',JSON.stringify(xpData));}
+
+function awardXP(amount, reason='') {
+  xpData.total=(xpData.total||0)+amount;
+  let newLevel=1;
+  for(let i=XP_THRESHOLDS.length-1;i>=0;i--){if(xpData.total>=XP_THRESHOLDS[i]){newLevel=i+1;break;}}
+  if(newLevel>xpData.level){xpData.level=newLevel;toast(`LEVEL UP → ${RANKS[newLevel-1]}!`,'ok');}
+  xpData.level=newLevel;saveXP();renderXP();
+  if(reason)toast(`+${amount} XP — ${reason}`,'ok');
+  log(`XP +${amount}: ${reason}`,'g');
+}
+
+function trackTool(name) {
+  toolUsage[name]=(toolUsage[name]||0)+1;
+  localStorage.setItem('sn_tool_usage',JSON.stringify(toolUsage));
+  renderToolLeaderboard();
+  const total=Object.values(toolUsage).reduce((a,b)=>a+b,0);
+  if(total>=5)unlockAchievement('tool_used_5');
+}
+
+function unlockAchievement(id) {
+  if(achievementData[id])return;
+  const a=ACHIEVEMENTS.find(x=>x.id===id);if(!a)return;
+  achievementData[id]=Date.now();
+  localStorage.setItem('sn_achievements',JSON.stringify(achievementData));
+  awardXP(a.xp,`Achievement: ${a.name}`);
+  toast(`${a.icon} ${a.name} unlocked!`,'ok');
+  renderAchievements();
+}
+
+function renderXP() {
+  const lvl=xpData.level||1;
+  const rank=RANKS[Math.min(lvl-1,RANKS.length-1)];
+  const cur=xpData.total||0;
+  const nextThresh=XP_THRESHOLDS[Math.min(lvl,XP_THRESHOLDS.length-1)];
+  const prevThresh=XP_THRESHOLDS[Math.min(lvl-1,XP_THRESHOLDS.length-1)];
+  const pct=nextThresh>prevThresh?Math.min(100,((cur-prevThresh)/(nextThresh-prevThresh))*100):100;
+  el('xp-level',lvl);el('xp-rank',rank);el('xp-cur',cur);el('xp-next',nextThresh);
+  const fill=document.getElementById('xp-fill');if(fill)fill.style.width=pct+'%';
+  const sb=document.getElementById('streak-badges');
+  if(sb){sb.innerHTML=[
+    {label:`L${lvl} ${rank}`,c:'var(--gold)'},{label:`${cur} total XP`,c:'var(--vi)'},
+    {label:`${goalDB.filter(g=>g.status==='done').length} done`,c:'var(--em)'},
+    {label:`${Object.keys(toolUsage).length} tools`,c:'var(--mind)'}
+  ].map(b=>`<span style="font-size:7px;padding:2px 8px;border-radius:20px;background:${b.c}18;color:${b.c};border:1px solid ${b.c}44;">${b.label}</span>`).join('');}
+}
+
+function showNewGoalModal(){showModal('new-goal-modal');setTimeout(()=>document.getElementById('ng-title')?.focus(),100);}
+
+function createGoal() {
+  const title=document.getElementById('ng-title').value.trim();
+  if(!title){toast('Enter a goal title','warn');return;}
+  const goal={id:'g_'+Date.now(),title,desc:document.getElementById('ng-desc').value.trim(),
+    agent:document.getElementById('ng-agent').value,priority:document.getElementById('ng-priority').value,
+    xp:parseInt(document.getElementById('ng-xp').value)||50,status:'active',createdAt:Date.now()};
+  goalDB.unshift(goal);saveGoals();closeModal('new-goal-modal');
+  document.getElementById('ng-title').value='';document.getElementById('ng-desc').value='';
+  renderGoals();awardXP(5,'Created goal');unlockAchievement('first_goal');
+  toast(`Goal created: ${title}`,'ok');log(`Goal: ${title} [${goal.agent}]`,'g');
+  if(goal.agent==='syntia'||goal.agent==='both'){
+    setTimeout(()=>{
+      addChatMsg('system',`Goal assigned to Syntia: "${title}"`);
+      sendToSyntia(`New goal assigned to you: "${title}". ${goal.desc||''} Priority: ${goal.priority}. What is your first action?`);
+    },400);showTab('chat');
+  }
+}
+
+function completeGoal(id) {
+  const g=goalDB.find(x=>x.id===id);if(!g)return;
+  g.status='done';g.completedAt=Date.now();saveGoals();renderGoals();
+  awardXP(g.xp,`Completed: ${g.title}`);
+  unlockAchievement('first_complete');
+  const done=goalDB.filter(x=>x.status==='done').length;
+  if(done>=3)unlockAchievement('goals_3');
+  trackTool('complete_goal');toast(`Done! +${g.xp} XP`,'ok');
+}
+
+function deleteGoal(id){goalDB=goalDB.filter(x=>x.id!==id);saveGoals();renderGoals();}
+
+function askAboutGoal(id){
+  const g=goalDB.find(x=>x.id===id);if(!g)return;
+  showTab('chat');
+  setTimeout(()=>sendToSyntia(`Status update on goal: "${g.title}". ${g.desc||''} What's the current state and next step?`),200);
+}
+
+function renderGoals() {
+  const active=goalDB.filter(g=>g.status==='active');
+  const done=goalDB.filter(g=>g.status==='done');
+  const PCOL={critical:'var(--re)',high:'var(--co)',medium:'var(--gold)',low:'var(--em)'};
+  const AGNT={me:'👤',syntia:'✦',both:'⚡'};
+  const fmt=(g,isDone)=>`
+    <div style="background:var(--s2);border:1px solid ${isDone?'rgba(16,185,129,.2)':'var(--border)'};border-radius:9px;padding:10px;margin-bottom:7px;${isDone?'opacity:.65':''}">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px;">
+        <div style="font-size:10px;font-weight:900;flex:1;padding-right:6px;">${g.title}</div>
+        <div style="display:flex;align-items:center;gap:4px;flex-shrink:0;">
+          <span style="font-size:7px;color:${PCOL[g.priority]||'var(--dim)'};">${g.priority.toUpperCase()}</span>
+          <span style="font-size:11px;">${AGNT[g.agent]||'👤'}</span>
+        </div>
+      </div>
+      ${g.desc?`<div style="font-size:8px;color:var(--dim);margin-bottom:6px;">${g.desc}</div>`:''}
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <span style="font-size:7px;color:var(--gold);">+${g.xp} XP</span>
+        <div style="display:flex;gap:4px;">
+          ${!isDone?`<button class="btn em sm" onclick="completeGoal('${g.id}')">DONE</button>
+            <button class="btn vi sm" onclick="askAboutGoal('${g.id}')">ASK ✦</button>`
+            :`<span style="font-size:7px;color:var(--em);">✓ ${new Date(g.completedAt).toLocaleDateString()}</span>`}
+          <button class="btn re sm" onclick="deleteGoal('${g.id}')">✕</button>
+        </div>
+      </div>
+    </div>`;
+  const al=document.getElementById('goals-active-list');
+  const dl=document.getElementById('goals-done-list');
+  if(al)al.innerHTML=active.length?active.map(g=>fmt(g,false)).join(''):`<div style="font-size:8px;color:var(--dim);padding:8px 0;text-align:center;">No active goals — create one!</div>`;
+  if(dl)dl.innerHTML=done.length?done.slice(0,5).map(g=>fmt(g,true)).join(''):`<div style="font-size:8px;color:var(--dim);padding:6px 0;">None yet</div>`;
+}
+
+function renderToolLeaderboard() {
+  const el=document.getElementById('tool-leaderboard');if(!el)return;
+  const sorted=Object.entries(toolUsage).sort((a,b)=>b[1]-a[1]).slice(0,8);
+  if(!sorted.length){el.innerHTML='<div style="font-size:8px;color:var(--dim);">No tools used yet</div>';return;}
+  const max=sorted[0][1];
+  el.innerHTML=sorted.map(([name,count],i)=>`
+    <div style="margin-bottom:6px;">
+      <div style="display:flex;justify-content:space-between;font-size:8px;margin-bottom:2px;">
+        <span style="color:${i===0?'var(--gold)':i===1?'var(--dim)':i===2?'var(--co)':'var(--dim)'}">${i===0?'🥇':i===1?'🥈':i===2?'🥉':' '} ${name}</span>
+        <span style="color:var(--vi);">${count}</span>
+      </div>
+      <div style="height:2px;background:rgba(255,255,255,.07);border-radius:1px;">
+        <div style="width:${(count/max)*100}%;height:100%;background:${i===0?'var(--gold)':'var(--vi)'};border-radius:1px;"></div>
+      </div>
+    </div>`).join('');
+}
+
+function renderAchievements() {
+  const el=document.getElementById('achievements-list');if(!el)return;
+  el.innerHTML=ACHIEVEMENTS.map(a=>{
+    const unlocked=achievementData[a.id];
+    return`<div style="display:flex;align-items:center;gap:6px;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.04);opacity:${unlocked?'1':'0.3'};">
+      <span style="font-size:13px;">${a.icon}</span>
+      <div style="flex:1;"><div style="font-size:8px;font-weight:700;color:${unlocked?'var(--gold)':'var(--dim)'};">${a.name}</div>
+      <div style="font-size:7px;color:var(--dim);">${a.desc}</div></div>
+      <span style="font-size:7px;color:var(--vi);">+${a.xp}</span>
+    </div>`;
+  }).join('');
+}
+
+// ── REQUESTS ──────────────────────────────────────────────
+function toggleRequests(){const p=document.getElementById('requests-panel');if(p)p.style.display=p.style.display==='none'?'block':'none';}
+function closeRequests(){const p=document.getElementById('requests-panel');if(p)p.style.display='none';}
+
+function makeRequest(){showModal('request-modal');setTimeout(()=>document.getElementById('req-text')?.focus(),100);}
+
+function submitRequest(){
+  const text=document.getElementById('req-text').value.trim();
+  if(!text){toast('Enter a request','warn');return;}
+  const tools=document.getElementById('req-tools').value.trim();
+  const req={id:'req_'+Date.now(),text,tools,status:'pending',createdAt:Date.now()};
+  requests.unshift(req);if(requests.length>30)requests.pop();
+  localStorage.setItem('sn_requests',JSON.stringify(requests));
+  closeModal('request-modal');document.getElementById('req-text').value='';
+  renderRequests();unlockAchievement('request_sent');
+  const msg='REQUEST: '+text+(tools?' [tools: '+tools+']':'')+'. Confirm you understand and execute.';
+  addChatMsg('system',`Request submitted: "${text.slice(0,60)}${text.length>60?'...':''}"`);
+  sendToSyntia(msg);showTab('chat');
+  toast('Request sent to Syntia','ok');log('Request: '+text.slice(0,50),'m');
+}
+
+function renderRequests(){
+  const el=document.getElementById('requests-list');
+  const countEl=document.getElementById('req-count');
+  const pending=requests.filter(r=>r.status==='pending').length;
+  if(countEl)countEl.textContent=pending;
+  if(!el)return;
+  if(!requests.length){el.innerHTML='<div style="font-size:8px;color:var(--dim);">No requests yet</div>';return;}
+  el.innerHTML=requests.slice(0,8).map(r=>`
+    <div style="padding:7px 0;border-bottom:1px solid rgba(255,255,255,.04);">
+      <div style="display:flex;justify-content:space-between;margin-bottom:3px;">
+        <span style="font-size:8px;font-weight:700;flex:1;padding-right:6px;">${r.text.slice(0,55)}${r.text.length>55?'...':''}</span>
+        <span class="tag ${r.status==='done'?'ok':r.status==='rejected'?'err':'warn'}" style="font-size:6px;flex-shrink:0;">${r.status.toUpperCase()}</span>
+      </div>
+      ${r.status==='pending'?`<div style="display:flex;gap:4px;"><button class="btn em sm" onclick="resolveRequest('${r.id}','done')">DONE</button><button class="btn re sm" onclick="resolveRequest('${r.id}','rejected')">✕</button></div>`:''}
+    </div>`).join('');
+}
+
+function resolveRequest(id,status){
+  const r=requests.find(x=>x.id===id);if(!r)return;
+  r.status=status;localStorage.setItem('sn_requests',JSON.stringify(requests));renderRequests();
+  if(status==='done'){awardXP(30,'Request completed');trackTool('complete_request');}
+}
+
+// ── OVERRIDE showTab ──────────────────────────────────────
+const _origShowTab = showTab;
+showTab = function(name) {
+  _origShowTab(name);
+  if(name==='goals'){renderGoals();renderXP();renderToolLeaderboard();renderAchievements();}
+  if(name==='chat'){renderRequests();}
+};
+
+
+// ── BOOT ADDITIONS ──────────────────────────────────────
+const _origBoot = boot;
+boot = async function() {
+  await _origBoot();
+  injectNetworkPanel();
+  initNetworkNodes();
+  renderGoals();renderXP();renderToolLeaderboard();renderAchievements();renderRequests();
+  // Auto-start ONNX load in background if Python goes offline
+  setTimeout(()=>{ if(!window._pythonOnline && !window._nodeOnline) loadONNXFallback(); }, 45000);
+  log('Network nodes: watcher · resonance_pulse · renderer · memory · wake_guard','g');
+};
+</script>
+</body>
+</html>

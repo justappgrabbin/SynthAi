@@ -28,6 +28,7 @@ final class HoverRuntime {
     static final String GUEST_DATA_DIR = "/var/lib/synthai/synthia58";
 
     private static volatile boolean ready;
+    private static volatile HoverRuntime active;
     private static volatile String failure;
 
     private final Context context;
@@ -37,10 +38,12 @@ final class HoverRuntime {
 
     HoverRuntime(Context context) {
         this.context = context.getApplicationContext();
+        active = this;
     }
 
     static boolean isReady() {
-        return ready;
+        HoverRuntime current = active;
+        return ready && current != null && current.isVerified();
     }
 
     static String failure() {
