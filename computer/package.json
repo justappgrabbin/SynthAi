@@ -6,6 +6,6 @@
     "install:shell": "npm --prefix shell/kimi-linux ci",
     "build": "npm --prefix shell/kimi-linux run build",
     "start": "node host/server.mjs",
-    "test:reassembly": "node --test tests/reassembly-ingest-e2e.test.mjs"
+    "test:reassembly": "node --test tests/reassembly-ingest-e2e.test.mjs tests/project-ingester-mount.test.mjs"
   }
 }
