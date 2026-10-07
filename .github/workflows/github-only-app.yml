@@ -6,6 +6,7 @@ on:
       - integration/github-only-app-20260923
       - 'hover/**'
       - 'fix/venom-hover-runtime-*'
+      - integration/merged-hover-preview-20261007
   pull_request:
     branches:
       - main
@@ -34,6 +35,8 @@ jobs:
   verify-and-build:
     runs-on: ubuntu-latest
     timeout-minutes: 90
+    env:
+      SYNTHAI_PREVIEW_INSTALL: ${{ github.ref_name == 'integration/merged-hover-preview-20261007' && '1' || '0' }}
 
     steps:
       - name: Checkout repository and donor submodule
@@ -329,9 +332,18 @@ jobs:
           if grep -q 'assets/computer-runtime/' /tmp/hover-apk-tree.txt; then echo "hover APK must not ship the Computer surface"; exit 1; fi
           "$ANDROID_SDK_ROOT/build-tools/35.0.0/aapt2" dump badging "$APK" > /tmp/hover-badging.txt
           cat /tmp/hover-badging.txt
-          grep -q "package: name='app.synthai.hover'" /tmp/hover-badging.txt
-          grep -Eq "application-label:'Synthia'|application: label='Synthia'" /tmp/hover-badging.txt
-          grep -q "launchable-activity: name='app.synthai.hover.MainActivity'" /tmp/hover-badging.txt
+          if [[ "$SYNTHAI_PREVIEW_INSTALL" == "1" ]]; then
+            grep -q "package: name='app.synthai.hover.preview'" /tmp/hover-badging.txt
+            grep -Eq "application-label:'Synthia Preview'|application: label='Synthia Preview'" /tmp/hover-badging.txt
+          else
+            grep -q "package: name='app.synthai.hover'" /tmp/hover-badging.txt
+            grep -Eq "application-label:'Synthia'|application: label='Synthia'" /tmp/hover-badging.txt
+          fi
+          if [[ "$SYNTHAI_PREVIEW_INSTALL" == "1" ]]; then
+            grep -q "launchable-activity: name='app.synthai.hover.preview.MainActivity'" /tmp/hover-badging.txt
+          else
+            grep -q "launchable-activity: name='app.synthai.hover.MainActivity'" /tmp/hover-badging.txt
+          fi
           for perm in SYSTEM_ALERT_WINDOW FOREGROUND_SERVICE FOREGROUND_SERVICE_SPECIAL_USE POST_NOTIFICATIONS RECORD_AUDIO; do
             grep -q "uses-permission: name='android.permission.$perm'" /tmp/hover-badging.txt
           done
@@ -356,7 +368,7 @@ jobs:
           disable-animations: true
           script: |
             if [[ "$GITHUB_REF_NAME" != hover/repair-* ]]; then bash .github/scripts/android-smoke.sh; python .github/scripts/android-synthworld-smoke.py; fi
-            bash .github/scripts/android-hover-smoke.sh
+            PKG=$([[ "$SYNTHAI_PREVIEW_INSTALL" == "1" ]] && echo app.synthai.hover.preview || echo app.synthai.hover) bash .github/scripts/android-hover-smoke.sh
 
       - name: Record APK checksums
         run: |
