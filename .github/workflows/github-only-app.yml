@@ -364,8 +364,8 @@ jobs:
           profile: pixel_6
           disable-animations: true
           script: |
-            if [[ "$GITHUB_REF_NAME" != hover/repair-* ]]; then bash .github/scripts/android-smoke.sh; python .github/scripts/android-synthworld-smoke.py; fi
-            PKG=$([[ "$SYNTHAI_PREVIEW_INSTALL" == "1" ]] && echo app.synthai.hover.preview || echo app.synthai.hover) bash .github/scripts/android-hover-smoke.sh
+            case "$GITHUB_REF_NAME" in hover/repair-*) ;; *) bash .github/scripts/android-smoke.sh && python .github/scripts/android-synthworld-smoke.py || exit $? ;; esac
+            PKG=$([ "$SYNTHAI_PREVIEW_INSTALL" = "1" ] && echo app.synthai.hover.preview || echo app.synthai.hover) bash .github/scripts/android-hover-smoke.sh
 
       - name: Record APK checksums
         run: |
