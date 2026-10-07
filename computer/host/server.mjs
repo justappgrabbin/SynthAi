@@ -6,6 +6,7 @@ import { ComputerRuntime } from '../ComputerRuntime.mjs';
 import { JsonFilePersistence } from '../runtime/json-file-persistence.mjs';
 import { ConversationExecution } from '../services/conversation-execution.mjs';
 import { FileAdmission } from '../services/file-admission.mjs';
+import { ProjectIngester } from '../services/project-ingester.mjs';
 import { readZipMembers } from './zip-members.mjs';
 
 const root = resolve(fileURLToPath(new URL('../shell/kimi-linux/dist/', import.meta.url)));
@@ -19,6 +20,7 @@ const computer = await new ComputerRuntime({
 }).boot();
 const conversation = new ConversationExecution(computer);
 const files = new FileAdmission(computer, conversation.execution);
+const projects = new ProjectIngester(computer);
 
 async function ingestUpload({ name, base64 }) {
   if (typeof name !== 'string' || !name || typeof base64 !== 'string' || base64.length > 8000000) throw new TypeError('A named file of at most 6 MB is required.');
@@ -85,6 +87,17 @@ const server = createServer(async (req, res) => {
         return json(res, 200, await files.activate(url.searchParams.get('address') ?? '', url.searchParams.get('path') ?? ''));
       }
       if (req.method === 'POST' && url.pathname === '/api/ingest') return json(res, 200, await ingestUpload(await body(req)));
+      if (req.method === 'POST' && url.pathname === '/api/analyze-project') {
+        const request = await body(req);
+        if (typeof request.path !== 'string' || !request.path.startsWith('/home/user/Imports/')) throw new TypeError('An imported app path is required.');
+        return json(res, 200, projects.analyze(request.path));
+      }
+      if (req.method === 'POST' && url.pathname === '/api/mount-project') {
+        const request = await body(req);
+        if (typeof request.path !== 'string' || !request.path.startsWith('/home/user/Imports/')) throw new TypeError('An imported app path is required.');
+        return json(res, 200, await projects.mount(request.path, { name: request.name, shell: 'workspace' }));
+      }
+      if (req.method === 'GET' && url.pathname === '/api/mounted-projects') return json(res, 200, projects.listMounted());
       if (req.method === 'PUT' && url.pathname === '/api/files') {
         const { path, content } = await body(req);
         return json(res, 200, await files.write(path, content, 'kimi-linux-file'));
