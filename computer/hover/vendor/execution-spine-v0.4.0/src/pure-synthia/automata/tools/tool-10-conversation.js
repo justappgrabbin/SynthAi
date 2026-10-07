@@ -96,10 +96,59 @@ export class ConversationAutomaton extends Automaton {
 
     let utterance;
     if (unresolved) {
-      utterance = text || 'I’m here.';
+      utterance = 'I’m here.';
     } else {
-      // State packets are internal cognition and must never be rendered into chat.
-      utterance = text || contributions.find((value) => typeof value === 'string' && value.trim()) || 'I’m here.';
+      // State packets are internal cognition. Speak from the resolved state that
+      // reached Conversation instead of echoing the person's source utterance.
+      const stages = Array.isArray(context.relationalContext?.stages)
+        ? context.relationalContext.stages
+        : [];
+      const outputFor = (stage) => stages.find((entry) => entry?.stage === stage)?.output ?? {};
+      const diseminer = outputFor('diseminer');
+      const klein = outputFor('klein-analogy');
+      const success = outputFor('success');
+      const claim = Array.isArray(diseminer.claims) ? diseminer.claims[0] : null;
+      const spoken = [];
+
+      if (claim?.subject && claim?.predicate && claim?.object) {
+        const subject = String(claim.subject).replaceAll('_', ' ');
+        const predicate = String(claim.predicate).replaceAll('_', ' ');
+        const object = String(claim.object).replaceAll('_', ' ');
+        spoken.push(`${subject.charAt(0).toUpperCase() + subject.slice(1)} ${predicate} ${object}.`);
+      } else {
+        const claimContribution = contributions.find((value) => (
+          typeof value === 'string'
+          && value.startsWith('Claim:')
+          && !/remains open/i.test(value)
+        ));
+        if (claimContribution) spoken.push(`${claimContribution.replace(/^Claim:\\s*/i, '').replace(/\\.?$/, '')}.`);
+      }
+
+      const relation = Array.isArray(klein.result) && klein.result.length
+        ? klein.result
+        : null;
+      if (relation) {
+        const readable = relation
+          .map((value) => String(value).replace(/^(?:lex|role|modality):/i, '').replaceAll('_', ' '))
+          .filter(Boolean);
+        if (readable.length) spoken.push(`I connect that through ${readable.join(', ')}.`);
+      }
+
+      if (['toward', 'away', 'neutral'].includes(success.direction)) {
+        spoken.push(`That is moving ${success.direction} the current goal.`);
+      }
+
+      if (!spoken.length) {
+        const contribution = contributions.find((value) => (
+          typeof value === 'string'
+          && value.trim()
+          && !/^Register:/i.test(value)
+          && !/remains open/i.test(value)
+        ));
+        if (contribution) spoken.push(contribution.replace(/^[^:]+:\\s*/, ''));
+      }
+
+      utterance = spoken.join(' ').trim() || 'I’m listening, but this turn has not resolved enough for me to answer yet.';
     }
 
     this.ownedState.turns += 1;
