@@ -35,3 +35,10 @@ test('minute precision passes through the actual birth-mirror configuration', as
   assert.equal(configured.identity.exactSecondsPreserved,false);
   assert.equal(synthia.birthMirror.configuration.resolvedTime.timePrecision,'minute');
 });
+
+test('misspelled city and region are not displaced by single-letter aliases', () => {
+  const places = searchPlaces('Los Angles California');
+  assert.equal(places[0].label, 'Los Angeles, California, US');
+  assert.equal(places[0].timeZone, 'America/Los_Angeles');
+  assert.equal(searchPlaces('Los Angeles California')[0].id, places[0].id);
+});

@@ -21,7 +21,7 @@ const distance = (a, b) => {
   return prev[b.length];
 };
 const fuzzyTerm = (term, words) => {
-  if (words.some(word => word.includes(term) || term.includes(word))) return 0;
+  if (words.some(word => word.includes(term))) return 0;
   const allowance = term.length >= 8 ? 2 : term.length >= 4 ? 1 : 0;
   let best = Infinity;
   for (const word of words) best = Math.min(best, distance(term, word));
