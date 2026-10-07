@@ -1,5 +1,7 @@
 # Qualitative swarm structure: consolidated working model
 
+> Superseded interpretation: the four-input catalogue below does not replace the five layers within each hexagram. Read `HEXAGRAM-CHANNEL-STRUCTURE.md` for the subsequent user correction. The catalogue remains a candidate arrangement only; it is not a runtime law.
+
 This checkpoint records the user's correction to the earlier five-independent-binary-layer chart. It specifies a structural table; it does not assign observed states, implement a coherence threshold, or claim a verified Govinda derivation.
 
 ## Four primitive roles and one derived role
