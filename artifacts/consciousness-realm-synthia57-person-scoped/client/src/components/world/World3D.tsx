@@ -153,7 +153,7 @@ function SynthiaMorphBody({ agent, emissiveIntensity }: { agent: Agent; emissive
           />
         </mesh>
         <mesh position={[0, 0.82, 0]} castShadow>
-          <coneGeometry args={[0.42, 0.31, 0.48, 18]} />
+          <coneGeometry args={[0.42, 0.48, 18, 1]} />
           <meshStandardMaterial
             color={accentColor}
             emissive={clothingColor}
