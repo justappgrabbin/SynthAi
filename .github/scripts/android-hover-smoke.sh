@@ -6,7 +6,7 @@
 set -Eeuo pipefail
 
 APK="${APK:-android-app/app/build/outputs/apk/hover/debug/app-hover-debug.apk}"
-PKG="app.synthai.hover"
+PKG="${PKG:-app.synthai.hover}"
 TAG="SynthiaHover"
 
 adb install -r "$APK"
