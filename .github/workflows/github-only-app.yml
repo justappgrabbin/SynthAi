@@ -339,11 +339,8 @@ jobs:
             grep -q "package: name='app.synthai.hover'" /tmp/hover-badging.txt
             grep -Eq "application-label:'Synthia'|application: label='Synthia'" /tmp/hover-badging.txt
           fi
-          if [[ "$SYNTHAI_PREVIEW_INSTALL" == "1" ]]; then
-            grep -q "launchable-activity: name='app.synthai.hover.preview.MainActivity'" /tmp/hover-badging.txt
-          else
-            grep -q "launchable-activity: name='app.synthai.hover.MainActivity'" /tmp/hover-badging.txt
-          fi
+          # The install package suffix does not rename the manifest activity class.
+          grep -q "launchable-activity: name='app.synthai.hover.MainActivity'" /tmp/hover-badging.txt
           for perm in SYSTEM_ALERT_WINDOW FOREGROUND_SERVICE FOREGROUND_SERVICE_SPECIAL_USE POST_NOTIFICATIONS RECORD_AUDIO; do
             grep -q "uses-permission: name='android.permission.$perm'" /tmp/hover-badging.txt
           done
