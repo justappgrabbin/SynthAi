@@ -77,7 +77,10 @@ public final class OverlayService extends Service {
         OverlayService current = instance;
         if (current == null || current.bubble == null) return;
         current.bubble.setVisibility(editing ? View.GONE : View.VISIBLE);
-        if (editing && current.panel != null) current.panel.setVisibility(View.GONE);
+        if (editing) current.bubbleParams.flags |= WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
+        else current.bubbleParams.flags &= ~WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
+        current.windowManager.updateViewLayout(current.bubble, current.bubbleParams);
+        if (editing && current.panel != null) current.hidePanel();
         if (!editing && current.panelWebView != null) {
             current.panelWebView.evaluateJavascript("window.dispatchEvent(new Event('focus'))", null);
         }
@@ -175,7 +178,7 @@ public final class OverlayService extends Service {
         identity.setText("Birth details");
         identity.setAllCaps(false);
         identity.setOnClickListener(v -> {
-            panel.setVisibility(View.GONE);
+            hidePanel();
             Intent edit = new Intent(this, IdentityActivity.class);
             edit.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(edit);
@@ -186,7 +189,7 @@ public final class OverlayService extends Service {
         Button close = new Button(this);
         close.setText("×");
         close.setAllCaps(false);
-        close.setOnClickListener(v -> panel.setVisibility(View.GONE));
+        close.setOnClickListener(v -> hidePanel());
         bar.addView(close, new LinearLayout.LayoutParams(dp(52), dp(44)));
 
         panel.addView(bar, new LinearLayout.LayoutParams(
@@ -246,7 +249,9 @@ public final class OverlayService extends Service {
                 Math.min(dp(430), getResources().getDisplayMetrics().widthPixels - dp(24)),
                 Math.min(dp(760), getResources().getDisplayMetrics().heightPixels - dp(96)),
                 overlayType(),
-                WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
+                        | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
+                        | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
                 PixelFormat.TRANSLUCENT);
         panelParams.gravity = Gravity.CENTER;
         panelParams.softInputMode = WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
@@ -258,12 +263,25 @@ public final class OverlayService extends Service {
         view.evaluateJavascript(INJECT_JS, null);
     }
 
+    private void hidePanel() {
+        if (panel == null || panelParams == null) return;
+        panel.setVisibility(View.GONE);
+        panelParams.flags |= WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
+        windowManager.updateViewLayout(panel, panelParams);
+    }
+
+    private void showPanel() {
+        panelParams.flags &= ~(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE);
+        panel.setVisibility(View.VISIBLE);
+        windowManager.updateViewLayout(panel, panelParams);
+    }
+
     private void togglePanel() {
         if (panel == null) return;
         if (panel.getVisibility() == View.VISIBLE) {
-            panel.setVisibility(View.GONE);
+            hidePanel();
         } else {
-            panel.setVisibility(View.VISIBLE);
+            showPanel();
             if (panelWebView != null) {
                 if (!pageReady) panelWebView.loadUrl(RUNTIME_URL);
                 panelWebView.requestFocus();
@@ -278,11 +296,11 @@ public final class OverlayService extends Service {
             boolean bubbleWasVisible = bubble.getVisibility() == View.VISIBLE;
             boolean panelWasVisible = panel.getVisibility() == View.VISIBLE;
             bubble.setVisibility(View.INVISIBLE);
-            panel.setVisibility(View.INVISIBLE);
+            hidePanel();
             bubble.postDelayed(() -> {
                 if (bubble == null || panel == null) return;
                 if (bubbleWasVisible) bubble.setVisibility(View.VISIBLE);
-                if (panelWasVisible) panel.setVisibility(View.VISIBLE);
+                if (panelWasVisible) showPanel();
             }, Math.max(250, millis));
         });
     }

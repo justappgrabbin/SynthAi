@@ -1,3 +1,4 @@
+import { searchPlaces } from '../identity/place-search.mjs';
 import { createServer } from 'node:http';
 import { readFile } from 'node:fs/promises';
 import { extname, join } from 'node:path';
@@ -68,6 +69,9 @@ export async function startSynthiaFrontScreen({
   const server = createServer(async (request, response) => {
     try {
       const url = new URL(request.url, `http://${request.headers.host ?? 'localhost'}`);
+      if (request.method === 'GET' && url.pathname === '/api/places') {
+        return reply(response, 200, { ok: true, places: searchPlaces(url.searchParams.get('q') ?? '') });
+      }
       if (request.method === 'POST' && url.pathname === '/api/solo/talk/chat') {
         return reply(response, 200, await talkReply(await bodyOf(request)));
       }

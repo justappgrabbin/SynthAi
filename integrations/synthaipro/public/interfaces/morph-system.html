@@ -1,0 +1,3031 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Morph Self-Deploying System · 64×6×6×6×5 · MIR v3</title>
+<style>
+
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0a0a0f;color:#e0e0e0;min-height:100vh;overflow-x:hidden;}
+.header{background:rgba(14,14,20,0.97);border-bottom:1px solid rgba(100,100,150,0.2);padding:.75rem 1rem;position:sticky;top:0;z-index:100;}
+.hrow{display:flex;justify-content:space-between;align-items:center;max-width:1800px;margin:0 auto;}
+.htitle h1{font-size:1.1rem;font-weight:600;background:linear-gradient(135deg,#f5c518,#e8921a,#c084fc);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.htitle p{font-size:.7rem;color:#555;}
+.stats{display:flex;gap:1.5rem;font-family:monospace;font-size:.6rem;}
+.sv{font-size:.9rem;font-weight:700;color:#f5c518;}
+.sl{color:#555;text-transform:uppercase;}
+.wrap{max-width:1800px;margin:0 auto;padding:.75rem;display:grid;grid-template-columns:260px 1fr 300px;gap:.75rem;}
+.panel{background:rgba(14,14,22,0.85);border:1px solid rgba(100,100,150,0.2);border-radius:10px;padding:.75rem;}
+.panel h2{font-size:.7rem;color:#888;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.6rem;}
+.pos-list{display:flex;flex-direction:column;gap:.2rem;}
+.pos-item{padding:.4rem .6rem;background:rgba(30,30,45,0.5);border:1px solid rgba(100,100,150,0.15);border-radius:5px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;font-size:.7rem;transition:all .2s;}
+.pos-item:hover{border-color:#f5c518;}
+.pos-item.active{border-color:#f5c518;background:rgba(245,197,24,0.08);}
+.pos-item.overlap{border-color:rgba(192,132,252,0.3);background:rgba(192,132,252,0.06);}
+.pos-item.overlap.active{border-color:#c084fc;background:rgba(192,132,252,0.12);}
+.pname{font-weight:600;}
+.pmeta{color:#555;font-size:.6rem;}
+.viz{position:relative;height:480px;background:rgba(8,8,14,0.9);border-radius:7px;overflow:hidden;}
+#cv{width:100%;height:100%;}
+.nesting{font-family:monospace;font-size:.62rem;}
+.nl{background:rgba(18,18,28,0.8);border-radius:5px;padding:.4rem .6rem;margin-bottom:.4rem;border-left:3px solid;}
+.nl.node{border-left-color:#f5c518;}
+.nl.state{border-left-color:#c084fc;}
+.nl.color{border-left-color:#ff5959;}
+.nl.tone{border-left-color:#e8921a;}
+.nl.base{border-left-color:#10d474;}
+.nlh{display:flex;justify-content:space-between;font-weight:600;margin-bottom:.2rem;}
+.nlc{color:#666;}
+.bsgrid{display:grid;grid-template-columns:repeat(5,1fr);gap:.2rem;margin-top:.3rem;}
+.bsi{padding:.2rem;background:rgba(80,80,80,0.2);border-radius:3px;text-align:center;font-size:.55rem;color:#888;}
+.bsi.active{background:#10d474;color:#000;font-weight:700;}
+.olap{background:rgba(192,132,252,0.08);border:1px solid rgba(192,132,252,0.25);border-radius:5px;padding:.6rem;margin-top:.4rem;font-size:.62rem;}
+.om{display:flex;justify-content:space-between;margin-bottom:.2rem;}
+.owl{font-family:monospace;font-size:.6rem;margin-top:.4rem;border-top:1px solid rgba(100,100,150,0.15);padding-top:.4rem;}
+.owrow{display:flex;justify-content:space-between;margin-bottom:.15rem;}
+.owbar{height:4px;background:rgba(192,132,252,0.15);border-radius:2px;margin-top:.1rem;overflow:hidden;}
+.owfill{height:100%;background:#c084fc;border-radius:2px;transition:width .4s;}
+.ctrls{margin-top:.75rem;display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:.6rem;}
+.cg{background:rgba(18,18,28,0.7);border-radius:7px;padding:.75rem;}
+.cg h3{font-size:.65rem;color:#888;text-transform:uppercase;margin-bottom:.5rem;}
+.btn{padding:.4rem .8rem;border-radius:5px;border:none;cursor:pointer;font-weight:600;width:100%;margin-bottom:.3rem;font-size:.7rem;transition:all .2s;}
+.bp{background:linear-gradient(135deg,#f5c518,#e8921a);color:#000;}
+.bs{background:rgba(255,255,255,0.07);color:#ccc;border:1px solid rgba(255,255,255,0.15);}
+.bs:hover{background:rgba(255,255,255,0.12);}
+.log{background:#0a0a10;border:1px solid rgba(100,100,150,0.15);border-radius:5px;padding:.6rem;font-family:monospace;font-size:.6rem;max-height:110px;overflow-y:auto;}
+.le{margin-bottom:.3rem;padding:.3rem;border-left:2px solid #f5c518;background:rgba(245,197,24,0.04);}
+.le.em{border-left-color:#ff5959;background:rgba(255,89,89,0.04);}
+.le.ov{border-left-color:#c084fc;background:rgba(192,132,252,0.04);}
+.le.fb{border-left-color:#10d474;background:rgba(16,212,116,0.04);}
+.wheel-info{font-size:.62rem;color:#555;margin-top:.5rem;line-height:1.6;}
+
+/* Mobile Responsive */
+@media (max-width: 900px) {
+  .wrap {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+  .panel {
+    padding: 0.6rem;
+  }
+  .viz {
+    height: 320px;
+  }
+  .ctrls {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.4rem;
+  }
+  .cg {
+    padding: 0.5rem;
+  }
+  .btn {
+    padding: 0.5rem;
+    font-size: 0.75rem;
+  }
+  .stats {
+    gap: 0.8rem;
+    font-size: 0.55rem;
+  }
+  .sv {
+    font-size: 0.75rem;
+  }
+  .htitle h1 {
+    font-size: 0.9rem;
+  }
+  .htitle p {
+    font-size: 0.6rem;
+  }
+  .hrow {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  .pos-list {
+    max-height: 200px;
+    overflow-y: auto;
+  }
+  .nesting {
+    font-size: 0.7rem;
+  }
+  .nl {
+    padding: 0.3rem 0.5rem;
+  }
+  .log {
+    max-height: 80px;
+  }
+}
+
+@media (max-width: 480px) {
+  .ctrls {
+    grid-template-columns: 1fr;
+  }
+  .viz {
+    height: 280px;
+  }
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.4rem;
+  }
+}
+
+
+/* ===== MIR ENGINE PANEL ===== */
+.mir-panel {
+  position: fixed;
+  top: 60px;
+  right: 10px;
+  width: 380px;
+  max-height: calc(100vh - 80px);
+  background: rgba(10,10,18,0.97);
+  border: 1px solid rgba(100,100,150,0.3);
+  border-radius: 10px;
+  padding: 12px;
+  font-family: monospace;
+  font-size: 11px;
+  color: #e0e0e0;
+  overflow-y: auto;
+  z-index: 200;
+  transition: transform 0.3s;
+}
+.mir-panel.collapsed { transform: translateX(calc(100% + 20px)); }
+.mir-toggle {
+  position: fixed;
+  top: 70px;
+  right: 10px;
+  z-index: 201;
+  background: linear-gradient(135deg,#f5c518,#e8921a);
+  color: #000;
+  border: none;
+  border-radius: 5px;
+  padding: 6px 12px;
+  font-weight: 700;
+  cursor: pointer;
+  font-size: 11px;
+}
+.mir-section { margin-bottom: 10px; border-bottom: 1px solid rgba(100,100,150,0.2); padding-bottom: 8px; }
+.mir-section h3 { font-size: 10px; color: #f5c518; text-transform: uppercase; margin-bottom: 6px; }
+.mir-dropzone {
+  border: 2px dashed rgba(100,100,150,0.4);
+  border-radius: 5px;
+  padding: 15px;
+  text-align: center;
+  color: #888;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.mir-dropzone:hover { border-color: #f5c518; color: #f5c518; }
+.mir-dropzone.dragover { border-color: #c084fc; background: rgba(192,132,252,0.1); }
+.mir-file {
+  background: rgba(30,30,45,0.8);
+  border: 1px solid rgba(100,100,150,0.2);
+  border-radius: 4px;
+  padding: 6px 8px;
+  margin-bottom: 4px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.mir-file .fname { color: #10d474; }
+.mir-file .fmeta { color: #555; font-size: 9px; }
+.mir-btn {
+  background: rgba(100,100,150,0.2);
+  border: 1px solid rgba(100,100,150,0.3);
+  color: #ccc;
+  border-radius: 3px;
+  padding: 3px 8px;
+  cursor: pointer;
+  font-size: 9px;
+  margin-right: 3px;
+}
+.mir-btn:hover { background: rgba(245,197,24,0.2); border-color: #f5c518; }
+.mir-btn.active { background: rgba(16,212,116,0.3); border-color: #10d474; }
+.mir-result {
+  background: rgba(8,8,14,0.9);
+  border: 1px solid rgba(100,100,150,0.2);
+  border-radius: 4px;
+  padding: 8px;
+  margin-top: 6px;
+  font-size: 9px;
+  white-space: pre-wrap;
+  max-height: 150px;
+  overflow-y: auto;
+}
+.mir-result .exact { color: #10d474; }
+.mir-result .approx { color: #e8921a; }
+.mir-result .missing { color: #ff5959; }
+.mir-stats { display: flex; gap: 8px; font-size: 9px; margin-top: 4px; }
+.mir-stat { background: rgba(30,30,45,0.5); padding: 2px 6px; border-radius: 3px; }
+.mir-stat .sl { color: #555; }
+.mir-stat .sv { color: #f5c518; font-weight: 700; }
+.mir-log {
+  background: #0a0a10;
+  border: 1px solid rgba(100,100,150,0.15);
+  border-radius: 4px;
+  padding: 6px;
+  font-size: 9px;
+  max-height: 80px;
+  overflow-y: auto;
+  margin-top: 6px;
+}
+.mir-log .le { margin-bottom: 2px; padding: 2px; border-left: 2px solid #f5c518; padding-left: 4px; }
+.mir-log .le.em { border-left-color: #ff5959; }
+.mir-log .le.ok { border-left-color: #10d474; }
+
+/* Deploy panel */
+.deploy-panel {
+  position: fixed;
+  bottom: 10px;
+  right: 10px;
+  background: rgba(10,10,18,0.97);
+  border: 1px solid rgba(100,100,150,0.3);
+  border-radius: 10px;
+  padding: 12px;
+  font-family: monospace;
+  font-size: 11px;
+  color: #e0e0e0;
+  z-index: 200;
+  width: 380px;
+}
+.deploy-panel h3 { font-size: 10px; color: #c084fc; text-transform: uppercase; margin-bottom: 8px; }
+.deploy-status { display: flex; gap: 8px; margin-bottom: 8px; }
+.deploy-status .dot { width: 8px; height: 8px; border-radius: 50%; background: #333; }
+.deploy-status .dot.active { background: #10d474; box-shadow: 0 0 6px #10d474; }
+.deploy-status .dot.pending { background: #e8921a; box-shadow: 0 0 6px #e8921a; }
+.deploy-btn {
+  background: linear-gradient(135deg,#10d474,#06b6d4);
+  color: #000;
+  border: none;
+  border-radius: 5px;
+  padding: 8px 16px;
+  font-weight: 700;
+  cursor: pointer;
+  width: 100%;
+  font-size: 11px;
+}
+.deploy-btn:hover { filter: brightness(1.2); }
+</style>
+</head>
+<body>
+
+<!-- MIR ENGINE TOGGLE -->
+<button class="mir-toggle" onclick="toggleMirPanel()">🧠 MIR</button>
+
+<!-- MIR ENGINE PANEL -->
+<div class="mir-panel collapsed" id="mir-panel">
+  <div class="mir-section">
+    <h3>📁 File Upload</h3>
+    <div class="mir-dropzone" id="mir-dropzone" onclick="document.getElementById('mir-file-input').click()">
+      Drop files here or click to upload<br>
+      <span style="font-size:9px;color:#555;">TSX, TS, JS, JSX, PY, JSON, CSS, MD</span>
+    </div>
+    <input type="file" id="mir-file-input" multiple style="display:none" onchange="handleFileUpload(event)">
+    <div id="mir-files"></div>
+  </div>
+
+  <div class="mir-section">
+    <h3>🔄 Regenerate</h3>
+    <div id="mir-regen-controls" style="display:none">
+      <div style="margin-bottom:6px">
+        <button class="mir-btn" onclick="regenerateFile('exact')">Exact</button>
+        <button class="mir-btn" onclick="regenerateFile('equivalent')">Equivalent</button>
+        <button class="mir-btn" onclick="regenerateFile('morph_runtime')">Morph</button>
+        <button class="mir-btn" onclick="regenerateFile('improved')">Improved</button>
+      </div>
+      <div id="mir-result" class="mir-result" style="display:none"></div>
+      <div class="mir-stats" id="mir-stats" style="display:none">
+        <div class="mir-stat"><span class="sl">mode</span> <span class="sv" id="stat-mode">-</span></div>
+        <div class="mir-stat"><span class="sl">conf</span> <span class="sv" id="stat-conf">-</span></div>
+        <div class="mir-stat"><span class="sl">exact</span> <span class="sv" id="stat-exact">-</span></div>
+        <div class="mir-stat"><span class="sl">integrity</span> <span class="sv" id="stat-integ">-</span></div>
+        <div class="mir-stat"><span class="sl">chunks</span> <span class="sv" id="stat-chunks">-</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="mir-section">
+    <h3>🧠 Memory</h3>
+    <div class="mir-stats">
+      <div class="mir-stat"><span class="sl">nodes</span> <span class="sv" id="mem-nodes">0</span></div>
+      <div class="mir-stat"><span class="sl">artifacts</span> <span class="sv" id="mem-artifacts">0</span></div>
+      <div class="mir-stat"><span class="sl">chunks</span> <span class="sv" id="mem-chunks">0</span></div>
+    </div>
+  </div>
+
+  <div class="mir-section">
+    <h3>📜 Log</h3>
+    <div class="mir-log" id="mir-log"><div class="le ok">MIR v3 initialized</div></div>
+  </div>
+</div>
+
+<!-- DEPLOY PANEL -->
+<div class="deploy-panel" id="deploy-panel">
+  <h3>🚀 Self-Deploy Status</h3>
+  <div class="deploy-status">
+    <div class="dot active" id="dot-engine"></div><span>Engine</span>
+    <div class="dot active" id="dot-sub"></div><span>Substructor</span>
+    <div class="dot pending" id="dot-mem"></div><span>Memory</span>
+    <div class="dot pending" id="dot-net"></div><span>Network</span>
+  </div>
+  <button class="deploy-btn" onclick="selfDeploy()">📦 Export Self-Contained Package</button>
+  <div style="margin-top:8px;font-size:9px;color:#555">
+    This page IS the server. Save as .html and it runs anywhere.
+  </div>
+</div>
+
+
+<header class="header">
+<div class="hrow">
+  <div class="htitle">
+    <h1>64×6×6×6×5 · Complete Neural Taxonomy · Morphing GNN</h1>
+    <p>Knowing·Centering·Understanding·Sensing·Integration circuits mapped to LSM·ResNet·MLP·DBN·Hybrid · 20+ neural architectures · 9 layers</p>
+  </div>
+  <div class="stats">
+    <div><div class="sv" id="s-pos">Fu Xi</div><div class="sl">Layer</div></div>
+    <div><div class="sv" id="s-node">-</div><div class="sl">Node</div></div>
+    <div><div class="sv" id="s-em">0</div><div class="sl">Emergent</div></div>
+    <div><div class="sv" id="s-coh">0%</div><div class="sl">Coherence</div></div>
+    <div><div class="sv" id="s-layer">9</div><div class="sl">Layers</div></div>
+    <div><div class="sv" id="s-circuits">6</div><div class="sl">Circuits</div></div>
+  </div>
+</div>
+</header>
+
+<div class="wrap">
+  <div class="panel">
+    <h2>9 Positions (Movement-First)</h2>
+    <div class="pos-list" id="pos-list"></div>
+    <div class="wheel-info">
+      <div><strong>Complete 32-Channel Neural Taxonomy GNN v3</strong></div>
+      <div>Knowing→LSM(9) · Centering→ResNet(1) · Understanding→MLP(7) · Sensing→DBN(7) · Ego→HMM(5) · Integration→Hybrid(4)</div>
+      <div>Crossing: LSM+MLP=LiquidFF · LSM+DBN=LiquidBelief · ResNet+MLP=ResidualPerc · LSM+HMM=LiquidTrans · MLP+HMM=LogicTrans</div>
+      <div>Knowing: 3/60·61/24·43/23·28/38·20/57·55/39·12/22·2/14·8/1</div>
+      <div>Centering: 10/34 · Understanding: 63/4·17/62·18/58·16/48·9/52·15/5·31/7</div>
+      <div>Sensing: 42/53·30/41·35/36·64/47·11/56·46/29·33/13</div>
+      <div>Ego: 25/51·21/45·26/44·37/40·19/49</div>
+      <div>Integration: 34/57·10/20·10/57·10/34</div>
+      <div>5 I Ching Orderings + 4 Edges = 9 Layers · 6 Circuits · 32 Channels · 20+ Neural Architectures</div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>360° Wheel · Click a node</h2>
+    <div class="viz"><canvas id="cv"></canvas></div>
+  </div>
+
+  <div class="panel">
+    <h2>Node State: 64×6×6×6×5</h2>
+    <div class="nesting">
+      <div class="nl node"><div class="nlh"><span>Node</span><span id="n-id">-</span></div><div class="nlc">64 on wheel · 5.625° sector</div></div>
+      <div class="nl state"><div class="nlh"><span>Semantic State</span><span id="n-st">-</span></div><div class="nlc" id="n-st-desc">6 derived hexagram transformations</div></div>
+      <div class="nl state" style="border-left-color:#c084fc"><div class="nlh"><span>Active Edges</span><span id="n-edges">-</span></div><div class="nlc">Neural-typed edges</div></div>
+      <div class="nl state" style="border-left-color:#06b6d4"><div class="nlh"><span>Neural Type</span><span id="n-neural">-</span></div><div class="nlc">Architecture for this state</div></div>
+      <div class="nl state" style="border-left-color:#f59e0b"><div class="nlh"><span>Circuit</span><span id="n-circuit">-</span></div><div class="nlc">HD circuit family</div></div>
+      <div class="nl state" style="border-left-color:#10b981"><div class="nlh"><span>Base Arch</span><span id="n-basearch">-</span></div><div class="nlc">Underlying neural family</div></div>
+      <div class="nl state" style="border-left-color:#8b5cf6"><div class="nlh"><span>Gate Pair</span><span id="n-gatepair">-</span></div><div class="nlc">HD channel mapping</div></div>
+      <div class="nl state" style="border-left-color:#dc2626"><div class="nlh"><span>Ego State</span><span id="n-ego">-</span></div><div class="nlc">HMM state (if Ego circuit)</div></div>
+      <div class="nl state" style="border-left-color:#f97316; display:none" id="crossing-panel"><div class="nlh"><span>Crossing</span><span id="n-crossing">-</span></div><div class="nlc">Hybrid architecture</div></div>
+      <div class="nl color"><div class="nlh"><span>Color/Motivation</span><span id="n-cl">-</span></div><div class="nlc" id="n-trigram">Trigram context</div></div>
+      <div class="nl tone"><div class="nlh"><span>Tone</span><span id="n-tn">-</span></div><div class="nlc">6 tonal filters</div></div>
+      <div class="nl base"><div class="nlh"><span>5 Bases (inside tone)</span><span id="n-bs">-</span></div><div class="nlc">Active base in current tone</div>
+        <div class="bsgrid" id="bsgrid"></div>
+      </div>
+    </div>
+    <div class="olap" id="olap" style="display:none">
+      <div class="om"><span>Coherence</span><span id="ov-coh">0%</span></div>
+      <div class="om"><span>Tension</span><span id="ov-ten">0%</span></div>
+      <div class="om"><span>Chain compat</span><span id="ov-cha">0%</span></div>
+      <div class="om"><span>Active nodes</span><span id="ov-nod">0</span></div>
+      <div class="om"><span>Emergent op</span><span id="ov-eop" style="color:#ff5959">—</span></div>
+      <div class="owl">
+        <div style="font-weight:600;margin-bottom:.3rem;color:#c084fc;">Operator weights · affinity</div>
+        <div class="owrow"><span>Pairing</span><span id="ow-pair">0</span></div>
+        <div class="owbar"><div class="owfill" id="owb-pair" style="width:0%"></div></div>
+        <div class="owrow"><span>Nuclear</span><span id="ow-nucl">0</span></div>
+        <div class="owbar"><div class="owfill" id="owb-nucl" style="width:0%"></div></div>
+        <div class="owrow"><span>Palace</span><span id="ow-palc">0</span></div>
+        <div class="owbar"><div class="owfill" id="owb-palc" style="width:0%"></div></div>
+        <div class="owrow"><span>Opposition</span><span id="ow-oppo">0</span></div>
+        <div class="owbar"><div class="owfill" id="owb-oppo" style="width:0%"></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div style="max-width:1800px;margin:0 auto;padding:0 .75rem .75rem;">
+<div class="ctrls">
+  <div class="cg"><h3>Position</h3>
+    <button class="btn bp" onclick="S.cyclePosition()">Cycle Position</button>
+    <button class="btn bs" onclick="S.jumpToOverlap()">Jump to Overlap</button>
+  </div>
+  <div class="cg"><h3>Node State</h3>
+    <button class="btn bp" onclick="S.advanceState()">Advance State</button>
+    <button class="btn bs" onclick="S.shiftColor()">Shift Color</button>
+    <button class="btn bs" onclick="S.modulateTone()">Modulate Tone</button>
+    <button class="btn bs" onclick="S.cycleBase()">Cycle Base</button>
+  </div>
+  <div class="cg"><h3>Operators</h3>
+    <button class="btn bp" onclick="S.applyOpposition()">Opposition Pair</button>
+    <button class="btn bs" onclick="S.extractNuclear()">Nuclear Extract</button>
+    <button class="btn bs" onclick="S.groupPalace()">Palace Group</button>
+    <button class="btn bs" onclick="S.applyPairing()">Apply Pairing</button>
+  </div>
+  <div class="cg"><h3>Emergence</h3>
+    <button class="btn bp" onclick="S.computeEmergence()">Compute Emergence</button>
+    <button class="btn bs" onclick="S.triggerMessagePassing()">Message Pass</button>
+    <button class="btn bs" onclick="S.resolveTension()">Resolve Tension</button>
+    <button class="btn bs" onclick="S.clearEmergent()">Clear Emergent</button>
+    <button class="btn bs" onclick="S.exportImage()">Export Image</button>
+  </div>
+  <div class="cg"><h3>System Log</h3>
+    <div class="log" id="log"><div class="le">System v2 initialized</div></div>
+  </div>
+</div>
+</div>
+
+<script>
+const BASES = ['Survival','Environment','Freedom','Art','Love'];
+const TONES = ['Clairaudient','Keynote','Peripheral','Defined','Nervous','Receptive'];
+const COLORS = ['Fear','Hope','Desire','Need','Guilt','Separation'];
+// ============================================================
+// 5 I CHING ORDERING SYSTEMS (Base Layers)
+// ============================================================
+
+// Layer 0: FU XI (Binary / Shao Yong / Before Heaven)
+// Mathematical order: 000000 to 111111 (0-63)
+// Spatial, logical, trigram-based matrix
+const FUXI_SEQUENCE = [
+  0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,
+  16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,
+  32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,
+  48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63
+];
+
+// Layer 1: KING WEN (Temporal / Received / After Heaven)
+// Historical order: pairs of inverses, seasonal progression
+// 1-30: Upper canon (Heaven/Earth focus), 31-64: Lower canon (Human focus)
+const KINGWEN_SEQUENCE = [
+  0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63
+];
+
+// Layer 2: SHAO YONG SQUARE (Spatial / Matrix)
+// 8×8 grid: rows = lower trigram, columns = upper trigram
+// Binary sequence 000000 to 111111
+const SHAOYONG_SEQUENCE = [
+  0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63
+];
+
+// Layer 3: MAWANGDUI (Archaeological / Silk Manuscript)
+// 8 groups by upper trigram: Qian(0), Gen(1), Kan(2), Zhen(3), Kun(4), Dui(5), Li(6), Xun(7)
+const MAWANGDUI_SEQUENCE = [
+  0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63
+];
+
+// Layer 4: NUCLEAR (Hu Gua / Inner Core)
+// Only 16 possible nuclear hexagrams (from lines 2-3-4 and 3-4-5)
+// Mapped back to 64 positions with repetition
+const NUCLEAR_SEQUENCE = [
+  0,0,1,1,2,2,3,3,4,4,5,5,6,6,7,7,
+  8,8,9,9,10,10,11,11,12,12,13,13,14,14,15,15,
+  16,16,17,17,18,18,19,19,20,20,21,21,22,22,23,23,
+  24,24,25,25,26,26,27,27,28,28,29,29,30,30,31,31
+];
+
+// ============================================================
+// 9 LAYER ARCHITECTURE
+// ============================================================
+// The 5 ordering systems above are the PRIMARY layers
+// When they interact, they create 4 EDGE layers:
+//
+// Primary layers: FuXi(0), KingWen(1), ShaoYong(2), Mawangdui(3), Nuclear(4)
+// Edge layers:    FuXi+KingWen(5), KingWen+ShaoYong(6), ShaoYong+Mawangdui(7), Mawangdui+Nuclear(8)
+//
+// Total: 9 layers (5 primaries + 4 edges)
+// ============================================================
+
+const LAYERS = [
+  {id:'fuxi',        name:'Fu Xi',        type:'primary', ordering:FUXI_SEQUENCE,        description:'Binary / Spatial / Before Heaven'},
+  {id:'kingwen',     name:'King Wen',     type:'primary', ordering:KINGWEN_SEQUENCE,     description:'Temporal / Received / After Heaven'},
+  {id:'shaoyong',    name:'Shao Yong',    type:'primary', ordering:SHAOYONG_SEQUENCE,    description:'Spatial / Matrix / Magic Square'},
+  {id:'mawangdui',   name:'Mawangdui',    type:'primary', ordering:MAWANGDUI_SEQUENCE,   description:'Archaeological / Silk / Upper Trigram'},
+  {id:'nuclear',     name:'Nuclear',      type:'primary', ordering:NUCLEAR_SEQUENCE,       description:'Hu Gua / Inner Core / Extracted'},
+
+  // Edge layers (transitions between primaries)
+  {id:'fuxi_kingwen',      name:'Fu Xi → King Wen',      type:'edge', left:'fuxi',      right:'kingwen',    description:'Mathematical to Temporal'},
+  {id:'kingwen_shaoyong',  name:'King Wen → Shao Yong',  type:'edge', left:'kingwen',  right:'shaoyong',   description:'Temporal to Spatial'},
+  {id:'shaoyong_mawangdui',name:'Shao Yong → Mawangdui', type:'edge', left:'shaoyong', right:'mawangdui',  description:'Spatial to Archaeological'},
+  {id:'mawangdui_nuclear', name:'Mawangdui → Nuclear',   type:'edge', left:'mawangdui',right:'nuclear',    description:'Archaeological to Core'}
+];
+
+// Layer-specific color schemes
+const LAYER_COLORS = {
+  fuxi:        '#f5c518', // Gold — mathematical
+  kingwen:     '#10d474', // Green — temporal/natural
+  shaoyong:    '#c084fc', // Purple — spatial/mystical
+  mawangdui:   '#e8921a', // Orange — archaeological/earth
+  nuclear:     '#ff5959', // Red — core/energy
+
+  // Edge layers blend their parents
+  fuxi_kingwen:      '#8bc34a', // Gold+Green
+  kingwen_shaoyong:  '#00bcd4', // Green+Purple
+  shaoyong_mawangdui:'#ff9800', // Purple+Orange
+  mawangdui_nuclear: '#f44336'  // Orange+Red
+};
+
+// ============================================================
+// COMPLETE NEURAL TAXONOMY FROM HUMAN DESIGN CHANNELS
+// ============================================================
+// Each channel maps to a specific neural architecture
+// Circuits = base architecture families
+// Channels = specific instantiations
+// ============================================================
+
+const NEURAL_TYPES = {
+  // === KNOWING CIRCUIT = LSM base (pulsed reservoir) ===
+  NTM: {
+    name: 'Neural Turing Machine',
+    gatePair: '61/24',
+    circuit: 'Knowing',
+    baseArch: 'LSM',
+    mechanism: 'external-memory',
+    description: 'External memory access to mystery — reads/writes to memory matrix',
+    color: '#a855f7', // Purple
+    process: (input, memory) => {
+      const attention = Math.sigmoid(input * memory);
+      return input * attention + memory * (1 - attention);
+    }
+  },
+  DN: {
+    name: 'Deconvolutional Network',
+    gatePair: '43/23',
+    circuit: 'Knowing',
+    baseArch: 'LSM',
+    mechanism: 'unpacking',
+    description: 'Unpacking internal knowing — reverse convolution to expand insight',
+    color: '#7c3aed', // Violet
+    process: (input, kernel) => {
+      return input * (1 + kernel);
+    }
+  },
+  GAN: {
+    name: 'Generative Adversarial Network',
+    gatePair: '28/38',
+    circuit: 'Knowing',
+    baseArch: 'LSM',
+    mechanism: 'adversarial',
+    description: 'Productive opposition — generator vs discriminator tension',
+    color: '#c026d3', // Fuchsia
+    process: (input, opponent) => {
+      const generator = input * 0.6;
+      const discriminator = opponent * 0.4;
+      return (generator - discriminator);
+    }
+  },
+  ESN: {
+    name: 'Echo State Network',
+    gatePair: '20/57',
+    circuit: 'Knowing',
+    baseArch: 'LSM',
+    mechanism: 'reservoir',
+    description: 'Present-moment voice — fixed reservoir, trainable output',
+    color: '#0891b2', // Cyan
+    process: (input, reservoir) => {
+      return Math.tanh(input + reservoir * 0.5);
+    }
+  },
+  CN: {
+    name: 'Capsule Network',
+    gatePair: '55/39',
+    circuit: 'Knowing',
+    baseArch: 'LSM',
+    mechanism: 'pose-preserving',
+    description: 'Spirit maintaining orientation through provocation — 55 survives 39\'s distortion with structure intact',
+    color: '#ea580c', // Orange
+    process: (input, pose) => {
+      const distortion = 1 - Math.abs(pose - 0.5) * 2;
+      const preserved = input * (1 - distortion * 0.3);
+      return preserved;
+    }
+  },
+  VAE_Knowing: {
+    name: 'Variational Autoencoder',
+    gatePair: '12/22',
+    circuit: 'Knowing',
+    baseArch: 'LSM',
+    mechanism: 'latent-encoding',
+    description: 'Latent social/emotional encoding — probabilistic compression',
+    color: '#db2777', // Pink
+    process: (input, latent) => {
+      const mu = input * 0.5;
+      const sigma = Math.exp(latent * 0.5);
+      return mu + sigma * (Math.random() - 0.5);
+    }
+  },
+  RBF: {
+    name: 'Radial Basis Function',
+    gatePair: '2/14',
+    circuit: 'Knowing',
+    baseArch: 'LSM',
+    mechanism: 'directional-resonance',
+    description: 'Directional resonance — distance-based activation',
+    color: '#059669', // Emerald
+    process: (input, center) => {
+      const dist = Math.abs(input - center);
+      return Math.exp(-dist * dist);
+    }
+  },
+  AN: {
+    name: 'Attention Network',
+    gatePair: '8/1',
+    circuit: 'Knowing',
+    baseArch: 'LSM',
+    mechanism: 'attention',
+    description: 'Attention/inspiration — selective focus mechanism',
+    color: '#f59e0b', // Amber
+    process: (input, query) => {
+      const score = input * query;
+      return input * Math.sigmoid(score);
+    }
+  },
+  LSM: {
+    name: 'Liquid State Machine',
+    gatePair: '3/60',
+    circuit: 'Knowing',
+    baseArch: 'LSM',
+    mechanism: 'reservoir-pulse',
+    description: 'Unpredictable, pulsed energy format — mutation as liquid computation',
+    color: '#06b6d4', // Cyan
+    process: (input, reservoirState) => {
+      const pulse = Math.sin(input * Math.PI * 2) > 0 ? 1 : 0;
+      return input * pulse + reservoirState * 0.1;
+    }
+  },
+
+  // === CENTERING CIRCUIT = ResNet base (identity preservation) ===
+  DRN_Centering: {
+    name: 'Deep Residual Network',
+    gatePair: '10/34',
+    circuit: 'Centering',
+    baseArch: 'ResNet',
+    mechanism: 'skip-connection',
+    description: 'Identity persists through action — 10 (behavior) + 34 (power) = F(x)+x. Skip connections preserve self across transformation.',
+    color: '#dc2626', // Red
+    process: (input, residual) => {
+      const transformed = Math.tanh(input * 1.2);
+      const identity = input * 0.8;
+      return transformed + identity;
+    }
+  },
+  DAE: {
+    name: 'Denoising Autoencoder',
+    gatePair: '25/51',
+    circuit: 'Ego',
+    baseArch: 'HMM',
+    mechanism: 'corruption-reconstruction',
+    description: 'Innocence reconstructed through shock — 51 corrupts, 25 forces reconstruction of essential signal. Initiation IS denoising.',
+    color: '#7f1d1d', // Dark red
+    process: (input, noise) => {
+      const corruptionStrength = Math.abs(noise) || 0.3;
+      const corrupted = input + (Math.random() - 0.5) * corruptionStrength;
+      const essential = corrupted > 0.5 ? corrupted : 0;
+      return essential;
+    }
+  },
+
+  // === UNDERSTANDING CIRCUIT = MLP base (feedforward logic) ===
+  DFF: {
+    name: 'Deep Feed Forward',
+    gatePair: '63/4',
+    circuit: 'Understanding',
+    baseArch: 'MLP',
+    mechanism: 'feedforward',
+    description: 'Clean logical processing — doubt → answer through layered transformation',
+    color: '#06b6d4', // Cyan
+    process: (input, weights) => {
+      let signal = input;
+      weights.forEach(w => { signal = Math.tanh(signal * w); });
+      return signal;
+    }
+  },
+  RBM: {
+    name: 'Restricted Boltzmann Machine',
+    gatePair: '17/62',
+    circuit: 'Understanding',
+    baseArch: 'MLP',
+    mechanism: 'bidirectional',
+    description: 'Opinion ↔ Facts constrain each other bidirectionally',
+    color: '#8b5cf6', // Violet
+    process: (visible, hidden) => {
+      const v2h = Math.sigmoid(visible * hidden);
+      const h2v = Math.sigmoid(hidden * visible);
+      return (v2h + h2v) / 2;
+    }
+  },
+  Hopfield: {
+    name: 'Hopfield Network',
+    gatePair: '18/58',
+    circuit: 'Understanding',
+    baseArch: 'MLP',
+    mechanism: 'attractor',
+    description: 'Error correction toward ideal pattern — stores and recovers ideal states',
+    color: '#10b981', // Emerald
+    process: (input, pattern) => {
+      const distance = Math.abs(input - pattern);
+      return pattern + (input - pattern) * Math.exp(-distance);
+    }
+  },
+  SAE: {
+    name: 'Sparse Autoencoder',
+    gatePair: '16/48',
+    circuit: 'Understanding',
+    baseArch: 'MLP',
+    mechanism: 'compression',
+    description: 'Compress deep knowledge into sparse efficient representations',
+    color: '#f59e0b', // Amber
+    process: (input, sparsity) => {
+      const threshold = sparsity || 0.5;
+      return input > threshold ? input : 0;
+    }
+  },
+  ELM: {
+    name: 'Extreme Learning Machine',
+    gatePair: '9/52',
+    circuit: 'Understanding',
+    baseArch: 'MLP',
+    mechanism: 'fixed',
+    description: 'Fixed random projection — stillness as computational strategy',
+    color: '#64748b', // Slate
+    process: (input, randomWeights) => {
+      return input * (randomWeights || 0.5);
+    }
+  },
+  Kohonen: {
+    name: 'Kohonen Network',
+    gatePair: '15/5',
+    circuit: 'Understanding',
+    baseArch: 'MLP',
+    mechanism: 'self-organizing',
+    description: 'Self-organizing map — finds natural rhythm and clusters in data',
+    color: '#ec4899', // Pink
+    process: (input, neighborhood) => {
+      const bmu = neighborhood.reduce((best, n) =>
+        Math.abs(n - input) < Math.abs(best - input) ? n : best, neighborhood[0]);
+      return bmu;
+    }
+  },
+  DCN: {
+    name: 'Deep Convolutional Network',
+    gatePair: '31/7',
+    circuit: 'Understanding',
+    baseArch: 'MLP',
+    mechanism: 'hierarchical',
+    description: 'Hierarchical pattern recognition — local features → global structure',
+    color: '#84cc16', // Lime
+    process: (input, filters) => {
+      const local = input * (filters[0] || 0.3);
+      const global = input * (filters[1] || 0.7);
+      return (local + global) / 2;
+    }
+  },
+
+  // === SENSING CIRCUIT = DBN base (generative experience) ===
+  DBN: {
+    name: 'Deep Belief Network',
+    gatePair: '42/53',
+    circuit: 'Sensing',
+    baseArch: 'DBN',
+    mechanism: 'generative',
+    description: 'Maturation through stacked RBMs — generative model of sensory data',
+    color: '#d946ef', // Fuchsia
+    process: (input, layers) => {
+      let signal = input;
+      layers.forEach(layer => { signal = Math.sigmoid(signal * layer); });
+      return signal;
+    }
+  },
+  RBM_Sensing: {
+    name: 'Restricted Boltzmann Machine',
+    gatePair: '30/41',
+    circuit: 'Sensing',
+    baseArch: 'DBN',
+    mechanism: 'bidirectional',
+    description: 'Desire/feeling hidden layer alignment — recognition through RBM energy',
+    color: '#8b5cf6', // Violet
+    process: (visible, hidden) => {
+      const v2h = Math.sigmoid(visible * hidden);
+      const h2v = Math.sigmoid(hidden * visible);
+      return (v2h + h2v) / 2;
+    }
+  },
+  VAE_Sensing: {
+    name: 'Variational Autoencoder',
+    gatePair: '35/36',
+    circuit: 'Sensing',
+    baseArch: 'DBN',
+    mechanism: 'latent-encoding',
+    description: 'Experience → latent → wisdom — probabilistic compression of transitory moments',
+    color: '#db2777', // Pink
+    process: (input, latent) => {
+      const mu = input * 0.5;
+      const sigma = Math.exp(latent * 0.5);
+      return mu + sigma * (Math.random() - 0.5);
+    }
+  },
+  DNC: {
+    name: 'Differentiable Neural Computer',
+    gatePair: '64/47',
+    circuit: 'Sensing',
+    baseArch: 'DBN',
+    mechanism: 'external-memory',
+    description: 'Chaotic memory → coherent meaning — differentiable memory access for abstraction',
+    color: '#a855f7', // Purple
+    process: (input, memory) => {
+      const attention = Math.sigmoid(input * memory);
+      return input * attention + memory * (1 - attention);
+    }
+  },
+  GAN_Sensing: {
+    name: 'Generative Adversarial Network',
+    gatePair: '11/56',
+    circuit: 'Sensing',
+    baseArch: 'DBN',
+    mechanism: 'adversarial',
+    description: 'Idea generator vs story discriminator — curiosity as creative opposition',
+    color: '#c026d3', // Fuchsia
+    process: (input, opponent) => {
+      const generator = input * 0.6;
+      const discriminator = opponent * 0.4;
+      return (generator - discriminator);
+    }
+  },
+  DCIGN: {
+    name: 'Deep Convolutional Inverse Graphics Network',
+    gatePair: '46/29',
+    circuit: 'Sensing',
+    baseArch: 'DBN',
+    mechanism: 'inverse-graphics',
+    description: 'Surface commitment → hidden structure — inverse graphics for discovery',
+    color: '#84cc16', // Lime
+    process: (input, sceneParams) => {
+      const rendered = input * (sceneParams || 0.5);
+      return rendered;
+    }
+  },
+  NTM_Sensing: {
+    name: 'Neural Turing Machine',
+    gatePair: '33/13',
+    circuit: 'Sensing',
+    baseArch: 'DBN',
+    mechanism: 'external-memory',
+    description: 'Memory keeper / timed release — prodigal memory with temporal gating',
+    color: '#a855f7', // Purple
+    process: (input, memory) => {
+      const attention = Math.sigmoid(input * memory);
+      return input * attention + memory * (1 - attention);
+    }
+  },
+
+  // === EGO CIRCUIT = HMM base (transactional state machine) ===
+  BinaryHMM: {
+    name: 'Binary Hidden Markov Model',
+    gatePair: '25/51',
+    circuit: 'Ego',
+    baseArch: 'HMM',
+    mechanism: 'binary-state',
+    description: 'Innocence reconstructed through shock — Life/Death binary state transitions. 51 (shock) forces state flip, 25 (innocence) is the absorbing state.',
+    color: '#dc2626', // Crimson
+    process: (input, state) => {
+      // Binary HMM: two states (0=innocence, 1=shock)
+      const transitionProb = Math.sigmoid(input);
+      const newState = Math.random() < transitionProb ? 1 : 0;
+      // Gating: only pass signal if in "life" state
+      return newState === 0 ? input : input * 0.1;
+    }
+  },
+  ContinuousHMM: {
+    name: 'Continuous Hidden Markov Model',
+    gatePair: '21/45',
+    circuit: 'Ego',
+    baseArch: 'HMM',
+    mechanism: 'continuous-emission',
+    description: 'Running ledger of trust and resources — continuous state space for transactional memory',
+    color: '#e11d48', // Rose
+    process: (input, ledger) => {
+      // Continuous HMM: Gaussian emission from current state
+      const mu = ledger || 0.5;
+      const sigma = 0.1;
+      const emission = mu + sigma * (Math.random() - 0.5);
+      // Update ledger with new transaction
+      return emission * 0.8 + input * 0.2;
+    }
+  },
+  SwitchingHMM: {
+    name: 'Switching Hidden Markov Model',
+    gatePair: '26/44',
+    circuit: 'Ego',
+    baseArch: 'HMM',
+    mechanism: 'regime-switching',
+    description: 'Pattern of inconsistency/deception detection — switches between honest and deceptive regimes',
+    color: '#be123c', // Crimson dark
+    process: (input, regime) => {
+      // Switching HMM: two regimes (0=honest, 1=deceptive)
+      const currentRegime = regime || 0;
+      const switchProb = Math.sigmoid(input * 2 - 1);
+      const newRegime = Math.random() < switchProb ? 1 - currentRegime : currentRegime;
+      // Different emission in each regime
+      return newRegime === 0 ? input : input * (0.5 + Math.random() * 0.5);
+    }
+  },
+  FactorialHMM: {
+    name: 'Factorial Hidden Markov Model',
+    gatePair: '37/40',
+    circuit: 'Ego',
+    baseArch: 'HMM',
+    mechanism: 'factorial-state',
+    description: 'Multiple simultaneous loyalties — factorial state space for community dynamics',
+    color: '#9f1239', // Crimson darker
+    process: (input, loyalties) => {
+      // Factorial HMM: multiple independent state chains
+      const chains = loyalties || [0.5, 0.5, 0.5];
+      const newChains = chains.map(c => {
+        const transition = Math.sigmoid(input * c);
+        return Math.random() < transition ? 1 - c : c;
+      });
+      // Combined emission from all chains
+      return newChains.reduce((sum, c) => sum + c, 0) / newChains.length;
+    }
+  },
+  InfiniteHMM: {
+    name: 'Infinite Hidden Markov Model',
+    gatePair: '19/49',
+    circuit: 'Ego',
+    baseArch: 'HMM',
+    mechanism: 'infinite-state',
+    description: 'Cumulative principle violations/acceptance — infinite state space for principle tracking',
+    color: '#881337', // Crimson darkest
+    process: (input, stateCount) => {
+      // Infinite HMM: Chinese Restaurant Process-like
+      const alpha = 0.5; // Concentration parameter
+      const n = stateCount || 1;
+      const newStateProb = alpha / (n + alpha);
+      const newState = Math.random() < newStateProb ? n + 1 : Math.floor(Math.random() * n) + 1;
+      // Accumulate violations
+      return input + (newState * 0.01);
+    }
+  },
+
+  // === INTEGRATION CIRCUIT = Hybrid base (crossing bridges) ===
+  ActorCritic: {
+    name: 'Actor-Critic with Reservoir',
+    gatePair: '34/57',
+    circuit: 'Integration',
+    baseArch: 'Hybrid',
+    mechanism: 'policy-evaluation',
+    description: 'Sensing ↔ Knowing bridge — power + intuition = acting on instinct',
+    color: '#f97316', // Orange
+    process: (state, value) => {
+      const policy = Math.sigmoid(state);
+      const advantage = value - 0.5;
+      return policy * advantage;
+    }
+  },
+  PolicyNet: {
+    name: 'Policy Network with Feedback',
+    gatePair: '10/20',
+    circuit: 'Integration',
+    baseArch: 'Hybrid',
+    mechanism: 'immediate-feedback',
+    description: 'Centering ↔ Knowing bridge — behavior + now = awakening through expression',
+    color: '#14b8a6', // Teal
+    process: (action, feedback) => {
+      return action + feedback * 0.3;
+    }
+  },
+  InstinctNet: {
+    name: 'Instinctive Action Network',
+    gatePair: '10/57',
+    circuit: 'Integration',
+    baseArch: 'Hybrid',
+    mechanism: 'intuitive-action',
+    description: 'Centering ↔ Knowing bridge — behavior + intuition = instinctive response',
+    color: '#06b6d4', // Cyan
+    process: (input, intuition) => {
+      return input * (1 + intuition);
+    }
+  },
+  DRN_Integration: {
+    name: 'Deep Residual Network',
+    gatePair: '10/34',
+    circuit: 'Integration',
+    baseArch: 'Hybrid',
+    mechanism: 'skip-connection',
+    description: 'Identity through persistent action — Integration bridge with Centering power',
+    color: '#dc2626', // Red
+    process: (input, residual) => {
+      const transformed = Math.tanh(input * 1.2);
+      const identity = input * 0.8;
+      return transformed + identity;
+    }
+  }
+};
+// Map states to neural architecture types (which channel/gate pair)
+const STATE_NEURAL_MAP = {
+  'primary':      'DFF',      // 63/4 — clean processing
+  'nuclear':      'Hopfield', // 18/58 — attractor/core
+  'opposite':     'RBM',      // 17/62 — bidirectional constraint
+  'reversed':     'SAE',      // 16/48 — compressed alternative
+  'line-1-change':'ELM',      // 9/52 — fixed initiating
+  'line-6-change':'DCN',      // 31/7 — hierarchical culminating
+  // Ego states (for nodes in Ego circuit positions)
+  'ego-binary':   'BinaryHMM',    // 25/51 — life/death states
+  'ego-continuous':'ContinuousHMM', // 21/45 — trust ledger
+  'ego-switching':'SwitchingHMM',  // 26/44 — deception detection
+  'ego-factorial':'FactorialHMM',  // 37/40 — multiple loyalties
+  'ego-infinite': 'InfiniteHMM'    // 19/49 — principle accumulation
+};
+
+// Circuit base architectures
+const CIRCUIT_BASES = {
+  'Knowing': 'LSM',
+  'Centering': 'ResNet',
+  'Understanding': 'MLP',
+  'Sensing': 'DBN',
+  'Ego': 'HMM',
+  'Integration': 'Hybrid'
+};
+
+// ============================================================
+// CROSSING RULES: How circuits hybridize
+// ============================================================
+// When two different base architectures interact, they create
+// emergent hybrid forms with unique properties
+// ============================================================
+const CROSSING_RULES = {
+  // LSM + MLP = Liquid Feedforward
+  'LSM_MLP': {
+    name: 'Liquid Feedforward',
+    description: 'Pulsed reservoir + feedforward = temporal pattern classification',
+    emergentProperty: 'Time-aware logic processing',
+    example: '20/57 (ESN) + 63/4 (DFF) = Present-moment logic with temporal depth'
+  },
+  'LSM_DBN': {
+    name: 'Liquid Belief',
+    description: 'Pulsed reservoir + generative = sensory prediction with temporal context',
+    emergentProperty: 'Anticipatory sensing',
+    example: '20/57 (ESN) + 42/53 (DBN) = Predictive sensory model'
+  },
+  'ResNet_MLP': {
+    name: 'Residual Perceptron',
+    description: 'Skip connections + feedforward = robust logical identity',
+    emergentProperty: 'Self-preserving reasoning',
+    example: '10/34 (DRN) + 63/4 (DFF) = Identity-preserving logic'
+  },
+  'ResNet_DBN': {
+    name: 'Residual Belief',
+    description: 'Skip connections + generative = self-preserving sensory model',
+    emergentProperty: 'Identity-aware sensing',
+    example: '10/34 (DRN) + 42/53 (DBN) = Self-aware sensory processing'
+  },
+  'MLP_DBN': {
+    name: 'Perceptual Belief',
+    description: 'Feedforward + generative = logical sensory abstraction',
+    emergentProperty: 'Reasoned perception',
+    example: '63/4 (DFF) + 42/53 (DBN) = Logical sensory understanding'
+  },
+  'LSM_ResNet': {
+    name: 'Liquid Residual',
+    description: 'Reservoir + skip connections = temporal identity preservation',
+    emergentProperty: 'Persistent presence',
+    example: '20/57 (ESN) + 10/34 (DRN) = Now-identity (Integration Channel 10/20!)'
+  },
+  // === HMM CROSSINGS (Ego interactions) ===
+  'LSM_HMM': {
+    name: 'Liquid Transaction',
+    description: 'Reservoir + hidden states = transactional intuition with temporal memory',
+    emergentProperty: 'Intuitive negotiation',
+    example: '20/57 (ESN) + 21/45 (HMM) = Timing-aware resource exchange'
+  },
+  'MLP_HMM': {
+    name: 'Logical Transaction',
+    description: 'Feedforward + hidden states = structured transactional logic',
+    emergentProperty: 'Contract reasoning',
+    example: '63/4 (DFF) + 37/40 (HMM) = Principle-based community logic'
+  },
+  'DBN_HMM': {
+    name: 'Sensory Transaction',
+    description: 'Generative + hidden states = experiential transactional memory',
+    emergentProperty: 'Experience-based trust',
+    example: '42/53 (DBN) + 25/51 (HMM) = Maturation through initiation'
+  },
+  'ResNet_HMM': {
+    name: 'Persistent Transaction',
+    description: 'Skip connections + hidden states = identity-preserving contracts',
+    emergentProperty: 'Reliable self in commerce',
+    example: '10/34 (DRN) + 21/45 (HMM) = Identity through resource management'
+  }
+};
+
+// Integration Channels are the crossing points
+const INTEGRATION_HYBRIDS = {
+  // 34/57: Power (Spleen/Sacral bridge)
+  '34_57': {
+    name: 'Actor-Critic with Reservoir',
+    crossing: 'ResNet_LSM',
+    hybrid: 'Liquid Residual',
+    description: 'Sensing↔Knowing bridge — power + intuition = acting on instinct'
+  },
+  // 10/20: Awakening (G-Center/Throat bridge)
+  '10_20': {
+    name: 'Policy Network with Feedback',
+    crossing: 'ResNet_LSM',
+    hybrid: 'Liquid Residual',
+    description: 'Centering↔Knowing bridge — behavior + now = awakening through expression'
+  },
+  // 10/57: Form (G-Center/Spleen bridge)
+  '10_57': {
+    name: 'Instinctive Action Network',
+    crossing: 'ResNet_LSM',
+    hybrid: 'Liquid Residual',
+    description: 'Centering↔Knowing bridge — behavior + intuition = instinctive response'
+  },
+  // 10/34: Action/Charisma (G-Center/Sacral bridge)
+  '10_34': {
+    name: 'Deep Residual Network',
+    crossing: 'ResNet_ResNet',
+    hybrid: 'Residual Residual',
+    description: 'Integration↔Centering bridge — identity through persistent action'
+  }
+};
+
+// Math helpers
+Math.sigmoid = x => 1 / (1 + Math.exp(-x));
+Math.tanh = x => (Math.exp(x) - Math.exp(-x)) / (Math.exp(x) + Math.exp(-x));
+
+// Map states to neural architecture types
+
+
+// Math helpers
+Math.sigmoid = x => 1 / (1 + Math.exp(-x));
+
+const CHAINS = {
+  fuxi:        ['Binary','Logic','Space','Structure','Pattern','Order'],
+  kingwen:     ['Time','Season','Change','Cycle','History','Fate'],
+  shaoyong:    ['Matrix','Grid','Square','Diagonal','Symmetry','Magic'],
+  mawangdui:   ['Silk','Earth','Dig','Find','Ancient','Truth'],
+  nuclear:     ['Core','Heart','Inside','Hidden','Seed','Root'],
+
+  // Edge chains are unions
+  fuxi_kingwen:       ['Math-Time','Space-Cycle','Logic-Change'],
+  kingwen_shaoyong:   ['Time-Matrix','Season-Grid','Cycle-Square'],
+  shaoyong_mawangdui: ['Matrix-Earth','Grid-Dig','Square-Ancient'],
+  mawangdui_nuclear:  ['Earth-Core','Dig-Heart','Ancient-Seed']
+};
+
+const CHAIN_COMPAT = {
+  'fuxi_kingwen':0.82,
+  'kingwen_shaoyong':0.71,
+  'shaoyong_mawangdui':0.75,
+  'mawangdui_nuclear':0.65
+};
+
+// Per-overlap operator affinity weights — which operators matter most in each transition
+// Values sum to 1.0 per overlap; used to weight opSum in emergence scoring
+const OVERLAP_OP_AFFINITY = {
+  'fuxi_kingwen':       {pairing:0.15, nuclear:0.35, palace:0.20, opposition:0.30},
+  'kingwen_shaoyong':   {pairing:0.20, nuclear:0.30, palace:0.25, opposition:0.25},
+  'shaoyong_mawangdui': {pairing:0.35, nuclear:0.15, palace:0.35, opposition:0.15},
+  'mawangdui_nuclear':  {pairing:0.40, nuclear:0.10, palace:0.30, opposition:0.20}
+};
+
+const POSITIONS = LAYERS.map(l => ({
+  id: l.id,
+  type: l.type,
+  name: l.name,
+  description: l.description,
+  chain: CHAINS[l.id] || [],
+  ordering: l.ordering || null,
+  left: l.left || null,
+  right: l.right || null
+}));
+
+function buildPositionMembership() {
+  const map = {};
+
+  // Pass 1: primaries — each layer gets its full ordering
+  POSITIONS.forEach(p => {
+    if(p.type === 'primary' && p.ordering) {
+      map[p.id] = [...p.ordering]; // Copy the ordering array
+    }
+  });
+
+  // Pass 2: edges — union of adjacent primaries
+  POSITIONS.forEach(p => {
+    if(p.type === 'edge') {
+      const left = map[p.left] || [];
+      const right = map[p.right] || [];
+      map[p.id] = [...new Set([...left, ...right])];
+    }
+  });
+
+  return map;
+}
+
+class OverlapSpace {
+  constructor(id,left,right) {
+    this.id=id; this.left=left; this.right=right;
+    this.coherence=0; this.tension=0; this.chainCompatibility=CHAIN_COMPAT[id]||0;
+    this.operatorWeights={pairing:0,nuclear:0,palace:0,opposition:0};
+    this.opAffinity=OVERLAP_OP_AFFINITY[id]||{pairing:0.25,nuclear:0.25,palace:0.25,opposition:0.25};
+    this.emergentOperator=null;
+    this.activeNodes=[];
+  }
+  // Affinity-weighted op score — each operator weighted by how much it matters in THIS overlap
+  weightedOpScore() {
+    const w=this.operatorWeights,a=this.opAffinity;
+    return w.pairing*a.pairing + w.nuclear*a.nuclear + w.palace*a.palace + w.opposition*a.opposition;
+  }
+  update(leftNodes,rightNodes) {
+    const shared=leftNodes.filter(ln=>rightNodes.some(rn=>rn.id===ln.id));
+    this.coherence=shared.length/Math.max(leftNodes.length,rightNodes.length,1);
+    let tsum=0;
+    leftNodes.forEach(ln=>{
+      const rn=rightNodes.find(n=>n.id===ln.id);
+      if(rn) tsum+=Math.abs(ln.activation-rn.activation);
+    });
+    this.tension=tsum/Math.max(leftNodes.length,1);
+    this.activeNodes=[...new Set([...leftNodes,...rightNodes])];
+    return {coherence:this.coherence,tension:this.tension};
+  }
+  bumpWeight(op,delta=0.2){
+    this.operatorWeights[op]=Math.min(1,(this.operatorWeights[op]||0)+delta);
+  }
+}
+
+class NestedNode {
+  constructor(id) {
+    this.id=id;
+    this.wheelPosition=(id/64)*360;
+    this.activation=0;
+    this.positionMembership=[];
+
+    // CRITICAL: Initialize edge storage for morphing GNN
+    this.activeEdges = [];
+    this.edgeWeights = new Map();
+
+    // Initialize 6 states with derived transformations
+    const transformations = [
+      'primary',
+      'nuclear',
+      'opposite',
+      'reversed',
+      'line-1-change',
+      'line-6-change'
+    ];
+
+    this.states=Array.from({length:6},(_,si)=>({
+      index:si, active:si===0,
+      transformation: transformations[si],
+      derivedId: this._computeDerivedId(si, transformations[si]),
+      colors:COLORS.map((c,ci)=>({
+        name:c, active:ci===0,
+        tones:TONES.map((t,ti)=>({
+          name:t, active:ti===0,
+          bases:BASES.map((b,bi)=>({name:b,active:bi===0}))
+        }))
+      }))
+    }));
+    this.currentState=0; this.currentColor=0; this.currentTone=0; this.currentBase=0;
+    // Ensure bases are synced on creation
+    this._syncBases();
+  }
+
+  _computeDerivedId(stateIdx, transformation) {
+    switch(transformation) {
+      case 'primary': return this.id;
+      case 'nuclear': return this.extractNuclear();
+      case 'opposite': return 63 - this.id;
+      case 'reversed':
+        return Number(
+          this.id.toString(2).padStart(6, '0').split('').reverse().join(''),
+          2
+        );
+      case 'line-1-change': return this.id ^ 1;  // Flip line 1 (bit 0)
+      case 'line-6-change': return this.id ^ 32; // Flip line 6 (bit 5)
+      default: return this.id;
+    }
+  }
+
+  _remorphForLayer(layerId, ordering) {
+    if (!ordering) return;
+    const idx = ordering.indexOf(this.id);
+    if (idx >= 0) this.wheelPosition = (idx / 64) * 360;
+  }
+
+  _syncBases() {
+    const state = this.states[this.currentState];
+    if(!state) return;
+    const color = state.colors[this.currentColor];
+    if(!color) return;
+    const tone = color.tones[this.currentTone];
+    if(!tone || !tone.bases) return;
+    tone.bases.forEach((b,i)=>{ b.active=(i===this.currentBase); });
+  }
+
+  getCurrentPath() {
+    return {
+      node:this.id,
+      state:this.currentState,
+      color:this.currentColor,
+      tone:this.currentTone,
+      base:this.currentBase,
+      colorName:COLORS[this.currentColor] || 'Unknown',
+      toneName:TONES[this.currentTone] || 'Unknown',
+      baseName:BASES[this.currentBase] || 'Unknown'
+    };
+  }
+  advanceState() { this.currentState=(this.currentState+1)%6; this._syncBases(); this.activation=Math.min(1,this.activation+0.2); return this.getCurrentPath(); }
+  safeAdvanceState() {
+    this.currentState=(this.currentState+1)%6;
+    this._syncBases();
+    this.activation=Math.min(1,this.activation+0.2);
+    const path = this.getCurrentPath();
+    return path;
+  }
+  shiftColor()   { this.currentColor=(this.currentColor+1)%6;  this._syncBases(); return this.getCurrentPath(); }
+  modulateTone() { this.currentTone=(this.currentTone+1)%6;    this._syncBases(); return this.getCurrentPath(); }
+  cycleBase()    { this.currentBase=(this.currentBase+1)%5;    this._syncBases(); return this.getCurrentPath(); }
+  extractNuclear() {
+    const l2=(this.id>>1)&1,l3=(this.id>>2)&1,l4=(this.id>>3)&1,l5=(this.id>>4)&1;
+    return l2|(l3<<1)|(l4<<2)|(l3<<3)|(l4<<4)|(l5<<5);
+  }
+}
+
+class System {
+  constructor() {
+    this.nodes=Array.from({length:64},(_,i)=>new NestedNode(i));
+    this.positions=POSITIONS;
+    this.activePosition=0;
+    this.activeLayer = 'fuxi'; // Current ordering system
+    this.layerHistory = ['fuxi']; // Track layer transitions
+    this.selectedNode=null;
+    this.emergentStructures=[];
+
+    this.membershipMap=buildPositionMembership();
+    this.nodes.forEach(n=>{
+      POSITIONS.forEach(p=>{
+        if(this.membershipMap[p.id].includes(n.id)) n.positionMembership.push(p.id);
+      });
+    });
+
+    // Initialize the morphing GNN edge structure
+    // Edges are created for ALL states but only ACTIVE ones are used
+    this._initializeMorphingEdges();
+
+    this.overlaps={
+      'fuxi_kingwen':new OverlapSpace('fuxi_kingwen','fuxi','kingwen'),
+      'kingwen_shaoyong':new OverlapSpace('kingwen_shaoyong','kingwen','shaoyong'),
+      'shaoyong_mawangdui':new OverlapSpace('shaoyong_mawangdui','shaoyong','mawangdui'),
+      'mawangdui_nuclear':new OverlapSpace('mawangdui_nuclear','mawangdui','nuclear')
+    };
+
+    this.canvas=document.getElementById('cv');
+    this.ctx=this.canvas.getContext('2d');
+    this.resize();
+    window.addEventListener('resize',()=>this.resize());
+    this.buildUI();
+    this.buildBasesGrid();
+    this.loop();
+    this.log('v2.1: dual-truth membership · pairing op · affinity-weighted emergence · compat surfaced');
+  }
+
+  resize(){const c=this.canvas.parentElement; this.canvas.width=c.clientWidth; this.canvas.height=c.clientHeight;}
+
+  // FIX: union of static map AND dynamic positionMembership — both truth systems honored
+  getNodesInPosition(posId) {
+    const staticIds=new Set(this.membershipMap[posId]||[]);
+    return this.nodes.filter(n=>{
+      const inPosition = staticIds.has(n.id) || n.positionMembership.includes(posId);
+      return inPosition && n.activation > 0.05;
+    });
+  }
+
+  tagNodeToActivePosition(node) {
+    const posId=this.positions[this.activePosition].id;
+    if(!node.positionMembership.includes(posId)) {
+      node.positionMembership.push(posId);
+    }
+    // Also update membershipMap so getNodesInPosition stays consistent
+    if(!this.membershipMap[posId]) this.membershipMap[posId]=[];
+    if(!this.membershipMap[posId].includes(node.id)) {
+      this.membershipMap[posId].push(node.id);
+    }
+  }
+
+  cyclePosition() {
+    this.activePosition = (this.activePosition + 1) % this.positions.length;
+    const pos = this.positions[this.activePosition];
+    this.activeLayer = pos.id;
+    this.layerHistory.push(pos.id);
+    if(this.layerHistory.length > 10) this.layerHistory.shift();
+
+    // When layer changes, all nodes remorph to the new ordering
+    this.nodes.forEach(n => {
+      n._remorphForLayer(pos.id, pos.ordering);
+    });
+
+    this.updatePositionUI();
+    this.log(`Layer: ${pos.name} (${pos.type}) — ${pos.description}`);
+  }
+  jumpToOverlap() {
+    for(let i=1;i<=this.positions.length;i++){
+      const idx=(this.activePosition+i)%this.positions.length;
+      if(this.positions[idx].type==='edge'){ this.activePosition=idx; this.updatePositionUI(); this.showOverlapUI(this.positions[idx].id); this.log(`Jumped to: ${this.positions[idx].id}`,'ov'); return; }
+    }
+  }
+  advanceState() { if(!this.selectedNode){this.log('No node selected');return;} this.tagNodeToActivePosition(this.selectedNode); const p=this.selectedNode.advanceState(); this.updateNesting(); this.log(`Node ${this.selectedNode.id}: state→${p.state}`); }
+  shiftColor()   { if(!this.selectedNode) return; this.tagNodeToActivePosition(this.selectedNode); const p=this.selectedNode.shiftColor();   this.updateNesting(); this.log(`Node ${this.selectedNode.id}: color→${p.colorName}`); }
+  modulateTone() { if(!this.selectedNode) return; this.tagNodeToActivePosition(this.selectedNode); const p=this.selectedNode.modulateTone(); this.updateNesting(); this.log(`Node ${this.selectedNode.id}: tone→${p.toneName}`); }
+  cycleBase()    { if(!this.selectedNode) return; const p=this.selectedNode.cycleBase();    this.updateNesting(); this.log(`Node ${this.selectedNode.id}: base→${p.baseName}`); }
+
+  applyOpposition() {
+    if(!this.selectedNode) return;
+    const opp=63-this.selectedNode.id; // 6-bit complement in 0..63 space
+    this.selectedNode.activation=0.85; this.nodes[opp].activation=0.85;
+    this._bumpOverlapsForNodes([this.selectedNode.id,opp],'opposition',0.25);
+    this.log(`Opposition: ${this.selectedNode.id} ↔ ${opp}`);
+  }
+  extractNuclear() {
+    if(!this.selectedNode) return;
+    const nid=this.selectedNode.extractNuclear();
+    this.nodes[nid].activation=Math.min(1,this.nodes[nid].activation+0.5);
+    this._bumpOverlapsForNodes([this.selectedNode.id,nid],'nuclear',0.2);
+    this.log(`Nuclear: ${this.selectedNode.id}→${nid}`);
+  }
+  groupPalace() {
+    if(!this.selectedNode) return;
+    const lt=this.selectedNode.id&0b111;
+    const members=this.nodes.filter(n=>(n.id&0b111)===lt);
+    members.forEach(n=>n.activation=Math.min(1,n.activation+0.3));
+    this._bumpOverlapsForNodes(members.map(n=>n.id),'palace',0.15);
+    this.log(`Palace: trigram ${lt} (${members.length} nodes)`);
+  }
+
+  // Pairing: links the selected node to its hexagram pair via lower/upper trigram swap
+  applyPairing() {
+    if(!this.selectedNode) return;
+    const lower=this.selectedNode.id&0b111;
+    const upper=(this.selectedNode.id>>3)&0b111;
+    const pairedId=(lower<<3)|upper; // swap trigrams
+    if(pairedId===this.selectedNode.id) { this.log(`Pairing: H${this.selectedNode.id+1} is self-paired`); return; }
+    this.selectedNode.activation=Math.min(1,this.selectedNode.activation+0.4);
+    this.nodes[pairedId].activation=Math.min(1,this.nodes[pairedId].activation+0.4);
+    this._bumpOverlapsForNodes([this.selectedNode.id,pairedId],'pairing',0.22);
+    this.log(`Pairing(trigram-swap): H${this.selectedNode.id+1} ↔ H${pairedId+1}`);
+  }
+
+  _bumpOverlapsForNodes(nodeIds,op,delta) {
+    Object.values(this.overlaps).forEach(ov=>{
+      const ovNodes=this.membershipMap[ov.id]||[];
+      if(nodeIds.some(id=>ovNodes.includes(id))) ov.bumpWeight(op,delta);
+    });
+    this.updateOverlapUI();
+  }
+
+  computeEmergence() {
+    const pos=this.positions[this.activePosition];
+    if(pos.type!=='overlap'){this.log('Emergence: must be at an overlap');return;}
+    const ov=this.overlaps[pos.id];
+    const lNodes=this.getNodesInPosition(pos.left);
+    const rNodes=this.getNodesInPosition(pos.right);
+    const metrics=ov.update(lNodes,rNodes);
+    const compat=ov.chainCompatibility;
+    // Use affinity-weighted op score instead of flat average
+    const opScore=ov.weightedOpScore();
+    const score=metrics.coherence*0.4+compat*0.35+opScore*0.25;
+    this.log(`Emergence calc: coh=${metrics.coherence.toFixed(2)} compat=${compat} opScore=${opScore.toFixed(2)} → ${score.toFixed(2)}`,'ov');
+
+    if(score>0.45||(metrics.coherence>0.5&&compat>0.5)){
+      const em={id:`EM_${Date.now()}`,overlap:pos.id,score,coherence:metrics.coherence,compat,nodes:ov.activeNodes,ts:Date.now()};
+      this.emergentStructures.push(em);
+      document.getElementById('s-em').textContent=this.emergentStructures.length;
+      ov.activeNodes.forEach(n=>{ n.activation=Math.min(1,n.activation+score*0.3); });
+      ov.tension*=0.7;
+      const weights=ov.operatorWeights;
+      ov.emergentOperator=Object.keys(weights).reduce((a,b)=>weights[a]>weights[b]?a:b);
+      this.log(`EMERGENCE ${em.id} score=${score.toFixed(2)} dominant=${ov.emergentOperator} → ${ov.activeNodes.length} nodes boosted`,'em');
+
+      // Auto-export emergent structure as artifact
+      setTimeout(() => {
+        this.exportImage();
+        this.log(`Auto-exported emergent structure ${em.id}`, 'fb');
+      }, 100);
+    } else {
+      this.log(`No emergence: score=${score.toFixed(2)} (threshold 0.45)`,'ov');
+    }
+    this.showOverlapUI(pos.id);
+  }
+
+  resolveTension() {
+    const pos=this.positions[this.activePosition];
+    if(pos.type!=='overlap'){this.log('No tension at primary');return;}
+    this.overlaps[pos.id].tension*=0.4;
+    this.showOverlapUI(pos.id);
+    this.log(`Tension resolved at ${pos.id}`,'ov');
+  }
+  clearEmergent() { this.emergentStructures=[]; document.getElementById('s-em').textContent='0'; this.log('Emergent structures cleared'); }
+
+  showOverlapUI(ovId) {
+    const ov=this.overlaps[ovId]; if(!ov) return;
+    document.getElementById('olap').style.display='block';
+    document.getElementById('ov-coh').textContent=(ov.coherence*100).toFixed(1)+'%';
+    document.getElementById('ov-ten').textContent=(ov.tension*100).toFixed(1)+'%';
+    document.getElementById('ov-cha').textContent=(ov.chainCompatibility*100).toFixed(0)+'% (fixed)';
+    document.getElementById('ov-nod').textContent=ov.activeNodes.length;
+    document.getElementById('ov-eop').textContent=ov.emergentOperator||'—';
+    const opKeys=['pairing','nuclear','palace','opposition'];
+    const uiKeys=['pair','nucl','palc','oppo'];
+    opKeys.forEach((k,i)=>{
+      const v=ov.operatorWeights[k]||0;
+      const a=ov.opAffinity[k]||0.25;
+      document.getElementById(`ow-${uiKeys[i]}`).textContent=`${v.toFixed(2)} (×${a})`;
+      document.getElementById(`owb-${uiKeys[i]}`).style.width=(v*100)+'%';
+    });
+    document.getElementById('s-coh').textContent=(ov.coherence*100).toFixed(0)+'%';
+  }
+  updateOverlapUI() { const pos=this.positions[this.activePosition]; if(pos.type==='edge') this.showOverlapUI(pos.id); }
+  updatePositionUI() {
+    const pos=this.positions[this.activePosition];
+    document.getElementById('s-pos').textContent=pos.name;
+    document.getElementById('s-pos').style.color=LAYER_COLORS[pos.id] || '#f5c518';
+    document.querySelectorAll('.pos-item').forEach((el,i)=>{
+      el.classList.toggle('active',i===this.activePosition);
+      const layerPos = this.positions[i];
+      el.style.borderColor = layerPos.type === 'edge' ? LAYER_COLORS[layerPos.id] || '#c084fc' : '';
+    });
+    if(pos.type==='edge') this.showOverlapUI(pos.id);
+    else document.getElementById('olap').style.display='none';
+  }
+  updateNesting() {
+    if(!this.selectedNode) return;
+    const p=this.selectedNode.getCurrentPath();
+    document.getElementById('n-id').textContent=`H${p.node+1} (${(p.node*5.625).toFixed(2)}°)`;
+    document.getElementById('n-st').textContent=`S${p.state} (+${(p.state*0.9375).toFixed(3)}°)`;
+    document.getElementById('n-cl').textContent=p.colorName;
+    document.getElementById('n-tn').textContent=p.toneName;
+    document.getElementById('n-bs').textContent=p.baseName;
+    document.getElementById('s-node').textContent=`H${p.node+1}`;
+    BASES.forEach((_,i)=>{ const el=document.getElementById(`bs-${i}`); if(el) el.classList.toggle('active',i===p.base); });
+
+    // Update neural architecture info
+    const state = this.selectedNode.states[this.selectedNode.currentState];
+    const neuralType = STATE_NEURAL_MAP[state.transformation] || 'DFF';
+    const neuralArch = NEURAL_TYPES[neuralType];
+
+    document.getElementById('n-edges').textContent = this.selectedNode.activeEdges.filter(e => e.active).length;
+    document.getElementById('n-neural').textContent = neuralArch ? neuralArch.name : neuralType;
+    document.getElementById('n-circuit').textContent = neuralArch ? neuralArch.circuit : '—';
+    document.getElementById('n-basearch').textContent = neuralArch ? neuralArch.baseArch : '—';
+    document.getElementById('n-gatepair').textContent = neuralArch ? neuralArch.gatePair : '—';
+
+    // Update crossing info if applicable
+    const crossingPanel = document.getElementById('crossing-panel');
+    if(neuralArch && neuralArch.circuit === 'Integration' && crossingPanel) {
+      crossingPanel.style.display = 'block';
+      const hybridKey = neuralArch.gatePair ? neuralArch.gatePair.replace('/', '_') : null;
+      const hybrid = hybridKey ? INTEGRATION_HYBRIDS[hybridKey] : null;
+      document.getElementById('n-crossing').textContent = hybrid ? hybrid.hybrid : 'Hybrid';
+    } else if(crossingPanel) {
+      crossingPanel.style.display = 'none';
+    }
+
+    // Update Ego state if applicable
+    const egoGates = [25,51,21,45,26,44,37,40,19,49];
+    if(egoGates.includes(p.node + 1)) {
+      const egoStates = ['innocence','ledger','regime','loyalty','principle'];
+      const egoIdx = egoGates.indexOf(p.node + 1) % 5;
+      document.getElementById('n-ego').textContent = egoStates[egoIdx] || 'transactional';
+    } else {
+      document.getElementById('n-ego').textContent = '—';
+    }
+  }
+  buildBasesGrid() {
+    const g=document.getElementById('bsgrid'); g.innerHTML='';
+    BASES.forEach((b,i)=>{ const el=document.createElement('div'); el.className='bsi'; el.id=`bs-${i}`; el.textContent=b.slice(0,4); g.appendChild(el); });
+  }
+  buildUI() {
+    const c=document.getElementById('pos-list'); c.innerHTML='';
+    this.positions.forEach((p,i)=>{
+      const el=document.createElement('div');
+      el.className=`pos-item ${p.type} ${i===0?'active':''}`;
+      el.style.borderLeft = `3px solid ${LAYER_COLORS[p.id] || '#888'}`;
+      el.innerHTML=`<span class="pname">${p.name}</span><span class="pmeta">${p.type}</span>`;
+      el.onclick=()=>{ this.activePosition=i; this.updatePositionUI(); if(p.type==='edge') this.showOverlapUI(p.id); else document.getElementById('olap').style.display='none'; };
+      c.appendChild(el);
+    });
+  }
+
+  draw() {
+    const ctx=this.ctx,w=this.canvas.width,h=this.canvas.height,cx=w/2,cy=h/2;
+    const R=Math.min(w,h)*0.4;
+
+    // Get current layer info
+    const currentLayer = this.positions[this.activePosition];
+    const layerColor = LAYER_COLORS[currentLayer.id] || '#888';
+    const rInner = R * 0.35; // Inner ring for 9-layer visualization
+    ctx.clearRect(0,0,w,h);
+
+    // === 9-LAYER CONCENTRIC VISUALIZATION ===
+    // Layer 0: Center (Taiji/Source)
+    ctx.fillStyle = 'rgba(255,255,255,0.1)';
+    ctx.beginPath(); ctx.arc(cx, cy, 8, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = '#888'; ctx.font = '10px monospace';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText('☯', cx, cy);
+
+    // Layer 1-8: The 8 trigram sectors (inner ring)
+    // These represent the 8 fundamental forces
+    const trigramNames = ['☰ Heaven', '☱ Lake', '☲ Fire', '☳ Thunder', '☴ Wind', '☵ Water', '☶ Mountain', '☷ Earth'];
+    const trigramColors = ['#f5c518', '#e8921a', '#ff5959', '#c084fc', '#10d474', '#06b6d4', '#8b5cf6', '#64748b'];
+
+    for(let t=0; t<8; t++) {
+      const angle = (t/8)*Math.PI*2 - Math.PI/2;
+      const nextAngle = ((t+1)/8)*Math.PI*2 - Math.PI/2;
+
+      // Draw trigram sector
+      ctx.fillStyle = trigramColors[t] + '15'; // 15 = ~8% opacity
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.arc(cx, cy, rInner, angle, nextAngle);
+      ctx.closePath();
+      ctx.fill();
+
+      // Trigram label
+      const labelAngle = angle + (nextAngle - angle)/2;
+      const lx = cx + Math.cos(labelAngle) * (rInner * 0.7);
+      const ly = cy + Math.sin(labelAngle) * (rInner * 0.7);
+      ctx.fillStyle = trigramColors[t];
+      ctx.font = '8px monospace';
+      ctx.fillText(trigramNames[t].split(' ')[0], lx, ly);
+    }
+
+    // Layer 9: The 9 position sectors (middle ring)
+    // 5 primaries + 4 overlaps = 9 sectors
+    const posColors = {
+      movement: 'rgba(245,197,24,', evolution: 'rgba(16,212,116,',
+      being: 'rgba(255,89,89,', design: 'rgba(232,146,26,',
+      space: 'rgba(192,132,252,'
+    };
+    const overlapColors = {
+      movement_evolution: 'rgba(245,197,24,', evolution_being: 'rgba(16,212,116,',
+      being_design: 'rgba(255,89,89,', design_space: 'rgba(232,146,26,'
+    };
+
+    // Draw 9 sectors (each 40°)
+    const sectorAngle = (Math.PI*2)/9;
+    for(let s=0; s<9; s++) {
+      const pos = this.positions[s];
+      if(!pos) continue;
+
+      const startAngle = s*sectorAngle - Math.PI/2;
+      const endAngle = (s+1)*sectorAngle - Math.PI/2;
+      const midAngle = startAngle + sectorAngle/2;
+
+      // Color based on position type
+      let colorBase;
+      if(pos.type === 'primary') {
+        colorBase = posColors[pos.id] || 'rgba(100,100,150,';
+      } else {
+        colorBase = overlapColors[pos.id] || 'rgba(192,132,252,';
+      }
+
+      // Draw sector background
+      ctx.fillStyle = colorBase + '0.08)';
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.arc(cx, cy, R*0.92, startAngle, endAngle);
+      ctx.closePath();
+      ctx.fill();
+
+      // Sector border
+      ctx.strokeStyle = colorBase + '0.3)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.lineTo(cx + Math.cos(startAngle)*R*0.92, cy + Math.sin(startAngle)*R*0.92);
+      ctx.stroke();
+
+      // Position label at middle ring
+      const labelR = (rInner + R) / 2;
+      const lx = cx + Math.cos(midAngle) * labelR;
+      const ly = cy + Math.sin(midAngle) * labelR;
+      ctx.fillStyle = colorBase + '1)';
+      ctx.font = '9px monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText(pos.id.replace('_', '+').substring(0, 10), lx, ly);
+    }
+
+    // === EMERGENT STRUCTURES ===
+    this.emergentStructures.forEach((em,idx)=>{
+      const r=R*(0.55+(idx%3)*0.12);
+      const fade=Math.max(0,1-(Date.now()-em.ts)/12000);
+      ctx.strokeStyle=`rgba(255,89,89,${(0.2+em.score*0.4)*fade})`;
+      ctx.lineWidth=2+em.score*2;
+      ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2); ctx.stroke();
+    });
+
+    // === NEURAL-TYPED ACTIVE EDGES ===
+    // Each edge type has distinct visual style matching its architecture
+    this.nodes.forEach(node => {
+      if(node.activation < 0.1) return;
+
+      node.activeEdges.forEach(edge => {
+        if(!edge.active) return;
+
+        const fromAngle = (node.id / 64) * Math.PI * 2 - Math.PI / 2;
+        const toAngle = (edge.targetNodeId / 64) * Math.PI * 2 - Math.PI / 2;
+        const fromX = cx + Math.cos(fromAngle) * R;
+        const fromY = cy + Math.sin(fromAngle) * R;
+        const toX = cx + Math.cos(toAngle) * R;
+        const toY = cy + Math.sin(toAngle) * R;
+
+        // Visual style based on neural architecture type
+        const neuralColor = edge.neuralArch ? edge.neuralArch.color : '#888';
+        const mechanism = edge.neuralArch ? edge.neuralArch.mechanism : 'default';
+
+        ctx.strokeStyle = neuralColor + Math.floor((0.2 + edge.strength * 0.6) * 255).toString(16).padStart(2,'0');
+        ctx.lineWidth = 0.5 + (edge.strength * 2);
+
+        // Different dash patterns for different architectures
+        switch(mechanism) {
+          case 'feedforward':
+            ctx.setLineDash([]); // Solid: DFF direct
+            break;
+          case 'bidirectional':
+            ctx.setLineDash([5, 3]); // Long dash: RBM bidirectional
+            break;
+          case 'attractor':
+            ctx.setLineDash([2, 2]); // Dotted: Hopfield energy
+            break;
+          case 'compression':
+            ctx.setLineDash([8, 2, 2, 2]); // Morse: SAE sparse
+            break;
+          case 'fixed':
+            ctx.setLineDash([10, 5]); // Long: ELM fixed
+            break;
+          case 'self-organizing':
+            ctx.setLineDash([3, 1, 3, 1]); // Pulse: Kohonen
+            break;
+          case 'hierarchical':
+            ctx.setLineDash([6, 2, 2, 2, 2, 2]); // Complex: DCN
+            break;
+          // === HMM EGO CIRCUIT STYLES ===
+          case 'binary-state':
+            ctx.setLineDash([4, 2, 1, 2]); // Binary pattern: BinaryHMM
+            break;
+          case 'continuous-emission':
+            ctx.setLineDash([3, 3]); // Smooth: ContinuousHMM
+            break;
+          case 'regime-switching':
+            ctx.setLineDash([8, 2, 2, 2, 2, 2]); // Switch: SwitchingHMM
+            break;
+          case 'factorial-state':
+            ctx.setLineDash([2, 1, 2, 1, 2, 1]); // Factorial: FactorialHMM
+            break;
+          case 'infinite-state':
+            ctx.setLineDash([1, 1]); // Dense: InfiniteHMM
+            break;
+          case 'corruption-reconstruction':
+            ctx.setLineDash([6, 3, 1, 3]); // Reconstruction: DAE
+            break;
+          default:
+            ctx.setLineDash([]);
+        }
+
+        ctx.beginPath();
+        ctx.moveTo(fromX, fromY);
+
+        // Curved edge with control point based on neural type
+        const midX = (fromX + toX) / 2;
+        const midY = (fromY + toY) / 2;
+        const curveStrength = edge.strength * 0.3;
+        const ctrlX = cx + (midX - cx) * curveStrength;
+        const ctrlY = cy + (midY - cy) * curveStrength;
+        ctx.quadraticCurveTo(ctrlX, ctrlY, toX, toY);
+        ctx.stroke();
+      });
+    });
+    ctx.setLineDash([]); // Reset
+
+    // Highlight selected node's active edges more prominently
+    if(this.selectedNode) {
+      this.selectedNode.activeEdges.forEach(edge => {
+        if(!edge.active) return;
+
+        const fromAngle = (this.selectedNode.id / 64) * Math.PI * 2 - Math.PI / 2;
+        const toAngle = (edge.targetNodeId / 64) * Math.PI * 2 - Math.PI / 2;
+        const fromX = cx + Math.cos(fromAngle) * R;
+        const fromY = cy + Math.sin(fromAngle) * R;
+        const toX = cx + Math.cos(toAngle) * R;
+        const toY = cy + Math.sin(toAngle) * R;
+
+        ctx.strokeStyle = '#c084fc';
+        ctx.lineWidth = 2 + edge.strength;
+        ctx.beginPath();
+        ctx.moveTo(fromX, fromY);
+        const midX = (fromX + toX) / 2;
+        const midY = (fromY + toY) / 2;
+        const ctrlX = cx + (midX - cx) * 0.3;
+        const ctrlY = cy + (midY - cy) * 0.3;
+        ctx.quadraticCurveTo(ctrlX, ctrlY, toX, toY);
+        ctx.stroke();
+      });
+    }
+
+    // === 64 HEXAGRAM NODES (outer ring) ===
+    // Circuit color mapping for visualization
+    const CIRCUIT_COLORS = {
+      'Knowing': '#06b6d4',      // Cyan
+      'Centering': '#dc2626',    // Red
+      'Understanding': '#f59e0b', // Amber
+      'Sensing': '#d946ef',      // Fuchsia
+      'Ego': '#dc2626',          // Crimson
+      'Integration': '#f97316'  // Orange
+    };
+
+    this.nodes.forEach((node,i)=>{
+      const angle=(i/64)*Math.PI*2-Math.PI/2;
+      const x=cx+Math.cos(angle)*R;
+      const y=cy+Math.sin(angle)*R;
+      const sz=5+node.activation*12;
+
+      // Determine circuit membership for this node
+      let circuit = null;
+      const gateNum = i + 1;
+      // Check which circuit this gate belongs to
+      const egoGates = [25,51,21,45,26,44,37,40,19,49];
+      const knowingGates = [3,60,61,24,43,23,28,38,20,57,55,39,12,22,2,14,8,1];
+      const centeringGates = [10,34];
+      const understandingGates = [63,4,17,62,18,58,16,48,9,52,15,5,31,7];
+      const sensingGates = [42,53,30,41,35,36,64,47,11,56,46,29,33,13];
+      const integrationGates = [34,57,10,20,10,57];
+
+      if(egoGates.includes(gateNum)) circuit = 'Ego';
+      else if(knowingGates.includes(gateNum)) circuit = 'Knowing';
+      else if(centeringGates.includes(gateNum)) circuit = 'Centering';
+      else if(understandingGates.includes(gateNum)) circuit = 'Understanding';
+      else if(sensingGates.includes(gateNum)) circuit = 'Sensing';
+      else if(integrationGates.includes(gateNum)) circuit = 'Integration';
+
+      // Color by activation level (heat map) with circuit tint
+      let col='#2a2a3a';
+      if(node.activation>0.8) col='#f5c518';
+      else if(node.activation>0.6) col='#ff5959';
+      else if(node.activation>0.4) col='#c084fc';
+      else if(node.activation>0.2) col='#e8921a';
+      else if(node.activation>0.05) col='#10d474';
+
+      // If node has a circuit assignment and is selected/hovered, tint it
+      if(circuit && (node.activation > 0.3 || (this.selectedNode && this.selectedNode.id === node.id))) {
+        col = CIRCUIT_COLORS[circuit] || col;
+      }
+
+      // Pulse effect for message passing
+      if(node._pulse) {
+        ctx.fillStyle = '#fff';
+        ctx.beginPath(); ctx.arc(x, y, sz + 3, 0, Math.PI * 2); ctx.fill();
+      }
+
+      ctx.fillStyle=col; ctx.beginPath(); ctx.arc(x,y,sz,0,Math.PI*2); ctx.fill();
+
+      // Selection ring
+      if(this.selectedNode && this.selectedNode.id===node.id){
+        ctx.strokeStyle='#10d474'; ctx.lineWidth=2.5;
+        ctx.beginPath(); ctx.arc(x,y,sz+5,0,Math.PI*2); ctx.stroke();
+      }
+
+      // Show hexagram number and circuit for active nodes
+      if(node.activation > 0.3) {
+        ctx.fillStyle = col;
+        ctx.font = '7px monospace';
+        ctx.textAlign = 'center';
+        const tx = cx + Math.cos(angle) * (R + 15);
+        const ty = cy + Math.sin(angle) * (R + 15);
+        ctx.fillText(`H${i+1}`, tx, ty);
+        if(circuit) {
+          ctx.font = '6px monospace';
+          ctx.fillText(circuit.slice(0,4), tx, ty + 8);
+        }
+      }
+    });
+
+    // === ACTIVE POSITION HIGHLIGHTS ===
+    const pos=this.positions[this.activePosition];
+    const activeIds=this.membershipMap[pos.id]||[];
+    activeIds.forEach(id=>{
+      const angle=(id/64)*Math.PI*2-Math.PI/2;
+      ctx.fillStyle=pos.type==='edge'?'rgba(192,132,252,0.5)':'rgba(245,197,24,0.4)';
+      ctx.beginPath(); ctx.arc(cx+Math.cos(angle)*(R*0.88),cy+Math.sin(angle)*(R*0.88),2,0,Math.PI*2); ctx.fill();
+    });
+  }
+
+  loop() {
+    const tick=()=>{ this.draw(); requestAnimationFrame(tick); };
+    tick();
+    // Decay activation
+    setInterval(()=>{ this.nodes.forEach(n=>{ if(n.activation>0) n.activation*=0.985; }); },120);
+    // Periodic morphing and message passing (every 2 seconds)
+    setInterval(()=>{
+      // Morph edges for all active nodes
+      this.nodes.forEach(n => {
+        if(n.activation > 0.2) {
+          this._morphEdges(n);
+        }
+      });
+      // Pass messages through active edges
+      this._messagePassingRound();
+    }, 2000);
+  }
+
+  // ============================================================
+  // NEURAL-TYPED EDGE INITIALIZATION
+  // ============================================================
+  // Each edge has a NEURAL TYPE that determines HOW it processes.
+  // The 6 states map to 6 neural architectures (DFF, Hopfield, RBM, etc.)
+  // When a state activates, its edges use that architecture's logic.
+  // ============================================================
+  _initializeMorphingEdges() {
+    let totalEdges = 0;
+    const neuralTypes = Object.keys(NEURAL_TYPES);
+
+    this.nodes.forEach(node => {
+      // Create edges for each of the 6 states
+      node.states.forEach((state, stateIdx) => {
+        const derivedId = state.derivedId;
+        const targetNode = this.nodes.find(n => n.id === derivedId);
+
+        if(targetNode && targetNode.id !== node.id) {
+          // Determine neural type from state transformation
+          const neuralType = STATE_NEURAL_MAP[state.transformation] || 'DFF';
+          const neuralArch = NEURAL_TYPES[neuralType];
+
+          // Create the edge with neural type
+          const edge = {
+            stateIndex: stateIdx,
+            targetNodeId: targetNode.id,
+            transformation: state.transformation,
+            neuralType: neuralType, // DFF, RBM, Hopfield, etc.
+            neuralArch: neuralArch, // Full architecture definition
+            layer: stateIdx,
+            strength: 0.1,
+            active: false,
+            history: [],
+            weights: [Math.random(), Math.random(), Math.random()] // Random init for neural processing
+          };
+
+          node.activeEdges.push(edge);
+          totalEdges++;
+
+          // Initialize edge weight for learning
+          const weightKey = `${targetNode.id}_${state.transformation}`;
+          node.edgeWeights.set(weightKey, 0.1);
+        }
+      });
+    });
+
+    this.log(`Neural-typed GNN initialized: ${totalEdges} edges`);
+    this.log(`Types: ${neuralTypes.join(', ')}`);
+  }
+
+  // ============================================================
+  // MORPHING: Activate edges for current state
+  // ============================================================
+  _morphEdges(node) {
+    // Deactivate all edges first
+    node.activeEdges.forEach(edge => {
+      edge.active = false;
+    });
+
+    // Activate edges for current state only
+    const currentStateIdx = node.currentState;
+    node.activeEdges.forEach(edge => {
+      if(edge.stateIndex === currentStateIdx) {
+        edge.active = true;
+        edge.history.push(Date.now());
+
+        // Strengthen edge through use (Hebbian learning)
+        const weightKey = `${edge.targetNodeId}_${edge.transformation}`;
+        const currentWeight = node.edgeWeights.get(weightKey) || 0.1;
+        node.edgeWeights.set(weightKey, Math.min(1, currentWeight + 0.05));
+        edge.strength = node.edgeWeights.get(weightKey);
+      }
+    });
+  }
+
+  // ============================================================
+  // FULL NEURAL TAXONOMY MESSAGE PASSING
+  // ============================================================
+  // Each message is processed through its channel's specific architecture.
+  // Knowing→LSM, Centering→ResNet, Understanding→MLP, Sensing→DBN
+  // Integration→Hybrid
+  // ============================================================
+  _messagePassingRound() {
+    const messages = [];
+
+    this.nodes.forEach(node => {
+      if(node.activation < 0.1) return;
+
+      node.activeEdges.forEach(edge => {
+        if(edge.active && edge.stateIndex === node.currentState) {
+          const neuralArch = edge.neuralArch;
+          const rawSignal = node.activation * edge.strength;
+
+          // Process through the specific neural architecture
+          let processedSignal;
+          try {
+            const proc = neuralArch.process;
+            switch(neuralArch.mechanism) {
+              case 'external-memory':
+                processedSignal = proc(rawSignal, edge.strength);
+                break;
+              case 'unpacking':
+                processedSignal = proc(rawSignal, edge.weights[0]);
+                break;
+              case 'adversarial':
+                processedSignal = proc(rawSignal, edge.strength);
+                break;
+              case 'reservoir':
+                processedSignal = proc(rawSignal, edge.weights[0]);
+                break;
+              case 'pose-preserving':
+                processedSignal = proc(rawSignal, edge.weights[0]);
+                break;
+              case 'latent-encoding':
+                processedSignal = proc(rawSignal, edge.weights[0]);
+                break;
+              case 'directional-resonance':
+                processedSignal = proc(rawSignal, 0.5);
+                break;
+              case 'attention':
+                processedSignal = proc(rawSignal, edge.weights[0]);
+                break;
+              case 'skip-connection':
+                processedSignal = proc(rawSignal, edge.strength);
+                break;
+              case 'corruption-reconstruction':
+                processedSignal = proc(rawSignal, (Math.random()-0.5)*0.2);
+                break;
+              case 'feedforward':
+                processedSignal = proc(rawSignal, edge.weights);
+                break;
+              case 'bidirectional':
+                processedSignal = proc(rawSignal, edge.strength);
+                break;
+              case 'attractor':
+                processedSignal = proc(rawSignal, 0.5);
+                break;
+              case 'compression':
+                processedSignal = proc(rawSignal, 0.5);
+                break;
+              case 'fixed':
+                processedSignal = proc(rawSignal, edge.weights[0]);
+                break;
+              case 'self-organizing':
+                processedSignal = proc(rawSignal, [0.2, 0.5, 0.8]);
+                break;
+              case 'hierarchical':
+                processedSignal = proc(rawSignal, edge.weights);
+                break;
+              case 'generative':
+                processedSignal = proc(rawSignal, edge.weights);
+                break;
+              case 'policy-evaluation':
+                processedSignal = proc(rawSignal, edge.strength);
+                break;
+              case 'immediate-feedback':
+                processedSignal = proc(rawSignal, edge.strength);
+                break;
+              case 'intuitive-action':
+                processedSignal = proc(rawSignal, edge.weights[0]);
+                break;
+              // === HMM EGO CIRCUIT MECHANISMS ===
+              case 'binary-state':
+                // BinaryHMM: Two-state HMM with gating (Tao & Busso GNN-HMM)
+                const binaryState = edge.weights[0] > 0.5 ? 1 : 0;
+                processedSignal = proc(rawSignal, binaryState);
+                break;
+              case 'continuous-emission':
+                // ContinuousHMM: Gaussian emission from continuous state space
+                const ledgerValue = edge.weights.reduce((a,b) => a+b, 0) / edge.weights.length;
+                processedSignal = proc(rawSignal, ledgerValue);
+                break;
+              case 'regime-switching':
+                // SwitchingHMM: Changes between honest/deceptive regimes
+                const currentRegime = edge.history.length % 2; // Alternates
+                processedSignal = proc(rawSignal, currentRegime);
+                break;
+              case 'factorial-state':
+                // FactorialHMM: Multiple independent state chains
+                const loyaltyVector = edge.weights.slice(0, 3);
+                processedSignal = proc(rawSignal, loyaltyVector);
+                break;
+              case 'infinite-state':
+                // InfiniteHMM: Chinese Restaurant Process state accumulation
+                const stateCount = edge.history.length;
+                processedSignal = proc(rawSignal, stateCount);
+                break;
+              case 'reservoir-pulse':
+                // LSM: Liquid State Machine pulsed reservoir
+                const pulsePhase = Math.sin(Date.now() / 1000) > 0 ? 1 : 0;
+                processedSignal = proc(rawSignal, pulsePhase);
+                break;
+              case 'inverse-graphics':
+                // DCIGN: Inverse graphics scene parameter extraction
+                const sceneParams = edge.weights[0];
+                processedSignal = proc(rawSignal, sceneParams);
+                break;
+              default:
+                processedSignal = rawSignal;
+            }
+          } catch(e) {
+            processedSignal = rawSignal;
+          }
+
+          messages.push({
+            from: node.id,
+            to: edge.targetNodeId,
+            transformation: edge.transformation,
+            neuralType: edge.neuralType,
+            neuralArch: neuralArch,
+            circuit: neuralArch.circuit,
+            baseArch: neuralArch.baseArch,
+            layer: edge.layer,
+            rawStrength: rawSignal,
+            processedStrength: processedSignal
+          });
+        }
+      });
+    });
+
+    // Apply processed messages with circuit-specific effects
+    messages.forEach(msg => {
+      const targetNode = this.nodes[msg.to];
+      if(!targetNode) return;
+
+      const signal = msg.processedStrength;
+      const circuit = msg.circuit;
+
+      // Circuit-specific processing
+      switch(circuit) {
+        case 'Knowing':
+          // LSM-based: Pulsed, memory-aware updates
+          targetNode.activation = Math.min(1, targetNode.activation + signal * 0.12);
+          // Knowing nodes build up "memory" of connections
+          const memKey = `${msg.from}_${msg.neuralType}`;
+          targetNode.edgeWeights.set(memKey, (targetNode.edgeWeights.get(memKey) || 0) + 0.02);
+          break;
+
+        case 'Centering':
+          // ResNet-based: Skip connections preserve identity
+          const residual = targetNode.activation;
+          targetNode.activation = Math.min(1, residual + signal * 0.15);
+          // Centering nodes resist change (survival)
+          if(Math.random() > 0.7) {
+            targetNode.activation = residual * 0.9 + targetNode.activation * 0.1;
+          }
+          break;
+
+        case 'Understanding':
+          // MLP-based: Direct feedforward processing
+          targetNode.activation = Math.min(1, targetNode.activation + signal * 0.18);
+          // Understanding nodes can "flip" to new states easily
+          if(signal > 0.5 && targetNode.activation > 0.7) {
+            this._considerStateChange(targetNode, msg.layer);
+          }
+          break;
+
+        case 'Sensing':
+          // DBN-based: Generative, bottom-up processing
+          targetNode.activation = Math.min(1, targetNode.activation + signal * 0.1);
+          // Sensing nodes activate in waves
+          if(targetNode.activation > 0.5) {
+            // Spread activation to neighbors
+            const neighbors = targetNode.activeEdges.filter(e => e.active);
+            neighbors.forEach(n => {
+              const nbr = this.nodes[n.targetNodeId];
+              if(nbr) nbr.activation = Math.min(1, nbr.activation + signal * 0.05);
+            });
+          }
+          break;
+
+        case 'Ego':
+          // HMM-based: Hidden state transitions with gating
+          // GNN-HMM: Gating layer controls signal flow (Tao & Busso 2018)
+          // The gating neuron filters out noisy/uninformative signals
+          const gate = Math.sigmoid(signal * 2 - 1); // Gating neuron: 0=block, 1=pass
+          const gatedSignal = signal * gate; // Only pass if gate is open
+
+          // HMM state transition: Markov chain on hidden states
+          if(!targetNode.hmmState) {
+            targetNode.hmmState = {
+              state: 0, // Hidden state: 0=innocence/trust, 1=shock/betrayal
+              history: [],
+              transitionMatrix: [[0.8, 0.2], [0.3, 0.7]], // P(stay|0), P(flip|0), P(flip|1), P(stay|1)
+              emissionParams: { mu: [0.3, 0.7], sigma: 0.1 } // Gaussian emissions per state
+            };
+          }
+
+          // Accumulate transaction history for state inference
+          targetNode.hmmState.history.push({
+            from: msg.from,
+            type: msg.neuralType,
+            strength: signal,
+            gate: gate,
+            ts: Date.now()
+          });
+          if(targetNode.hmmState.history.length > 10) {
+            targetNode.hmmState.history.shift();
+          }
+
+          // Viterbi-like state inference: most likely state given history
+          const recent = targetNode.hmmState.history.slice(-3);
+          const avgSignal = recent.reduce((s,h) => s + h.strength, 0) / recent.length;
+          const currentState = targetNode.hmmState.state;
+          const transProbs = targetNode.hmmState.transitionMatrix[currentState];
+          const stayProb = transProbs[0];
+          const flipProb = transProbs[1];
+
+          // State transition based on signal strength and transition probabilities
+          const stateLikelihood0 = stayProb * Math.exp(-Math.pow(avgSignal - 0.3, 2) / (2 * 0.01));
+          const stateLikelihood1 = flipProb * Math.exp(-Math.pow(avgSignal - 0.7, 2) / (2 * 0.01));
+          targetNode.hmmState.state = stateLikelihood1 > stateLikelihood0 ? 1 : 0;
+
+          // Apply gated signal with state-dependent amplification
+          const stateMultiplier = targetNode.hmmState.state === 0 ? 1.0 : 0.5; // Innocence amplifies, shock attenuates
+          targetNode.activation = Math.min(1, targetNode.activation + gatedSignal * 0.15 * stateMultiplier);
+
+          // Log HMM state changes
+          if(Math.random() > 0.85) {
+            this.log(`HMM[${msg.neuralType}]: hiddenState=${targetNode.hmmState.state} gate=${gate.toFixed(2)} mult=${stateMultiplier.toFixed(1)}`, 'em');
+          }
+          break;
+
+        case 'Integration':
+          // Hybrid: Bridge between circuits — uses crossing rules
+          targetNode.activation = Math.min(1, targetNode.activation + signal * 0.2);
+
+          // Integration edges carry crossing information
+          if(msg.neuralArch && msg.neuralArch.crossing) {
+            const crossing = CROSSING_RULES[msg.neuralArch.crossing];
+            if(crossing && Math.random() > 0.7) {
+              this.log(`Crossing: ${crossing.name} — ${crossing.emergentProperty}`, 'em');
+            }
+          }
+
+          // Integration nodes can trigger circuit switches
+          if(signal > 0.6) {
+            this._considerLayerChange(targetNode);
+          }
+          break;
+
+        default:
+          targetNode.activation = Math.min(1, targetNode.activation + signal * 0.15);
+      }
+    });
+
+    return messages.length;
+  }
+
+  // Consider changing layer (for Integration nodes)
+  _considerLayerChange(node) {
+    const currentLayer = this.positions[this.activePosition].id;
+    const possibleLayers = ['fuxi', 'kingwen', 'shaoyong', 'mawangdui', 'nuclear'];
+    const newLayer = possibleLayers[Math.floor(Math.random() * possibleLayers.length)];
+    if(newLayer !== currentLayer && Math.random() > 0.8) {
+      // Find the layer index
+      const layerIdx = this.positions.findIndex(p => p.id === newLayer);
+      if(layerIdx !== -1) {
+        this.activePosition = layerIdx;
+        this.activeLayer = newLayer;
+        this.log(`Layer morph: ${currentLayer} → ${newLayer} (triggered by Integration)`, 'em');
+        this.updatePositionUI();
+      }
+    }
+  }
+
+  // Consider changing state based on incoming message layer
+  _considerStateChange(node, incomingLayer) {
+    // If incoming message is from a "higher" layer, node might advance state
+    if(incomingLayer > node.currentState && Math.random() > 0.7) {
+      node.advanceState();
+      this._morphEdges(node); // Remorph edges for new state
+    }
+  }
+
+  // Trigger message passing manually
+  triggerMessagePassing() {
+    const msgCount = this._messagePassingRound();
+    this.log(`Morphing: ${msgCount} active edges passed messages`, 'em');
+  }
+
+  // Export current canvas state as PNG artifact
+  exportImage() {
+    const link = document.createElement('a');
+    link.download = `nested-state-${Date.now()}.png`;
+    link.href = this.canvas.toDataURL('image/png');
+    link.click();
+    this.log('Canvas exported as PNG', 'fb');
+  }
+
+  // Get current active graph structure (for visualization)
+  getActiveGraph() {
+    const nodes = [];
+    const edges = [];
+
+    this.nodes.forEach(node => {
+      if(node.activation > 0.1) {
+        nodes.push({id: node.id, state: node.currentState, activation: node.activation});
+
+        node.activeEdges.forEach(edge => {
+          if(edge.active) {
+            edges.push({
+              from: node.id,
+              to: edge.targetNodeId,
+              transformation: edge.transformation,
+              layer: edge.layer,
+              strength: edge.strength
+            });
+          }
+        });
+      }
+    });
+
+    return {nodes, edges};
+  }
+
+  log(msg,type='') {
+    const p=document.getElementById('log');
+    const el=document.createElement('div'); el.className=`le ${type}`;
+    el.textContent=`[${new Date().toLocaleTimeString()}] ${msg}`;
+    p.insertBefore(el,p.firstChild);
+    if(p.children.length>15) p.removeChild(p.lastChild);
+  }
+}
+
+window.S=new System();
+
+document.getElementById('cv').addEventListener('click',e=>{
+  const rect=window.S.canvas.getBoundingClientRect();
+  const x=e.clientX-rect.left,y=e.clientY-rect.top;
+  const cx=window.S.canvas.width/2,cy=window.S.canvas.height/2;
+  const R=Math.min(window.S.canvas.width,window.S.canvas.height)*0.4;
+  const dx=x-cx,dy=y-cy,dist=Math.sqrt(dx*dx+dy*dy);
+  if(Math.abs(dist-R)<35){
+    let angle=Math.atan2(dy,dx)+Math.PI/2;
+    if(angle<0) angle+=Math.PI*2;
+    const idx=Math.round((angle/(Math.PI*2))*64)%64;
+    window.S.selectedNode=window.S.nodes[idx];
+    window.S.nodes[idx].activation=Math.min(1,window.S.nodes[idx].activation+0.35);
+    window.S.tagNodeToActivePosition(window.S.nodes[idx]);
+    window.S.updateNesting();
+    window.S.log(`Selected H${idx+1} · positions: ${window.S.nodes[idx].positionMembership.join(', ')}`);
+  }
+});
+</script>
+
+
+<!-- EMBEDDED MIR ENGINE -->
+<script>
+// Morph Neural Net v3 - Browser-Embedded Engine
+// Source-dominant, brutally honest file regeneration
+
+(function(global) {
+  'use strict';
+
+  // ========== TYPES (runtime) ==========
+  const GNNNodeType = [
+    "functionality", "pattern", "dependency", "insight",
+    "reusable_component", "source_chunk", "file_blueprint",
+    "morph_runtime", "improvement"
+  ];
+
+  const RegenerationMode = ["exact", "equivalent", "morph_runtime", "improved"];
+
+  // ========== MIR ANALYZER ==========
+  class MIRAnalyzer {
+    analyze(artifact) {
+      const content = artifact.originalContent;
+      const fileType = this.detectFileType(artifact.originalName);
+
+      const contract = {
+        fileType,
+        exports: this.extractExports(content),
+        imports: this.extractImports(content),
+        dependencies: this.extractDependencies(content),
+        props: (fileType === "tsx" || fileType === "jsx") ? this.extractProps(content) : undefined,
+        behavior: this.extractBehavior(content),
+        visualStructure: (fileType === "tsx" || fileType === "jsx") ? this.extractVisualStructure(content) : undefined,
+        dataFlow: this.extractDataFlow(content),
+        stateShape: this.extractStateShape(content),
+        apiSurface: this.extractApiSurface(content)
+      };
+
+      const blueprint = this.extractBlueprint(content);
+      return { contract, blueprint };
+    }
+
+    detectFileType(filename) {
+      const ext = (filename.split(".").pop() || "").toLowerCase();
+      const map = { tsx:"tsx", ts:"ts", js:"js", jsx:"jsx", py:"py", json:"json", css:"css", md:"md" };
+      return map[ext] || "unknown";
+    }
+
+    extractExports(content) {
+      const exports = [];
+      const defaultMatch = content.match(/export\s+default\s+(?:function|class|const)?\s*(\w+)/);
+      if (defaultMatch) exports.push(`default:${defaultMatch[1]}`);
+      const named = [...content.matchAll(/export\s+(?:function|class|const|type|interface)\s+(\w+)/g)];
+      named.forEach(m => exports.push(m[1]));
+      return exports;
+    }
+
+    extractImports(content) {
+      return [...content.matchAll(/import\s+.*?\s+from\s+['"]([^'"]+)['"]/g)].map(m => m[1]);
+    }
+
+    extractDependencies(content) {
+      const deps = new Set();
+      if (content.includes("react")) deps.add("react");
+      if (content.includes("framer-motion")) deps.add("framer-motion");
+      if (content.includes("useState") || content.includes("useEffect")) deps.add("react-hooks");
+      if (content.includes("fetch") || content.includes("axios")) deps.add("http-client");
+      if (content.includes("supabase")) deps.add("supabase");
+      if (content.includes("tailwind")) deps.add("tailwind");
+      if (content.includes("three")) deps.add("three.js");
+      return Array.from(deps);
+    }
+
+    extractProps(content) {
+      const props = [];
+      const interfaceMatch = content.match(/interface\s+\w+Props\s*\{([^}]+)\}/);
+      if (interfaceMatch) {
+        [...interfaceMatch[1].matchAll(/(\w+)(\?)?:\s*(\w+)/g)].forEach(m => {
+          props.push({ name: m[1], type: m[3], required: !m[2] });
+        });
+      }
+      return props;
+    }
+
+    extractBehavior(content) {
+      const b = [];
+      if (content.includes("onClick")) b.push("handles click events");
+      if (content.includes("useState")) b.push("manages local state");
+      if (content.includes("useEffect")) b.push("reacts to lifecycle changes");
+      if (content.includes("fetch") || content.includes("axios")) b.push("makes API calls");
+      if (content.includes("animate") || content.includes("motion")) b.push("has animations");
+      return b;
+    }
+
+    extractVisualStructure(content) {
+      const structure = [];
+      const returnMatch = content.match(/return\s*\((.*?)\);?\s*\}/s);
+      if (returnMatch) {
+        const jsx = returnMatch[1];
+        [...jsx.matchAll(/<(\w+)[^>]*>/g)].forEach(m => {
+          if (m[1] && m[1][0] === m[1][0].toLowerCase()) {
+            structure.push({ element: m[1] });
+          }
+        });
+      }
+      return structure;
+    }
+
+    extractDataFlow(content) {
+      const flows = [];
+      if (content.includes("useState")) flows.push({ from: "user", to: "state", type: "state" });
+      if (content.includes("onClick")) flows.push({ from: "user", to: "handler", type: "event" });
+      if (content.includes("fetch")) flows.push({ from: "api", to: "component", type: "api" });
+      return flows;
+    }
+
+    extractStateShape(content) {
+      const shape = {};
+      [...content.matchAll(/const\s+\[(\w+),\s*set(\w+)\]\s*=\s*useState(?:<([^>]+)>)?\(([^)]+)\)/g)].forEach(m => {
+        shape[m[1]] = m[3] || "any";
+      });
+      return Object.keys(shape).length > 0 ? shape : undefined;
+    }
+
+    extractApiSurface(content) {
+      const endpoints = [];
+      [...content.matchAll(/(?:fetch|axios)\s*\(\s*['"]([^'"]+)['"]\s*,?\s*\{?\s*method:\s*['"](\w+)['"]?/g)].forEach(m => {
+        endpoints.push({ method: m[2] || "GET", path: m[1] });
+      });
+      return endpoints.length > 0 ? endpoints : undefined;
+    }
+
+    extractBlueprint(content) {
+      const imports = [...content.matchAll(/import\s+.*?\s+from\s+['"]([^'"]+)['"]/g)].map(m => m[0]);
+      const exports = [...content.matchAll(/export\s+(?:default\s+)?(?:function|const|class|interface|type)\s+\w+/g)].map(m => m[0]);
+      const functions = [...content.matchAll(/(?:function|const)\s+(\w+)/g)].map(m => m[1]);
+      const classes = [...content.matchAll(/class\s+(\w+)/g)].map(m => m[1]);
+      const hasJsx = content.includes("return (") && content.includes("<");
+      let fileRole = "utility";
+      if (hasJsx) fileRole = "component";
+      else if (exports.some(e => e.includes("default"))) fileRole = "module";
+      else if (classes.length > 0) fileRole = "class";
+      else if (functions.length > 0) fileRole = "functions";
+
+      return { imports, exports, functions, classes, hasJsx, fileRole, chunkCount: Math.ceil(content.length / 2000), totalLength: content.length };
+    }
+  }
+
+  // ========== MIR RENDERER ==========
+  class MIRRenderer {
+    render(contract, blueprint, mode) {
+      switch (mode) {
+        case "exact": return "// EXACT: use source chunks";
+        case "equivalent": return this.renderEquivalent(contract, blueprint);
+        case "morph_runtime": return this.renderMorphRuntime(contract, blueprint);
+        case "improved": return this.renderImproved(contract, blueprint);
+        default: return this.renderMorphRuntime(contract, blueprint);
+      }
+    }
+
+    renderEquivalent(contract, blueprint) {
+      const lines = [];
+      const specName = (blueprint.exports[0] || "MorphComponent").replace("default:", "");
+
+      contract.imports.slice(0, 5).forEach(imp => {
+        if (imp === "react") lines.push('import React from "react"');
+        else if (imp.includes("framer")) lines.push('import { motion } from "framer-motion"');
+        else lines.push(`import * as ${imp.replace(/[^a-zA-Z0-9]/g, "_")} from "${imp}"`);
+      });
+      lines.push("");
+
+      if (contract.props && contract.props.length > 0) {
+        lines.push(`interface ${specName}Props {`);
+        contract.props.forEach(p => {
+          lines.push(`  ${p.name}${p.required ? "" : "?"}: ${p.type};`);
+        });
+        lines.push(`}`);
+        lines.push("");
+      }
+
+      lines.push(`export const ${specName} = () => {`);
+      contract.behavior.forEach(b => lines.push(`  // TODO: ${b}`));
+      lines.push(`  return <div>${specName} equivalent</div>;`);
+      lines.push(`};`);
+
+      return lines.join("\n");
+    }
+
+    renderMorphRuntime(contract, blueprint) {
+      const specName = (blueprint.exports[0] || "MorphComponent").replace("default:", "");
+      return `// Morph Runtime Equivalent
+// Original: ${blueprint.fileRole} (${contract.fileType})
+export const ${specName}Spec = {
+  type: "${blueprint.fileRole}",
+  name: "${specName}",
+  fileType: "${contract.fileType}",
+  props: ${JSON.stringify(contract.props || [])},
+  behavior: ${JSON.stringify(contract.behavior)},
+  dependencies: ${JSON.stringify(contract.dependencies)},
+  renderPlan: ${JSON.stringify(contract.visualStructure || [])},
+  dataFlow: ${JSON.stringify(contract.dataFlow)},
+  stateShape: ${JSON.stringify(contract.stateShape)},
+  apiSurface: ${JSON.stringify(contract.apiSurface)}
+};
+`;
+    }
+
+    renderImproved(contract, blueprint) {
+      return `// Improved version
+export const ImprovedSpec = {
+  enhancements: ["memoized", "error boundaries", "loading states", "a11y"]
+};`;
+    }
+  }
+
+  // ========== MORPH MEMORY ENGINE v3 ==========
+  class MorphMemoryEngine {
+    constructor() {
+      this.nodes = new Map();
+      this.operations = [];
+      this.nodeCounter = 0;
+      this.analyzer = new MIRAnalyzer();
+      this.renderer = new MIRRenderer();
+    }
+
+    hydrate(nodes) {
+      nodes.forEach(node => {
+        this.nodes.set(node.id, node);
+        const num = parseInt(node.id.split("_")[1] || "0");
+        this.nodeCounter = Math.max(this.nodeCounter, num);
+      });
+    }
+
+    async analyzeArtifact(artifact) {
+      const content = artifact.originalContent;
+      const { contract, blueprint } = this.analyzer.analyze(artifact);
+
+      // Store source chunks WITH EXPLICIT INDEX
+      this.createSourceChunks(content, artifact.id);
+
+      // Store blueprint
+      this.createNode("file_blueprint", JSON.stringify({ contract, blueprint }), artifact.id);
+
+      // Store components
+      blueprint.imports.slice(0, 10).forEach(imp => this.createNode("dependency", imp, artifact.id));
+      blueprint.functions.slice(0, 10).forEach(func => this.createNode("functionality", `Function: ${func}`, artifact.id));
+      blueprint.classes.forEach(cls => this.createNode("pattern", `Class: ${cls}`, artifact.id));
+
+      return {
+        ...artifact,
+        understanding: {
+          intent: this.extractIntent(content),
+          functionality: this.extractFunctionality(content),
+          dependencies: this.extractDependencies(content),
+          patterns: this.extractPatterns(content),
+          complexity: this.calculateComplexity(content),
+          keyInsights: this.extractKeyInsights(content),
+          reusableComponents: this.extractReusableComponents(content)
+        },
+        metadata: { ...artifact.metadata, status: "understood" }
+      };
+    }
+
+    async regenerateArtifact(artifact, context, mode = "morph_runtime") {
+      if (!artifact.understanding) {
+        return {
+          ...artifact,
+          regenerationResult: {
+            code: "// No understanding", confidence: 0, modeUsed: mode,
+            missing: ["No analysis"], integrity: 0, isExact: false, isIdentical: false,
+            chunkCount: 0, reconstructedLength: 0, originalLength: 0
+          }
+        };
+      }
+
+      const artifactNodes = this.findArtifactNodes(artifact.id);
+      const blueprintNode = artifactNodes.find(n => n.nodeType === "file_blueprint");
+
+      // BRUTAL INTEGRITY: from reconstructed output
+      const reconstructed = this.reconstructFromChunks(artifact.id);
+      const isIdentical = reconstructed === artifact.originalContent;
+      const integrity = artifact.originalContent.length > 0 ? reconstructed.length / artifact.originalContent.length : 0;
+      const chunkCount = artifactNodes.filter(n => n.nodeType === "source_chunk").length;
+
+      let result;
+
+      if (mode === "exact") {
+        if (chunkCount > 0 && integrity > 0.7) {
+          result = {
+            code: reconstructed, confidence: isIdentical ? 0.98 : 0.92, modeUsed: "exact",
+            missing: isIdentical ? [] : ["minor differences"],
+            integrity, isExact: isIdentical, isIdentical, chunkCount,
+            reconstructedLength: reconstructed.length, originalLength: artifact.originalContent.length
+          };
+        } else {
+          result = {
+            code: this.generateFromBlueprint(artifact.id), confidence: 0.65, modeUsed: "exact",
+            missing: [`Integrity too low (${(integrity * 100).toFixed(1)}%)`],
+            integrity, isExact: false, isIdentical: false, chunkCount,
+            reconstructedLength: reconstructed.length, originalLength: artifact.originalContent.length
+          };
+        }
+      } else if (mode === "equivalent") {
+        let mirContract = null, mirBlueprint = null;
+        if (blueprintNode) {
+          try { const parsed = JSON.parse(blueprintNode.content); mirContract = parsed.contract; mirBlueprint = parsed.blueprint; }
+          catch { /* fallback */ }
+        }
+        if (!mirContract) { const { contract, blueprint } = this.analyzer.analyze(artifact); mirContract = contract; mirBlueprint = blueprint; }
+        result = {
+          code: this.renderer.render(mirContract, mirBlueprint, "equivalent"), confidence: 0.85,
+          modeUsed: "equivalent", missing: ["exact details", "original comments"],
+          integrity: 0, isExact: false, isIdentical: false, chunkCount,
+          reconstructedLength: reconstructed.length, originalLength: artifact.originalContent.length
+        };
+      } else if (mode === "morph_runtime") {
+        let mirContract = null, mirBlueprint = null;
+        if (blueprintNode) {
+          try { const parsed = JSON.parse(blueprintNode.content); mirContract = parsed.contract; mirBlueprint = parsed.blueprint; }
+          catch { const { contract, blueprint } = this.analyzer.analyze(artifact); mirContract = contract; mirBlueprint = blueprint; }
+        } else { const { contract, blueprint } = this.analyzer.analyze(artifact); mirContract = contract; mirBlueprint = blueprint; }
+        result = {
+          code: this.renderer.render(mirContract, mirBlueprint, "morph_runtime"), confidence: 0.78,
+          modeUsed: "morph_runtime", missing: ["exact styles", "animation timing", "variable names"],
+          integrity: 0, isExact: false, isIdentical: false, chunkCount,
+          reconstructedLength: reconstructed.length, originalLength: artifact.originalContent.length
+        };
+      } else {
+        result = {
+          code: `// Improved version of ${artifact.originalName}`, confidence: 0.82,
+          modeUsed: "improved", missing: ["original specifics"],
+          integrity: 0, isExact: false, isIdentical: false, chunkCount,
+          reconstructedLength: reconstructed.length, originalLength: artifact.originalContent.length
+        };
+      }
+
+      return {
+        ...artifact,
+        regeneration: {
+          generatedCode: result.code, architecture: "Morph", confidence: Math.round(result.confidence * 100),
+          improvements: result.missing, gnnNodes: artifactNodes.map(n => n.id),
+          generatedAt: new Date().toISOString(), mode, missing: result.missing
+        },
+        regenerationResult: result,
+        metadata: { ...artifact.metadata, status: "regenerated" }
+      };
+    }
+
+    // ========== SOURCE CHUNK SYSTEM v3 ==========
+    createSourceChunks(content, artifactId) {
+      const chunkSize = 2000, overlap = 200;
+      for (let i = 0, index = 0; i < content.length; i += chunkSize - overlap, index++) {
+        const start = i, end = Math.min(i + chunkSize, content.length);
+        const payload = { index, chunk: content.slice(start, end), start, end };
+        this.createNode("source_chunk", JSON.stringify(payload), artifactId);
+      }
+    }
+
+    reconstructFromChunks(artifactId) {
+      const chunks = Array.from(this.nodes.values())
+        .filter(n => n.nodeType === "source_chunk" && n.sourceArtifact === artifactId)
+        .map(n => { try { return JSON.parse(n.content); } catch { return null; } })
+        .filter(p => p !== null)
+        .sort((a, b) => a.index - b.index); // SORT BY INDEX, NOT ID
+
+      if (chunks.length === 0) return "";
+
+      let result = chunks[0].chunk;
+      for (let i = 1; i < chunks.length; i++) {
+        const prev = chunks[i - 1].chunk, curr = chunks[i].chunk;
+        let overlapLen = 0, maxOverlap = Math.min(prev.length, curr.length, 500);
+        for (let j = maxOverlap; j > 0; j--) {
+          if (prev.slice(-j) === curr.slice(0, j)) { overlapLen = j; break; }
+        }
+        result += curr.slice(overlapLen);
+      }
+      return result;
+    }
+
+    generateFromBlueprint(artifactId) {
+      const blueprintNode = this.findArtifactNodes(artifactId).find(n => n.nodeType === "file_blueprint");
+      if (!blueprintNode) return "// Blueprint not found";
+      try {
+        const { blueprint } = JSON.parse(blueprintNode.content);
+        return `// Reconstructed from blueprint\n// Role: ${blueprint.fileRole}\n// Functions: ${blueprint.functions.length}\n// Classes: ${blueprint.classes.length}`;
+      } catch { return "// Failed to parse blueprint"; }
+    }
+
+    // ========== NODE MANAGEMENT ==========
+    createNode(nodeType, content, sourceArtifact) {
+      this.nodeCounter++;
+      const node = {
+        id: `${nodeType}_${this.nodeCounter}`, nodeType, content, sourceArtifact,
+        weight: 0.5, usageCount: 0, connections: [], createdAt: new Date().toISOString()
+      };
+      this.nodes.set(node.id, node);
+      return node;
+    }
+
+    findArtifactNodes(artifactId) {
+      return Array.from(this.nodes.values()).filter(n => n.sourceArtifact === artifactId);
+    }
+
+    // ========== SEMANTIC EXTRACTION ==========
+    extractIntent(content) {
+      const m = content.match(/\/\*\*\s*\n\s*\*\s*(.+?)\n/s) || content.match(/\/\/\s*(.+?)(?:\n|$)/);
+      if (m) return m[1].trim();
+      const cm = content.match(/class\s+(\w+)/), fm = content.match(/function\s+(\w+)/);
+      if (cm) return `Implements ${cm[1]}`;
+      if (fm) return `Provides ${fm[1]}`;
+      return "Unknown";
+    }
+
+    extractFunctionality(content) {
+      const funcs = [];
+      [...content.matchAll(/export\s+(?:async\s+)?(?:function|const|class)\s+(\w+)/g)].forEach(m => funcs.push(`Export: ${m[1]}`));
+      if (content.includes("useState")) funcs.push("State management");
+      if (content.includes("onClick")) funcs.push("Event handling");
+      return funcs.length > 0 ? funcs : ["Basic functionality"];
+    }
+
+    extractDependencies(content) {
+      const deps = [...content.matchAll(/from\s+['"]([^'"]+)['"]/g)].map(m => m[1]);
+      if (content.includes("supabase")) deps.push("Supabase");
+      if (content.includes("react")) deps.push("React");
+      return [...new Set(deps)];
+    }
+
+    extractPatterns(content) {
+      const p = [];
+      if (content.includes("useEffect")) p.push("React hooks");
+      if (content.includes("async")) p.push("Async/await");
+      if (content.includes("try") && content.includes("catch")) p.push("Error handling");
+      return p.length > 0 ? p : ["Procedural"];
+    }
+
+    extractKeyInsights(content) {
+      const insights = [];
+      if (content.includes("graph") || content.includes("node")) insights.push("Graph-based architecture");
+      if (content.includes("neural") || content.includes("tensor")) insights.push("Neural network components");
+      return insights.length > 0 ? insights : ["General utility"];
+    }
+
+    extractReusableComponents(content) {
+      const comps = [];
+      if (content.includes("config") || content.includes("settings")) comps.push("Configuration pattern");
+      if (content.includes("validate")) comps.push("Validation logic");
+      return comps.length > 0 ? comps : ["Core functionality"];
+    }
+
+    calculateComplexity(content) {
+      let score = 50;
+      score += Math.min(content.split("\n").length / 10, 20);
+      let maxDepth = 0, current = 0;
+      for (const char of content) {
+        if (char === "{") { current++; maxDepth = Math.max(maxDepth, current); }
+        else if (char === "}") current--;
+      }
+      score += maxDepth * 5;
+      score += (content.match(/function/g) || []).length * 2;
+      return Math.min(100, Math.round(score));
+    }
+
+    getNodes() { return Array.from(this.nodes.values()); }
+    getNodeCount() { return this.nodes.size; }
+  }
+
+  // ========== EXPOSE TO GLOBAL ==========
+  global.MorphEngine = { MorphMemoryEngine, MIRAnalyzer, MIRRenderer, RegenerationMode };
+
+})(typeof window !== 'undefined' ? window : global);
+
+</script>
+
+<!-- MIR INTERFACE LOGIC -->
+<script>
+// ========== GLOBAL STATE ==========
+const engine = new MorphEngine.MorphMemoryEngine();
+let artifacts = [];
+let selectedArtifact = null;
+
+// ========== PANEL TOGGLE ==========
+function toggleMirPanel() {
+  document.getElementById('mir-panel').classList.toggle('collapsed');
+}
+
+// ========== FILE UPLOAD ==========
+function handleFileUpload(event) {
+  const files = event.target.files;
+  if (!files.length) return;
+
+  Array.from(files).forEach(file => {
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      const content = e.target.result;
+      const artifact = {
+        id: 'art_' + Date.now() + '_' + Math.random().toString(36).slice(2,8),
+        originalName: file.name,
+        originalContent: content,
+        metadata: {
+          fileType: file.name.split('.').pop(),
+          size: content.length,
+          uploadedAt: new Date().toISOString(),
+          status: 'uploaded'
+        }
+      };
+
+      const analyzed = await engine.analyzeArtifact(artifact);
+      artifacts.push(analyzed);
+      selectedArtifact = analyzed;
+
+      renderFileList();
+      document.getElementById('mir-regen-controls').style.display = 'block';
+      mirLog('Analyzed ' + file.name + ': ' + analyzed.understanding.functionality.length + ' functions, ' + analyzed.understanding.patterns.length + ' patterns', 'ok');
+      updateMemoryStats();
+      document.getElementById('dot-mem').className = 'dot active';
+    };
+    reader.readAsText(file);
+  });
+}
+
+// ========== DRAG & DROP ==========
+const dropzone = document.getElementById('mir-dropzone');
+dropzone.addEventListener('dragover', (e) => { e.preventDefault(); dropzone.classList.add('dragover'); });
+dropzone.addEventListener('dragleave', () => dropzone.classList.remove('dragover'));
+dropzone.addEventListener('drop', (e) => {
+  e.preventDefault();
+  dropzone.classList.remove('dragover');
+  const dt = e.dataTransfer;
+  if (dt && dt.files) {
+    handleFileUpload({ target: { files: dt.files } });
+  }
+});
+
+// ========== REGENERATE ==========
+async function regenerateFile(mode) {
+  if (!selectedArtifact) return;
+
+  mirLog('Regenerating ' + selectedArtifact.originalName + ' (mode: ' + mode + ')...');
+
+  const result = await engine.regenerateArtifact(selectedArtifact, undefined, mode);
+  const regen = result.regenerationResult;
+
+  const resultDiv = document.getElementById('mir-result');
+  resultDiv.style.display = 'block';
+  var codePreview = regen.code.slice(0, 500);
+  if (regen.code.length > 500) codePreview += '...';
+  resultDiv.innerHTML = '<code>' + escapeHtml(codePreview) + '</code>';
+  resultDiv.className = 'mir-result ' + (regen.isExact ? 'exact' : 'approx');
+
+  document.getElementById('mir-stats').style.display = 'flex';
+  document.getElementById('stat-mode').textContent = regen.modeUsed;
+  document.getElementById('stat-conf').textContent = (regen.confidence * 100).toFixed(0) + '%';
+  document.getElementById('stat-exact').textContent = regen.isExact ? 'YES' : 'NO';
+  document.getElementById('stat-exact').style.color = regen.isExact ? '#10d474' : '#e8921a';
+  document.getElementById('stat-integ').textContent = (regen.integrity * 100).toFixed(1) + '%';
+  document.getElementById('stat-chunks').textContent = regen.chunkCount;
+
+  if (regen.missing.length > 0) {
+    var missingDiv = document.createElement('div');
+    missingDiv.className = 'missing';
+    missingDiv.textContent = 'Missing: ' + regen.missing.join(', ');
+    resultDiv.appendChild(missingDiv);
+  }
+
+  mirLog(mode + ' complete: ' + (regen.confidence * 100).toFixed(0) + '% confidence, isExact=' + regen.isExact, regen.isExact ? 'ok' : 'em');
+}
+
+// ========== UI HELPERS ==========
+function renderFileList() {
+  const container = document.getElementById('mir-files');
+  var html = '';
+  for (var i = 0; i < artifacts.length; i++) {
+    var a = artifacts[i];
+    var selected = (selectedArtifact && a.id === selectedArtifact.id) ? 'border-color:#f5c518;' : '';
+    html += '<div class="mir-file" onclick="selectArtifact(' + i + ')" style="cursor:pointer;' + selected + '">' +
+      '<span class="fname">' + escapeHtml(a.originalName) + '</span>' +
+      '<span class="fmeta">' + a.metadata.fileType + ' · ' + a.metadata.size + ' chars · ' + a.metadata.status + '</span>' +
+      '</div>';
+  }
+  container.innerHTML = html;
+}
+
+function selectArtifact(index) {
+  selectedArtifact = artifacts[index];
+  renderFileList();
+  mirLog('Selected: ' + selectedArtifact.originalName);
+}
+
+function updateMemoryStats() {
+  var nodes = engine.getNodes();
+  document.getElementById('mem-nodes').textContent = nodes.length;
+  document.getElementById('mem-artifacts').textContent = artifacts.length;
+  document.getElementById('mem-chunks').textContent = nodes.filter(function(n) { return n.nodeType === 'source_chunk'; }).length;
+}
+
+function mirLog(msg, type) {
+  type = type || '';
+  var log = document.getElementById('mir-log');
+  var el = document.createElement('div');
+  el.className = 'le ' + type;
+  el.textContent = '[' + new Date().toLocaleTimeString() + '] ' + msg;
+  log.insertBefore(el, log.firstChild);
+  if (log.children.length > 20) log.removeChild(log.lastChild);
+}
+
+function escapeHtml(text) {
+  var div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+// ========== SELF-DEPLOY ==========
+function selfDeploy() {
+  var html = document.documentElement.outerHTML;
+  var blob = new Blob([html], { type: 'text/html' });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = 'morph-system-' + Date.now() + '.html';
+  a.click();
+  URL.revokeObjectURL(url);
+
+  mirLog('Self-contained package exported!', 'ok');
+  document.getElementById('dot-net').className = 'dot active';
+}
+
+// Auto-init
+mirLog('Morph Self-Deploying System ready', 'ok');
+mirLog('Upload files → Analyze → Regenerate (exact/equivalent/morph/improved)', 'ok');
+</script>
+
+<!-- SUBSTRUCTOR VISUALIZATION -->
+
+
+</body>
+</html>

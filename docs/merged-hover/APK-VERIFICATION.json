@@ -1,0 +1,10 @@
+{
+  "package": "app.synthai.hover.preview",
+  "version": "0.5.8-merge-preview1",
+  "sha256": "6e35ce01562484990ab4d28ba6c5b6e8210231d5961c8a89ba04396a457d1a6a",
+  "sizeBytes": 182985041,
+  "apkSignatureV2": true,
+  "testedRootfsMatches": true,
+  "arm64RuntimeSmokePassed": true,
+  "physicalDeviceTested": false
+}

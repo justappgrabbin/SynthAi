@@ -13,11 +13,54 @@ let worldAnimation = null;
 let pendingChat = null;
 let identityContext = { personId: 'front-screen', agentId: 'synthia' };
 const draftKey = 'synthia-origin-draft-v1';
+const timezoneSelect = $('#birth-timezone');
+for (const zone of Intl.supportedValuesOf('timeZone')) {
+  timezoneSelect.add(new Option(zone.replaceAll('_', ' ').replaceAll('/', ' · '), zone));
+}
 const identityFields = $$('#identity-form input, #identity-form select');
 try {
   const draft = JSON.parse(localStorage.getItem(draftKey) || '{}');
   identityFields.forEach(input => { if (typeof draft[input.id] === 'string') input.value = draft[input.id]; });
 } catch {}
+if ($('#birth-time').value?.length > 5) $('#birth-time').value = $('#birth-time').value.slice(0,5);
+let placeSearchTimer;
+let placeSearchVersion = 0;
+$('#birth-place').addEventListener('input', () => {
+  const query = $('#birth-place').value.trim();
+  const version = ++placeSearchVersion;
+  clearTimeout(placeSearchTimer);
+  $('#place-results').replaceChildren();
+  timezoneSelect.value = '';
+  $('#birth-latitude').value = '';
+  $('#birth-longitude').value = '';
+  $('#place-status').textContent = query.length < 2 ? 'Type at least two letters to find your birthplace.' : 'Searching…';
+  if (query.length < 2) return;
+  placeSearchTimer = setTimeout(async () => {
+    try {
+      const { places } = await api('/api/places?q=' + encodeURIComponent(query));
+      if (version !== placeSearchVersion) return;
+      $('#place-status').textContent = places.length ? 'Select your birthplace below.' : 'No matching city. Try a nearby city or open Location details.';
+      for (const place of places) {
+        const button = document.createElement('button');
+        button.type = 'button'; button.textContent = place.label;
+        button.onclick = () => {
+          ++placeSearchVersion;
+          $('#birth-place').value = place.label;
+          if (![...timezoneSelect.options].some(option => option.value === place.timeZone)) timezoneSelect.add(new Option(place.timeZone.replaceAll('_',' ').replaceAll('/',' · '),place.timeZone));
+          timezoneSelect.value = place.timeZone;
+          $('#birth-latitude').value = place.latitude;
+          $('#birth-longitude').value = place.longitude;
+          $('#place-results').replaceChildren();
+          $('#place-status').textContent = 'Location selected. Timezone and city coordinates filled in.';
+          $('#identity-form').dispatchEvent(new Event('input', { bubbles: true }));
+        };
+        $('#place-results').append(button);
+      }
+    } catch (error) {
+      if (version === placeSearchVersion) $('#place-status').textContent = 'Place search is unavailable. Open Location details to enter your place manually.';
+    }
+  }, 200);
+});
 $('#identity-form').addEventListener('input', () => {
   try { localStorage.setItem(draftKey, JSON.stringify(Object.fromEntries(identityFields.map(input => [input.id, input.value])))); } catch {}
 });
@@ -168,8 +211,12 @@ $('#identity-form').addEventListener('submit', async (event) => {
   const result = $('#identity-result');
   const submit = event.currentTarget.querySelector('[type=submit]');
   submit.disabled = true;
-  result.textContent = 'configuring…';
+  result.textContent = 'Saving your birth details…';
   try {
+    if (!timezoneSelect.value || $('#birth-latitude').value === '' || $('#birth-longitude').value === '') {
+      $('#place-details').open = true;
+      throw new Error('Select a birthplace from the search results, or complete its location details.');
+    }
     const data = await api('/api/identity/configure', {
       method: 'POST', body: JSON.stringify({
         ...identityContext,
@@ -387,3 +434,7 @@ async function openTalk() {
 }
 $('#build-talk').addEventListener('click', openTalk);
 $('#talk-open').addEventListener('click', openTalk);
+
+$('#build-deploy').addEventListener('click', () => { $('#build-frame').src = '/deploy/index.html'; });
+
+if (new URLSearchParams(location.search).get('surface') === 'chat') openSurface('chat');

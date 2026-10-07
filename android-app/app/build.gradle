@@ -29,9 +29,10 @@ android {
         hover {
             dimension 'face'
             applicationId 'app.synthai.hover'
+            if (System.getenv('SYNTHAI_PREVIEW_INSTALL') == '1') applicationIdSuffix '.preview'
             versionCode Integer.parseInt(System.getenv('SYNTHAI_VERSION_CODE') ?: '60')
-            versionName '0.5.8-hover-repair1'
-            manifestPlaceholders = [appLabel: 'Synthia']
+            versionName System.getenv('SYNTHAI_PREVIEW_INSTALL') == '1' ? '0.5.8-merge-preview1' : '0.5.8-hover-repair1'
+            manifestPlaceholders = [appLabel: System.getenv('SYNTHAI_PREVIEW_INSTALL') == '1' ? 'Synthia Preview' : 'Synthia']
         }
     }
 

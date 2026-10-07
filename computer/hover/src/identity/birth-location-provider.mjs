@@ -35,12 +35,12 @@ function parseDate(value) {
 }
 
 function parseTime(value) {
-  const match = /^(\d{2}):(\d{2}):(\d{2})$/.exec(String(value ?? ''));
-  if (!match) throw new TypeError('birthTime must include exact seconds as HH:MM:SS');
+  const match = /^(\d{2}):(\d{2})(?::(\d{2}))?$/.exec(String(value ?? ''));
+  if (!match) throw new TypeError('Enter a birth time as HH:MM or HH:MM:SS');
   return {
     hour: integer(match[1], 'birth hour', 0, 23),
     minute: integer(match[2], 'birth minute', 0, 59),
-    second: integer(match[3], 'birth second', 0, 59),
+    second: integer(match[3] ?? 0, 'birth second', 0, 59),
   };
 }
 
@@ -130,7 +130,8 @@ export function resolveZonedBirthInstant({ birthDate, birthTime, timeZone, disam
     timeZone: String(timeZone),
     disambiguation: unique.length > 1 ? disambiguation : 'unambiguous',
     candidateCount: unique.length,
-    exactSecondsPreserved: true,
+    exactSecondsPreserved: /^\d{2}:\d{2}:\d{2}$/.test(birthTime),
+    timePrecision: /^\d{2}:\d{2}:\d{2}$/.test(birthTime) ? 'second' : 'minute',
   });
 }
 

@@ -1,0 +1,71 @@
+diff --git a/computer/residents/native-image-resident-loader.mjs b/computer/residents/native-image-resident-loader.mjs
+index 9127a4e..5d22528 100644
+--- a/computer/residents/native-image-resident-loader.mjs
++++ b/computer/residents/native-image-resident-loader.mjs
+@@ -88,6 +88,7 @@ export class NativeImageResidentLoader {
+   async #request(descriptor, method, route, body = undefined) {
+     const response = await this.fetchImpl(descriptor.url + route, {
+       method,
++      signal: AbortSignal.timeout(3000),
+       headers: body === undefined ? undefined : { 'content-type': 'application/json' },
+       body: body === undefined ? undefined : JSON.stringify(body),
+     });
+@@ -119,7 +120,7 @@ export class NativeImageResidentLoader {
+     const record = verified.record;
+     const descriptor = descriptorFor(record, { residentId });
+     const previous = this.mounts.get(descriptor.residentId);
+-    previous?.unbind?.();
++    if (previous) await this.unmount(descriptor.residentId);
+ 
+     const host = await this.computer.terminal.hostApp({
+       id: descriptor.hostId,
+@@ -130,7 +131,18 @@ export class NativeImageResidentLoader {
+       port: descriptor.port,
+       url: descriptor.url,
+     });
+-    const health = await this.#waitHealthy(descriptor, timeoutMs);
++    let health;
++    try {
++      health = await this.#waitHealthy(descriptor, timeoutMs);
++    } catch (error) {
++      try {
++        await this.computer.terminal.stopApp(descriptor.hostId);
++      } catch (cleanupError) {
++        throw new AggregateError([error, cleanupError], descriptor.name + ' startup failed and process cleanup failed');
++      }
++      this.bus?.emit('resident-image:startup-failed', { residentId: descriptor.residentId, error: error.message });
++      throw error;
++    }
+ 
+     await this.computer.registerResident(descriptor.residentId, {
+       publicState: {
+diff --git a/computer/tests/native-resident-images.test.mjs b/computer/tests/native-resident-images.test.mjs
+index 81e42da..79c7a40 100644
+--- a/computer/tests/native-resident-images.test.mjs
++++ b/computer/tests/native-resident-images.test.mjs
+@@ -169,3 +169,25 @@ test('MOBILE COMPUTER: resident_type echo and synthia58 delegate to the native r
+   assert.equal(prime.launchUrl, 'http://127.0.0.1:17759');
+   assert.deepEqual(calls.map(call => call.imageId), ['echo-image', 'prime-image']);
+ });
++
++test('failed resident startup stops the launched process and publishes no active resident', async () => {
++  const runtime = await new NativeSeedRuntime({ persistence: new MemoryPersistence(), namespace: 'failed-image-loader' }).boot();
++  const stopped = [];
++  runtime.terminal = {
++    async hostApp(spec) { return { id: spec.id, status: 'active' }; },
++    async stopApp(id) { stopped.push(id); return { stopped: true }; },
++  };
++  const packageStore = { async verify() { return { installed: true, record: {
++    id: 'echo', residentType: 'echo', residentEntry: 'control.mjs', base: '/tmp/echo',
++    payloadSha256: 'c'.repeat(64), manifest: { name: 'Echo' },
++  } }; } };
++  let now = 0;
++  const loader = new NativeImageResidentLoader({ computer: runtime, packageStore,
++    clock: () => now,
++    fetchImpl: async (_url, options) => { assert.ok(options.signal); now = 100; throw new Error('connection refused'); },
++  });
++  await assert.rejects(loader.mount({ imageId: 'echo', timeoutMs: 1 }), /did not become healthy/);
++  assert.deepEqual(stopped, ['resident-echo-cccccccccccc']);
++  assert.equal(loader.snapshot().length, 0);
++  assert.equal(runtime.meshKernel.participant('echo'), null);
++});

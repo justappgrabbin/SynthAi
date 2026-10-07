@@ -145,6 +145,9 @@ jobs:
           test -f synthia-server/render-server.py
           test -f synthia-server/requirements-mobile.txt
 
+      - name: Build integrated SynthAIPro screen
+        run: node scripts/build-synthaipro-integration.mjs
+
       - name: Build embedded ARM64 Linux Computer rootfs
         if: ${{ !startsWith(github.ref_name, 'hover/repair-') }}
         run: |
@@ -183,6 +186,7 @@ jobs:
             --load \
             .
           node .github/scripts/arm64-hover-smoke.mjs "synthia-hover-arm64:$GITHUB_SHA"
+          docker run --rm -i --platform linux/arm64 --entrypoint node "synthia-hover-arm64:$GITHUB_SHA" --input-type=module - < .github/scripts/merged-hover-runtime-smoke.mjs
           mkdir -p /tmp/synthia-hover-rootfs
           container="$(docker create --platform linux/arm64 "synthia-hover-arm64:$GITHUB_SHA")"
           docker export "$container" | tar -C /tmp/synthia-hover-rootfs -xf -
