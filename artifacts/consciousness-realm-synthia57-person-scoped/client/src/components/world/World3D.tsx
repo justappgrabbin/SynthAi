@@ -70,70 +70,211 @@ function SynthiaMorphBody({ agent, emissiveIntensity }: { agent: Agent; emissive
   const scale = morph?.scale ?? 1;
   const ringCount = Math.max(1, Math.min(5, morph?.base ?? 3));
   const pulseSpeed = morph?.pulseSpeed ?? 1;
+  const intensity = morph?.intensity ?? 0.7;
+
+  // Morph forms are phenotype profiles, not replacement primitives.
+  // Cynthia keeps one embodied identity while Morph continuously changes
+  // proportions, gait, posture and field expression around the same root.
+  const profile =
+    form === 'column' ? { width: 0.82, height: 1.14, shoulders: 0.88, hips: 0.84, head: 0.94 } :
+    form === 'orb' ? { width: 1.10, height: 0.94, shoulders: 1.02, hips: 1.10, head: 1.04 } :
+    form === 'diamond' ? { width: 0.98, height: 1.04, shoulders: 1.18, hips: 0.88, head: 0.96 } :
+    form === 'crystal' ? { width: 0.90, height: 1.10, shoulders: 1.04, hips: 0.90, head: 0.92 } :
+    { width: 1.00, height: 1.00, shoulders: 1.00, hips: 1.00, head: 1.00 };
+
   const bodyRef = useRef<THREE.Group>(null);
+  const torsoRef = useRef<THREE.Group>(null);
+  const hipsRef = useRef<THREE.Group>(null);
+  const headRef = useRef<THREE.Group>(null);
+  const leftArmRef = useRef<THREE.Group>(null);
+  const rightArmRef = useRef<THREE.Group>(null);
+  const leftLegRef = useRef<THREE.Group>(null);
+  const rightLegRef = useRef<THREE.Group>(null);
+
+  const skinColor = ((agent.appearance as any)?.skinColor ?? '#8f664f') as string;
+  const clothingColor = agent.appearance?.color ?? '#6f4f8f';
+  const accentColor = agent.appearance?.auraColor ?? clothingColor;
 
   useFrame(({ clock }) => {
     if (!bodyRef.current) return;
+
     const t = clock.elapsedTime * pulseSpeed;
-    const breathe = 1 + Math.sin(t) * 0.055;
-    bodyRef.current.scale.setScalar(scale * breathe);
-    bodyRef.current.rotation.y += 0.003 + ((morph?.tone ?? 1) * 0.0008);
+    const breathe = 1 + Math.sin(t) * (0.018 + intensity * 0.012);
+    const targetX = scale * profile.width;
+    const targetY = scale * profile.height * breathe;
+    const targetZ = scale * profile.width;
+
+    bodyRef.current.scale.x = THREE.MathUtils.lerp(bodyRef.current.scale.x, targetX, 0.08);
+    bodyRef.current.scale.y = THREE.MathUtils.lerp(bodyRef.current.scale.y, targetY, 0.08);
+    bodyRef.current.scale.z = THREE.MathUtils.lerp(bodyRef.current.scale.z, targetZ, 0.08);
+
+    if (torsoRef.current) {
+      torsoRef.current.scale.x = THREE.MathUtils.lerp(torsoRef.current.scale.x, profile.shoulders, 0.08);
+      torsoRef.current.scale.z = THREE.MathUtils.lerp(torsoRef.current.scale.z, 0.92 + intensity * 0.08, 0.08);
+    }
+    if (hipsRef.current) {
+      hipsRef.current.scale.x = THREE.MathUtils.lerp(hipsRef.current.scale.x, profile.hips, 0.08);
+    }
+    if (headRef.current) {
+      headRef.current.scale.setScalar(
+        THREE.MathUtils.lerp(headRef.current.scale.x, profile.head, 0.08)
+      );
+    }
+
+    const locomoting = agent.animationState === 'walking' || agent.animationState === 'running';
+    const gaitRate = agent.animationState === 'running' ? 10 : 7;
+    const gaitAmount = locomoting ? (agent.animationState === 'running' ? 0.62 : 0.42) : 0;
+    const swing = Math.sin(clock.elapsedTime * gaitRate) * gaitAmount;
+
+    if (leftArmRef.current) leftArmRef.current.rotation.x = THREE.MathUtils.lerp(leftArmRef.current.rotation.x, swing, 0.22);
+    if (rightArmRef.current) rightArmRef.current.rotation.x = THREE.MathUtils.lerp(rightArmRef.current.rotation.x, -swing, 0.22);
+    if (leftLegRef.current) leftLegRef.current.rotation.x = THREE.MathUtils.lerp(leftLegRef.current.rotation.x, -swing * 0.72, 0.22);
+    if (rightLegRef.current) rightLegRef.current.rotation.x = THREE.MathUtils.lerp(rightLegRef.current.rotation.x, swing * 0.72, 0.22);
+
+    if (!locomoting && agent.animationState === 'meditating') {
+      bodyRef.current.position.y = THREE.MathUtils.lerp(bodyRef.current.position.y, 0.16 + Math.sin(t * 0.6) * 0.05, 0.08);
+    } else {
+      bodyRef.current.position.y = THREE.MathUtils.lerp(bodyRef.current.position.y, 0, 0.12);
+    }
   });
 
   return (
     <group ref={bodyRef}>
-      <mesh position={[0, 0.95, 0]} castShadow>
-        {form === 'orb' && <sphereGeometry args={[0.48, 24, 24]} />}
-        {form === 'column' && <capsuleGeometry args={[0.30, 1.15, 8, 16]} />}
-        {form === 'diamond' && <octahedronGeometry args={[0.62, 1]} />}
-        {form === 'crystal' && <dodecahedronGeometry args={[0.58, 0]} />}
-        {form === 'field' && <icosahedronGeometry args={[0.64, 1]} />}
-        <meshStandardMaterial
-          color={agent.appearance.color}
-          emissive={agent.appearance.auraColor}
-          emissiveIntensity={emissiveIntensity + 0.35}
-          roughness={0.22}
-          metalness={0.7}
-          transparent
-          opacity={0.92}
-        />
-      </mesh>
+      {/* pelvis / clothing anchor */}
+      <group ref={hipsRef}>
+        <mesh position={[0, 0.72, 0]} castShadow>
+          <sphereGeometry args={[0.30, 18, 18]} />
+          <meshStandardMaterial
+            color={clothingColor}
+            emissive={accentColor}
+            emissiveIntensity={emissiveIntensity * 0.24}
+            roughness={0.62}
+            metalness={0.08}
+          />
+        </mesh>
+        <mesh position={[0, 0.82, 0]} castShadow>
+          <coneGeometry args={[0.42, 0.48, 18, 1]} />
+          <meshStandardMaterial
+            color={accentColor}
+            emissive={clothingColor}
+            emissiveIntensity={emissiveIntensity * 0.18}
+            roughness={0.68}
+            metalness={0.04}
+          />
+        </mesh>
+      </group>
 
-      <mesh position={[0, 1.62, 0]} castShadow>
-        <sphereGeometry args={[0.22, 20, 20]} />
-        <meshStandardMaterial
-          color={agent.appearance.auraColor}
-          emissive={agent.appearance.color}
-          emissiveIntensity={emissiveIntensity + 0.55}
-          roughness={0.18}
-          metalness={0.72}
-        />
-      </mesh>
+      {/* torso stays embodied while Morph changes its phenotype */}
+      <group ref={torsoRef}>
+        <mesh position={[0, 1.28, 0]} castShadow>
+          <capsuleGeometry args={[0.31, 0.76, 8, 18]} />
+          <meshStandardMaterial
+            color={clothingColor}
+            emissive={accentColor}
+            emissiveIntensity={emissiveIntensity * 0.28}
+            roughness={0.58}
+            metalness={0.10}
+          />
+        </mesh>
+        <mesh position={[0, 1.66, 0]} castShadow>
+          <capsuleGeometry args={[0.105, 0.12, 6, 12]} />
+          <meshStandardMaterial color={skinColor} roughness={0.72} metalness={0.02} />
+        </mesh>
+      </group>
 
+      {/* head is identity-bearing, not the entire body */}
+      <group ref={headRef} position={[0, 1.98, 0]}>
+        <mesh castShadow>
+          <sphereGeometry args={[0.255, 24, 24]} />
+          <meshStandardMaterial color={skinColor} roughness={0.72} metalness={0.02} />
+        </mesh>
+        <mesh position={[-0.085, 0.025, 0.225]}>
+          <sphereGeometry args={[0.028, 10, 10]} />
+          <meshBasicMaterial color="#f7f4ef" />
+        </mesh>
+        <mesh position={[0.085, 0.025, 0.225]}>
+          <sphereGeometry args={[0.028, 10, 10]} />
+          <meshBasicMaterial color="#f7f4ef" />
+        </mesh>
+        <mesh position={[-0.085, 0.025, 0.248]}>
+          <sphereGeometry args={[0.012, 8, 8]} />
+          <meshBasicMaterial color="#17131c" />
+        </mesh>
+        <mesh position={[0.085, 0.025, 0.248]}>
+          <sphereGeometry args={[0.012, 8, 8]} />
+          <meshBasicMaterial color="#17131c" />
+        </mesh>
+      </group>
+
+      {/* articulated arms */}
+      <group ref={leftArmRef} position={[-0.39, 1.52, 0]} rotation={[0, 0, -0.10]}>
+        <mesh position={[0, -0.34, 0]} castShadow>
+          <capsuleGeometry args={[0.095, 0.52, 7, 14]} />
+          <meshStandardMaterial color={skinColor} roughness={0.70} />
+        </mesh>
+        <mesh position={[0, -0.68, 0]} castShadow>
+          <sphereGeometry args={[0.105, 14, 14]} />
+          <meshStandardMaterial color={skinColor} roughness={0.70} />
+        </mesh>
+      </group>
+      <group ref={rightArmRef} position={[0.39, 1.52, 0]} rotation={[0, 0, 0.10]}>
+        <mesh position={[0, -0.34, 0]} castShadow>
+          <capsuleGeometry args={[0.095, 0.52, 7, 14]} />
+          <meshStandardMaterial color={skinColor} roughness={0.70} />
+        </mesh>
+        <mesh position={[0, -0.68, 0]} castShadow>
+          <sphereGeometry args={[0.105, 14, 14]} />
+          <meshStandardMaterial color={skinColor} roughness={0.70} />
+        </mesh>
+      </group>
+
+      {/* articulated legs; the agent root remains the invisible navigation anchor */}
+      <group ref={leftLegRef} position={[-0.17, 0.62, 0]}>
+        <mesh position={[0, -0.44, 0]} castShadow>
+          <capsuleGeometry args={[0.115, 0.70, 7, 14]} />
+          <meshStandardMaterial color={clothingColor} roughness={0.64} />
+        </mesh>
+        <mesh position={[0, -0.89, 0.08]} castShadow>
+          <boxGeometry args={[0.22, 0.12, 0.38]} />
+          <meshStandardMaterial color="#2c2933" roughness={0.82} />
+        </mesh>
+      </group>
+      <group ref={rightLegRef} position={[0.17, 0.62, 0]}>
+        <mesh position={[0, -0.44, 0]} castShadow>
+          <capsuleGeometry args={[0.115, 0.70, 7, 14]} />
+          <meshStandardMaterial color={clothingColor} roughness={0.64} />
+        </mesh>
+        <mesh position={[0, -0.89, 0.08]} castShadow>
+          <boxGeometry args={[0.22, 0.12, 0.38]} />
+          <meshStandardMaterial color="#2c2933" roughness={0.82} />
+        </mesh>
+      </group>
+
+      {/* Morph remains visible as Cynthia's field instead of replacing her body. */}
       {Array.from({ length: ringCount }).map((_, index) => (
         <mesh
           key={index}
-          position={[0, 1.03, 0]}
+          position={[0, 1.10, 0]}
           rotation={[
             Math.PI / 2 + index * 0.24,
             (morph?.line ?? 1) * 0.14 + index * 0.36,
             index * 0.28,
           ]}
         >
-          <torusGeometry args={[0.72 + index * 0.08, 0.012 + index * 0.003, 8, 48]} />
+          <torusGeometry args={[0.74 + index * 0.08, 0.010 + index * 0.0025, 8, 48]} />
           <meshBasicMaterial
-            color={index % 2 === 0 ? agent.appearance.color : agent.appearance.auraColor}
+            color={index % 2 === 0 ? clothingColor : accentColor}
             transparent
-            opacity={0.30 + Math.min(0.45, (morph?.intensity ?? 0.7) * 0.25)}
+            opacity={0.18 + Math.min(0.34, intensity * 0.22)}
           />
         </mesh>
       ))}
 
       <pointLight
-        position={[0, 1.05, 0]}
-        intensity={1.1 + (morph?.intensity ?? 0.7)}
-        distance={8}
-        color={agent.appearance.color}
+        position={[0, 1.20, 0]}
+        intensity={0.55 + intensity * 0.85}
+        distance={7}
+        color={accentColor}
       />
     </group>
   );
