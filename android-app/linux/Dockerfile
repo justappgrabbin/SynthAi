@@ -7,6 +7,16 @@ RUN npm ci --no-audit --no-fund
 COPY computer/donors/resonance-network/frontend ./
 RUN npm run build
 
+# Install target dependencies on the builder CPU to avoid QEMU/V8 crashes.
+# Lifecycle scripts stay disabled; optional binaries target the phone (ARM64 musl).
+FROM --platform=$BUILDPLATFORM node:22-alpine3.22 AS synthia-server-deps
+WORKDIR /opt/synthia-server
+COPY synthia-server ./
+RUN node -e "const fs=require('fs');const p=JSON.parse(fs.readFileSync('package.json','utf8'));for(const d of ['onnxruntime-node','exceljs','pdf-parse','mammoth','@supabase/supabase-js','socket.io','simple-git','jszip','multer','node-cron','ws'])delete (p.dependencies||{})[d];delete p.devDependencies;fs.writeFileSync('package.json',JSON.stringify(p,null,2)+'\n')" \
+    && npm install --cpu=arm64 --os=linux --libc=musl --omit=dev --no-audit --no-fund --ignore-scripts \
+    && npm cache clean --force \
+    && rm -rf /root/.npm /tmp/*
+
 FROM node:22-alpine3.22
 
 RUN apk add --no-cache \
@@ -28,13 +38,7 @@ RUN apk add --no-cache py3-numpy \
 # Embedded Synthia Server (checked out by CI at a pinned SHA into ./synthia-server).
 # Only the lite Node bus and the Python API run on the phone, so heavy/native
 # Node deps that lite.js never loads are dropped before install.
-COPY synthia-server /opt/synthia-server
-
-RUN cd /opt/synthia-server \
-    && node -e "const fs=require('fs');const p=JSON.parse(fs.readFileSync('package.json','utf8'));for(const d of ['onnxruntime-node','exceljs','pdf-parse','mammoth','@supabase/supabase-js','socket.io','simple-git','jszip','multer','node-cron','ws'])delete (p.dependencies||{})[d];delete p.devDependencies;fs.writeFileSync('package.json',JSON.stringify(p,null,2)+'\n')" \
-    && npm install --omit=dev --no-audit --no-fund --ignore-scripts \
-    && npm cache clean --force \
-    && rm -rf /root/.npm /tmp/*
+COPY --from=synthia-server-deps /opt/synthia-server /opt/synthia-server
 
 RUN cd /opt/synthia-server \
     && ( pip install --break-system-packages --no-cache-dir --prefer-binary -r requirements-mobile.txt \
