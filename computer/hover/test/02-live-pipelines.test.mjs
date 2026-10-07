@@ -22,7 +22,8 @@ test('visible chat never exposes runtime JSON or state packets', async () => {
   const message = 'Hello Synthia';
   const response = await system.chat(message, { personId: 'chat-visible-test' });
   assert.equal(typeof response.utterance, 'string');
-  assert.equal(response.utterance, message);
+  assert.ok(response.utterance.trim().length > 0);
+  assert.notEqual(response.utterance, message);
   assert.equal(response.utterance.includes('[weave:'), false);
   assert.equal(response.utterance.includes('conditionStateId'), false);
   assert.equal(response.utterance.includes('resolved-state'), false);
