@@ -120,6 +120,16 @@
       "path": "tests/world-embodiment.test.mjs",
       "baseSha256": null,
       "updatedSha256": "f0d3772ff5377705fdf11feb5a8add17e650901b89742598bad2b8e8ae2ad660"
+    },
+    {
+      "path": "components/organism/processes/MeshArtifactGenerator.mjs",
+      "baseSha256": null,
+      "updatedSha256": "59c92598d2a946fcf847e238cf87aef49363222c670d5b1315e133f023a4585e"
+    },
+    {
+      "path": "components/organism/tests/mesh-artifact-generation.mjs",
+      "baseSha256": null,
+      "updatedSha256": "d19b9ad4f18bf75f5f7fbf7f0e5a0cf5e22b754c1eb7112969a9fa48af57523f"
     }
   ]
 }
