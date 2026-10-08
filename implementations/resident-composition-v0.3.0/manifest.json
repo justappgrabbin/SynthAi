@@ -80,6 +80,21 @@
       "path": "tests/spec-boundaries.test.mjs",
       "baseSha256": null,
       "updatedSha256": "e8f7b8ba4979a4ffde5c0b7046facc4d3c71f3889e39c108bcff95184f0572ae"
+    },
+    {
+      "path": "components/organism/organism/HumanOutcomeLedger.mjs",
+      "baseSha256": "6907569b9848d6e9b2521da3a8227df470fa24980cd71d981066fc0f6e9afd6f",
+      "updatedSha256": "23e8738a6abc62049002548619683eb5a838eb36632a56d001889c428305e447"
+    },
+    {
+      "path": "components/organism/organism/ScienceMode.mjs",
+      "baseSha256": "6d459db89c5aa7ece71042dfdb132a9c0370918dc8b22d47976d1fb310a973b1",
+      "updatedSha256": "8e9e09c53ae3e5a93c409d07f82e17fce02a7948e174d97db09d73f267b88b55"
+    },
+    {
+      "path": "tests/human-outcome-lineage.test.mjs",
+      "baseSha256": null,
+      "updatedSha256": "5dfe48d8a96f41073c4c312fbd8d923979ca927a0eb269e3cc8f7241f6fab018"
     }
   ]
 }
