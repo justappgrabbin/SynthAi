@@ -1,4 +1,4 @@
-import { resolveIntroductionAddress } from './IntroductionAddress.mjs';
+import { resolveIntroductionAddress, requireIntroductionAddress } from './IntroductionAddress.mjs';
 import SemanticWorld from '../world/SemanticWorld.mjs';
 const clone=x=>x==null?x:structuredClone(x);
 
@@ -30,6 +30,12 @@ export class WorldEmbodiment {
   const w={id,address:clone(address),addressBinding,expression:clone(expression),objects:addressed};this.state.worlds.push(w);this.#record('world-defined',{worldId:id,addressBinding});return clone(w);
  }
  enter(worldId){const w=this.state.worlds.find(w=>w.id===worldId);if(!w)throw new Error('unknown world');if(!this.#addressed(w))throw new Error('world address unresolved before interaction');this.state.activeWorld=worldId;this.#syncWorld();this.#record('world-entered',{worldId});return this.snapshot();}
+ witnessRole(record){
+  if(record?.identityId!==this.state.identityId||record?.status!=='verified'||record?.workup?.Space?.verified!==true)throw new TypeError('Verified role result for the existing identity required');
+  const binding=requireIntroductionAddress({address:record.addressBinding?.address},null,`manifestation:${record.id}`);
+  this.state.manifestation={id:record.id,roleId:record.roleId,need:record.need,addressBinding:binding,output:clone(record.workup.Space.output),source:clone(record.source)};
+  this.#record('role-manifested',{manifestation:clone(this.state.manifestation)});return this.snapshot();
+ }
  setSelfState(state){if(typeof state!=='string'||!state)throw new TypeError('self state required');this.state.selfState=state;this.#record('self-state',{state});return this.snapshot();}
  interact(objectId,actionId){
   const w=this.state.worlds.find(w=>w.id===this.state.activeWorld);if(!w)throw new Error('no active world');if(!this.#addressed(w))throw new Error('world address unresolved before interaction');
@@ -42,7 +48,7 @@ export class WorldEmbodiment {
   this.#record('object-interaction',{worldId:w.id,objectId,actionId,before,after:{objectState:o.state,interaction:clone(w.interaction)},source:'authored-world-transition',scope:'local-object-interaction',qualitative:clone(action.qualitative||null),address:clone(action.address||null)});
   return this.snapshot();
  }
- snapshot(){const w=this.state.worlds.find(w=>w.id===this.state.activeWorld&&this.#addressed(w));return {...clone(this.state),currentWorld:clone(w),avatar:{identityId:this.state.identityId,selfState:this.state.selfState,interaction:clone(w?.interaction),morph:clone(this.unit.morphicExpression?.last||null)},provision:this.unit.complement?.snapshot?.()||null};}
+ snapshot(){const w=this.state.worlds.find(w=>w.id===this.state.activeWorld&&this.#addressed(w));return {...clone(this.state),currentWorld:clone(w),avatar:{identityId:this.state.identityId,selfState:this.state.selfState,manifestation:clone(this.state.manifestation),interaction:clone(w?.interaction),morph:clone(this.unit.morphicExpression?.last||null)},provision:this.unit.complement?.snapshot?.()||null};}
  #addressed(w){
   const valid=binding=>binding?.complete===true&&resolveIntroductionAddress({address:binding.address}).complete;
   return valid(w.addressBinding)&&w.objects.every(o=>valid(o.addressBinding)&&(o.actions||[]).every(a=>valid(a.addressBinding)));

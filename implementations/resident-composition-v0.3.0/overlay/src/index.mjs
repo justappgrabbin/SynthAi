@@ -7,3 +7,6 @@ export { BehaviorArtifactProducer, validateExperience } from '../components/orga
 export { angularTicks, measureGate, reconstructGatePosition, GATE_TICKS, SUBDIVISIONS } from '../components/organism/processes/MandalaMeasure.mjs';
 
 export { reduceExperience, createReducedSession } from '../components/organism/processes/AutomataReduction.mjs';
+
+export { NeedRoleMorph, ROLE_WORKUP_SOURCE } from '../components/organism/integration/NeedRoleMorph.mjs';
+export { executeWithResidentFallback } from '../components/organism/integration/ResidentFallback.mjs';

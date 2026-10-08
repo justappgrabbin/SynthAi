@@ -1,3 +1,5 @@
+import NeedRoleMorph from '../components/organism/integration/NeedRoleMorph.mjs';
+import { executeWithResidentFallback } from '../components/organism/integration/ResidentFallback.mjs';
 import { requireIntroductionAddress } from '../components/organism/integration/IntroductionAddress.mjs';
 import MeshArtifactGenerator from '../components/organism/processes/MeshArtifactGenerator.mjs';
 import BehaviorArtifactProducer from '../components/organism/processes/BehaviorArtifactProducer.mjs';
@@ -101,6 +103,9 @@ export class ScientificSynthiaAssembly {
       storeName: 'addressed-records',
     });
 
+    this.residentFallback = options.residentFallback ?? false;
+    this.fallbackBridge = options.fallbackBridge ?? new ResidentExecutionBridge(options.residentExecutionOptions ?? {});
+    this.needRoles = new NeedRoleMorph({memory:this.organism.memory,identity:()=>this.embodiment.snapshot().identityId,onWitness:record=>this.embodiment.witnessRole(record),executeArtifact:(artifact,context)=>this.executeArtifact(artifact,context)});
     this.events = [];
     this.artifactGenerator = null;
     if (options.artifactGeneration) this.mountArtifactGenerator(options.artifactGeneration);
@@ -165,6 +170,9 @@ export class ScientificSynthiaAssembly {
   }
 
   addressAudit(address) { return auditAddress(address); }
+
+  registerMorphRole(role) { return this.needRoles.register(role); }
+  morphForNeed(request) { return this.needRoles.morph(request); }
 
   registerSymbol(occurrence) { return this.compositions.occurrence(occurrence); }
   composeSymbols(memberIds, options) { return this.compositions.compose(memberIds, options); }
@@ -264,7 +272,11 @@ export class ScientificSynthiaAssembly {
           workerUsed: false,
           result: { engine: 'synthia-address-first-boundary', stdout: [], returnValue: null },
         }
-      : await this.executionSurface.execute(session.normalized, context);
+      : await executeWithResidentFallback({
+          artifact:session.normalized,context,enabled:context.residentFallback ?? this.residentFallback,
+          primary:(normalized,executionContext)=>this.executionSurface.execute(normalized,executionContext),
+          resident:(normalized,executionContext)=>this.fallbackBridge.execute({name:normalized.name,bytes:normalized.bytes,content:normalized.text},executionContext)
+        });
 
     if (!full.ok) {
       return Object.freeze({
@@ -392,6 +404,7 @@ export class ScientificSynthiaAssembly {
     return Object.freeze({
       version: this.version,
       executionMode: this.executionMode,
+      needRoles:this.needRoles.snapshot(),
       architecture: 'non-destructive scientific assembly',
       dimensions: this.dimensions,
       graphProjections: this.graphProjections,

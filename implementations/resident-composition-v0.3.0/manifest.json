@@ -104,7 +104,7 @@
     {
       "path": "components/organism/integration/WorldEmbodiment.mjs",
       "baseSha256": null,
-      "updatedSha256": "80a7b6793b7f492814cc39276cd4ae9de8fc07e387ed672f8239818c98896754"
+      "updatedSha256": "bcd5b7c2ba240acce170b104332a4b267ea822832b25db9ff1b3e18a491243e0"
     },
     {
       "path": "components/organism/browser/LivingWorldView.mjs",
@@ -114,7 +114,7 @@
     {
       "path": "src/ScientificSynthiaAssembly.mjs",
       "baseSha256": "046b0c2d1a53a1a92e27b0968963ea1f5b65e03d3e902332b5bb88954784901e",
-      "updatedSha256": "e35920ecee72a6cc0ce501492ff15b91a39e471db915eba623871097bff7afcc"
+      "updatedSha256": "09e1ccc4592b6fd654579850a49b773dd3993ae10fdd50ff8242f4aeb5608dfb"
     },
     {
       "path": "tests/world-embodiment.test.mjs",
@@ -149,7 +149,7 @@
     {
       "path": "src/index.mjs",
       "baseSha256": "f78794729613461e929bd823e3c4fd087dd8de359a170c0b670ac1b17e6e8b6a",
-      "updatedSha256": "ecdfdeacb1cde3311ebc6382f1a141daade19a47dadf0b49c4d00eef08b68b7e"
+      "updatedSha256": "0e7d1f4af90c6141d3650d0d59447f635b888df717b501aa5bdba51deda2a848"
     },
     {
       "path": "tests/mesh-generation.test.mjs",
@@ -190,6 +190,26 @@
       "path": "tests/automata-reduction.test.mjs",
       "baseSha256": null,
       "updatedSha256": "6731e8245b9c649821c03ac70bf95d3b91693150c5425cd0ce04cbb3710d9c64"
+    },
+    {
+      "path": "components/organism/integration/NeedRoleMorph.mjs",
+      "baseSha256": null,
+      "updatedSha256": "11b662ba15fc224300a3fe645b4ddb02ca883ee19b804704a6f2a8a0573929f4"
+    },
+    {
+      "path": "components/organism/integration/ResidentFallback.mjs",
+      "baseSha256": null,
+      "updatedSha256": "3ed585d0f5f4c05fc7762b50ab59a1924b50c58449f972ff397d139616556c3d"
+    },
+    {
+      "path": "components/automata-ingestion/src/automata/ingestion-execution-kernel.mjs",
+      "baseSha256": "a1fa73df51c0fe9c2b26f901bbd02be2f7fba2981a4bc461b147cc7dff9f1882",
+      "updatedSha256": "503c97d9c3d49ca3ee1c1b70247c93506a2f7c1c46e42f3f531c9a8995601f46"
+    },
+    {
+      "path": "tests/need-role-morph.test.mjs",
+      "baseSha256": null,
+      "updatedSha256": "e0b4e0eca8c3f759a5f0a5541c396def50d98d7f9d20f2151b30346f7d94c1f9"
     }
   ]
 }
