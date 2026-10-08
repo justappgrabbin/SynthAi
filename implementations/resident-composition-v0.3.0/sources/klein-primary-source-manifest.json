@@ -1,0 +1,50 @@
+[
+  {
+    "id": "messy",
+    "url": "https://pages.cs.wisc.edu/~sklein/Meta-symbolic%20Simulation%20System.pdf",
+    "bytes": 19295160,
+    "sha256": "bb440682679f8facec385ef4b3e831389120f73afcb87a3e2b1f3dabac115a3c",
+    "localPdfPagesReviewed": "1\u20135, 8 (foreword and introduction); contents 6\u20137; selected declaration material through 18",
+    "textExtraction": "OCR; tables and diagrams require visual confirmation before further transcription"
+  },
+  {
+    "id": "iching",
+    "url": "https://pages.cs.wisc.edu/~sklein/I-CHING%20Example%20from%20%5BCURRENT%20ANTHROPOLOGY%201983.pdf",
+    "bytes": 1713210,
+    "sha256": "97deb9f134ba311ead76e259447d276fe3489d65230e520a0234352e53f23df5",
+    "localPdfPagesReviewed": "1, 3\u20136",
+    "textExtraction": "OCR; tables and diagrams require visual confirmation before further transcription"
+  },
+  {
+    "id": "auto-inference",
+    "url": "https://pages.cs.wisc.edu/~sklein/Auto-Inference%20Semantic%20Structure%20Rules%20in%20Generative%20Semanrtic%20Grammars%20.pdf",
+    "bytes": 1710517,
+    "sha256": "90da8910320685bd385fcdb15c976f143834004742a27e1ae50e3a6b74559b55",
+    "localPdfPagesReviewed": "2\u20134, 6\u20138, 10, 12\u201316, 18",
+    "textExtraction": "OCR; tables and diagrams require visual confirmation before further transcription"
+  },
+  {
+    "id": "analogy",
+    "url": "https://pages.cs.wisc.edu/~sklein/Analogical%20Foundations%20of%20Creativity%20in%20Language%2C%20Culture%20%26%20the%20Arts/Analogical%20Foundations%20of%20Creativity%20in%20Language%2C%20Culture%20%26%20the%20Arts.pdf",
+    "bytes": 265777,
+    "sha256": "c401673558a7c1a0b2c4a25d42ce6edc1303c080fa5166a7ef05dd46fe25ea49",
+    "localPdfPagesReviewed": "1\u201321, text; figure descriptions and available numeric examples",
+    "textExtraction": "native text"
+  },
+  {
+    "id": "style",
+    "url": "https://pages.cs.wisc.edu/~sklein/Control-of-Style-gen-gram.pdf",
+    "bytes": 1486873,
+    "sha256": "f5bfbd3f905de8a24c420685e3ecc05372280d184279c54670cffa87374726c9",
+    "localPdfPagesReviewed": "1, 10\u201311",
+    "textExtraction": "OCR; tables and diagrams require visual confirmation before further transcription"
+  },
+  {
+    "id": "contact",
+    "url": "https://pages.cs.wisc.edu/~sklein/Computer%20Simulation%20of%20Language%20Contact%20Models.pdf",
+    "bytes": 1749514,
+    "sha256": "4d7ab1ea50cc0fae0a1292f530912b7e8633392c97cabf0807dbcae2f55c03de",
+    "localPdfPagesReviewed": "9\u201310, 12",
+    "textExtraction": "OCR; tables and diagrams require visual confirmation before further transcription"
+  }
+]

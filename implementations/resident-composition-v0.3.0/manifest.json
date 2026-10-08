@@ -130,6 +130,11 @@
       "path": "components/organism/tests/mesh-artifact-generation.mjs",
       "baseSha256": null,
       "updatedSha256": "d19b9ad4f18bf75f5f7fbf7f0e5a0cf5e22b754c1eb7112969a9fa48af57523f"
+    },
+    {
+      "path": "components/organism/tests/klein-primary-source-examples.mjs",
+      "baseSha256": null,
+      "updatedSha256": "286958eebe246a856e9c951f3882ce2a61a7d75370017116c27f7858e279339d"
     }
   ]
 }
