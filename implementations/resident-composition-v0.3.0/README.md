@@ -20,3 +20,7 @@ The original archive SHA256 is in `manifest.json`; every overlay file includes i
 Nine assembly tests passed. Tests cover overlapping symbol identity, restart restoration, unresolved address preservation, visible composition wiring, direct local execution, resident capability derivation/reuse, and explicit unresolved capability reporting. Capability reuse was verified within one runtime; persisted executable capability restoration and arbitrary-language support are not established.
 
 The full-screen morphing world and the canonical three-nested-dimension stability rules are still pending. No guessed stability thresholds or quality-to-letter laws are introduced here.
+
+## Active host participation experiment
+
+See [ACTIVE-HOST-PARTICIPATION.md](ACTIVE-HOST-PARTICIPATION.md) for the isolated discovery/action/clarification loop and its 33 targeted tests. Routine authorized repairs act without asking and retain verified change records. [DNA-ADDRESS-EXPRESSION-AUDIT.md](DNA-ADDRESS-EXPRESSION-AUDIT.md) traces actual DNA, named qualities, primitive composition, and addressing mechanisms, including unresolved source conflicts. This experiment does not complete chart-driven or reference-image world embodiment.

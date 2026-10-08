@@ -89,12 +89,12 @@
     {
       "path": "components/organism/organism/LivingLoop.mjs",
       "baseSha256": "d4693647f895c58c04eb815afa49ae64240d4c2ccb7e77d7256625f3663ccc55",
-      "updatedSha256": "b3bb69a1a28be8358b7a2cfede09c2afa76c257278760f01373dcbde3f0a8790"
+      "updatedSha256": "392139b25a950ed64d2e14dcd6c54565b6ce0dbb6f07ea7052d0a9c08e0df18b"
     },
     {
       "path": "components/organism/core/SynthiaUnit.mjs",
       "baseSha256": "1de4695deefc84fee2eaebf4025d9336c048689d89391a9551798cc85f04b5ce",
-      "updatedSha256": "9e6c4e62c6649d1967f53424b997389c4903daa45a5d76624c066c7307f189c9"
+      "updatedSha256": "993240531b599404570caca5b366c57ee35300100757b54436c7aa941dc6ff02"
     },
     {
       "path": "tests/gap-provision.test.mjs",
@@ -135,6 +135,16 @@
       "path": "components/organism/tests/klein-primary-source-examples.mjs",
       "baseSha256": null,
       "updatedSha256": "286958eebe246a856e9c951f3882ce2a61a7d75370017116c27f7858e279339d"
+    },
+    {
+      "path": "components/organism/organism/HostParticipationLoop.mjs",
+      "baseSha256": null,
+      "updatedSha256": "a7d6a5095c86094c80dc1ccbfe1a8c943453f82480b47e8b2121c62a6a7fb94e"
+    },
+    {
+      "path": "tests/host-participation.test.mjs",
+      "baseSha256": null,
+      "updatedSha256": "30fc19ed82d66d335ae3b0e917a18d2324f3b95e150fe178918446d3088a76bb"
     }
   ]
 }
