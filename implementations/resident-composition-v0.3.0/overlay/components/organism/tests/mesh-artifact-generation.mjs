@@ -4,16 +4,17 @@ import { SemanticWorld } from '../world/SemanticWorld.mjs';
 const stored = new Map();
 const memory = { get: (ns, key) => stored.get(`${ns}:${key}`), upsert: (ns, key, value) => stored.set(`${ns}:${key}`, { value: structuredClone(value) }) };
 const world = new SemanticWorld();
+const address={planetary:'Sun',dimension:'Movement',gate:1,line:1,color:1,tone:1,base:1,degree:0,minute:0,second:0,arc:0,zodiac:1,house:1};
 world.assert('player', 'NEEDS', 'crossing');
 let proposals = 0;
 const options = {
   world, memory,
-  resolve: source => ({ complete: source?.admitted === true, source }),
+  resolve: source => ({ complete: source?.admitted === true, address, source }),
   propose: ({ facts, kind }) => {
     proposals++;
     assert.equal(facts[0].object, 'crossing');
     assert.equal(kind, 'game');
-    return { files: [{ path: 'crossing.mjs', source: 'export const cross = state => ({ ...state, location: "other-bank" });' }] };
+    return { files: [{ path: 'crossing.mjs', inheritAddress:true, source: 'export const cross = state => ({ ...state, location: "other-bank" });' }] };
   },
   verify: async record => {
     const module = await import(`data:text/javascript,${encodeURIComponent(record.proposal.files[0].source)}`);

@@ -19,17 +19,17 @@
     {
       "path": "components/organism/integration/SymbolCompositionGraph.mjs",
       "baseSha256": null,
-      "updatedSha256": "4a854509443aff25d4824c116fdc19d0cac2b4072c9a5c1408568a90088837cb"
+      "updatedSha256": "5d469c7b44fec813efff32787fe388afb61cd773fcaa845a8cfacf01660077dc"
     },
     {
       "path": "components/organism/browser/SymbolCompositionView.mjs",
       "baseSha256": null,
-      "updatedSha256": "70dbe32932a5cfead299b6426cf3a37c463e39939c5a9a823ce51d1f52df78a3"
+      "updatedSha256": "a6088fdb69bd7cf15c1f9c536ea350bc71f3ee7e89fe9003ff1e101c479c852d"
     },
     {
       "path": "tests/composition-boundary.test.mjs",
       "baseSha256": null,
-      "updatedSha256": "35f10e10f924806f7061790f719870139023b70822572c260c34ac68f7af81d1"
+      "updatedSha256": "cf13b93cd0d144f2c202ac9e80420a43b9484cba9f9fda399b80a074726d0061"
     },
     {
       "path": "tests/local-execution-retention.test.mjs",
@@ -104,7 +104,7 @@
     {
       "path": "components/organism/integration/WorldEmbodiment.mjs",
       "baseSha256": null,
-      "updatedSha256": "9fe647fd5d47a9a9d5748b6f3074ee374900a1883662985abfbfeb636027e120"
+      "updatedSha256": "80a7b6793b7f492814cc39276cd4ae9de8fc07e387ed672f8239818c98896754"
     },
     {
       "path": "components/organism/browser/LivingWorldView.mjs",
@@ -114,27 +114,72 @@
     {
       "path": "src/ScientificSynthiaAssembly.mjs",
       "baseSha256": "046b0c2d1a53a1a92e27b0968963ea1f5b65e03d3e902332b5bb88954784901e",
-      "updatedSha256": "614a190ee64bc6034a52ebe9d50855250e066544b88ca029404cd0b068899ea4"
+      "updatedSha256": "e35920ecee72a6cc0ce501492ff15b91a39e471db915eba623871097bff7afcc"
     },
     {
       "path": "tests/world-embodiment.test.mjs",
       "baseSha256": null,
-      "updatedSha256": "f0d3772ff5377705fdf11feb5a8add17e650901b89742598bad2b8e8ae2ad660"
+      "updatedSha256": "427d0b748eb472cf61b304558e3f7cc69025c12b7f28bed48966238ed620d3c8"
     },
     {
       "path": "components/organism/processes/MeshArtifactGenerator.mjs",
       "baseSha256": null,
-      "updatedSha256": "59c92598d2a946fcf847e238cf87aef49363222c670d5b1315e133f023a4585e"
+      "updatedSha256": "cd0d1a50c1b9062285aa5a7660428e90851bb4d679a4fe3a68c9beb4c8f4bf1e"
     },
     {
       "path": "components/organism/tests/mesh-artifact-generation.mjs",
       "baseSha256": null,
-      "updatedSha256": "d19b9ad4f18bf75f5f7fbf7f0e5a0cf5e22b754c1eb7112969a9fa48af57523f"
+      "updatedSha256": "5ef2221b2730fccfbfd2b7889402b4b50e98b297b6a3b2dd5a6c95bf56adf2c5"
     },
     {
       "path": "components/organism/tests/klein-primary-source-examples.mjs",
       "baseSha256": null,
       "updatedSha256": "286958eebe246a856e9c951f3882ce2a61a7d75370017116c27f7858e279339d"
+    },
+    {
+      "path": "components/organism/processes/MeshAnalogyContext.mjs",
+      "baseSha256": null,
+      "updatedSha256": "d1d27033bbc36899d688249d453aafef47c1b07c43cafb5d5e8bd794c91df60e"
+    },
+    {
+      "path": "components/organism/processes/BehaviorArtifactProducer.mjs",
+      "baseSha256": null,
+      "updatedSha256": "59697bd0410ae8e6117104e69447e65508f9bc92dc535d541a60bd2a1e901079"
+    },
+    {
+      "path": "src/index.mjs",
+      "baseSha256": "f78794729613461e929bd823e3c4fd087dd8de359a170c0b670ac1b17e6e8b6a",
+      "updatedSha256": "0b6fb571cec7eda369fcdfa5b380457a4f7bef73fc715c398ab55e8cf7698646"
+    },
+    {
+      "path": "tests/mesh-generation.test.mjs",
+      "baseSha256": null,
+      "updatedSha256": "577fbb6f17b5853cda8a9ad235c041adbdab795b4979509d1852c28088ca61ab"
+    },
+    {
+      "path": "examples/authored-mesh-generation.mjs",
+      "baseSha256": null,
+      "updatedSha256": "9bb55262885fef5852cd72b97202802e6640852f593645c57c1833c1739e1387"
+    },
+    {
+      "path": "components/organism/integration/IntroductionAddress.mjs",
+      "baseSha256": null,
+      "updatedSha256": "735aadb53a3aff4b17b56d9368c44633243b1744be02b4e27f11f4fb02598e5f"
+    },
+    {
+      "path": "components/organism/processes/MandalaMeasure.mjs",
+      "baseSha256": null,
+      "updatedSha256": "174a1855dc9c6eb0c572d506affd04f678905ffec0962e126d3eb37b3f671bc9"
+    },
+    {
+      "path": "tests/assembly.test.mjs",
+      "baseSha256": "dd5f8ba603a7a4ad9cbe7ebcb0cacdcd35afcf971347ac0626fe64c7515a0a46",
+      "updatedSha256": "fa259656537ca90c9dd77d10678b3416a9b4a7fa16817a97f957638a3d290b95"
+    },
+    {
+      "path": "tests/mandala-measure.test.mjs",
+      "baseSha256": null,
+      "updatedSha256": "f1453aa4de80c80b203c83243e55232508f76b0670b5cc64c8aeea42383177ff"
     }
   ]
 }

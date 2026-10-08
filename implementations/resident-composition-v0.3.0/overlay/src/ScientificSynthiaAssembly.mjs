@@ -1,3 +1,6 @@
+import { requireIntroductionAddress } from '../components/organism/integration/IntroductionAddress.mjs';
+import MeshArtifactGenerator from '../components/organism/processes/MeshArtifactGenerator.mjs';
+import BehaviorArtifactProducer from '../components/organism/processes/BehaviorArtifactProducer.mjs';
 import WorldEmbodiment from '../components/organism/integration/WorldEmbodiment.mjs';
 import SynthiaUnit from '../components/organism/core/SynthiaUnit.mjs';
 import { DIMENSION_ORDER, AXES as ORGANISM_AXES } from '../components/organism/state-space/state-space-foundation.mjs';
@@ -99,6 +102,8 @@ export class ScientificSynthiaAssembly {
     });
 
     this.events = [];
+    this.artifactGenerator = null;
+    if (options.artifactGeneration) this.mountArtifactGenerator(options.artifactGeneration);
     this.#bootProcessPhysics();
     this.#registerExistingExternalProcesses();
   }
@@ -164,9 +169,41 @@ export class ScientificSynthiaAssembly {
   registerSymbol(occurrence) { return this.compositions.occurrence(occurrence); }
   composeSymbols(memberIds, options) { return this.compositions.compose(memberIds, options); }
 
-  registerResidentCapability(capability) {
+  registerResidentCapability(capability, { organismAddress = capability?.address } = {}) {
+    const addressBinding = requireIntroductionAddress({address:organismAddress},null,`resident-capability:${capability?.name ?? capability?.id ?? 'unnamed'}`);
     if (!(this.execution.execution instanceof ResidentExecutionBridge)) throw new Error('Resident execution mode is not mounted');
-    return this.execution.execution.register(capability);
+    return this.execution.execution.register({...capability, address:addressBinding.address, addressBinding});
+  }
+
+  /** Neural or authored producers share the existing address-first boundary. */
+  mountArtifactGenerator({ propose, verify, resolve } = {}) {
+    if (this.artifactGenerator) throw new Error('Artifact generator already mounted');
+    const producer = new BehaviorArtifactProducer();
+    this.artifactGenerator = new MeshArtifactGenerator({
+      world: this.embodiment.world,
+      memory: this.organism.memory,
+      coder: this.organism.autoCoder,
+      resolve: async (source) => {
+        const validation = validateFullOrganismAddress(source?.address ?? {}, { calculation: 'mesh-artifact-generation' });
+        if (!validation.complete) return { ...validation, source };
+        if (!resolve) return { ...validation, source };
+        const interpreted = await resolve(source, validation);
+        return { ...interpreted, complete: interpreted?.complete === true, address: validation.address, source };
+      },
+      propose: propose ?? (request => producer.propose(request)),
+      verify,
+    });
+    return this.artifactGenerator;
+  }
+
+  async generateArtifact(request = {}) {
+    if (!this.artifactGenerator) throw new Error('Mount an artifact producer and behavioral verifier first');
+    const session = this.embodiment.snapshot();
+    const record = await this.artifactGenerator.generate({
+      ...request, context: { ...(request.context ?? {}), identityId: session.identityId, worldId: session.activeWorld }
+    });
+    this.events.push(Object.freeze({ type: 'artifact-generation', id: record.id, status: record.status, at: Date.now() }));
+    return record;
   }
 
   async ask(intent, options = {}) {
@@ -209,13 +246,16 @@ export class ScientificSynthiaAssembly {
   /**
    * Address-first admission boundary.
    *
-   * External material may be normalized, reduced, compiled, and executed in a
-   * transient work session. Nothing is committed to Synthia memory/state until
+   * External material may be normalized, reduced, and compiled in a
+   * transient non-interactive work session. Execution and admission are held until
    * the complete 13-part organism address has been accepted.
    */
   async executeArtifact(artifact, context = {}) {
+    const full = validateFullOrganismAddress(context.organismAddress ?? {});
     const session = await this.ingestion.prepare(artifact, context);
-    const execution = context.execute === false
+    const execution = !full.complete
+      ? { ok:false, path:'address-held', executed:false, backendUsed:false, workerUsed:false, result:null }
+      : context.execute === false
       ? {
           ok: true,
           kind: session.normalized.kind,
@@ -226,7 +266,6 @@ export class ScientificSynthiaAssembly {
         }
       : await this.executionSurface.execute(session.normalized, context);
 
-    const full = validateFullOrganismAddress(context.organismAddress ?? {});
     if (!full.ok) {
       return Object.freeze({
         schema: 'synthia.transient-admission.v0.3',
@@ -358,6 +397,7 @@ export class ScientificSynthiaAssembly {
       graphProjections: this.graphProjections,
       addressAxes: this.addressAxes,
       compositions: this.compositions.snapshot(),
+      artifactGeneration: this.artifactGenerator?.snapshot() ?? [],
       organism: safe(this.organism.snapshot()),
       execution: safe(this.execution.wiringAudit()),
       processPhysics: safe(this.processPhysics.status()),

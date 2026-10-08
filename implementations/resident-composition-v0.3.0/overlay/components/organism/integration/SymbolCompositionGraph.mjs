@@ -1,3 +1,4 @@
+import { resolveIntroductionAddress } from './IntroductionAddress.mjs';
 import { operatorById } from '../../state-math/src/state-space/operators.js';
 
 const copy = value => structuredClone(value);
@@ -17,14 +18,14 @@ export class SymbolCompositionGraph {
     this.memory = memory;
     const saved = memory?.get?.('symbol-composition', 'graph')?.value;
     for (const row of saved?.nodes || []) {
-      if (row.kind === 'occurrence') this.#nodes.set(row.id, freeze(copy(row)));
+      if (row.kind === 'occurrence') this.#nodes.set(row.id, freeze({ ...copy(row), addressBinding: resolveIntroductionAddress(row, null, row.id) }));
       else {
         const members = row.members.map(({ position, id }) => {
           const member = this.#nodes.get(id);
           if (!member) throw new Error(`Missing persisted constituent ${id}`);
           return { position, member };
         });
-        this.#nodes.set(row.id, freeze({ ...copy(row), members }));
+        this.#nodes.set(row.id, freeze({ ...copy(row), members, addressBinding: resolveIntroductionAddress(row, null, row.id) }));
       }
     }
     this.#events = copy(saved?.events || []);
@@ -40,11 +41,11 @@ export class SymbolCompositionGraph {
     if (typeof id !== 'string' || !id || this.#nodes.has(id)) throw new Error('A new occurrence requires a unique id');
     if (typeof symbol !== 'string' || !symbol) throw new TypeError('An occurrence requires an explicit symbol');
     const node = freeze({ id, kind: 'occurrence', scale: 'grapheme', symbol,
-      address: copy(address), provenance: copy(provenance) });
+      address: copy(address), addressBinding: resolveIntroductionAddress({address}, null, id), provenance: copy(provenance) });
     this.#nodes.set(id, node);
     return this.#record('occurrence-created', node);
   }
-  compose(memberIds, { provenance = [] } = {}) {
+  compose(memberIds, { address = {}, provenance = [] } = {}) {
     if (!Array.isArray(memberIds) || !memberIds.length) throw new TypeError('Composition requires constituents');
     const members = memberIds.map(id => {
       const node = this.#nodes.get(id);
@@ -53,7 +54,7 @@ export class SymbolCompositionGraph {
     });
     const result = operatorById('o_sequence').transform(members);
     if (this.#nodes.has(result.id)) return this.#nodes.get(result.id);
-    const node = freeze({ ...result, kind: 'composition', provenance: copy(provenance) });
+    const node = freeze({ ...result, kind: 'composition', address: copy(address), addressBinding: resolveIntroductionAddress({address}, null, result.id), provenance: copy(provenance) });
     this.#nodes.set(node.id, node);
     return this.#record('composition-created', node);
   }

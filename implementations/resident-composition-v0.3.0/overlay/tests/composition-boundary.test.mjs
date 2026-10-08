@@ -7,6 +7,8 @@ import { ScientificSynthiaAssembly } from '../src/index.mjs';
 import { LivingWorldView } from '../components/organism/browser/LivingWorldView.mjs';
 import { OrganismExpression } from '../components/organism/browser/OrganismExpression.mjs';
 
+const fullAddress = {planetary:'Sun',dimension:'Movement',gate:43,line:1,color:1,tone:1,base:1,degree:0,minute:0,second:0,arc:0,zodiac:1,house:1};
+
 function memory() {
   const values = new Map();
   return { get: (a,b) => values.has(`${a}:${b}`) ? {value:structuredClone(values.get(`${a}:${b}`))} : null,
@@ -16,12 +18,12 @@ function memory() {
 test('overlapping words and their parent retain the same occurrence after restart', () => {
   const store=memory(), graph=new SymbolCompositionGraph({memory:store});
   for(const [id,symbol] of [['y','Y'],['o','O'],['u','U'],['t','T'],['o2','O']]) {
-    graph.occurrence({id,symbol,address:{gate:43},provenance:[{sourceId:'letter-field'}]});
+    graph.occurrence({id,symbol,address:fullAddress,provenance:[{sourceId:'letter-field'}]});
   }
-  const you=graph.compose(['y','o','u']), too=graph.compose(['t','o','o2']);
+  const you=graph.compose(['y','o','u'],{address:fullAddress}), too=graph.compose(['t','o','o2'],{address:fullAddress});
   assert.notEqual(you.id,too.id);
   assert.strictEqual(you.members[1].member,too.members[1].member);
-  const phrase=graph.compose([you.id,too.id]);
+  const phrase=graph.compose([you.id,too.id],{address:fullAddress});
   assert.strictEqual(phrase.members[0].member,you);
   assert.equal(graph.parents('o').length,2);
   const html=compositionSurface(graph);
@@ -30,7 +32,7 @@ test('overlapping words and their parent retain the same occurrence after restar
   assert.strictEqual(restored.get(you.id).members[1].member,restored.get(too.id).members[1].member);
   assert.strictEqual(restored.get(phrase.id).members[0].member,restored.get(you.id));
   assert.equal(restored.snapshot().events.length,8);
-  assert.deepEqual(restored.get('o').address,{gate:43});
+  assert.deepEqual(restored.get('o').address,fullAddress);
   assert.throws(()=>restored.occurrence({id:'o',symbol:'X'}),/unique id/);
   assert.equal(restored.get('o').symbol,'O');
 });
@@ -55,8 +57,8 @@ test('assembly and view read the organism-owned composition graph', async () => 
   const assembly=new ScientificSynthiaAssembly({autoStart:false});
   try {
     assert.strictEqual(assembly.compositions,assembly.organism.compositions);
-    const symbol=assembly.registerSymbol({id:`fixture:${crypto.randomUUID()}`,symbol:'<',address:{gate:1}});
-    const composition=assembly.composeSymbols([symbol.id]);
+    const symbol=assembly.registerSymbol({id:`fixture:${crypto.randomUUID()}`,symbol:'<',address:fullAddress});
+    const composition=assembly.composeSymbols([symbol.id],{address:fullAddress});
     assert.strictEqual(assembly.organism.compositions.get(composition.id).members[0].member,symbol);
     assert.match(compositionSurface(assembly.organism.compositions),/&lt;/);
     const root={innerHTML:''};
@@ -66,4 +68,15 @@ test('assembly and view read the organism-owned composition graph', async () => 
     assert.match(root.innerHTML,/&lt;/);
     assert.ok(assembly.snapshot().compositions.nodes.some(x=>x.id===composition.id));
   } finally { await assembly.close(); }
+});
+
+test('unaddressed introductions stay retained but never enter the symbol surface', () => {
+  const graph=new SymbolCompositionGraph();
+  const pending=graph.occurrence({id:'pending',symbol:'X',address:{gate:43}});
+  const complete=graph.occurrence({id:'complete',symbol:'Y',address:fullAddress});
+  graph.compose([pending.id,complete.id],{address:fullAddress});
+  graph.compose([complete.id]);
+  assert.equal(compositionSurface(graph),'');
+  assert.equal(graph.get('pending').addressBinding.status,'held');
+  assert.equal(graph.snapshot().nodes.length,4);
 });
