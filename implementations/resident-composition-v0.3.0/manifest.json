@@ -60,6 +60,26 @@
       "path": "tests/dmsa-coordinate.test.mjs",
       "baseSha256": null,
       "updatedSha256": "08725c8c1f89746b21d2b37b47f03be101ccb0978a53b06d9c7ba29d8ee32a0d"
+    },
+    {
+      "path": "src/address-interop.mjs",
+      "baseSha256": "4edae8a4af8a3d06c2f82a5fe6f4ba2765490b89abe84f53b9500068304f2bba",
+      "updatedSha256": "32b95e39401f9b78c8a1786cdabbec72bfac13e031bbc246e63facfdd220645f"
+    },
+    {
+      "path": "components/state-math/src/grammar/parser.js",
+      "baseSha256": "35d5cab651f879de5f7428899b87cecb66654f2ab94fec7dec1ba468636c5f2f",
+      "updatedSha256": "cca4eb6c2976d42535079cb16913078201783a847da5acbd490614e51036305e"
+    },
+    {
+      "path": "components/execution-spine/src/pure-synthia/grammar/parser.js",
+      "baseSha256": "35d5cab651f879de5f7428899b87cecb66654f2ab94fec7dec1ba468636c5f2f",
+      "updatedSha256": "cca4eb6c2976d42535079cb16913078201783a847da5acbd490614e51036305e"
+    },
+    {
+      "path": "tests/spec-boundaries.test.mjs",
+      "baseSha256": null,
+      "updatedSha256": "e8f7b8ba4979a4ffde5c0b7046facc4d3c71f3889e39c108bcff95184f0572ae"
     }
   ]
 }
