@@ -12,11 +12,6 @@
       "updatedSha256": "4d2ed16abdc00ff9b92beec105e51f3e1d76d98b937940d511356d92eb6e7604"
     },
     {
-      "path": "components/organism/core/SynthiaUnit.mjs",
-      "baseSha256": "1de4695deefc84fee2eaebf4025d9336c048689d89391a9551798cc85f04b5ce",
-      "updatedSha256": "8c41e7607871da7851cd45e1b16676bf3bde31e4559f896936196cc4a419a5e2"
-    },
-    {
       "path": "components/organism/integration/StateOrganismBridge.mjs",
       "baseSha256": "d1bacd7a7e2fd73267a088301bcf0adf16b24ca2a4d024f2e05eccf72bb803d6",
       "updatedSha256": "e3cda790d8afa36cd395a3198bb404326ccc405266d81723031c762555a2ca6e"
@@ -95,6 +90,26 @@
       "path": "tests/human-outcome-lineage.test.mjs",
       "baseSha256": null,
       "updatedSha256": "5dfe48d8a96f41073c4c312fbd8d923979ca927a0eb269e3cc8f7241f6fab018"
+    },
+    {
+      "path": "components/organism/organism/ComplementaryGapModel.mjs",
+      "baseSha256": "4f6fefb10a58eb4e56f1c66e294deded331da14a9cca17d83bf6886ebf8c69f0",
+      "updatedSha256": "19e72517aaa3db79e6ec6ce4bf63ace6ca6054fedbc8a198d4ba1cf12fd03ad2"
+    },
+    {
+      "path": "components/organism/organism/LivingLoop.mjs",
+      "baseSha256": "d4693647f895c58c04eb815afa49ae64240d4c2ccb7e77d7256625f3663ccc55",
+      "updatedSha256": "b3bb69a1a28be8358b7a2cfede09c2afa76c257278760f01373dcbde3f0a8790"
+    },
+    {
+      "path": "components/organism/core/SynthiaUnit.mjs",
+      "baseSha256": "1de4695deefc84fee2eaebf4025d9336c048689d89391a9551798cc85f04b5ce",
+      "updatedSha256": "9e6c4e62c6649d1967f53424b997389c4903daa45a5d76624c066c7307f189c9"
+    },
+    {
+      "path": "tests/gap-provision.test.mjs",
+      "baseSha256": null,
+      "updatedSha256": "b35503bcf76c46a8bd8e4923444c47231c010e8124ce7656eeb33cfc2f69a3c6"
     }
   ]
 }

@@ -112,6 +112,13 @@ if(!ids.length||/\b(why|feel|think|help|advice|talk|chat|pissed|understand)\b/i.
  defineSuccessIndicator(indicator){return this.metabolism.defineIndicator(indicator);}
  recordUserSuccess(indicatorId,value,{evidence,source='user',context=null,human='user',purpose=null}={}){const event=this.metabolism.observe(indicatorId,value,{evidence,source,context});this.outcomes.record({kind:'verified-human-success',human,purpose:purpose||this.metabolism.purpose,actualOutcome:{indicatorId,value,direction:event.after?.direction||null},metrics:{indicatorId,value},evidence,status:event.delta>0?'supported':'observed',context});return event;}
  observeHumanFriction(spec={}){const gap=this.complement.observe(spec);this.outcomes.record({kind:'human-friction',human:spec.human||'user',purpose:spec.purpose||this.metabolism.purpose,friction:{capability:spec.capability,description:spec.friction,persistence:spec.persistence||1},evidence:spec.evidence,status:'observed',context:spec.context});if(gap.persistence>=2)this.living.observeCapabilityGap({capabilities:[`complement:${gap.capability}`],subject:gap.capability,pressure:Math.min(.24,.08+.04*gap.persistence),reason:`persistent human friction indicates a complementary capability gap: ${gap.friction||gap.capability}`,evidence:[{type:'human-friction',gapId:gap.id,...(spec.evidence||{})}],dimension:Number(spec.dimension||5)});return gap;}
+ async provisionHumanGap(id,{context={},verify=null}={}){
+   const gap=this.complement.gaps.find(g=>g.id===id);if(!gap)throw new Error(`unknown gap ${id}`);
+   const tool=this.runtime.getRegisteredTools().find(t=>t.provides?.includes(`complement:${gap.capability}`));
+   if(!tool)return {status:'unresolved',gapId:id,reason:'no executable complementary support registered'};
+   const verification=verify|| (typeof tool.verifyRepair==='function'?((result,current)=>tool.verifyRepair(result,current)):null);
+   return this.complement.provision(id,{by:tool.toolId,execute:current=>tool.execute({...context,inputValues:{...context.inputValues,gap:current}}),verify:verification});
+ }
  createHypothesis(spec){return this.science.createHypothesis(spec);}
  recordHypothesisResult(id,result){return this.science.recordResult(id,result);}
  sciencePaper(options={}){return this.science.paper(options);}
