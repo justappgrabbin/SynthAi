@@ -5,3 +5,5 @@ export { MeshArtifactGenerator } from '../components/organism/processes/MeshArti
 export { deriveMeshAnalogy } from '../components/organism/processes/MeshAnalogyContext.mjs';
 export { BehaviorArtifactProducer, validateExperience } from '../components/organism/processes/BehaviorArtifactProducer.mjs';
 export { angularTicks, measureGate, reconstructGatePosition, GATE_TICKS, SUBDIVISIONS } from '../components/organism/processes/MandalaMeasure.mjs';
+
+export { reduceExperience, createReducedSession } from '../components/organism/processes/AutomataReduction.mjs';

@@ -30,7 +30,7 @@ test('unaddressed worlds and actions are retained before interaction without act
  assert.equal(session.defineWorld({id:'pending',objects:[]}).status,'held');
  assert.throws(()=>session.enter('pending'),/unknown world/);
  const address={planetary:'Sun',dimension:'Movement',gate:1,line:1,color:1,tone:1,base:1,degree:0,minute:0,second:0,arc:0,zodiac:1,house:1};
- assert.equal(session.defineWorld({id:'pending-action',address,objects:[{id:'seat',inheritAddress:true,actions:[{id:'sit'}]}]}).status,'held');
+ assert.equal(session.defineWorld({id:'pending-action',address,objects:[{id:'seat',state:'available',inheritAddress:true,actions:[{id:'sit',from:'available',to:'occupied'}]}]}).status,'held');
  assert.equal(session.snapshot().heldWorlds.length,2);
  assert.equal(session.snapshot().worlds.length,0);
 });

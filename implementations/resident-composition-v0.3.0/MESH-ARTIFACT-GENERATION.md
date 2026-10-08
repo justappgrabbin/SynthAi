@@ -62,3 +62,13 @@ Introductions now retain a complete canonical address binding. Explicit `inherit
 Reduction investigation located existing finite-state machines and sequential/parallel/Kleene automata composition in `components/execution-spine/src/pure-synthia/experiments/scale/`. The ingestion compiler's five fields are shared, knowledge, causal, dependency, and stateSpace; these are not the five resonance dimensions. Primitive extraction and retained-byte reconstruction already exist, but neither establishes a universally minimal behavioral machine or dimension-preserving scaled execution. That integration remains outstanding; no automatic prime factorization or unverified scaling formula has been introduced.
 
 Validation at this checkpoint: 24 root tests pass, standalone generation and published Klein analogy checks pass, and the addressed crossing example has been regenerated with passing behavior evidence.
+
+## Verified behavioral reduction
+
+`AutomataReduction.mjs` now builds a deterministic qualitative quotient using the existing execution-spine FSM classes. Partition refinement retains authored state qualities, effective addresses, action qualities, action availability, and future transitions. It produces the smallest quotient under that observation contract, not a universal primitive ontology or numeric prime factorization. No resonance dimension is assigned from an execution field.
+
+Every original state has a projection into a reduced state and a retained lifting membership. Exhaustive finite transition obligations certify qualitative deterministic bisimulation, covering arbitrary-length action traces by induction. Original definitions remain available for reconstruction. `createReducedSession()` runs reduced transitions and lifts them back to original identities after checking full introduction addresses. Generated game/app modules now execute the same reduced-transition check before their original-state transition. Proposal records retain the complete work-up, partition rounds, ratio, reconstruction definition, and verification obligations.
+
+Tests demonstrate a two-state cycle executing as one primitive while reconstructing alternating original identities, and initially similar states separating when future outcomes differ. This is behavioral state reduction; numerical quantity rescaling and the cross-resonance-dimension work-up remain separate outstanding work.
+
+Current validation: 26 root tests pass. This corrects the previous 24-test claim: its newly appended world-boundary fixture lacked required state/transition fields. The fixture now supplies valid structural fields so it checks the intended missing-address boundary.

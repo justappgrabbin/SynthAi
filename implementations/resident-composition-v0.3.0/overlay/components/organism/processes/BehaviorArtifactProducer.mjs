@@ -1,3 +1,4 @@
+import { reduceExperience } from './AutomataReduction.mjs';
 import { requireIntroductionAddress } from '../integration/IntroductionAddress.mjs';
 const clone = value => structuredClone(value);
 const named = value => typeof value === 'string' && value.trim().length > 0;
@@ -48,6 +49,8 @@ export class BehaviorArtifactProducer {
     if (selected == null) return { held:true, reason:analogy ? `analogy-${analogy.matchStatus}` : 'authored-experience-missing', needs:['explicit authored experience or uniquely mapped experience'] };
     const binding = requireIntroductionAddress({address:resolution.address},null,'generation-source');
     const experience = validateExperience(selected,binding);
+    const workup = reduceExperience(experience);
+    if (!workup.verification.pass) throw new Error('Automata reduction failed verification');
     const provenance = {
       producer: 'authored-behavior-compiler', purpose, address: clone(resolution.address),
       analogy: clone(analogy), context: clone(context), experienceId: experience.id
@@ -55,6 +58,7 @@ export class BehaviorArtifactProducer {
     const runtime = `export function createExperience(identityId) {
   if (typeof identityId !== 'string' || !identityId.trim()) throw new TypeError('identity required');
   const definition = ${literal(experience)};
+  const reduction = ${literal({projection:workup.projection,machine:workup.machine})};
   let stateId = definition.initial;
   const history = [];
   const copy = value => JSON.parse(JSON.stringify(value));
@@ -65,7 +69,10 @@ export class BehaviorArtifactProducer {
       const state = definition.states.find(s => s.id === stateId);
       const action = (state.actions || []).find(a => a.id === actionId);
       if (!action) throw new Error('action unavailable in current state');
-      history.push({ sequence: history.length + 1, from: stateId, actionId, to: action.to });
+      const primitiveFrom = reduction.projection[stateId];
+      const transition = reduction.machine.transitions.find(t => t.from === primitiveFrom && t.input === actionId);
+      if (!transition || transition.to !== reduction.projection[action.to]) throw new Error('reduced execution disagrees with reconstruction');
+      history.push({ primitiveFrom, primitiveTo:transition.to, sequence: history.length + 1, from: stateId, actionId, to: action.to });
       stateId = action.to;
       return snapshot();
     }
@@ -87,7 +94,7 @@ function render() {
 }
 render();`;
     const html = `<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Generated experience</title><main></main><script type="module">${runtime}\n${render}</script></html>`;
-    return { kind, producer: provenance.producer, experience, provenance,
+    return { kind, producer: provenance.producer, experience, provenance, workup,
       files: [{ path: `${kind}.mjs`, source: runtime, inheritAddress:true }, { path: 'index.html', source: html, inheritAddress:true }] };
   }
 }

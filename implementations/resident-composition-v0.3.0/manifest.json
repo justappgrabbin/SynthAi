@@ -119,7 +119,7 @@
     {
       "path": "tests/world-embodiment.test.mjs",
       "baseSha256": null,
-      "updatedSha256": "427d0b748eb472cf61b304558e3f7cc69025c12b7f28bed48966238ed620d3c8"
+      "updatedSha256": "cf9c98fc041351b3492eff02157ea09c49610c33284543ff2e351b960f43e912"
     },
     {
       "path": "components/organism/processes/MeshArtifactGenerator.mjs",
@@ -144,12 +144,12 @@
     {
       "path": "components/organism/processes/BehaviorArtifactProducer.mjs",
       "baseSha256": null,
-      "updatedSha256": "59697bd0410ae8e6117104e69447e65508f9bc92dc535d541a60bd2a1e901079"
+      "updatedSha256": "aace5896f57ab2caf2679754ddd4c9f67938e3cfaac10f6b7c0d4ec7a3f2f271"
     },
     {
       "path": "src/index.mjs",
       "baseSha256": "f78794729613461e929bd823e3c4fd087dd8de359a170c0b670ac1b17e6e8b6a",
-      "updatedSha256": "0b6fb571cec7eda369fcdfa5b380457a4f7bef73fc715c398ab55e8cf7698646"
+      "updatedSha256": "ecdfdeacb1cde3311ebc6382f1a141daade19a47dadf0b49c4d00eef08b68b7e"
     },
     {
       "path": "tests/mesh-generation.test.mjs",
@@ -180,6 +180,16 @@
       "path": "tests/mandala-measure.test.mjs",
       "baseSha256": null,
       "updatedSha256": "f1453aa4de80c80b203c83243e55232508f76b0670b5cc64c8aeea42383177ff"
+    },
+    {
+      "path": "components/organism/processes/AutomataReduction.mjs",
+      "baseSha256": null,
+      "updatedSha256": "e8a936617fa521ca125865867c830d4a87a8c057bf788f8f9cfdef15b2f79fd5"
+    },
+    {
+      "path": "tests/automata-reduction.test.mjs",
+      "baseSha256": null,
+      "updatedSha256": "6731e8245b9c649821c03ac70bf95d3b91693150c5425cd0ce04cbb3710d9c64"
     }
   ]
 }
