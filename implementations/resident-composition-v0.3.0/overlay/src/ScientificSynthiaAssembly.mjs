@@ -1,3 +1,4 @@
+import WorldEmbodiment from '../components/organism/integration/WorldEmbodiment.mjs';
 import SynthiaUnit from '../components/organism/core/SynthiaUnit.mjs';
 import { DIMENSION_ORDER, AXES as ORGANISM_AXES } from '../components/organism/state-space/state-space-foundation.mjs';
 import { ProcessFabric as ProcessPhysicsFabric } from '../components/process-physics/multiprocess/ProcessFabric.mjs';
@@ -49,6 +50,7 @@ export class ScientificSynthiaAssembly {
       ...(options.organismOptions ?? {}),
       autoStart: options.autoStart ?? false,
     });
+    this.embodiment = this.organism.embodiment ??= new WorldEmbodiment({unit:this.organism});
     this.executionMode = options.executionMode ?? 'supplied-spine';
     if (!['supplied-spine','resident'].includes(this.executionMode)) throw new TypeError('Unknown execution mode');
     const executionOptions = { remember: false, ...(options.executionOptions ?? {}) };

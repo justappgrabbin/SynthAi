@@ -22,9 +22,13 @@ function surface(morph,field){
 }
 
 export class LivingWorldView{
-  constructor({root,unit}={}){this.root=root;this.unit=unit;}
+  constructor({root,unit,worldRenderer=null}={}){this.root=root;this.unit=unit;this.worldRenderer=worldRenderer;}
   render(expression=null){
     if(!this.root)return;
+    const embodied=this.unit.embodiment?.snapshot?.();
+    if(embodied?.currentWorld&&this.worldRenderer){
+      return this.worldRenderer({root:this.root,session:embodied,interact:(objectId,actionId)=>{const next=this.unit.embodiment.interact(objectId,actionId);this.render(expression);return next;}});
+    }
     const e=expression||globalThis.SynthiaExpression?.resolve?.('')||null;
     const field=e?.field||this.unit.processField?.evaluate?.(this.unit,{cycle:this.unit.cultivationProgram.current()});
     const morph=e?.morph||this.unit.morphicExpression?.resolve?.({field,recursive:this.unit.recursiveField?.resolve?.(field)});

@@ -27,16 +27,6 @@
       "updatedSha256": "70dbe32932a5cfead299b6426cf3a37c463e39939c5a9a823ce51d1f52df78a3"
     },
     {
-      "path": "components/organism/browser/LivingWorldView.mjs",
-      "baseSha256": "0308609c4d3a70508f667ab8b66607731ff1b90ec4ccf8f53be3efe1e9743929",
-      "updatedSha256": "21a2a92894bdb4b1ed84961a83840182ea5c4441ae50688c5e1376bac15d09ff"
-    },
-    {
-      "path": "src/ScientificSynthiaAssembly.mjs",
-      "baseSha256": "046b0c2d1a53a1a92e27b0968963ea1f5b65e03d3e902332b5bb88954784901e",
-      "updatedSha256": "22ab76e29c9209d034f02621a40c7ca4e21881e805bcc4657f1fd95eb8dde098"
-    },
-    {
       "path": "tests/composition-boundary.test.mjs",
       "baseSha256": null,
       "updatedSha256": "35f10e10f924806f7061790f719870139023b70822572c260c34ac68f7af81d1"
@@ -110,6 +100,26 @@
       "path": "tests/gap-provision.test.mjs",
       "baseSha256": null,
       "updatedSha256": "b35503bcf76c46a8bd8e4923444c47231c010e8124ce7656eeb33cfc2f69a3c6"
+    },
+    {
+      "path": "components/organism/integration/WorldEmbodiment.mjs",
+      "baseSha256": null,
+      "updatedSha256": "9fe647fd5d47a9a9d5748b6f3074ee374900a1883662985abfbfeb636027e120"
+    },
+    {
+      "path": "components/organism/browser/LivingWorldView.mjs",
+      "baseSha256": "0308609c4d3a70508f667ab8b66607731ff1b90ec4ccf8f53be3efe1e9743929",
+      "updatedSha256": "0d150003b0cd222b22b85aec44100bb65fd5a3eeaae886b244ba6a7696bc2fd3"
+    },
+    {
+      "path": "src/ScientificSynthiaAssembly.mjs",
+      "baseSha256": "046b0c2d1a53a1a92e27b0968963ea1f5b65e03d3e902332b5bb88954784901e",
+      "updatedSha256": "614a190ee64bc6034a52ebe9d50855250e066544b88ca029404cd0b068899ea4"
+    },
+    {
+      "path": "tests/world-embodiment.test.mjs",
+      "baseSha256": null,
+      "updatedSha256": "f0d3772ff5377705fdf11feb5a8add17e650901b89742598bad2b8e8ae2ad660"
     }
   ]
 }
