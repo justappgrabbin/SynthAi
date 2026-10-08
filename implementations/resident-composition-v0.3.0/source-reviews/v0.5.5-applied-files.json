@@ -1,0 +1,70 @@
+[
+  {
+    "path": "README.md",
+    "replacesBaseFile": true
+  },
+  {
+    "path": "RELEASE-v0.5.5.md",
+    "replacesBaseFile": false
+  },
+  {
+    "path": "PATCH-MANIFEST.md",
+    "replacesBaseFile": false
+  },
+  {
+    "path": "MANIFEST.json",
+    "replacesBaseFile": true
+  },
+  {
+    "path": "CHANGELOG.md",
+    "replacesBaseFile": true
+  },
+  {
+    "path": "package.json",
+    "replacesBaseFile": true
+  },
+  {
+    "path": "docs/RELATIONAL-ALGEBRA-v0.5.5.md",
+    "replacesBaseFile": false
+  },
+  {
+    "path": "docs/RELATIONAL-ALGEBRA-FINAL-VERIFICATION-v0.5.5.md",
+    "replacesBaseFile": false
+  },
+  {
+    "path": "src/index.mjs",
+    "replacesBaseFile": true
+  },
+  {
+    "path": "src/federated-synthia.mjs",
+    "replacesBaseFile": true
+  },
+  {
+    "path": "test/16-relational-operator-runtime.test.mjs",
+    "replacesBaseFile": false
+  },
+  {
+    "path": "scripts/verify.mjs",
+    "replacesBaseFile": true
+  },
+  {
+    "path": "src/state-space/channel-mesh-body.mjs",
+    "replacesBaseFile": true
+  },
+  {
+    "path": "src/state-space/relational-operator-runtime.mjs",
+    "replacesBaseFile": false
+  },
+  {
+    "path": "src/state-space/dna-perception-runtime.mjs",
+    "replacesBaseFile": true
+  },
+  {
+    "path": "src/state-space/semantic-genome.mjs",
+    "replacesBaseFile": true
+  },
+  {
+    "path": "src/state-space/dna-state-substrate.mjs",
+    "replacesBaseFile": true
+  }
+]

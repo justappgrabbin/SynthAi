@@ -1,0 +1,19 @@
+{
+  "targetedTests": {
+    "pass": 7,
+    "fail": 0
+  },
+  "fullTests": {
+    "pass": 41,
+    "fail": 0
+  },
+  "verification": {
+    "status": "PASS",
+    "exitCode": 0
+  },
+  "logDigests": {
+    "v0.5.5-targeted-tests.txt": "2c85740040a45588033d76f7565741a82d6381ebb514f31a1669ba5ccb7ed76b",
+    "v0.5.5-full-tests.txt": "e0f6296d1e7db6a53fce2d3472b1ad5b9d64b9ea873fb484ccfbb00da378f117",
+    "v0.5.5-verify.txt": "b488333ad026d4b24e40b80a321e68ff849b6da551165cd6f19f1dc66fe43d61"
+  }
+}
