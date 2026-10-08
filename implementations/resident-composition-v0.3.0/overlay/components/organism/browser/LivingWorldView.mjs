@@ -24,9 +24,9 @@ function surface(morph,field){
 
 export class LivingWorldView{
   constructor({root,unit,worldRenderer=null}={}){this.root=root;this.unit=unit;this.worldRenderer=worldRenderer;}
-  morph({compositionId,form,resolveState=null}={}){
+  morph({compositionId,form,resolveState=null,readSensory=null,directionRules={}}={}){
     this.swarmView?.stop();
-    this.swarmView=new SwarmMorphView({root:this.root,graph:this.unit.compositions,resolveState});
+    this.swarmView=new SwarmMorphView({root:this.root,graph:this.unit.compositions,resolveState,readSensory,directionRules});
     return this.swarmView.morph({compositionId,form});
   }
   render(expression=null){
