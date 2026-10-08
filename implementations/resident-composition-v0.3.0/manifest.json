@@ -50,6 +50,16 @@
       "path": "tests/local-execution-retention.test.mjs",
       "baseSha256": null,
       "updatedSha256": "3bc778fcebf7f4f8036e72c6bf7e263b0805d0518076191430b96b486d85902e"
+    },
+    {
+      "path": "src/dmsa-coordinate.mjs",
+      "baseSha256": null,
+      "updatedSha256": "68d599ae97ca92a848e6b241c0c491be15a8e7fa4d1388441d442d7ba5e6bf6d"
+    },
+    {
+      "path": "tests/dmsa-coordinate.test.mjs",
+      "baseSha256": null,
+      "updatedSha256": "08725c8c1f89746b21d2b37b47f03be101ccb0978a53b06d9c7ba29d8ee32a0d"
     }
   ]
 }
