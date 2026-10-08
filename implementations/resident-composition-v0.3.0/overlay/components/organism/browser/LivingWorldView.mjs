@@ -1,3 +1,4 @@
+import SwarmMorphView from './SwarmMorphView.mjs';
 import { compositionSurface } from './SymbolCompositionView.mjs';
 const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 const point=(gate,{cx=160,cy=132,spread=116}={})=>{const a=gate*2.399963229728653,r=18+Math.sqrt(gate/64)*spread;return [cx+Math.cos(a)*r,cy+Math.sin(a)*r];};
@@ -23,7 +24,13 @@ function surface(morph,field){
 
 export class LivingWorldView{
   constructor({root,unit,worldRenderer=null}={}){this.root=root;this.unit=unit;this.worldRenderer=worldRenderer;}
+  morph({compositionId,form,resolveState=null,readSensory=null,directionRules={}}={}){
+    this.swarmView?.stop();
+    this.swarmView=new SwarmMorphView({root:this.root,graph:this.unit.compositions,resolveState,readSensory,directionRules});
+    return this.swarmView.morph({compositionId,form});
+  }
   render(expression=null){
+    this.swarmView?.stop();
     if(!this.root)return;
     const embodied=this.unit.embodiment?.snapshot?.();
     if(embodied?.currentWorld&&this.worldRenderer){

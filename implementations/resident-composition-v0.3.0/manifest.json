@@ -4,7 +4,7 @@
     {
       "path": "components/state-math/src/state-space/operators.js",
       "baseSha256": "549d70c3e183d4cf555caef0658a4aa1742ffd6c761a34d11dd56181fc9c7a75",
-      "updatedSha256": "10887faaf724e1b4e3f9ac9f44015f07a126f679ad3b5f8359c6698130ebfaeb"
+      "updatedSha256": "dcf9e0d0197739d07130cb47f9d0ce946b190a6feac8ea25b3a52b0385cad38c"
     },
     {
       "path": "components/execution-spine/src/pure-synthia/state-space/operators.js",
@@ -19,7 +19,7 @@
     {
       "path": "components/organism/integration/SymbolCompositionGraph.mjs",
       "baseSha256": null,
-      "updatedSha256": "4a854509443aff25d4824c116fdc19d0cac2b4072c9a5c1408568a90088837cb"
+      "updatedSha256": "df99719c788b1c0744760253660c7b9e1073e7487b2b400d8ea0ef33b3939548"
     },
     {
       "path": "components/organism/browser/SymbolCompositionView.mjs",
@@ -89,12 +89,12 @@
     {
       "path": "components/organism/organism/LivingLoop.mjs",
       "baseSha256": "d4693647f895c58c04eb815afa49ae64240d4c2ccb7e77d7256625f3663ccc55",
-      "updatedSha256": "b3bb69a1a28be8358b7a2cfede09c2afa76c257278760f01373dcbde3f0a8790"
+      "updatedSha256": "392139b25a950ed64d2e14dcd6c54565b6ce0dbb6f07ea7052d0a9c08e0df18b"
     },
     {
       "path": "components/organism/core/SynthiaUnit.mjs",
       "baseSha256": "1de4695deefc84fee2eaebf4025d9336c048689d89391a9551798cc85f04b5ce",
-      "updatedSha256": "9e6c4e62c6649d1967f53424b997389c4903daa45a5d76624c066c7307f189c9"
+      "updatedSha256": "993240531b599404570caca5b366c57ee35300100757b54436c7aa941dc6ff02"
     },
     {
       "path": "tests/gap-provision.test.mjs",
@@ -109,7 +109,7 @@
     {
       "path": "components/organism/browser/LivingWorldView.mjs",
       "baseSha256": "0308609c4d3a70508f667ab8b66607731ff1b90ec4ccf8f53be3efe1e9743929",
-      "updatedSha256": "0d150003b0cd222b22b85aec44100bb65fd5a3eeaae886b244ba6a7696bc2fd3"
+      "updatedSha256": "002ff68692e68a3213f6091a6e60170e43961dacb442e29912486f26ccb30730"
     },
     {
       "path": "src/ScientificSynthiaAssembly.mjs",
@@ -135,6 +135,31 @@
       "path": "components/organism/tests/klein-primary-source-examples.mjs",
       "baseSha256": null,
       "updatedSha256": "286958eebe246a856e9c951f3882ce2a61a7d75370017116c27f7858e279339d"
+    },
+    {
+      "path": "components/organism/organism/HostParticipationLoop.mjs",
+      "baseSha256": null,
+      "updatedSha256": "a7d6a5095c86094c80dc1ccbfe1a8c943453f82480b47e8b2121c62a6a7fb94e"
+    },
+    {
+      "path": "tests/host-participation.test.mjs",
+      "baseSha256": null,
+      "updatedSha256": "30fc19ed82d66d335ae3b0e917a18d2324f3b95e150fe178918446d3088a76bb"
+    },
+    {
+      "path": "components/organism/browser/SwarmMorphView.mjs",
+      "baseSha256": null,
+      "updatedSha256": "ce7da7b128e400b126b82724329c097ddd8e52540d4b83fcb6215e649293b9e5"
+    },
+    {
+      "path": "components/organism/integration/SymbolSequence.mjs",
+      "baseSha256": null,
+      "updatedSha256": "c318c64319e7c7508c9dcbdc967723e0afece387f4900ea488dbd8f886a6bd8a"
+    },
+    {
+      "path": "tests/swarm-morph.test.mjs",
+      "baseSha256": null,
+      "updatedSha256": "f48e70c3552fef8e7c98e483caa6b492d9ad1490d0935ef7a0177c747400394f"
     }
   ]
 }
