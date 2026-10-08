@@ -1,3 +1,4 @@
+import { sequence } from '../../../organism/integration/SymbolSequence.mjs';
 // Pure Synthia Automata — the 12 cross-scale operators O (spec §4); metadata + pure transforms
 
 import { SCALES } from './constants.js';
@@ -55,13 +56,7 @@ export const OPERATORS = Object.freeze([
     accepts:'any states', positionalRule:'position i is part of composite state',
     invariants:['order-sensitive', 'length-preserving'],
     inverseId:null, scalesObserved:['grapheme','morpheme','word','phrase'],
-    transform(operands) {
-      const members = asList(operands);
-      const base = commonScale(members);
-      return { kind:'sequence', operator:'o_sequence', id:sequenceIdentity(members),
-               positional:true, scale: base ? promoteScale(base) : 'mixed',
-               members: members.map((m, i) => ({ position: i, member: m })) };
-    },
+    transform: sequence,
   },
   {
     id:'o_project', arity:1, name:'Perspective',

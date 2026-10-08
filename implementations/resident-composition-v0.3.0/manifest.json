@@ -4,7 +4,7 @@
     {
       "path": "components/state-math/src/state-space/operators.js",
       "baseSha256": "549d70c3e183d4cf555caef0658a4aa1742ffd6c761a34d11dd56181fc9c7a75",
-      "updatedSha256": "10887faaf724e1b4e3f9ac9f44015f07a126f679ad3b5f8359c6698130ebfaeb"
+      "updatedSha256": "dcf9e0d0197739d07130cb47f9d0ce946b190a6feac8ea25b3a52b0385cad38c"
     },
     {
       "path": "components/execution-spine/src/pure-synthia/state-space/operators.js",
@@ -19,7 +19,7 @@
     {
       "path": "components/organism/integration/SymbolCompositionGraph.mjs",
       "baseSha256": null,
-      "updatedSha256": "4a854509443aff25d4824c116fdc19d0cac2b4072c9a5c1408568a90088837cb"
+      "updatedSha256": "df99719c788b1c0744760253660c7b9e1073e7487b2b400d8ea0ef33b3939548"
     },
     {
       "path": "components/organism/browser/SymbolCompositionView.mjs",
@@ -109,7 +109,7 @@
     {
       "path": "components/organism/browser/LivingWorldView.mjs",
       "baseSha256": "0308609c4d3a70508f667ab8b66607731ff1b90ec4ccf8f53be3efe1e9743929",
-      "updatedSha256": "0d150003b0cd222b22b85aec44100bb65fd5a3eeaae886b244ba6a7696bc2fd3"
+      "updatedSha256": "2e59b9d3e2ee0aeab6e8a4ea24533c2b105e89e69a613dad804b7525ae92d2d1"
     },
     {
       "path": "src/ScientificSynthiaAssembly.mjs",
@@ -145,6 +145,21 @@
       "path": "tests/host-participation.test.mjs",
       "baseSha256": null,
       "updatedSha256": "30fc19ed82d66d335ae3b0e917a18d2324f3b95e150fe178918446d3088a76bb"
+    },
+    {
+      "path": "components/organism/browser/SwarmMorphView.mjs",
+      "baseSha256": null,
+      "updatedSha256": "a6ba3c73861cc7636781a96224c6c339251a52406af21a8c4ec301292d357728"
+    },
+    {
+      "path": "components/organism/integration/SymbolSequence.mjs",
+      "baseSha256": null,
+      "updatedSha256": "c318c64319e7c7508c9dcbdc967723e0afece387f4900ea488dbd8f886a6bd8a"
+    },
+    {
+      "path": "tests/swarm-morph.test.mjs",
+      "baseSha256": null,
+      "updatedSha256": "4a541c331fcdf8e77d7e5b530e09b62c70e48821f7df15fbad2a5d2e0a17c14f"
     }
   ]
 }

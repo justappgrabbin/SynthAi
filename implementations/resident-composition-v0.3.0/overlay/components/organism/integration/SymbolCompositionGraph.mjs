@@ -1,4 +1,4 @@
-import { operatorById } from '../../state-math/src/state-space/operators.js';
+import { sequence } from './SymbolSequence.mjs';
 
 const copy = value => structuredClone(value);
 function freeze(value) {
@@ -51,7 +51,7 @@ export class SymbolCompositionGraph {
       if (!node) throw new Error(`Unknown constituent ${id}`);
       return node;
     });
-    const result = operatorById('o_sequence').transform(members);
+    const result = sequence(members);
     if (this.#nodes.has(result.id)) return this.#nodes.get(result.id);
     const node = freeze({ ...result, kind: 'composition', provenance: copy(provenance) });
     this.#nodes.set(node.id, node);

@@ -24,3 +24,7 @@ The full-screen morphing world and the canonical three-nested-dimension stabilit
 ## Active host participation experiment
 
 See [ACTIVE-HOST-PARTICIPATION.md](ACTIVE-HOST-PARTICIPATION.md) for the isolated discovery/action/clarification loop and its 33 targeted tests. Routine authorized repairs act without asking and retain verified change records. [DNA-ADDRESS-EXPRESSION-AUDIT.md](DNA-ADDRESS-EXPRESSION-AUDIT.md) traces actual DNA, named qualities, primitive composition, and addressing mechanisms, including unresolved source conflicts. This experiment does not complete chart-driven or reference-image world embodiment.
+
+## Visible text swarm morph
+
+See [TEXT-SWARM-MORPH.md](TEXT-SWARM-MORPH.md) and [the browser demo](demo/morph.html) for constituent-preserving animated forms, run instructions, tests and remaining qualitative/3D limitations.
