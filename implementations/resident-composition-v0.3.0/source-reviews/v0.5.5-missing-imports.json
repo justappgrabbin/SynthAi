@@ -1,0 +1,326 @@
+[
+  {
+    "file": "src/index.mjs",
+    "import": "./integrated-synthia-system.mjs"
+  },
+  {
+    "file": "src/index.mjs",
+    "import": "./mesh/relational-mesh.mjs"
+  },
+  {
+    "file": "src/index.mjs",
+    "import": "./mesh/mesh-federation.mjs"
+  },
+  {
+    "file": "src/index.mjs",
+    "import": "./execution/integrated-address-resolver.mjs"
+  },
+  {
+    "file": "src/index.mjs",
+    "import": "./execution/execution-pipeline.mjs"
+  },
+  {
+    "file": "src/index.mjs",
+    "import": "./execution/registered-app-runtime.mjs"
+  },
+  {
+    "file": "src/index.mjs",
+    "import": "./execution/exact-address-recall.mjs"
+  },
+  {
+    "file": "src/index.mjs",
+    "import": "./pipeline/chat-pipeline.mjs"
+  },
+  {
+    "file": "src/index.mjs",
+    "import": "./pipeline/cultivation-pipeline.mjs"
+  },
+  {
+    "file": "src/index.mjs",
+    "import": "./forms/synthia-role-resolver.mjs"
+  },
+  {
+    "file": "src/index.mjs",
+    "import": "./state-space/sovereign-state-space-runtime.mjs"
+  },
+  {
+    "file": "src/index.mjs",
+    "import": "./state-space/nine-center-body.mjs"
+  },
+  {
+    "file": "src/index.mjs",
+    "import": "./state-space/dimension-perspective-registry.mjs"
+  },
+  {
+    "file": "src/index.mjs",
+    "import": "./state-space/kimi-package-manifest.mjs"
+  },
+  {
+    "file": "src/index.mjs",
+    "import": "./state-space/kimi-knowledge-manifest.mjs"
+  },
+  {
+    "file": "src/index.mjs",
+    "import": "./state-space/mapping-providers.mjs"
+  },
+  {
+    "file": "src/index.mjs",
+    "import": "./state-space/line-meaning-provider.mjs"
+  },
+  {
+    "file": "src/index.mjs",
+    "import": "./pipeline/intent-orchestrator.mjs"
+  },
+  {
+    "file": "src/index.mjs",
+    "import": "./pipeline/success-feedback.mjs"
+  },
+  {
+    "file": "src/index.mjs",
+    "import": "./pipeline/tool-synthesizer.mjs"
+  },
+  {
+    "file": "src/index.mjs",
+    "import": "./ui/server.mjs"
+  },
+  {
+    "file": "src/index.mjs",
+    "import": "./pipeline/adapters.mjs"
+  },
+  {
+    "file": "src/index.mjs",
+    "import": "./governance/observation-engine.mjs"
+  },
+  {
+    "file": "src/index.mjs",
+    "import": "./governance/proposal-ledger.mjs"
+  },
+  {
+    "file": "src/index.mjs",
+    "import": "./governance/chart-timing.mjs"
+  },
+  {
+    "file": "src/index.mjs",
+    "import": "./governance/deletion-guard.mjs"
+  },
+  {
+    "file": "src/index.mjs",
+    "import": "./persistence/file-runtime-store.mjs"
+  },
+  {
+    "file": "src/index.mjs",
+    "import": "./identity/birth-mirror-runtime.mjs"
+  },
+  {
+    "file": "src/index.mjs",
+    "import": "./identity/birth-location-provider.mjs"
+  },
+  {
+    "file": "src/index.mjs",
+    "import": "./identity/dimension-landing-provider.mjs"
+  },
+  {
+    "file": "src/index.mjs",
+    "import": "./identity/mirror-expression-organ.mjs"
+  },
+  {
+    "file": "src/index.mjs",
+    "import": "./primitives/index.mjs"
+  },
+  {
+    "file": "src/index.mjs",
+    "import": "./state-space/dna-linguistic-observer.mjs"
+  },
+  {
+    "file": "src/index.mjs",
+    "import": "./state-space/biological-translation-runtime.mjs"
+  },
+  {
+    "file": "src/federated-synthia.mjs",
+    "import": "../vendor/pure-synthia-v0.4.0/src/synthia/swarm/bootstrap.mjs"
+  },
+  {
+    "file": "src/federated-synthia.mjs",
+    "import": "../vendor/pure-synthia-v0.4.0/src/synthia/swarm/checkpointStores.mjs"
+  },
+  {
+    "file": "src/federated-synthia.mjs",
+    "import": "./persistence/file-runtime-store.mjs"
+  },
+  {
+    "file": "src/federated-synthia.mjs",
+    "import": "./identity/birth-mirror-runtime.mjs"
+  },
+  {
+    "file": "src/federated-synthia.mjs",
+    "import": "./identity/mirror-expression-organ.mjs"
+  },
+  {
+    "file": "src/federated-synthia.mjs",
+    "import": "./integrated-synthia-system.mjs"
+  },
+  {
+    "file": "src/federated-synthia.mjs",
+    "import": "./mesh/relational-mesh.mjs"
+  },
+  {
+    "file": "src/federated-synthia.mjs",
+    "import": "./mesh/mesh-federation.mjs"
+  },
+  {
+    "file": "src/federated-synthia.mjs",
+    "import": "./state-space/sovereign-state-space-runtime.mjs"
+  },
+  {
+    "file": "src/federated-synthia.mjs",
+    "import": "./state-space/nine-center-body.mjs"
+  },
+  {
+    "file": "src/federated-synthia.mjs",
+    "import": "./state-space/dna-linguistic-observer.mjs"
+  },
+  {
+    "file": "src/federated-synthia.mjs",
+    "import": "./state-space/line-meaning-provider.mjs"
+  },
+  {
+    "file": "src/federated-synthia.mjs",
+    "import": "./state-space/mapping-providers.mjs"
+  },
+  {
+    "file": "src/federated-synthia.mjs",
+    "import": "./state-space/gate-architecture-provider.mjs"
+  },
+  {
+    "file": "src/federated-synthia.mjs",
+    "import": "./state-space/planetary-filters.mjs"
+  },
+  {
+    "file": "src/federated-synthia.mjs",
+    "import": "./state-space/dimension-perspective-registry.mjs"
+  },
+  {
+    "file": "src/federated-synthia.mjs",
+    "import": "./forms/synthia-role-resolver.mjs"
+  },
+  {
+    "file": "src/federated-synthia.mjs",
+    "import": "../vendor/kimi-agent-automata-state-space-merge/pure-synthia-automata/src/merged/centers-channels.js"
+  },
+  {
+    "file": "src/federated-synthia.mjs",
+    "import": "./util.mjs"
+  },
+  {
+    "file": "test/16-relational-operator-runtime.test.mjs",
+    "import": "./helpers.mjs"
+  },
+  {
+    "file": "src/state-space/channel-mesh-body.mjs",
+    "import": "../mesh/relational-mesh.mjs"
+  },
+  {
+    "file": "src/state-space/channel-mesh-body.mjs",
+    "import": "../util.mjs"
+  },
+  {
+    "file": "src/state-space/channel-mesh-body.mjs",
+    "import": "../../vendor/kimi-agent-automata-state-space-merge/pure-synthia-automata/src/merged/centers-channels.js"
+  },
+  {
+    "file": "src/state-space/channel-mesh-body.mjs",
+    "import": "../../vendor/pure-synthia-v0.4.0/src/synthia/neural/architectureModulation.mjs"
+  },
+  {
+    "file": "src/state-space/channel-mesh-body.mjs",
+    "import": "../../vendor/pure-synthia-v0.4.0/src/synthia/neural/generativeChannelField.mjs"
+  },
+  {
+    "file": "src/state-space/channel-mesh-body.mjs",
+    "import": "../../vendor/pure-synthia-v0.4.0/src/synthia/neural/humanDesignGNN.mjs"
+  },
+  {
+    "file": "src/state-space/channel-mesh-body.mjs",
+    "import": "../../vendor/kimi-agent-automata-state-space-merge/pure-synthia-automata/src/state-space/constants.js"
+  },
+  {
+    "file": "src/state-space/channel-mesh-body.mjs",
+    "import": "../../vendor/kimi-agent-automata-state-space-merge/pure-synthia-automata/src/state-space/dimensions.js"
+  },
+  {
+    "file": "src/state-space/relational-operator-runtime.mjs",
+    "import": "../../vendor/kimi-agent-automata-state-space-merge/pure-synthia-automata/src/merged/centers-channels.js"
+  },
+  {
+    "file": "src/state-space/relational-operator-runtime.mjs",
+    "import": "../primitives/index.mjs"
+  },
+  {
+    "file": "src/state-space/relational-operator-runtime.mjs",
+    "import": "../util.mjs"
+  },
+  {
+    "file": "src/state-space/relational-operator-runtime.mjs",
+    "import": "../../vendor/trainable-assembly-v0.4.2/src/core/state-space/addressing.js"
+  },
+  {
+    "file": "src/state-space/dna-perception-runtime.mjs",
+    "import": "../util.mjs"
+  },
+  {
+    "file": "src/state-space/semantic-genome.mjs",
+    "import": "../../vendor/trainable-assembly-v0.4.2/src/core/state-space/addressing.js"
+  },
+  {
+    "file": "src/state-space/semantic-genome.mjs",
+    "import": "../../vendor/kimi-agent-automata-state-space-merge/pure-synthia-automata/src/state-space/dimension-canon.js"
+  },
+  {
+    "file": "src/state-space/semantic-genome.mjs",
+    "import": "../primitives/index.mjs"
+  },
+  {
+    "file": "src/state-space/semantic-genome.mjs",
+    "import": "../util.mjs"
+  },
+  {
+    "file": "src/state-space/semantic-genome.mjs",
+    "import": "./line-meaning-provider.mjs"
+  },
+  {
+    "file": "src/state-space/semantic-genome.mjs",
+    "import": "./mapping-providers.mjs"
+  },
+  {
+    "file": "src/state-space/semantic-genome.mjs",
+    "import": "./planetary-filters.mjs"
+  },
+  {
+    "file": "src/state-space/semantic-genome.mjs",
+    "import": "./gate-architecture-provider.mjs"
+  },
+  {
+    "file": "src/state-space/semantic-genome.mjs",
+    "import": "./dimension-perspective-registry.mjs"
+  },
+  {
+    "file": "src/state-space/semantic-genome.mjs",
+    "import": "./biological-translation-runtime.mjs"
+  },
+  {
+    "file": "src/state-space/semantic-genome.mjs",
+    "import": "./agent-address.mjs"
+  },
+  {
+    "file": "src/state-space/dna-state-substrate.mjs",
+    "import": "../../vendor/trainable-assembly-v0.4.2/src/core/state-space/addressing.js"
+  },
+  {
+    "file": "src/state-space/dna-state-substrate.mjs",
+    "import": "../primitives/index.mjs"
+  },
+  {
+    "file": "src/state-space/dna-state-substrate.mjs",
+    "import": "../util.mjs"
+  }
+]
