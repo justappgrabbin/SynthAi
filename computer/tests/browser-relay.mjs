@@ -1,0 +1,48 @@
+import {fileURLToPath} from 'node:url';
+import http from 'node:http';
+import {readFile} from 'node:fs/promises';
+const server=http.createServer(async(req,res)=>{const path=req.url==='/'?'/index.html':req.url;try{const data=await readFile(fileURLToPath(new URL('../../public', import.meta.url))+path);res.setHeader('Content-Type',path.endsWith('.mjs')?'text/javascript':path.endsWith('.css')?'text/css':'text/html');res.end(data)}catch{res.statusCode=404;res.end()}});
+await new Promise(resolve=>server.listen(8777,'127.0.0.1',resolve));
+import { chromium } from 'playwright';
+import assert from 'node:assert/strict';
+const browser = await chromium.launch({...(process.env.CHROMIUM_PATH ? {executablePath:process.env.CHROMIUM_PATH} : {}),args:['--no-sandbox']});
+const context = await browser.newContext({viewport:{width:412,height:915}});
+const page = await context.newPage();
+const errors=[];page.on('pageerror',e=>errors.push(e.message));
+await page.goto('http://127.0.0.1:8777/');
+await page.waitForFunction(()=>globalThis.SynthAIComputer);
+await page.locator('[data-view="build"]').click();
+await page.locator('#projectName').fill('Vegas checklist');
+await page.locator('#createProject').click();
+await page.waitForFunction(()=>document.querySelector('#builderMessage').textContent.includes('persisted'));
+const popupPromise=page.waitForEvent('popup');
+await page.locator('#previewFile').click();
+const app=await popupPromise;
+await app.waitForSelector('#text');
+await app.locator('#text').fill('Pack charger');
+await app.locator('form button').click();
+assert.equal(await app.locator('#items li').count(),1);
+await app.getByRole('button',{name:'Done',exact:true}).click();
+assert.equal(await app.locator('.done').textContent(),'Pack charger');
+const dataPromise=app.waitForEvent('download');await app.getByRole('button',{name:'Export JSON'}).click();const dataDownload=await dataPromise;const exported=JSON.parse(await readFile(await dataDownload.path(),'utf8'));assert.equal(exported[0].text,'Pack charger');
+
+await app.close();
+await page.reload();
+await page.waitForFunction(()=>globalThis.SynthAIComputer);
+await page.locator('[data-view="build"]').click();
+const againPromise=page.waitForEvent('popup');await page.locator('#previewFile').click();const again=await againPromise;
+await again.waitForSelector('.done');assert.equal(await again.locator('.done').textContent(),'Pack charger');
+await again.getByRole('button',{name:'Delete',exact:true}).click();assert.equal(await again.locator('#items li').count(),0);
+await again.close();
+await page.locator('#projectName').fill('Trip journal');await page.locator('#projectDescription').fill('notebook');await page.locator('#createProject').click();
+await page.waitForFunction(()=>document.querySelector('#editor').value.includes('Trip journal'));
+const notePromise=page.waitForEvent('popup');await page.locator('#previewFile').click();const notes=await notePromise;
+await notes.waitForSelector('textarea');await notes.locator('#text').fill('Arrived in Vegas');await notes.locator('form button').click();assert.equal(await notes.locator('#items li span').textContent(),'Arrived in Vegas');
+await notes.close();
+const htmlPromise=page.waitForEvent('download');await page.locator('#exportApp').click();const htmlDownload=await htmlPromise;assert.match(await readFile(await htmlDownload.path(),'utf8'),/Trip journal/);
+assert.deepEqual(errors,[]);
+
+console.log('PASS browser boot, Klein build, task completion, saved data after restart, deletion, notebook');
+await browser.close();
+
+server.close();

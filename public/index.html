@@ -42,7 +42,7 @@
           <div>
             <span class="pill">SynthAI Computer</span>
             <h2>Your work lives here first.</h2>
-            <p>Build projects, keep their files in the Computer, publish through GitHub, and mount the rest of the SynthAI family into one operating home as each runtime becomes available.</p>
+            <p>Build a task tracker or notebook with the resident Klein tools. Open it, save your data, edit its files, and export the app. Broader autonomous construction is still being connected.</p>
           </div>
           <button class="primary big" data-go="build">Create something</button>
         </div>
@@ -70,10 +70,10 @@
         <div class="builder-grid">
           <article class="panel project-panel">
             <div class="panel-head"><div><small>PROJECT</small><h3>Build workspace</h3></div><span class="pill" id="projectState">no project</span></div>
-            <label>Project name<input id="projectName" placeholder="My app"></label>
-            <label>Description<input id="projectDescription" placeholder="What this project is for"></label>
+            <label>Project name<input value="My Tasks" id="projectName" placeholder="My app"></label>
+            <label>App purpose (notebook or task tracker)<input id="projectDescription" placeholder="Task tracker by default; write notebook for notes"></label>
             <div class="row">
-              <button class="primary" id="createProject">New project</button>
+              <button class="primary" id="createProject">Build app</button>
               <select id="projectPicker"><option value="">Choose project</option></select>
             </div>
           </article>
@@ -83,7 +83,7 @@
               <input id="filePath" value="index.html" aria-label="File path">
               <div class="row">
                 <button class="quiet" id="saveFile">Save file</button>
-                <button class="quiet" id="previewFile">Preview</button>
+                <button class="quiet" id="previewFile">Open app</button><button class="quiet" id="exportApp">Export app</button>
                 <button class="primary" id="publishProject">Publish to GitHub</button>
               </div>
             </div>
@@ -93,7 +93,7 @@
 
           <article class="panel preview-panel">
             <div class="panel-head"><div><small>LIVE LOCAL OUTPUT</small><h3>Preview</h3></div></div>
-            <iframe id="preview" sandbox="allow-scripts"></iframe>
+            <div id="preview">Build a task tracker or notebook, then open the app.</div>
           </article>
         </div>
       </section>
