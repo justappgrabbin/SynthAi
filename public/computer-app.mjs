@@ -1,3 +1,5 @@
+import { RelayWorkerClient, mountWorkerPanel } from '/relay-worker.mjs';
+import { RelayBuilder } from '/computer-runtime/runtime/relay-builder.mjs';
 import { ComputerRuntime } from '/computer-runtime/ComputerRuntime.mjs';
 import { LocalStoragePersistence } from '/computer-runtime/core/kernel.mjs';
 
@@ -12,6 +14,7 @@ const computer = await new ComputerRuntime({
 }).boot();
 
 globalThis.SynthAIComputer = computer;
+const relayBuilder = new RelayBuilder(computer);
 
 let currentProjectId = localStorage.synthaiCurrentProject || '';
 let activity = [];
@@ -46,25 +49,6 @@ function setCurrentProject(id) {
   loadCurrentFile();
 }
 
-function starterHtml(name) {
-  const safeName = escapeHtml(name);
-  return `<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>${safeName}</title>
-  <style>
-    body{font-family:system-ui;margin:0;min-height:100vh;display:grid;place-items:center;background:#100b18;color:#f8f3ff}
-    main{max-width:700px;padding:32px}
-    h1{font-size:clamp(2rem,8vw,4.5rem);margin:0 0 12px}
-    p{color:#c8b8d7;line-height:1.6}
-  </style>
-</head>
-<body><main><h1>${safeName}</h1><p>This project was created inside SynthAI Computer. Edit this file, preview it locally, then publish the same files to GitHub.</p></main></body>
-</html>`;
-}
-
 function mimeFor(path) {
   if (path.endsWith('.html')) return 'text/html';
   if (path.endsWith('.css')) return 'text/css';
@@ -77,12 +61,17 @@ async function createProject() {
   const name = $('#projectName').value.trim();
   if (!name) return message('#builderMessage', 'Project name is required.', false);
   try {
-    const p = await computer.projects.create({ name, description: $('#projectDescription').value.trim() });
-    await computer.projects.writeFile(p.id, 'index.html', starterHtml(name), { type: 'text/html' });
+    const description = $('#projectDescription').value.trim();
+    const kind = /note|journal/i.test(description) ? 'notes' : 'tasks';
+    const task = await relayBuilder.enqueue({ name, description, kind });
+    const tasks = await relayBuilder.drain();
+    const result = tasks[task.id];
+    if (result.status !== 'built') throw new Error(result.error || 'Build did not finish');
+    const p = computer.projects.get(result.projectId);
     setCurrentProject(p.id);
     $('#filePath').value = 'index.html';
     loadCurrentFile();
-    message('#builderMessage', 'Project created in the Computer and persisted locally.', true);
+    message('#builderMessage', `${kind === 'notes' ? 'Notebook' : 'Task tracker'} built by the connected Klein tools and persisted locally.`, true);
   } catch (error) {
     message('#builderMessage', error.message, false);
   }
@@ -126,8 +115,24 @@ function preview() {
   if (!p) return message('#builderMessage', 'Choose a project first.', false);
   const file = computer.projects.readFile(p.id, 'index.html');
   if (!file) return message('#builderMessage', 'This project has no index.html to preview.', false);
-  $('#preview').srcdoc = file.content;
-  message('#builderMessage', 'Preview rendered from the Computer VFS.', true);
+  const url = URL.createObjectURL(new Blob([file.content], { type: 'text/html' }));
+  const opened = window.open(url, '_blank');
+  if (!opened) return message('#builderMessage', 'Opening was blocked. Allow popups or export the app.', false);
+  opened.opener = null;
+  $('#preview').textContent = 'App opened. Close its window to return to your workspace.';
+  message('#builderMessage', 'Saved app opened from the Computer VFS.', true);
+}
+
+function exportApp() {
+  const p = project();
+  if (!p) return message('#builderMessage', 'Build or choose a project first.', false);
+  const file = computer.projects.readFile(p.id, 'index.html');
+  if (!file) return message('#builderMessage', 'No app file to export.', false);
+  if (globalThis.RelayAndroid) return RelayAndroid.save('relay-app.html', file.content);
+  const a = document.createElement('a');
+  const url = URL.createObjectURL(new Blob([file.content], { type: 'text/html' }));
+  a.href = url; a.download = 'relay-app.html'; a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
 async function publish() {
@@ -263,3 +268,10 @@ renderSystems();
 renderActivity();
 if (currentProjectId && computer.projects.get(currentProjectId)) loadCurrentFile();
 if (savedServer && savedToken) connectGitHub();
+
+$('#exportApp').addEventListener('click', exportApp);
+
+await relayBuilder.drain();
+renderProjects();
+
+mountWorkerPanel(new RelayWorkerClient(computer, { onProject: setCurrentProject }));
