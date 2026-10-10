@@ -78,6 +78,16 @@
             </div>
           </article>
 
+          <article class="panel">
+            <h3>Unattended worker</h3>
+            <p>Task trackers and notebooks. Server work continues while this app is closed.</p>
+            <label>Worker address<input id="workerUrl" type="url" placeholder="https://your-worker.onrender.com"></label>
+            <label>Connection token<input id="workerToken" type="password" autocomplete="off"></label>
+            <div class="row"><button id="connectWorker">Connect worker</button><button id="backgroundBuild">Build while away</button><button id="refreshWorker">Refresh jobs</button></div>
+            <div id="workerMessage" class="message">Worker not connected.</div>
+            <div id="workerJobs"></div>
+          </article>
+
           <article class="panel editor-panel">
             <div class="editor-head">
               <input id="filePath" value="index.html" aria-label="File path">

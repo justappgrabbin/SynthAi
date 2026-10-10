@@ -7,7 +7,7 @@ relay_platform="$ANDROID_SDK_ROOT/platforms/android-35/android.jar"
 npm run build:computer
 rm -rf android/build/classes android/build/dex android/build/assets
 mkdir -p android/build/classes android/build/dex android/build/assets/www
-cp public/index.html public/computer-app.mjs public/computer.css android/build/assets/www/
+cp public/index.html public/computer-app.mjs public/relay-worker.mjs public/computer.css android/build/assets/www/
 cp -R public/computer-runtime android/build/assets/www/
 javac -source 8 -target 8 -classpath "$relay_platform" -d android/build/classes android/src/app/synthai/relay/MainActivity.java
 find android/build/classes -name '*.class' -print0 | xargs -0 "$relay_tools/d8" --lib "$relay_platform" --min-api 26 --output android/build/dex

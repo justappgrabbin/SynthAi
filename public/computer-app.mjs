@@ -1,3 +1,4 @@
+import { RelayWorkerClient, mountWorkerPanel } from '/relay-worker.mjs';
 import { RelayBuilder } from '/computer-runtime/runtime/relay-builder.mjs';
 import { ComputerRuntime } from '/computer-runtime/ComputerRuntime.mjs';
 import { LocalStoragePersistence } from '/computer-runtime/core/kernel.mjs';
@@ -117,6 +118,7 @@ function preview() {
   const url = URL.createObjectURL(new Blob([file.content], { type: 'text/html' }));
   const opened = window.open(url, '_blank');
   if (!opened) return message('#builderMessage', 'Opening was blocked. Allow popups or export the app.', false);
+  opened.opener = null;
   $('#preview').textContent = 'App opened. Close its window to return to your workspace.';
   message('#builderMessage', 'Saved app opened from the Computer VFS.', true);
 }
@@ -271,3 +273,5 @@ $('#exportApp').addEventListener('click', exportApp);
 
 await relayBuilder.drain();
 renderProjects();
+
+mountWorkerPanel(new RelayWorkerClient(computer, { onProject: setCurrentProject }));

@@ -26,6 +26,7 @@ jobs:
       - run: npm ci
       - run: npm test
       - run: npx playwright install --with-deps chromium
+      - run: RELAY_TEST_BROWSER=1 node --test computer/tests/worker.test.mjs
       - run: npm run test:browser
       - name: Build development APK
         env:
