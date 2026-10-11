@@ -1,7 +1,7 @@
 let browserToken = '';
 
 export class RelayWorkerClient {
-  constructor(computer, { onProject = () => {}, onMessage = () => {} } = {}) { Object.assign(this, { computer, onProject, onMessage }); }
+  constructor(computer, { onProject = () => {}, onMessage = () => {} } = {}) { Object.assign(this, { computer, onProject, onMessage }); this.imports = new Map(); }
   get token() { return globalThis.RelaySecrets?.getWorkerToken() || browserToken || ''; }
   get url() { return localStorage.getItem('relayWorkerUrl') || ''; }
   async request(path, options = {}) {
@@ -31,17 +31,28 @@ export class RelayWorkerClient {
     return job;
   }
   async importArtifact(jobId) {
-    const key = `relay.remoteImports.${jobId}`;
+    const workerUrl = this.url;
+    const scope = encodeURIComponent(workerUrl).replaceAll('.', '%2E');
+    const key = `relay.remoteImports.${scope}.${jobId}`;
+    if (this.imports.has(key)) return this.imports.get(key);
+    const pending = this.importSavedArtifact(jobId, key, workerUrl);
+    this.imports.set(key, pending);
+    try { return await pending; } finally { this.imports.delete(key); }
+  }
+  async importSavedArtifact(jobId, key, workerUrl) {
     let local = this.computer.state.get(key, null);
+    // Retain imports made by earlier Relay versions only for their original server.
+    const legacy = this.computer.state.get(`relay.remoteImports.${jobId}`, null);
+    if (!local && legacy?.workerUrl === workerUrl) local = legacy;
     if (local?.status === 'imported') { this.onProject(local.projectId); return local; }
     const artifact = await this.request(`/api/jobs/${jobId}/artifact`);
     if (!local) {
       const project = await this.computer.projects.create({ name: artifact.project.name, description: artifact.project.description });
-      local = { projectId: project.id, status: 'importing', workerUrl: this.url, jobId };
+      local = { projectId: project.id, status: 'importing', workerUrl, jobId };
       await this.computer.state.set(key, local, { source: 'relay-worker' });
     }
     for (const file of artifact.project.files) await this.computer.projects.writeFile(local.projectId, file.path, file.content, { type: file.type });
-    await this.computer.projects.writeFile(local.projectId, 'worker-receipt.json', JSON.stringify({ jobId, workerUrl: this.url, verification: artifact.verification }, null, 2), { type: 'application/json' });
+    await this.computer.projects.writeFile(local.projectId, 'worker-receipt.json', JSON.stringify({ jobId, workerUrl, verification: artifact.verification }, null, 2), { type: 'application/json' });
     local.status = 'imported'; await this.computer.state.set(key, local, { source: 'relay-worker' });
     this.onProject(local.projectId); return local;
   }
