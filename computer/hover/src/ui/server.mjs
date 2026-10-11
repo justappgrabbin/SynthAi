@@ -398,7 +398,28 @@ export async function startSynthiaFrontScreen({
 }
 
 const isMain = process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href;
+// Embedded Synthia Server (phone only): reuse the Computer app's supervisor
+// unchanged. HoverRuntime sets SYNTHIA_EMBEDDED=1 and the Hover-only ports.
+// A Synthia Server failure must never take down the hover face on PORT.
+async function startEmbeddedSynthiaServer(env = process.env) {
+  if (env.SYNTHIA_EMBEDDED !== '1') return null;
+  try {
+    const modulePath = env.SYNTHIA_SUPERVISOR_MODULE || '/opt/synthia-supervisor/synthia-supervisor.mjs';
+    const { startSynthiaSupervisor } = await import(pathToFileURL(modulePath).href);
+    const supervisor = startSynthiaSupervisor({ env });
+    process.on('exit', () => { try { supervisor.stop('SIGKILL'); } catch { /* exiting */ } });
+    for (const signal of ['SIGTERM', 'SIGINT']) {
+      process.once(signal, () => { try { supervisor.stop(signal); } catch { /* exiting */ } process.exit(0); });
+    }
+    return supervisor;
+  } catch (error) {
+    console.error('SYNTHIA_SUPERVISOR_FAILED ' + String(error?.stack || error));
+    return null;
+  }
+}
+
 if (isMain) {
+  await startEmbeddedSynthiaServer();
   const started = await startSynthiaFrontScreen();
   console.log(`Synthia front screen: ${started.url}`);
 }

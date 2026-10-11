@@ -11,6 +11,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -26,6 +27,9 @@ final class HoverRuntime {
     static final String GUEST_ENTRY = "/opt/synthia58/src/ui/server.mjs";
     static final String GUEST_DATA_MOUNT = "/var/lib/synthai";
     static final String GUEST_DATA_DIR = "/var/lib/synthai/synthia58";
+    static final String GUEST_SYNTHIA_ROOT = "/opt/synthia-server";
+    static final String GUEST_SYNTHIA_DATA_DIR = "/var/lib/synthai/synthia";
+    static final String GUEST_SYNTHIA_SUPERVISOR = "/opt/synthia-supervisor/synthia-supervisor.mjs";
 
     private static volatile boolean ready;
     private static volatile HoverRuntime active;
@@ -35,6 +39,8 @@ final class HoverRuntime {
     private final StringBuilder outputTail = new StringBuilder();
     private volatile Process process;
     private volatile boolean verified;
+    // Per-process secret for the embedded Synthia Server (TERMINAL_TOKEN), like LinuxContainer's session secret.
+    private final String synthiaToken = newToken();
 
     HoverRuntime(Context context) {
         this.context = context.getApplicationContext();
@@ -156,6 +162,15 @@ final class HoverRuntime {
         env.put("SYNTHIA_TALK_PYTHON", "/opt/talk-venv/bin/python3");
         env.put("SYNTHIA_TALK_APP", "/opt/synthia-talk/app.py");
         env.put("NODE_ENV", "production");
+        // Embedded Synthia Server: same env as LinuxContainer, Hover-only ports, loopback only.
+        env.put("SYNTHIA_EMBEDDED", "1");
+        env.put("SYNTHIA_ROOT", GUEST_SYNTHIA_ROOT);
+        env.put("SYNTHIA_SUPERVISOR_MODULE", GUEST_SYNTHIA_SUPERVISOR);
+        env.put("SYNTHIA_NODE_PORT", String.valueOf(HoverPorts.SYNTHIA_NODE_PORT));
+        env.put("SYNTHIA_PY_PORT", String.valueOf(HoverPorts.SYNTHIA_PY_PORT));
+        env.put("TERMINAL_TOKEN", synthiaToken);
+        env.put("DATA_DIR", GUEST_SYNTHIA_DATA_DIR);
+        env.put("CORS_ORIGIN", HoverPorts.RUNTIME_URL);
         if (noSeccomp) env.put("PROOT_NO_SECCOMP", "1");
 
         process = builder.start();
@@ -266,6 +281,14 @@ final class HoverRuntime {
         } catch (IllegalThreadStateException running) {
             return true;
         }
+    }
+
+    private static String newToken() {
+        byte[] bytes = new byte[24];
+        new SecureRandom().nextBytes(bytes);
+        StringBuilder hex = new StringBuilder(bytes.length * 2);
+        for (byte b : bytes) hex.append(String.format("%02x", b));
+        return hex.toString();
     }
 
     private static void requireFile(File file, String label) {

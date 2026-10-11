@@ -381,7 +381,7 @@ textarea.inp{resize:vertical;min-height:60px;}
   <div class="grid-2">
     <div class="card" id="card-render">
       <div class="ctitle">RENDER <span id="render-tag" class="tag dim">OFFLINE</span></div>
-      <div id="render-url-display" style="font-size:8px;color:var(--dim);word-break:break-all;margin-bottom:8px;">synthia-server.onrender.com</div>
+      <div id="render-url-display" style="font-size:8px;color:var(--dim);word-break:break-all;margin-bottom:8px;">http://127.0.0.1:4185</div>
       <div class="btn-row">
         <button class="btn em sm" onclick="pingRender()">⚡ PING</button>
         <button class="btn go sm" onclick="wakeRender()">☀ WAKE</button>
@@ -550,7 +550,7 @@ textarea.inp{resize:vertical;min-height:60px;}
   <div class="sec">CREDENTIALS + ENDPOINTS</div>
   <div class="card">
     <div class="ctitle">SERVERS</div>
-    <div class="inp-row"><label class="inp-lbl">PYTHON SERVER (AI · Trident · ONNX)</label><input class="inp" id="cfg-render" value="https://synthia-server.onrender.com"></div>
+    <div class="inp-row"><label class="inp-lbl">PYTHON SERVER (AI · Trident · ONNX)</label><input class="inp" id="cfg-render" value="http://127.0.0.1:4185"></div>
     <div class="inp-row"><label class="inp-lbl">NODE SERVER (Tools · MCP · WS) — add URL when ready</label><input class="inp" id="cfg-node" placeholder="https://your-node-server.onrender.com"></div>
     <div class="inp-row"><label class="inp-lbl">GROQ API KEY</label><input class="inp" id="cfg-groq-key" type="password" placeholder="gsk_..."></div>
     <div class="inp-row"><label class="inp-lbl">LOCAL MCP URL</label><input class="inp" id="cfg-local-mcp" value="http://10.0.0.200:3001/sse"></div>
@@ -736,7 +736,7 @@ textarea.inp{resize:vertical;min-height:60px;}
 //  CONFIG
 // ═══════════════════════════════════════════════════════════
 const CFG = {
-  renderUrl:   localStorage.getItem('sn_render')   || 'https://synthia-server.onrender.com',
+  renderUrl:   localStorage.getItem('sn_render')   || 'http://127.0.0.1:4185',
   nodeUrl:     localStorage.getItem('sn_node')     || '',
   groqKey:     localStorage.getItem('sn_groq_key') || '',
   localMcp:    localStorage.getItem('sn_local_mcp')|| 'http://10.0.0.200:3001/sse',

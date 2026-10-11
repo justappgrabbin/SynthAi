@@ -1,6 +1,20 @@
 # Hover face rootfs: minimal Alpine + Node 22 + Synthia 5.8 at /opt/synthia58.
-# Includes the preserved Talk helper in an isolated Python environment. No Synthia Server. Started on the phone by HoverRuntime via PRoot:
+# Includes the preserved Talk helper in an isolated Python environment, plus the
+# embedded Synthia Server (same pinned checkout and deps stage as the Computer
+# rootfs). Started on the phone by HoverRuntime via PRoot:
 #   node /opt/synthia58/src/ui/server.mjs   (cwd /opt/synthia58)
+# With SYNTHIA_EMBEDDED=1, server.mjs starts the existing Computer supervisor,
+# which runs Synthia Server lite.js (4184) and render-server.py (4185) on loopback.
+
+# Same stage as android-app/linux/Dockerfile (checked out by CI at a pinned SHA).
+FROM --platform=$BUILDPLATFORM node:22-alpine3.22 AS synthia-server-deps
+WORKDIR /opt/synthia-server
+COPY synthia-server ./
+RUN node -e "const fs=require('fs');const p=JSON.parse(fs.readFileSync('package.json','utf8'));for(const d of ['onnxruntime-node','exceljs','pdf-parse','mammoth','@supabase/supabase-js','socket.io','simple-git','jszip','multer','node-cron','ws'])delete (p.dependencies||{})[d];delete p.devDependencies;fs.writeFileSync('package.json',JSON.stringify(p,null,2)+'\n')" \
+    && npm install --cpu=arm64 --os=linux --libc=musl --omit=dev --no-audit --no-fund --ignore-scripts \
+    && npm cache clean --force \
+    && rm -rf /root/.npm /tmp/*
+
 FROM node:22-alpine3.22
 
 # 5.8 has no npm dependencies; drop the package managers to keep the rootfs small.
@@ -16,14 +30,36 @@ COPY computer/donors/synthia58/extras/Cynthia-Talk-v1-unmodified /opt/synthia-ta
 RUN python3 -m venv /opt/talk-venv \
     && /opt/talk-venv/bin/pip install --no-cache-dir -r /opt/synthia-talk/requirements.txt
 
+# Embedded Synthia Server, copied from android-app/linux/Dockerfile unchanged.
+# The supervisor lives outside /opt/synthia58 so that tree stays identical to computer/hover.
+COPY --from=synthia-server-deps /opt/synthia-server /opt/synthia-server
+COPY computer/backend/synthia-supervisor.mjs /opt/synthia-supervisor/synthia-supervisor.mjs
+
+RUN cd /opt/synthia-server \
+    && ( pip install --break-system-packages --no-cache-dir --prefer-binary -r requirements-mobile.txt \
+         || ( echo "pip wheels unavailable; falling back to Alpine packages" \
+              && apk add --no-cache py3-fastapi py3-uvicorn py3-httpx py3-python-multipart \
+              && pip install --break-system-packages --no-cache-dir --prefer-binary 'sse-starlette>=2.0.0' 'mcp>=1.0.0,<2' ) ) \
+    && rm -rf /root/.cache/pip /tmp/*
+
 RUN mkdir -p /var/lib/synthai/synthia58 /root /tmp \
     && node --version \
     && test -f /opt/synthia58/src/ui/server.mjs \
     && test -f /opt/synthia58/ui/index.html \
     && node --check /opt/synthia58/src/ui/server.mjs \
     && test -x /opt/talk-venv/bin/python3 \
-    && test ! -e /opt/synthia-server \
-    && test ! -e /opt/synthia58/backups
+    && test ! -e /opt/synthia58/backups \
+    && node --check /opt/synthia-supervisor/synthia-supervisor.mjs \
+    && test -f /opt/synthia-server/server/lite.js \
+    && test -f /opt/synthia-server/server/computer-github-routes.js \
+    && test -f /opt/synthia-server/render-server.py \
+    && test -f /opt/synthia-server/server.py \
+    && python3 -c 'import fastapi, uvicorn, sse_starlette, httpx; print("synthia python deps ok")' \
+    && (python3 -c 'import mcp.server.fastmcp; print("mcp ok")' || echo "WARN: python mcp unavailable; Trident python MCP disabled") \
+    && cd /opt/synthia-server \
+    && DATA_DIR=/tmp/synthia-import-check python3 -c 'import server; print("synthia server.py imports ok")' \
+    && rm -rf /tmp/synthia-import-check /opt/synthia-server/__pycache__ /opt/synthia-server/data \
+    && node -e "require('express');require('cors');require('helmet');require('compression');require('express-rate-limit');require('dotenv');require('./server/computer-github-routes');console.log('synthia node deps ok')"
 
 WORKDIR /opt/synthia58
 
@@ -34,5 +70,9 @@ ENV SYNTHIA_TALK_APP=/opt/synthia-talk/app.py
 ENV PORT=4183
 ENV SYNTHIA_DATA_DIR=/var/lib/synthai/synthia58
 ENV SYNTHIA_ANDROID_BRIDGE_URL=http://127.0.0.1:8797
+ENV SYNTHIA_ROOT=/opt/synthia-server
+ENV SYNTHIA_SUPERVISOR_MODULE=/opt/synthia-supervisor/synthia-supervisor.mjs
+ENV SYNTHIA_NODE_PORT=4184
+ENV SYNTHIA_PY_PORT=4185
 
 CMD ["node", "/opt/synthia58/src/ui/server.mjs"]

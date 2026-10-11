@@ -29,7 +29,7 @@ async function main() {
   const arch = await docker('run', '--rm', '--platform', 'linux/arm64', image, 'uname', '-m');
   assert.equal(arch, 'aarch64', `expected aarch64 guest, got ${arch}`);
   await docker('run', '--rm', '--platform', 'linux/arm64', image, 'sh', '-c',
-    'test -x /opt/talk-venv/bin/python3 && test ! -e /opt/synthia-server && test -f /opt/synthia58/src/ui/server.mjs && node --version');
+    'test -x /opt/talk-venv/bin/python3 && test -f /opt/synthia-server/server/lite.js && test -f /opt/synthia-server/render-server.py && test -f /opt/synthia-supervisor/synthia-supervisor.mjs && test -f /opt/synthia58/src/ui/server.mjs && node --version');
 
   container = await docker('run', '--detach', '--rm', '--platform', 'linux/arm64', '--network', 'host',
     '--volume', `${volume}:/var/lib/synthai`,

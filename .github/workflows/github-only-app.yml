@@ -129,8 +129,8 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
+      # Needed by both the Computer rootfs and the hover rootfs (embedded Synthia Server).
       - name: Check out pinned Synthia Server for the embedded rootfs
-        if: ${{ !startsWith(github.ref_name, 'hover/repair-') }}
         uses: actions/checkout@v4
         with:
           repository: justappgrabbin/Synthia-server
@@ -139,7 +139,6 @@ jobs:
           persist-credentials: false
 
       - name: Verify pinned Synthia Server checkout
-        if: ${{ !startsWith(github.ref_name, 'hover/repair-') }}
         run: |
           test "$(git -C synthia-server rev-parse HEAD)" = "cc22370a1c8670fb9bdec167267c098306ecf502"
           rm -rf synthia-server/.git
@@ -199,7 +198,11 @@ jobs:
           test -x /tmp/synthia-hover-rootfs/usr/local/bin/node
           test -d /tmp/synthia-hover-rootfs/var/lib/synthai
           test -x /tmp/synthia-hover-rootfs/opt/talk-venv/bin/python3
-          test ! -e /tmp/synthia-hover-rootfs/opt/synthia-server
+          # Hover now embeds Synthia Server (supervised on 4184 / 4185 by server.mjs).
+          test -f /tmp/synthia-hover-rootfs/opt/synthia-server/server/lite.js
+          test -f /tmp/synthia-hover-rootfs/opt/synthia-server/render-server.py
+          test -d /tmp/synthia-hover-rootfs/opt/synthia-server/node_modules/express
+          test -f /tmp/synthia-hover-rootfs/opt/synthia-supervisor/synthia-supervisor.mjs
           test ! -e /tmp/synthia-hover-rootfs/opt/synthai
           # Vendored 5.8 app must be byte-identical inside the rootfs.
           # Python surface-morph verification creates bytecode in the checkout;
@@ -320,7 +323,9 @@ jobs:
           unzip -p "$APK" assets/linux-rootfs.bundle | gzip -t
           unzip -p "$APK" assets/linux-rootfs.bundle | tar -tzf - > /tmp/hover-rootfs-list.txt
           grep -q '^./opt/synthia58/src/ui/server.mjs$' /tmp/hover-rootfs-list.txt
-          if grep -q '^./opt/synthia-server/' /tmp/hover-rootfs-list.txt; then echo "hover rootfs must not ship Synthia Server"; exit 1; fi
+          grep -q '^./opt/synthia-server/server/lite.js$' /tmp/hover-rootfs-list.txt || { echo "hover rootfs must ship embedded Synthia Server"; exit 1; }
+          grep -q '^./opt/synthia-server/render-server.py$' /tmp/hover-rootfs-list.txt
+          grep -q '^./opt/synthia-supervisor/synthia-supervisor.mjs$' /tmp/hover-rootfs-list.txt
           grep -q '^./opt/synthia-talk/app.py$' /tmp/hover-rootfs-list.txt
           grep -q '^./opt/talk-venv/bin/python3$' /tmp/hover-rootfs-list.txt
           unzip -p "$APK" assets/linux-rootfs.version > /tmp/hover-rootfs.version
