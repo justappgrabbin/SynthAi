@@ -381,10 +381,15 @@ $('#clearActivity').addEventListener('click', () => { activity = []; renderActiv
 
 function homeIsVisible() {
   const home = $('#home');
-  const heading = home?.querySelector('h2');
-  const create = home?.querySelector('[data-go="build"]');
+  // The phone Home shows the launcher; the hero (h2 + "Create something") sits in the
+  // collapsed "Computer status" <details>, which older Android WebViews lay out at 0x0.
+  const launcher = home?.querySelector('.phone-launcher');
+  const heading = launcher || home?.querySelector('h2');
+  const create = launcher?.querySelector('[data-go="build"]') || home?.querySelector('[data-go="build"]');
   const visible = element => {
     if (!element) return false;
+    const closed = element.closest('details:not([open])');
+    if (closed && !closed.querySelector(':scope > summary')?.contains(element)) return false;
     const style = getComputedStyle(element);
     const box = element.getBoundingClientRect();
     return style.display !== 'none' && style.visibility === 'visible'
