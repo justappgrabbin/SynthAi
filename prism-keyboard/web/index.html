@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Prism Keys</title>
+<style>
+:root{--bg:#f6f4fb;--fg:#1d1b26;--card:#fff;--mut:#6b6880;--bd:#ddd8ea;--key:#e7e3f3;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#13111c;--fg:#f1eefc;--card:#1e1b2b;--mut:#a29fba;--bd:#34304a;--key:#2b2740}}
+:root[data-theme="dark"]{--bg:#13111c;--fg:#f1eefc;--card:#1e1b2b;--mut:#a29fba;--bd:#34304a;--key:#2b2740}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--fg);font:16px/1.4 system-ui,-apple-system,sans-serif;display:flex;flex-direction:column;overflow:hidden}
+header{display:flex;align-items:center;gap:10px;padding:8px 12px;flex-wrap:wrap}
+h1{font-size:18px;margin:0;flex:1;filter:hue-rotate(calc(var(--hs,0)*1deg));background:linear-gradient(90deg,#ff4d6d,#ff9f1c,#f4d35e,#2ec4b6,#4895ef,#9b5de5);-webkit-background-clip:text;background-clip:text;color:transparent}
+label{font-size:12px;color:var(--mut);display:flex;gap:4px;align-items:center}
+main{flex:1;overflow-y:auto;padding:0 12px 8px;min-height:0}
+#t{width:100%;min-height:96px;resize:none;border:2px solid var(--bd);border-radius:14px;background:var(--card);color:var(--fg);font:inherit;padding:10px;outline:none}
+#t:focus{border-color:#9b5de5}
+#view{margin:8px 0;padding:10px;border-radius:14px;background:var(--card);border:1px solid var(--bd);white-space:pre-wrap;word-break:break-word;min-height:44px}
+#view:empty::before{content:"claims light up here";color:var(--mut)}
+mark{--c:#999;background:color-mix(in srgb,var(--c) 28%,transparent);color:inherit;border-bottom:3px solid var(--c);border-radius:4px;padding:0 2px}
+mark sup{font-weight:700;color:var(--c);margin-left:2px}
+.rc{border-left:6px solid var(--c);background:var(--card);border-radius:10px;padding:8px 10px;margin:8px 0;font-size:14px}
+.rc q{display:block;font-style:italic;color:var(--mut);quotes:none;margin-bottom:4px}
+.vd{display:inline-block;font-size:11px;font-weight:700;padding:1px 8px;border-radius:99px;color:#fff;margin-right:6px;text-transform:uppercase}
+.rc ul{margin:4px 0 0;padding-left:18px}.rc a{color:#4895ef}
+.note{font-size:12px;color:var(--mut)}
+.k{transition:background .25s}
+.k.sp,.bar button,.bar select{filter:hue-rotate(calc(var(--hs,0)*1deg))}
+header select{font-size:12px;border-radius:8px;border:1px solid var(--bd);background:var(--card);color:var(--fg);padding:2px 4px}
+#view.code,#t.code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:14px;white-space:pre;overflow-x:auto;tab-size:2}
+.bar{display:flex;gap:6px;padding:6px 8px;overflow-x:auto;flex-shrink:0}
+.bar button,.bar select{flex:0 0 auto;border:0;border-radius:99px;padding:9px 14px;font:600 14px system-ui;color:#fff;cursor:pointer}
+.b1{background:#ff4d6d}.b2{background:#ff9f1c}.b3{background:#2ec4b6}.b4{background:#4895ef}.b5{background:#9b5de5}.b6{background:#f15bb5}
+.bar select{background:#ff9f1c;appearance:none}
+.bar button:disabled{opacity:.5}
+#kb{padding:4px 4px 8px;flex-shrink:0;user-select:none;-webkit-user-select:none;touch-action:manipulation}
+.row{display:flex}
+.k{flex:1;height:46px;margin:3px;border:0;border-radius:10px;font:600 19px system-ui;color:#fff;text-shadow:0 1px 1px #0004;cursor:pointer;padding:0;min-width:0}
+.k:active{filter:brightness(1.25);transform:scale(.95)}
+.k.s{background:var(--key);color:var(--fg);text-shadow:none;flex:1.5;font-size:15px}
+.k.sp{flex:4;background:linear-gradient(90deg,#ff4d6d,#ff9f1c,#f4d35e,#2ec4b6,#4895ef,#9b5de5)}
+.k.on{outline:3px solid #fff8;background:#9b5de5}
+#toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 250px);transform:translateX(-50%);background:#000d;color:#fff;padding:8px 14px;border-radius:99px;font-size:13px;opacity:0;transition:opacity .2s;pointer-events:none;max-width:90%;text-align:center}
+#toast.show{opacity:1}
+[hidden]{display:none!important}dialog{max-width:600px;width:92%;max-height:80vh;overflow:auto;background:var(--card);color:var(--fg);border:1px solid var(--bd);border-radius:16px;padding:20px}dialog label{font-size:14px;margin:14px 0}dialog button{margin:6px;padding:8px;border-radius:8px}dialog::backdrop{background:#0008}#workerToken{width:100%;padding:10px}.context-item,.job-item{border-top:1px solid var(--bd);padding:10px 0}#connectionState{font-size:12px}header button{border-radius:8px;padding:5px}main{scroll-behavior:smooth}</style></head>
+<body>
+<header>
+  <h1>Prism Keys</h1>
+  <label><input type="checkbox" id="auto" checked> auto-punctuate</label>
+  <label><input type="checkbox" id="slang" checked> "then / thus / well" breaks</label>
+  <label><input type="checkbox" id="cd"> code mode</label>
+  <label>colors <select id="cm"><option value="drift">drift</option><option value="pulse">pulse on type</option><option value="still">still</option></select></label>
+<button id="settingsButton">Settings</button></header>
+<main>
+  <textarea id="t" inputmode="none" placeholder="type with the keys below, no punctuation needed" spellcheck="false"></textarea>
+  <div id="view"></div>
+  <div id="recs"></div><div id="problemNotice" class="note" role="status"></div><button id="inboxNotice" hidden style="background:#fff1a8;color:#332900;border:0;border-radius:8px;padding:10px;width:100%">✦ Check your inbox — your companion finished something</button>
+</main>
+<div class="bar">
+  <button class="b1" id="bP">Punctuate</button>
+  <select id="tone"><option>clean</option><option>punchy</option><option>warm</option><option>formal</option><option>shorter</option><option>casual</option></select>
+  <button class="b2" id="bR">Rephrase</button>
+  <button class="b3" id="bC">Proof</button>
+  <button class="b4" id="bA" disabled>Attach</button>
+  <button class="b5" id="bU">Undo</button>
+  <button class="b6" id="bK">Copy</button>
+</div>
+<div class="bar"><button class="b5" data-task="prompt">Fix prompt</button><button class="b3" data-task="translate">Context translator</button><button class="b4" data-task="research">Research</button><button class="b2" data-task="write">Write</button><button class="b3" id="saveContext">Save context</button><button class="b6" id="speak">Talk back</button><button class="b4" id="dictate">Dictate</button><button class="b1" id="stopVoice">Stop voice</button><button class="b5" id="activityButton">Inbox</button><button class="b3" id="pushButton">Push</button><button class="b4" id="androidHands" hidden>Android hands</button><button class="b5" id="openTerminal">Terminal</button></div>
+<dialog id="settings"><h2>Companion settings</h2><label><input type="checkbox" id="proactiveSolutions"> Proactively create solutions when my text describes a problem</label><p class="note">Problem detection is a text heuristic. Proposed solutions and code go to Inbox; they are not applied to projects automatically.</p><label><input type="checkbox" id="changeWords"> Allow companion to automatically change my words</label><p class="note">When enabled, AI rewrites prose after you pause. Undo restores the previous text. Your draft and selected context go to your configured model. Code is only changed when you press Refine.</p><label><input type="checkbox" id="keywordSearch"> Automatically look up keywords as I type or dictate</label><label><input type="checkbox" id="autoAttachProof"> Automatically attach retrieved source links to claims</label><label><input type="checkbox" id="autoResearch"> Automatically research detected claims after I pause</label><p class="note">Research uses online source lookup. Sources are candidates, not verified verdicts.</p><label><input type="checkbox" id="autoSpeak"> Speak finished responses</label><label><input type="checkbox" id="useRag" checked> Retrieve relevant saved context automatically (local RAG)</label><label><input type="checkbox" id="repeatWork"> Do repeated requests for me in the background</label><p class="note">When the same request is entered three separate times, queue code or writing work automatically. Results go to Inbox. Code is generated, not executed.</p><p>Context language</p><select id="contextLanguage"><option value="auto">Auto (AI interpretation)</option><option value="sw">Swahili (tentative local morphology + AI)</option><option value="zu">Zulu (AI interpretation)</option><option value="xh">Xhosa (AI interpretation)</option><option value="en">English (context interpretation)</option></select><p>Research sources</p><select id="sourceMode"><option value="auto">Online sources + scholarly fallback</option><option value="scholarly">Journal articles (review status unverified)</option><option value="google">Google API (requires worker configuration)</option></select><button id="googleSearch">Google Search</button><h3>GitHub RAG</h3><label><input type="checkbox" id="githubRag"> Retrieve repository code for AI requests</label><input id="githubRepo" placeholder="owner/repository"><input id="githubFiles" placeholder="Optional: src/app.py, README.md"><button id="fetchGitHub">Retrieve code to Inbox</button><input id="newRepoName" placeholder="New private repository name"><button id="createGitHubRepo">Create private repository</button><p class="note">Uses public GitHub or PRISM_GITHUB_TOKEN on the worker. Retrieves up to six source files. Repository contents are read as context, never executed.</p><h3>MCP tools</h3><input id="mcpServer" value="workspace" placeholder="Configured MCP server name"><button id="listMcp">Load tools</button><select id="mcpTool"><option value="">Load tools first</option></select><textarea id="mcpArguments" placeholder='{"path":"README.md"}' style="width:100%;min-height:60px"></textarea><button id="callMcp">Run selected tool</button><p class="note">Each click authorizes that tool call. The bundled workspace tools only read files. Additional stdio servers require PRISM_MCP_CONFIG on the worker.</p><p>Worker token</p><input id="workerToken" type="password" autocomplete="off"><button id="connectWorker">Connect</button><p id="connectionState"></p><button id="openFeatureStore">Feature Store</button><h3>Add features</h3><textarea id="featureRequest" placeholder="Describe a new feature…" style="width:100%;min-height:70px"></textarea><button id="requestFeature">Build feature in background</button><p class="note">Generated code arrives in Inbox. Features are not installed automatically.</p><h3>Saved context</h3><div id="contextLibrary"></div><button id="exportContext">Export context</button><button id="closeSettings">Done</button></dialog>
+<dialog id="synthiaChat"><h2>Synthia</h2><p id="synthiaChatMode" class="note">Local state/context helper; connect a model or Synthia Operator for generated conversation.</p><div id="synthiaMessages" style="max-height:40vh;overflow:auto"></div><textarea id="synthiaMessage" placeholder="Talk to Synthia…" style="width:100%;min-height:65px"></textarea><button id="synthiaSend">Send</button><button id="synthiaClose">Close</button></dialog><dialog id="terminal"><h2>Linux terminal</h2><p class="note">Runs in the worker’s isolated container. Requires Docker on the Linux worker. No network, package installation, persistent shell session, or Android-host shell access.</p><textarea id="terminalCommand" placeholder="python --version" style="width:100%;min-height:90px;font-family:monospace"></textarea><button id="runTerminal">Run in container</button><pre id="terminalOutput" style="white-space:pre-wrap"></pre><button id="closeTerminal">Close</button></dialog><dialog id="featureStore"><h2>Feature Store</h2><p class="note">Install tools and make custom action buttons for your companion.</p><div id="featureCatalog"></div><h3>Create a custom feature</h3><input id="customFeatureName" placeholder="Feature name"><select id="customFeatureType"><option value="write">Writing</option><option value="code">Coding</option><option value="research">Research</option><option value="rewrite">Rewrite</option></select><textarea id="customFeatureInstructions" placeholder="What should this feature do with my text?" style="width:100%;min-height:70px"></textarea><button id="installCustomFeature">Install custom action</button><button id="closeFeatureStore">Done</button></dialog><div class="bar" id="customFeatureBar" hidden></div><dialog id="activity"><h2>Inbox</h2><p class="note">Tasks continue while the Termux worker runs. Open a result to apply it.</p><div id="jobList"></div><button id="closeActivity">Close</button></dialog><section id="keyboardPreview" hidden style="padding:8px;flex-shrink:0;height:270px;overflow:auto;background:var(--card);border-top:1px solid var(--bd)"><div><strong>Companion preview</strong><button id="backToKeys">Back to keys</button><button id="pushPreview">Push / use result</button><button id="copyPreview">Copy</button><button id="reviewPreview">Review result</button><button id="approveSelfEdit" hidden>Approve self-edit</button></div><iframe id="previewFrame" sandbox="allow-scripts" title="Generated app preview" style="width:100%;height:210px;border:0" hidden></iframe><pre id="previewText" style="white-space:pre-wrap;overflow-wrap:anywhere"></pre></section><div id="kb"></div>
+<div id="toast"></div>
+<script>
+const $=s=>document.querySelector(s),T=$('#t'),PAL=['#ff4d6d','#ff9f1c','#e6b800','#2ec4b6','#4895ef','#9b5de5','#f15bb5'];
+let hist=[],sample=null,recs=null,tm,layer=0,shift=false;
+const toast=m=>{const e=$('#toast');e.textContent=m;e.classList.add('show');clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove('show'),2600)};
+const esc=s=>s.replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+
+
+/* ---------- auto punctuation (local, offline) ---------- */
+const Q=/^(who|what|when|where|why|how|which|is|are|am|was|were|do|does|did|can|could|would|should|will|shall|have|has|had|whats|hows|isnt|arent|dont|wont)\b/i;
+const cap=s=>s.replace(/^(\W*)([a-z])/,(m,a,b)=>a+b.toUpperCase());
+const fixI=s=>s.replace(/\bi\b/g,'I');
+function fixSeg(s,slang){
+  s=s.trim().replace(/\s+/g,' ');if(!s)return '';
+  const w=s.split(' '),sents=[];let cur=[];
+  for(const x of w){
+    if(slang&&cur.length>=4&&/^(thus|then|well)$/i.test(x)){sents.push(cur);cur=[x]}else cur.push(x);
+  }
+  sents.push(cur);
+  return sents.map(a=>{
+    let t=a.join(' ');
+    t=t.replace(/(\S) (but|though|however|yet)\b/gi,(m,p,c)=>/[,;]$/.test(p)?m:p+', '+c);
+    t=t.replace(/^(thus|then|well)\b(?!,)(?= \S)/i,'$1,');
+    const q=Q.test(t);
+    t=cap(fixI(t));
+    return t+(q?'?':'.');
+  }).join(' ');
+}
+function punct(text,slang){
+  const re=/[^.!?\n]+[.!?]*|\n/g;let out='',m;
+  while((m=re.exec(text))){
+    const c=m[0];if(c==='\n'){out+=c;continue}
+    const [,lead,body,trail]=c.match(/^(\s*)([\s\S]*?)(\s*)$/);
+    if(!body){out+=c;continue}
+    out+=lead+(/[.!?]$/.test(body)?cap(fixI(body)):fixSeg(body,slang))+trail;
+  }
+  return out;
+}
+
+/* ---------- claim detection ---------- */
+const CL=[/\d/,/\b(studies|study|research|according|proves?|proven|shows?|data|statistics|scientists?|experts?|reports?|reported)\b/i,/\b(always|never|every(one|body|thing)?|nobody|no one|most|best|worst|biggest|largest|first|only|majority|all)\b/i,/\b(causes?|caused|leads? to|results? in|because|due to|linked to|increases?|decreases?|reduces?)\b/i,/\b(is|are|was|were)\s+(the|a|an|not)\b/i];
+function claims(text){
+  const re=/[^.!?\n]+[.!?]*/g,out=[];let m;
+  while((m=re.exec(text))){
+    const lead=m[0].match(/^\s*/)[0].length,t=m[0].trim();
+    if(t.split(/\s+/).length<4||/\?$/.test(t)||Q.test(t))continue;
+    const strong=CL.slice(0,4).some(r=>r.test(t));
+    const weak=CL[4].test(t)&&!/^(i|my|we|me)\b/i.test(t);
+    if(!strong&&!weak)continue;
+    if(/^(i|my|we)\b/i.test(t)&&!CL[0].test(t)&&!CL[1].test(t))continue;
+    const n=out.length+1;
+    out.push({n,text:t,start:m.index+lead,end:m.index+lead+t.length,color:PAL[(n-1)%PAL.length]});
+  }
+  return out;
+}
+function render(){if(code){$('#view').innerHTML=hl(T.value);return}
+  const v=T.value,cs=claims(v);let pos=0,h='';
+  for(const c of cs){h+=esc(v.slice(pos,c.start))+`<mark style="--c:${c.color}">${esc(v.slice(c.start,c.end))}<sup>${c.n}</sup></mark>`;pos=c.end}
+  $('#view').innerHTML=h+esc(v.slice(pos));
+}
+function setText(v){hist.push(T.value);if(hist.length>40)hist.shift();T.value=v;T.setSelectionRange(v.length,v.length);render()}
+
+/* ---------- input flow ---------- */
+function onInput(){
+  render();clearTimeout(tm);
+  if($('#auto').checked&&!code)tm=setTimeout(()=>{
+    if(T.selectionStart!==T.value.length)return;
+    const v=punct(T.value,$('#slang').checked);if(v!==T.value)setText(v);
+  },900);
+}
+T.addEventListener('input',onInput);
+const fire=()=>T.dispatchEvent(new Event('input'));
+function ins(t){T.setRangeText(t,T.selectionStart,T.selectionEnd,'end');fire()}
+function bs(){let s=T.selectionStart,e=T.selectionEnd;if(code&&s===e&&s>0&&PAIRS[T.value[s-1]]===T.value[s]){T.setRangeText('',s-1,s+1,'end');return fire()}if(s===e){if(!s)return;s--}T.setRangeText('',s,e,'end');fire()}
+
+/* ---------- buttons ---------- */
+$('#bP').onclick=()=>{const v=code?T.value.replace(/[ \t]+$/gm,'').replace(/\t/g,'  ').replace(/\n{3,}/g,'\n\n'):punct(T.value,$('#slang').checked);v!==T.value?setText(v):toast(code?'already tidy':'already punctuated')};
+$('#bU').onclick=()=>{if(!hist.length)return toast('nothing to undo');T.value=hist.pop();T.setSelectionRange(T.value.length,T.value.length);render()};
+$('#bK').onclick=async()=>{try{await navigator.clipboard.writeText(T.value);toast('copied')}catch{T.select();document.execCommand('copy');toast('copied')}};
+async function busy(btn,label,fn){const o=btn.textContent;btn.disabled=true;btn.textContent=label;try{await fn()}catch(e){toast(e&&e.code==='not_granted'?'permission needed to ask Claude':(e&&e.message)||'something failed')}btn.disabled=false;btn.textContent=o}
+/* ---------- multicolor keyboard ---------- */
+const L=[['qwertyuiop'.split(''),'asdfghjkl'.split(''),['⇧',...'zxcvbnm'.split(''),'⌫'],['123',',',' ','.','↵']],
+         ['1234567890'.split(''),['-','/',':',';','(',')','$','&','@','"'],['#+=',...'.,?!\''.split(''),'⌫'],['ABC',',',' ','.','↵']],
+         ['[]{}#%^*+='.split(''),'_\\|~<>`!?@'.split(''),['123','⇥',':',';','"',"'",'⌫'],['ABC',',',' ','.','↵']]];
+function build(){
+  const kb=$('#kb');kb.innerHTML='';
+  (code&&layer===0?[CODE_ROW,...L[0]]:L[layer]).forEach((r,ri)=>{
+    const d=document.createElement('div');d.className='row';
+    r.forEach((k,ci)=>{
+      const b=document.createElement('button');b.className='k';b.type='button';
+      const sp=['⇧','⌫','123','ABC','#+=','↵','⇥'].includes(k);
+      b.textContent=k===' '?'space':(shift&&layer===0&&k.length===1&&k!==','&&k!=='.'?k.toUpperCase():k);
+      if(k===' ')b.classList.add('sp');
+      else if(sp){b.classList.add('s');if(k==='⇧'&&shift)b.classList.add('on')}
+      else b.style.background=`hsl(calc(${(ci*34+ri*70+(layer*40))%360}deg + var(--hs,0) * 1deg) 72% 46%)`;
+      b.dataset.k=k;d.appendChild(b);
+    });
+    kb.appendChild(d);
+  });
+}
+let rep,code=false,cmode='drift',hs=0,lastT=0;
+const PAIRS={'(':')','[':']','{':'}','"':'"',"'":"'",'`':'`'},CLOSE=new Set([')',']','}','"',"'",'`']),CODE_ROW=['⇥','{','}','(',')','[',']','<','>','='];
+function setHs(v){hs=v%360;document.documentElement.style.setProperty('--hs',hs.toFixed(1))}
+requestAnimationFrame(function lp(t){if(cmode==='drift'&&t-lastT>60){lastT=t;setHs(hs+1)}requestAnimationFrame(lp)});
+function setCode(on){code=on;$('#tone').innerHTML=(on?['clean up','simplify','add comments','add types','find bugs']:['clean','punchy','warm','formal','shorter','casual']).map(x=>`<option>${x}</option>`).join('');$('#bR').textContent=on?'Refine':'Rephrase';$('#bP').textContent=on?'Tidy':'Punctuate';$('#view').classList.toggle('code',on);T.classList.toggle('code',on);T.placeholder=on?'code mode: brackets pair, enter auto-indents':'type with the keys below, no punctuation needed';layer=0;build();render()}
+function cins(ch){const s=T.selectionStart,e=T.selectionEnd,v=T.value;if(s===e&&CLOSE.has(ch)&&v[s]===ch){T.setSelectionRange(s+1,s+1);return fire()}if(PAIRS[ch]){if(s!==e){T.setRangeText(ch+v.slice(s,e)+PAIRS[ch],s,e,'end');return fire()}if(ch===PAIRS[ch]&&/\w/.test(v[s-1]||'')){return ins(ch)}T.setRangeText(ch+PAIRS[ch],s,e,'end');T.setSelectionRange(s+1,s+1);return fire()}ins(ch)}
+function enter(){const s=T.selectionStart,v=T.value,ls=s?v.lastIndexOf('\n',s-1)+1:0,line=v.slice(ls,s),ind=line.match(/^[ \t]*/)[0],p=v[s-1],n=v[s],more=/[{(\[:]$/.test(line.trimEnd())?'  ':'';if(p&&n&&PAIRS[p]===n&&p!=='"'&&p!=="'"&&p!=='`'){T.setRangeText('\n'+ind+more+'\n'+ind,s,T.selectionEnd,'end');const c=s+1+ind.length+more.length;T.setSelectionRange(c,c);return fire()}ins('\n'+ind+more)}
+const KW=/^(function|const|let|var|return|if|else|elif|for|while|class|import|from|export|def|in|of|new|await|async|try|catch|except|throw|raise|switch|case|break|continue|True|False|None|true|false|null|undefined|and|or|not|is|with|as|lambda|pass|yield|self|this|print)$/;
+function hl(v){let d=0;const sp=(c,t,x='')=>`<span style="color:${c};${x}">${esc(t)}</span>`;
+return v.replace(/(\/\/[^\n]*|#[^\n]*)|("(?:\\.|[^"\\\n])*"?|'(?:\\.|[^'\\\n])*'?|`(?:\\.|[^`\\])*`?)|(\b\d[\w.]*)|([A-Za-z_$][\w$]*)(?=\s*\()|([A-Za-z_$][\w$]*)|([{}()[\]])|([=+\-*\/%<>!&|^~?:;,.]+)|([\s\S])/g,
+(m,c,s,n,f,i,b,o)=>c?sp('#8a87a0',m,'font-style:italic'):s?sp('#2ec4b6',m):n?sp('#ff9f1c',m):f?sp(KW.test(m)?'#ff4d6d':'#4895ef',m):i?(KW.test(m)?sp('#ff4d6d',m,'font-weight:700'):esc(m)):b?(/[{(\[]/.test(b)?sp(PAL[d++%7],m,'font-weight:700'):sp(PAL[(--d<0?(d=0):d)%7],m,'font-weight:700')):o?sp('#f15bb5',m):esc(m))}
+let rep2;
+function press(k){
+  navigator.vibrate&&navigator.vibrate(6);if(cmode==='pulse')setHs(hs+14);
+  if(k==='⇧'){shift=!shift;return build()}
+  if(k==='123'){layer=1;return build()}
+  if(k==='ABC'){layer=0;return build()}if(k==='#+='){layer=2;return build()}
+  if(k==='⌫')return bs();
+  if(k==='↵')return code?enter():ins('\n');
+  {const ch=k===' '?' ':k==='⇥'?'  ':(shift&&layer===0&&k.length===1?k.toUpperCase():k);code?cins(ch):ins(ch)}
+  if(shift){shift=false;build()}
+}
+$('#kb').addEventListener('pointerdown',e=>{
+  const b=e.target.closest('.k');if(!b)return;e.preventDefault();
+  const k=b.dataset.k;press(k);
+  if(k==='⌫'){clearTimeout(rep);rep=setTimeout(function r(){bs();rep=setTimeout(r,60)},380)}
+});
+['pointerup','pointercancel','pointerleave'].forEach(ev=>$('#kb').addEventListener(ev,()=>clearTimeout(rep)));
+$('#cd').onchange=e=>setCode(e.target.checked);$('#cm').onchange=e=>{cmode=e.target.value;if(cmode==='still')setHs(0)};build();render();
+</script>
+<script src="/synthia-core.js"></script><script src="/companion.js"></script><script src="/keyboard-ui.js"></script></body></html>
