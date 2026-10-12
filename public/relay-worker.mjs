@@ -87,7 +87,7 @@ export function mountWorkerPanel(client) {
   $('backgroundBuild').onclick = async () => {
     try {
       const name = $('projectName').value.trim(); const description = $('projectDescription').value.trim();
-      const job = await client.submit({ name, description, kind: /note|journal/i.test(description) ? 'notes' : 'tasks' });
+      const job = await client.submit({ name, description, kind: /budget|expense|spend/i.test(description) ? 'budget' : /note|journal/i.test(description) ? 'notes' : 'tasks' });
       report(`Job ${job.id.slice(0, 8)} saved on the worker. You can close Relay.`); await refresh();
     } catch (error) { report(error.message); }
   };

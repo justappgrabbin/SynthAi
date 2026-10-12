@@ -16,15 +16,19 @@ try {
   await page.route('**/*', route => route.request().url().startsWith(origin + '/') ? route.continue() : route.abort());
   await page.goto(origin);
   await page.locator('#text').fill('Worker verification entry');
+  const amount = page.locator('#amount');
+  const isBudget = Boolean(await amount.count());
+  if (isBudget) await amount.fill('12.34');
   await page.locator('form button').click();
-  if (await page.locator('#items li span').textContent() !== 'Worker verification entry') throw new Error('Entry creation failed');
+  if (!(await page.locator('#items li span').textContent()).startsWith('Worker verification entry')) throw new Error('Entry creation failed');
+  if (isBudget && await page.locator('#total').textContent() !== 'Total: $12.34') throw new Error('Budget total failed');
   const complete = page.getByRole('button', { name: 'Done', exact: true });
   const isTracker = Boolean(await complete.count());
   if (isTracker) { await complete.click(); if (await page.locator('.done').count() !== 1) throw new Error('Task completion failed'); }
   await page.reload();
-  if (await page.locator('#items li span').textContent() !== 'Worker verification entry') throw new Error('Saved data recovery failed');
+  if (!(await page.locator('#items li span').textContent()).startsWith('Worker verification entry')) throw new Error('Saved data recovery failed');
   await page.getByRole('button', { name: 'Delete', exact: true }).click();
   if (await page.locator('#items li').count()) throw new Error('Delete failed');
   if (errors.length) throw new Error(errors.join('; '));
-  console.log(JSON.stringify({ ok: true, checks: ['entry creation', 'saved data recovery', 'deletion', ...(isTracker ? ['task completion'] : [])] }));
+  console.log(JSON.stringify({ ok: true, checks: ['entry creation', 'saved data recovery', 'deletion', ...(isTracker ? ['task completion'] : []), ...(isBudget ? ['budget total'] : [])] }));
 } finally { await browser?.close(); await new Promise(resolve => server.close(resolve)); }

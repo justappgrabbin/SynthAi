@@ -62,7 +62,7 @@ async function createProject() {
   if (!name) return message('#builderMessage', 'Project name is required.', false);
   try {
     const description = $('#projectDescription').value.trim();
-    const kind = /note|journal/i.test(description) ? 'notes' : 'tasks';
+    const kind = /budget|expense|spend/i.test(description) ? 'budget' : /note|journal/i.test(description) ? 'notes' : 'tasks';
     const task = await relayBuilder.enqueue({ name, description, kind });
     const tasks = await relayBuilder.drain();
     const result = tasks[task.id];
@@ -71,7 +71,7 @@ async function createProject() {
     setCurrentProject(p.id);
     $('#filePath').value = 'index.html';
     loadCurrentFile();
-    message('#builderMessage', `${kind === 'notes' ? 'Notebook' : 'Task tracker'} built by the connected Klein tools and persisted locally.`, true);
+    message('#builderMessage', `${kind === 'notes' ? 'Notebook' : kind === 'budget' ? 'Budget tracker' : 'Task tracker'} built by the connected Klein tools and persisted locally.`, true);
   } catch (error) {
     message('#builderMessage', error.message, false);
   }

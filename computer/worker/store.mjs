@@ -21,7 +21,7 @@ export class JobStore {
   }
   async put(job) { await atomicJSON(this.path(job.id), job); return job; }
   async submit(spec, requestKey) {
-    if (!['tasks', 'notes'].includes(spec.kind) || typeof spec.name !== 'string' || !spec.name.trim() || spec.name.length > 200) throw new Error('Provide a name and supported kind: tasks or notes');
+    if (!['tasks', 'notes', 'budget'].includes(spec.kind) || typeof spec.name !== 'string' || !spec.name.trim() || spec.name.length > 200) throw new Error('Provide a name and supported kind: tasks, notes, or budget');
     if (typeof requestKey !== 'string' || requestKey.length < 8 || requestKey.length > 200) throw new Error('An idempotency key of 8–200 characters is required');
     const id = createHash('sha256').update(requestKey).digest('hex');
     const clean = { name: spec.name.trim(), description: String(spec.description || '').slice(0, 4000), kind: spec.kind };

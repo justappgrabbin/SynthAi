@@ -43,7 +43,13 @@ await page.waitForFunction(()=>document.querySelector('#editor').value.includes(
 const notePromise=page.waitForEvent('popup');await page.locator('#previewFile').click();const notes=await notePromise;
 await notes.waitForSelector('textarea');await notes.locator('#text').fill('Arrived in Vegas');await notes.locator('form button').click();assert.equal(await notes.locator('#items li span').textContent(),'Arrived in Vegas');
 await notes.close();
-const htmlPromise=page.waitForEvent('download');await page.locator('#exportApp').click();const htmlDownload=await htmlPromise;assert.match(await readFile(await htmlDownload.path(),'utf8'),/Trip journal/);
+await page.locator('#projectName').fill('Vegas budget');await page.locator('#projectDescription').fill('expense budget');await page.locator('#createProject').click();
+await page.waitForFunction(()=>document.querySelector('#editor').value.includes('Vegas budget'));
+const budgetPromise=page.waitForEvent('popup');await page.locator('#previewFile').click();const budget=await budgetPromise;
+await budget.waitForSelector('#amount');await budget.locator('#text').fill('Dinner');await budget.locator('#amount').fill('42.50');await budget.locator('form button').click();
+assert.equal(await budget.locator('#items li span').textContent(),'Dinner — $42.50');assert.equal(await budget.locator('#total').textContent(),'Total: $42.50');
+await budget.reload();assert.equal(await budget.locator('#total').textContent(),'Total: $42.50');await budget.getByRole('button',{name:'Delete',exact:true}).click();assert.equal(await budget.locator('#total').textContent(),'Total: $0.00');await budget.close();
+const htmlPromise=page.waitForEvent('download');await page.locator('#exportApp').click();const htmlDownload=await htmlPromise;assert.match(await readFile(await htmlDownload.path(),'utf8'),/Vegas budget/);
 assert.deepEqual(errors,[]);
 
 const dataDirectory = await mkdtemp(join(tmpdir(), 'relay-front-worker-'));

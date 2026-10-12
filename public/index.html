@@ -71,7 +71,7 @@
           <article class="panel project-panel">
             <div class="panel-head"><div><small>PROJECT</small><h3>Build workspace</h3></div><span class="pill" id="projectState">no project</span></div>
             <label>Project name<input value="My Tasks" id="projectName" placeholder="My app"></label>
-            <label>App purpose (notebook or task tracker)<input id="projectDescription" placeholder="Task tracker by default; write notebook for notes"></label>
+            <label>App purpose<input id="projectDescription" placeholder="Task tracker, notebook, or budget/expenses"></label>
             <div class="row">
               <button class="primary" id="createProject">Build app</button>
               <select id="projectPicker"><option value="">Choose project</option></select>
@@ -80,7 +80,7 @@
 
           <article class="panel">
             <h3>Unattended worker</h3>
-            <p>Task trackers and notebooks. Server work continues while this app is closed.</p>
+            <p>Task trackers, notebooks, and budget trackers. Server work continues while this app is closed.</p>
             <label>Worker address<input id="workerUrl" type="url" placeholder="https://your-worker.onrender.com"></label>
             <label>Connection token<input id="workerToken" type="password" autocomplete="off"></label>
             <div class="row"><button id="connectWorker">Connect worker</button><button id="backgroundBuild">Build while away</button><button id="refreshWorker">Refresh jobs</button></div>

@@ -25,7 +25,7 @@ Enter the deployed HTTPS service address and its token in Build → Unattended w
 
 ## API
 
-All `/api` routes require `Authorization: Bearer <token>`. `POST /api/jobs` also requires an `Idempotency-Key`; retries reuse a job instead of creating duplicates. The body is `{ "name": "Trip", "kind": "tasks", "description": "" }`. `GET /api/jobs`, `/api/jobs/:id`, `/api/jobs/:id/artifact`, and `/api/worker/status` expose status and verified results. `/health` is a public minimal process-liveness endpoint. It is not proof that an artifact passes verification.
+All `/api` routes require `Authorization: Bearer <token>`. `POST /api/jobs` also requires an `Idempotency-Key`; retries reuse a job instead of creating duplicates. The body is `{ "name": "Trip", "kind": "tasks", "description": "" }`; supported kinds are `tasks`, `notes`, and `budget`. `GET /api/jobs`, `/api/jobs/:id`, `/api/jobs/:id/artifact`, and `/api/worker/status` expose status and verified results. `/health` is a public minimal process-liveness endpoint. It is not proof that an artifact passes verification.
 
 ## Reliability targets and recovery
 
