@@ -65,6 +65,7 @@ try {
   await page.locator('#connectWorker').click();
   await page.waitForFunction(()=>document.querySelector('#workerMessage').textContent.includes('connected'));
   await page.locator('#projectName').fill('Unattended trip notes');
+  await page.locator('#projectDescription').fill('notebook');
   await page.locator('#backgroundBuild').click();
   await page.waitForFunction(()=>document.querySelector('#workerJobs').textContent.includes('Unattended trip notes'));
   await page.close();
