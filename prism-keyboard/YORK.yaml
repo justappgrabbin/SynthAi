@@ -1,0 +1,48 @@
+# Prism project contract. The supplied Compiler Kit remains unchanged.
+schema: synthia.york.v1
+name: Prism Keys native Android keyboard companion
+purpose: Preserve the original keyboard and wire companion actions through Synthia.
+paths:
+  project_dir: prism-keyboard
+  keyboard_payload: web
+  packaged_payload: android/app/src/main/assets
+  native_source: android/app/src/main/java/app/prismkeys
+  rootfs_parts: runtime/linux-parts
+android:
+  package: app.prismkeys
+  min_sdk: 26
+  target_sdk: 35
+  architecture: arm64-v8a
+  ime: app.prismkeys.PrismIME
+  activity: app.prismkeys.MainActivity
+runtime:
+  donor: justappgrabbin/SynthAi
+  donor_branch: integrate/hover-tool-factory
+  donor_commit: a5168b099bcfb0ed153bf962e267441b6c356c3b
+  embedded_linux: Alpine under PRoot
+  execution_engine: existing Synthia universal JavaScript execution pipeline
+  chat_endpoint: /api/chat
+  execution_endpoint: /api/execute
+  preserve_canonical_addressing: true
+  force_python_interpreter: false
+edit_rules:
+  - Preserve the original Prism keyboard; do not replace it with an HTML wrapper app.
+  - Preserve InputMethodService, accessibility service, embedded server and native libraries.
+  - Pass generated artifacts to Synthia execution; do not bypass its strategy analysis.
+  - Preserve typed downstream consumption in the Klein chat pipeline.
+  - Situational meaning includes people, relationships, goals and actions.
+  - Keep secrets out of source and keyboard payload.
+  - Self edits require user approval; Android installs require system confirmation.
+  - Synchronize changed web assets into packaged assets before pushing.
+  - If Linux payload changes, regenerate ordered parts, SHA256 and rootfs version marker.
+  - Do not confuse this full native app with Compiler Kit AnyFile's single-activity template.
+publication:
+  repository: justappgrabbin/SynthAi
+  branch: prism-keys/android-auto-release
+  workflow: .github/workflows/prism-keyboard.yml
+  trigger: push to keyboard source or workflow, and manual dispatch
+  build: Gradle 8.9 and Android SDK 35 on GitHub Actions
+  signing: stable debug key for debug builds only
+  artifact: Prism-Keys.apk
+  release_tag: prism-keys-build-<run-number>
+  install: download APK and confirm Android installation

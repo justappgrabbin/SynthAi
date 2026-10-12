@@ -1,0 +1,1 @@
+Read YORK.yaml before editing. This is a native Android keyboard, not the generic AnyFile wrapper. Keep the original Prism payload and the live Synthia chat/execution pipelines. Commit and push finished updates to prism-keys/android-auto-release; GitHub Actions builds and publishes a downloadable APK. Do not claim a release exists until its build and upload succeed.
