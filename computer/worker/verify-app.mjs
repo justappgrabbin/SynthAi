@@ -19,6 +19,9 @@ try {
   const amount = page.locator('#amount');
   const isBudget = Boolean(await amount.count());
   if (isBudget) await amount.fill('12.34');
+  const observation = page.locator('#observation');
+  const isExperiment = Boolean(await observation.count());
+  if (isExperiment) { await observation.fill('Controlled observation'); await page.locator('#outcome').selectOption({ label: 'Supported' }); }
   await page.locator('form button').click();
   if (!(await page.locator('#items li span').textContent()).startsWith('Worker verification entry')) throw new Error('Entry creation failed');
   if (isBudget && await page.locator('#total').textContent() !== 'Total: $12.34') throw new Error('Budget total failed');
@@ -30,5 +33,5 @@ try {
   await page.getByRole('button', { name: 'Delete', exact: true }).click();
   if (await page.locator('#items li').count()) throw new Error('Delete failed');
   if (errors.length) throw new Error(errors.join('; '));
-  console.log(JSON.stringify({ ok: true, checks: ['entry creation', 'saved data recovery', 'deletion', ...(isTracker ? ['task completion'] : []), ...(isBudget ? ['budget total'] : [])] }));
+  console.log(JSON.stringify({ ok: true, checks: ['entry creation', 'saved data recovery', 'deletion', ...(isTracker ? ['task completion'] : []), ...(isBudget ? ['budget total'] : []), ...(isExperiment ? ['experiment observation'] : [])] }));
 } finally { await browser?.close(); await new Promise(resolve => server.close(resolve)); }

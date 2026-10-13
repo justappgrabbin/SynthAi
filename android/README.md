@@ -4,7 +4,7 @@ This is an offline Android packaging target for the existing Computer project wo
 
 ## Working path
 
-Build opens a task tracker by default. Writing `notebook` selects a notebook; writing `budget`, `expense`, or `spend` selects a budget tracker with persistent expense entries and a calculated total. AutoLing recognizes the declared build operation; AutoNovel combines the document and executable program. Both are the existing donor implementations, unchanged. The added integration rules support these three app types only. Each project contains its actual HTML source and `build-evidence.json` recording the tools' outputs.
+Build opens a task tracker by default. Writing `notebook` selects a notebook; writing `budget`, `expense`, or `spend` selects a budget tracker with persistent expense entries and a calculated total. Writing `experiment`, `observation`, or `hypothesis` selects a structured experiment log with hypothesis, observation, outcome, timestamp, persistence, deletion, and export. AutoLing recognizes the declared build operation; AutoNovel combines the document and executable program. Both are the existing donor implementations, unchanged. The added integration rules support these four app types only. Each project contains its actual HTML source and `build-evidence.json` recording the tools' outputs.
 
 Open app launches the saved artifact in a separate window, with no iframe. Tasks support adding, completing, undoing and deleting. Notes support adding and deleting. Data persists locally. Export app saves a standalone HTML file; Export JSON in the generated app backs up its data. GitHub publishing requires the existing authenticated bridge and is not preconnected in the APK.
 

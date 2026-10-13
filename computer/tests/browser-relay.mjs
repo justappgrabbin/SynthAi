@@ -49,7 +49,13 @@ const budgetPromise=page.waitForEvent('popup');await page.locator('#previewFile'
 await budget.waitForSelector('#amount');await budget.locator('#text').fill('Dinner');await budget.locator('#amount').fill('42.50');await budget.locator('form button').click();
 assert.equal(await budget.locator('#items li span').textContent(),'Dinner — $42.50');assert.equal(await budget.locator('#total').textContent(),'Total: $42.50');
 await budget.reload();assert.equal(await budget.locator('#total').textContent(),'Total: $42.50');await budget.getByRole('button',{name:'Delete',exact:true}).click();assert.equal(await budget.locator('#total').textContent(),'Total: $0.00');await budget.close();
-const htmlPromise=page.waitForEvent('download');await page.locator('#exportApp').click();const htmlDownload=await htmlPromise;assert.match(await readFile(await htmlDownload.path(),'utf8'),/Vegas budget/);
+await page.locator('#projectName').fill('Causal observations');await page.locator('#projectDescription').fill('experiment log');await page.locator('#createProject').click();
+await page.waitForFunction(()=>document.querySelector('#editor').value.includes('Causal observations'));
+const experimentPromise=page.waitForEvent('popup');await page.locator('#previewFile').click();const experiment=await experimentPromise;
+await experiment.waitForSelector('#observation');await experiment.locator('#text').fill('Timing predicts result');await experiment.locator('#observation').fill('Control run recorded');await experiment.locator('#outcome').selectOption({label:'Inconclusive'});await experiment.locator('form button').click();
+assert.match(await experiment.locator('#items li span').textContent(),/Timing predicts result — Control run recorded \[Inconclusive\]/);
+await experiment.reload();assert.equal(await experiment.locator('#items li').count(),1);await experiment.getByRole('button',{name:'Delete',exact:true}).click();assert.equal(await experiment.locator('#items li').count(),0);await experiment.close();
+const htmlPromise=page.waitForEvent('download');await page.locator('#exportApp').click();const htmlDownload=await htmlPromise;assert.match(await readFile(await htmlDownload.path(),'utf8'),/Causal observations/);
 assert.deepEqual(errors,[]);
 
 const dataDirectory = await mkdtemp(join(tmpdir(), 'relay-front-worker-'));

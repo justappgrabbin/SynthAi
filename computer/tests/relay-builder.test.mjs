@@ -46,3 +46,15 @@ test('Klein builder creates a persistent executable budget tracker', async () =>
   assert.equal(evidence.kind, 'budget');
   assert.equal(evidence.language.matches[0].ruleId, 'relay.budget');
 });
+
+test('Klein builder creates an executable structured experiment log', async () => {
+  const computer = await new ComputerRuntime().boot();
+  const project = await new RelayBuilder(computer).build({ name: 'Causal observations', kind: 'experiments' });
+  const html = computer.projects.readFile(project.id, 'index.html').content;
+  const evidence = JSON.parse(computer.projects.readFile(project.id, 'build-evidence.json').content);
+  assert.match(html, /id="observation"/);
+  assert.match(html, /id="outcome"/);
+  assert.match(html, /Inconclusive/);
+  assert.equal(evidence.kind, 'experiments');
+  assert.equal(evidence.language.matches[0].ruleId, 'relay.experiments');
+});

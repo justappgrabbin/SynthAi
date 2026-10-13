@@ -35,7 +35,7 @@ const server = createServer(async (request, response) => {
   if (supplied.length !== expected.length || !timingSafeEqual(supplied, expected)) return reply(401, { error: 'Authentication required' });
   try {
     const path = new URL(request.url, 'http://localhost').pathname;
-    if (request.method === 'GET' && path === '/api/worker/status') return reply(200, { ok: true, workerActive: Boolean(child && child.exitCode === null && !child.killed), supportedKinds: ['tasks', 'notes', 'budget'] });
+    if (request.method === 'GET' && path === '/api/worker/status') return reply(200, { ok: true, workerActive: Boolean(child && child.exitCode === null && !child.killed), supportedKinds: ['tasks', 'notes', 'budget', 'experiments'] });
     if (request.method === 'GET' && path === '/api/jobs') return reply(200, { jobs: (await store.list()).map(({ output, ...job }) => job) });
     if (request.method === 'POST' && path === '/api/jobs') {
       let body = ''; for await (const chunk of request) { body += chunk; if (Buffer.byteLength(body) > 20000) return reply(413, { error: 'Request too large' }); }

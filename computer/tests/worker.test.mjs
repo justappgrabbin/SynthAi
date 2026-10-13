@@ -20,6 +20,8 @@ test('queue rejects unsupported requests and preserves idempotency', async () =>
     await assert.rejects(store.submit({ name: 'Game', kind: 'game' }, 'another-key'), /supported kind/);
     const budget = await store.submit({ name: 'Vegas budget', kind: 'budget' }, 'budget-build-key');
     assert.equal(budget.spec.kind, 'budget');
+    const experiments = await store.submit({ name: 'Observation log', kind: 'experiments' }, 'experiment-log-key');
+    assert.equal(experiments.spec.kind, 'experiments');
   } finally { await rm(directory, { recursive: true, force: true }); }
 });
 
