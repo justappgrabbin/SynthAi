@@ -137,6 +137,7 @@ export class ComputerRuntime {
   registerFormationOperation(id, implementation) { this.formations.registerOperation(id, implementation); return this; }
   createFormation(spec) { return this.formations.create(spec); }
   transformFormation(id, graph, options) { return this.formations.transform(id, graph, options); }
+  composeFormations(spec) { return this.formations.compose(spec); }
   activateFormation(id, revisionId) { return this.formations.activate(id, revisionId); }
   executeFormation(id, input, options) { return this.formations.execute(id, input, options); }
   formationHistory(id) { return this.formations.history(id); }
