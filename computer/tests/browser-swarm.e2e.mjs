@@ -11,7 +11,7 @@ import { fileURLToPath } from 'node:url';
 import { extname, resolve, sep } from 'node:path';
 import { chromium } from 'playwright';
 
-const ROOT = fileURLToPath(new URL('../../public/', import.meta.url));
+const ROOT = resolve(fileURLToPath(new URL('../../public/', import.meta.url)));
 const types = {
   '.mjs': 'text/javascript; charset=utf-8',
   '.js': 'text/javascript; charset=utf-8',
@@ -45,7 +45,8 @@ page.on('request', request => {
   if (!request.url().startsWith(url + '/')) offDevice.push(request.url());
 });
 try {
-  await page.goto(url + '/', { waitUntil: 'load' });
+  const response = await page.goto(url + '/', { waitUntil: 'load' });
+  assert.equal(response.status(), 200, 'existing Computer page served');
   try {
     await page.waitForFunction(
       () => Boolean(window.SynthAIComputer?.nativeKlein) &&
