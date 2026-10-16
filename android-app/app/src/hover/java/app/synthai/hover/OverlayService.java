@@ -45,11 +45,11 @@ public final class OverlayService extends Service {
             "html,body{background:transparent!important}"
             + ".veil{display:none!important;background:transparent!important;"
             + "backdrop-filter:none!important;-webkit-backdrop-filter:none!important}"
-            + ".workspace{background:linear-gradient(160deg,rgba(255,255,255,.34),rgba(236,226,255,.26))!important;"
-            + "backdrop-filter:blur(10px) saturate(1.1);-webkit-backdrop-filter:blur(10px) saturate(1.1);"
-            + "box-shadow:0 12px 40px rgba(60,20,120,.18)!important;"
-            // 5.8's text is light-on-dark; a soft shadow keeps it legible on the light glass.
-            + "text-shadow:0 1px 2px rgba(20,6,40,.6)}";
+            // 5.8's text is light-on-dark, so the glass must stay dark enough to read over any
+            // home screen: ~85% deep violet, still slightly see-through, with a stronger blur.
+            + ".workspace{background:linear-gradient(160deg,rgba(26,18,46,.88),rgba(16,12,32,.84))!important;"
+            + "backdrop-filter:blur(14px) saturate(1.1);-webkit-backdrop-filter:blur(14px) saturate(1.1);"
+            + "box-shadow:0 12px 40px rgba(60,20,120,.28)!important}";
 
     static final String INJECT_JS =
             "(function(){try{var id='synthai-hover-light';var s=document.getElementById(id);"
