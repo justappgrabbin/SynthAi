@@ -44,6 +44,9 @@ jobs:
         with:
           submodules: recursive
 
+      - name: Restore complete preserved r21.22 parent
+        run: bash .github/scripts/restore-r21-parent.sh
+
       - name: Use Node 22
         uses: actions/setup-node@v4
         with:
@@ -59,6 +62,9 @@ jobs:
 
       - name: Verify canonical Computer and local backend
         run: npm test
+
+      - name: Verify the complete preserved r21.22 organism
+        run: npm --prefix computer/donors/recovered/synthai-r21.22-self-cultivation-graph-integrated run verify
 
       - name: Verify the supplied Resonance Network is executable
         run: |
