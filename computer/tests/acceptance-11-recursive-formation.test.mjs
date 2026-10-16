@@ -39,6 +39,7 @@ test('ACCEPTANCE 11: native emergence composes executable child and grandchild w
     });
     assert.equal(child.revisions.length, 1);
     assert.equal(child.revisions[0].lineage.generator, 'recovered:ato-core/GenerativeEmergence');
+    assert.equal(child.revisions[0].lineage.generation, 1);
     assert.equal(child.revisions[0].lineage.sourceRevision, double.activeRevision);
     assert.equal(child.revisions[0].lineage.targetRevision, increment.activeRevision);
     assert.match(child.revisions[0].lineage.mappingVersion, /state-space-association/);
@@ -52,6 +53,7 @@ test('ACCEPTANCE 11: native emergence composes executable child and grandchild w
       id: 'emergent-grandchild', sourceId: 'emergent-child', targetId: 'double',
     });
     assert.equal(grandchild.revisions.length, 1);
+    assert.equal(grandchild.revisions[0].lineage.generation, 2);
     assert.equal((await r1.executeFormation('emergent-grandchild', 3)).outputs.output, 14);
     assert.equal(r1.formations.list().length, 4);
     const nested = await r1.formationHistory('double');
