@@ -46,7 +46,21 @@ page.on('request', request => {
 });
 try {
   await page.goto(url + '/', { waitUntil: 'load' });
-  await page.waitForFunction(() => window.SynthAIComputer?.nativeKlein && document.getElementById('bootLabel')?.textContent === 'runtime online', { timeout: 25000 });
+  try {
+    await page.waitForFunction(
+      () => Boolean(window.SynthAIComputer?.nativeKlein) &&
+        document.getElementById('bootLabel')?.textContent === 'runtime online',
+      null, { timeout: 10000 },
+    );
+  } catch (error) {
+    console.error('BROWSER_BOOT_ERRORS', JSON.stringify(errors));
+    console.error('BROWSER_BOOT_STATE', await page.evaluate(() => ({
+      label: document.getElementById('bootLabel')?.textContent,
+      scripts: [...document.scripts].map(s => s.src),
+      title: document.title,
+    })));
+    throw error;
+  }
   assert.equal(await page.locator('#runtimeStatus').innerText(), 'LOCAL');
   await page.locator('[data-view="systems"]').click();
   await page.locator('#assembleKlein').click();
