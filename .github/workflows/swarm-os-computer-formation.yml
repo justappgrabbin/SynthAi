@@ -6,12 +6,14 @@ on:
       - 'computer/services/executable-formations.mjs'
       - 'computer/ComputerRuntime.mjs'
       - 'computer/tests/acceptance-10-executable-formation.test.mjs'
+      - 'computer/tests/acceptance-11-recursive-formation.test.mjs'
       - '.github/workflows/swarm-os-computer-formation.yml'
   pull_request:
     paths:
       - 'computer/services/executable-formations.mjs'
       - 'computer/ComputerRuntime.mjs'
       - 'computer/tests/acceptance-10-executable-formation.test.mjs'
+      - 'computer/tests/acceptance-11-recursive-formation.test.mjs'
       - '.github/workflows/swarm-os-computer-formation.yml'
   workflow_dispatch:
 permissions:
@@ -31,8 +33,9 @@ jobs:
           node --check computer/services/executable-formations.mjs
           node --check computer/ComputerRuntime.mjs
           node --check computer/tests/acceptance-10-executable-formation.test.mjs
+          node --check computer/tests/acceptance-11-recursive-formation.test.mjs
       - name: Persistent formation and native Klein integration tests
-        run: node --test computer/tests/acceptance-10-executable-formation.test.mjs
+        run: node --test computer/tests/acceptance-10-executable-formation.test.mjs computer/tests/acceptance-11-recursive-formation.test.mjs
       - name: Install existing Penta ephemeris test dependency
         run: python3 -m pip install ephem
       - name: Computer acceptance regression suite
