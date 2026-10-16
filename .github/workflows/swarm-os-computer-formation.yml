@@ -1,0 +1,47 @@
+name: SWARM-OS Computer Formation Verification
+on:
+  push:
+    branches: [swarm-os-computer-formation-20261016]
+    paths:
+      - 'computer/**'
+      - 'public/**'
+      - '.github/workflows/swarm-os-computer-formation.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax validation
+        run: |
+          node --check computer/services/executable-formations.mjs
+          node --check computer/ComputerRuntime.mjs
+          node --check computer/events/browser-event-emitter.mjs
+          node --check computer/services/native-klein-memory.mjs
+          node --check computer/tests/browser-swarm.e2e.mjs
+          node --check public/swarm-ui.mjs
+          node --check public/computer-app.mjs
+          node --check computer/tests/acceptance-10-executable-formation.test.mjs
+          node --check computer/tests/acceptance-11-recursive-formation.test.mjs
+      - name: Persistent formation and native Klein integration tests
+        run: node --test computer/tests/acceptance-10-executable-formation.test.mjs computer/tests/acceptance-11-recursive-formation.test.mjs
+      - name: Install existing Penta ephemeris test dependency
+        run: python3 -m pip install ephem
+      - name: Computer acceptance regression suite
+        run: npm run test:computer
+      - name: Existing Computer browser build
+        run: npm run build:computer
+
+      - name: Install headless browser for real local Computer integration
+        run: |
+          npm install --no-save --ignore-scripts playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Verify mobile browser runtime, offline ATO and IndexedDB persistence
+        run: node computer/tests/browser-swarm.e2e.mjs

@@ -1342,6 +1342,78 @@
           }
         }
       ]
+    },
+    {
+      "capability": "formation_execution",
+      "description": "Addressed executable ATO graph formations: create, transform, compose, recursively synthesize, execute, activate historical revisions and recover from the Computer event ledger.",
+      "providers": [
+        {
+          "provider_id": "synthai:recovered-ato-core-formation",
+          "capability": "formation_execution",
+          "repository": "justappgrabbin/SynthAi",
+          "branch_ref": "swarm-os-computer-formation-20261016 (draft PR #46)",
+          "source_artifact": "computer/services/executable-formations.mjs; computer/ComputerRuntime.mjs; computer/donors/recovered/synthai-r21.22-self-cultivation-graph-integrated/vendor/ato-core/src/",
+          "status": "VERIFIED",
+          "environment_requirements": [
+            "Node.js 22 ESM for verified Computer/EventEmitter persistence path",
+            "existing Back-up- pinned Git submodule for complete Computer regression suite",
+            "PyEphem for existing Penta regression suite, not for formation execution",
+            "Chromium/Android WebView with IndexedDB and ES modules for verified browser-local path; no external LLM, app backend or web worker"
+          ],
+          "inputs": {
+            "formation": "{id,address,graph,purpose}; registered installed operation functions",
+            "composition": "{id,sourceId,targetId, optional revisions}"
+          },
+          "outputs": {
+            "execution": "{formationId, revisionId, artifactId, address, outputs}",
+            "history": "append-only Computer grammar-v1 events",
+            "lineage": "versioned graph dependencies and native GenerativeEmergence association"
+          },
+          "dependencies": [
+            "recovered:ATOEngine",
+            "recovered:AutomataMesh",
+            "recovered:Anomata",
+            "recovered:StateSpaceKernel (code projection)",
+            "Computer EventEmitter events.jsonl"
+          ],
+          "persistence_behavior": "Node: Computer grammar-v1 events.jsonl. Browser: append-only IndexedDB events keyed to the Computer namespace. Fresh Node boot and mobile Chromium reload replay formation revisions, native Diseminer lexical vectors and user-learned AUTOLING rules.",
+          "verification_evidence": [
+            {
+              "kind": "test_run",
+              "ref": "https://github.com/justappgrabbin/SynthAi/actions/runs/38941769809",
+              "summary": "Five focused formation tests passed, including native AutoLing + Diseminer, ATO graph mutation, restart replay, native GenerativeEmergence child/grandchild recursive synthesis, lineage depth, failure preservation. All 28 Computer regression tests passed and existing Computer web build succeeded.",
+              "timestamp": "2026-10-16T17:41:07Z"
+            },
+            {
+              "kind": "test_run",
+              "ref": "https://github.com/justappgrabbin/SynthAi/actions/runs/38944990590",
+              "summary": "Real Chromium phone-sized viewport 420x850 loaded existing Computer shell; mounted native AUTOLING+Diseminer ATO formation; executed with network requests blocked, persisted native memory in IndexedDB, learned a new AUTOLING rule and verified after browser reload. Five focused tests + 29 Computer tests passed; web build passed.",
+              "timestamp": "2026-10-16T18:08:50Z"
+            }
+          ],
+          "last_verified": "2026-10-16T18:08:50Z",
+          "known_limitations": [
+            "VERIFIED scope is Node.js executable formation graph composition and restart replay, not unrestricted program synthesis or a trained model.",
+            "The Node event emitter uses node:fs; the browser uses the same grammar-v1 contract through IndexedDB. Android APK packaging/device installation is not yet verified.",
+            "Executable operators must be re-registered from actual installed source after restart; native mutable tool memories are not yet restored automatically.",
+            "Generated composition currently uses native address association to construct a two-member ATO graph; arbitrary topology synthesis remains unverified.",
+            "Only registered callable operations execute; effects/policies of new operations require explicit review before exposing to end users.",
+            "Chromium verified execution after network blocking once modules were loaded; cold offline reload and distribution as an installable APK remain unverified."
+          ],
+          "lineage": {
+            "derived_from": [
+              "justappgrabbin/SynthAi@main:recovered/ato-core",
+              "justappgrabbin/Simlish pull/4 executable formation slice"
+            ],
+            "supersedes_for_scope": []
+          },
+          "selection_hints": {
+            "locality": "local",
+            "performance_notes": "Node.js test-verified; no external LLM or backend for graph execution",
+            "preferred_when": "Creating/recomposing executable formations through existing SynthAi Computer ATO contracts"
+          }
+        }
+      ]
     }
   ],
   "notes": [
