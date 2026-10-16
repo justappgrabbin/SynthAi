@@ -86,6 +86,15 @@ try {
   await page.waitForFunction(() => document.getElementById('formationOutput').textContent.includes('dragon / is / alert'));
   assert.match(await page.locator('#formationMemory').innerText(), /2 native lexical records/);
   await page.unroute('**/*');
+  // Learning changes the REAL donor grammar, not a UI-only command list.
+  await page.locator('.formation-teacher summary').click();
+  await page.locator('#teachAutoling').click();
+  await page.waitForFunction(() => document.getElementById('ruleMessage').textContent.includes('learned ADMIRES'));
+  assert.match(await page.locator('#formationMemory').innerText(), /3 AUTOLING grammar rules/);
+  await page.locator('#formationText').fill('owl admires moon');
+  await page.locator('#runFormation').click();
+  await page.waitForFunction(() => document.getElementById('formationOutput').textContent.includes('Recognized ADMIRES'));
+  assert.match(await page.locator('#formationMemory').innerText(), /3 native lexical records/);
 
   // Fresh browser page over the SAME IndexedDB. Formations + native vectors
   // must be reconstructed from durable Computer grammar-v1 event history.
@@ -93,14 +102,19 @@ try {
   await page.waitForFunction(() => window.SynthAIComputer?.nativeKlein && document.getElementById('bootLabel')?.textContent === 'runtime online');
   await page.locator('[data-view="systems"]').click();
   await page.waitForFunction(() => document.getElementById('formationStatus').textContent === '3 executable');
-  assert.match(await page.locator('#formationMemory').innerText(), /2 native lexical records/);
+  assert.match(await page.locator('#formationMemory').innerText(), /3 native lexical records/);
+  assert.match(await page.locator('#formationMemory').innerText(), /3 AUTOLING grammar rules/);
+  await page.locator('#formationText').fill('bear admires stars');
   await page.locator('#runFormation').click();
-  await page.waitForFunction(() => document.getElementById('formationMemory').textContent.includes('3 native lexical records'));
+  await page.waitForFunction(() => document.getElementById('formationMemory').textContent.includes('4 native lexical records'));
+  assert.match(await page.locator('#formationOutput').innerText(), /Recognized ADMIRES/);
   const history = await page.evaluate(() => window.SynthAIComputer.formationHistory('klein:autoling+diseminer'));
   assert.ok(history.some(event => event.input.action === 'create'));
   assert.ok(history.some(event => event.input.action === 'execute'));
   const memoryHistory = await page.evaluate(() => window.SynthAIComputer.eventEmitter.history('klein:diseminer-memory'));
-  assert.equal(memoryHistory.length, 3);
+  assert.equal(memoryHistory.length, 4);
+  const rules = await page.evaluate(() => window.SynthAIComputer.eventEmitter.history('klein:autoling-memory'));
+  assert.equal(rules.length, 1);
   assert.equal(offDevice.length, 0, 'no off-device browser requests during test');
   assert.deepEqual(errors, [], 'no browser runtime errors');
   console.log('Browser formation: native Klein + ATO execution, offline action, local memory replay, bottom navigation: PASS');
