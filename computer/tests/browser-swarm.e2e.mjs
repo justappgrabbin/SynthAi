@@ -171,7 +171,7 @@ try {
   assert.equal(morphImage[3], 255);
   const morphs = await page.evaluate(() => window.SynthAIComputer.formations.list()
     .filter(f => f.id.startsWith('simlish:')).map(f => f.id));
-  assert.deepEqual(morphs, ['simlish:frame-geometry', 'simlish:swarm-lighting']);
+  assert.deepEqual(morphs, ['simlish:frame-geometry', 'simlish:lighting-active', 'simlish:lighting-constant', 'simlish:lighting-gradient', 'simlish:swarm-lighting']);
 
   await page.reload({ waitUntil: 'load' });
   await page.waitForFunction(() => Boolean(window.SynthAIComputer?.fitnessMorph));
