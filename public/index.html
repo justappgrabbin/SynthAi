@@ -159,6 +159,18 @@
             <div class="panel-head"><div><small>NOTEBOOK HISTORY</small><h3>Klein lexical memory</h3></div></div>
             <div id="formationMemory" class="muted">No lexical records written by this Computer session.</div>
           </div>
+          <details class="formation-teacher">
+            <summary>Teach AUTOLING a new grammar relation</summary>
+            <p class="muted">This is a real learned rule, kept with Computer history and applied by the recovered AUTOLING implementation.</p>
+            <div class="formation-controls">
+              <label>Rule ID<input id="ruleId" value="admires.v1" aria-label="AUTOLING rule ID"></label>
+              <label>Relation<input id="ruleRelation" value="ADMIRES" aria-label="AUTOLING relation"></label>
+              <label>Token pattern<input id="rulePattern" value="$entity admires $quality" aria-label="AUTOLING token pattern"></label>
+              <label>Language template<input id="ruleTemplate" value="$entity admires $quality" aria-label="AUTOLING template"></label>
+            </div>
+            <button class="primary" id="teachAutoling">Learn this rule</button>
+            <div id="ruleMessage" class="message" role="status">Learned rules become available to the executing formation.</div>
+          </details>
         </article>
       </section>
 
