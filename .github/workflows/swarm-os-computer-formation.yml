@@ -33,6 +33,8 @@ jobs:
           node --check computer/tests/acceptance-10-executable-formation.test.mjs
       - name: Persistent formation and native Klein integration tests
         run: node --test computer/tests/acceptance-10-executable-formation.test.mjs
+      - name: Install existing Penta ephemeris test dependency
+        run: python3 -m pip install ephem
       - name: Computer acceptance regression suite
         run: npm run test:computer
       - name: Existing Computer browser build
