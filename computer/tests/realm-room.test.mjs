@@ -31,3 +31,24 @@ test('two computers share owned addresses, movements and host grammar with scope
     await guest.leave(); assert.equal(host.snapshot().participants.length, 1);
   } finally { await guest.leave(); await host.leave(); }
 });
+
+test('hosting falls back to loopback when a sandbox blocks network interface discovery', async () => {
+  const host = new RealmRoom({
+    host: '0.0.0.0',
+    port: 0,
+    getNetworkInterfaces() { throw new Error('interface discovery denied'); }
+  });
+  const guest = new RealmRoom();
+  try {
+    await host.hostWorld({
+      world: { ownerId: 'host', grammar: { colors: { world: '#654321' } } },
+      participant: participant('host')
+    });
+    assert.equal(new URL(host.invite).hostname, '127.0.0.1');
+    const joined = await guest.join(host.invite, participant('guest'));
+    assert.equal(joined.participants.length, 2);
+  } finally {
+    await guest.leave();
+    await host.leave();
+  }
+});

@@ -4,6 +4,26 @@ import { networkInterfaces } from 'node:os';
 
 const token = () => randomBytes(24).toString('base64url');
 const matches = (a, b) => typeof a === 'string' && typeof b === 'string' && Buffer.byteLength(a) === Buffer.byteLength(b) && timingSafeEqual(Buffer.from(a), Buffer.from(b));
+const wildcardHosts = new Set(['0.0.0.0', '::', '::0']);
+
+function inviteHostname(host, getNetworkInterfaces) {
+  if (host && !wildcardHosts.has(host)) return host;
+
+  // Android/Linux sandboxes can legally deny interface enumeration even after
+  // the local room server has bound successfully. Hosting must still work on
+  // the same device, so a failed LAN lookup degrades to loopback instead of
+  // tearing down the multiplayer runtime.
+  try {
+    const interfaces = getNetworkInterfaces?.() ?? {};
+    const external = Object.values(interfaces)
+      .flat()
+      .find(address => address && address.family === 'IPv4' && !address.internal)?.address;
+    return external ?? '127.0.0.1';
+  } catch {
+    return '127.0.0.1';
+  }
+}
+
 function actor(record) {
   if (!record?.id || !Array.isArray(record.addresses) || record.addresses.length > 64) throw new Error('Resolved avatar identity required');
   const position = record.position ?? [0, 1, 0];
@@ -14,8 +34,8 @@ function actor(record) {
 }
 
 export class RealmRoom {
-  constructor({ host = '0.0.0.0', port = 17384, clock = Date.now } = {}) {
-    Object.assign(this, { host, port, clock }); this.peers = new Map(); this.mode = 'local';
+  constructor({ host = '0.0.0.0', port = 17384, clock = Date.now, getNetworkInterfaces = networkInterfaces } = {}) {
+    Object.assign(this, { host, port, clock, getNetworkInterfaces }); this.peers = new Map(); this.mode = 'local';
   }
   async hostWorld({ world, participant }) {
     await this.leave(); this.secret = token(); this.roomId = randomUUID(); this.world = world; this.owner = actor(participant); this.mode = 'host';
@@ -49,8 +69,7 @@ export class RealmRoom {
     this.server.requestTimeout = 10000; this.server.headersTimeout = 10000;
     await new Promise((resolve, reject) => { this.server.once('error', reject); this.server.listen(this.port, this.host, resolve); });
     const port = this.server.address().port;
-    const addresses = Object.values(networkInterfaces()).flat().filter(address => address && address.family === 'IPv4' && !address.internal).map(address => address.address);
-    this.invite = `http://${addresses[0] ?? '127.0.0.1'}:${port}/#${this.secret}`;
+    this.invite = `http://${inviteHostname(this.host, this.getNetworkInterfaces)}:${port}/#${this.secret}`;
     return this.status();
   }
   snapshot() {
