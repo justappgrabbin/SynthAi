@@ -392,7 +392,19 @@ $('#todo-form').addEventListener('submit', async (event) => { event.preventDefau
 
 async function loadWorld() {
   try {
-    const data = await api('/api/solo/world');
+    let data = await api('/api/solo/world');
+    // A state only lands when something runs through the organism (chat, execute, genome).
+    // First time on this surface, land one through the existing /api/genome path so the
+    // World has something real to show. Needs birth details; otherwise say so.
+    if (!data.perception?.latest) {
+      if (!identityConfigured) {
+        $('#world-state').textContent = 'Add your birth details (◎ at the top) so Synthia can land your first state.';
+        drawWorld(data);
+        return;
+      }
+      await api('/api/genome', { method: 'POST', body: JSON.stringify({ input: 'world', context: { surface: 'world' } }) });
+      data = await api('/api/solo/world');
+    }
     const latest = data.perception?.latest;
     $('#world-state').textContent = latest?.address ? `${latest.address.dimension} · Gate ${latest.address.gate}.${latest.address.line} · Color ${latest.address.color} · Tone ${latest.address.tone} · Base ${latest.address.base}` : 'Waiting for a landed state.';
     drawWorld(data);
