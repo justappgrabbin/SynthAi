@@ -115,6 +115,71 @@ try {
   assert.equal(memoryHistory.length, 4);
   const rules = await page.evaluate(() => window.SynthAIComputer.eventEmitter.history('klein:autoling-memory'));
   assert.equal(rules.length, 1);
+
+  // REAL browser pixels: no stock art, mocked algorithm or off-device image.
+  // These fixtures encode a measurable changing illumination field and texture.
+  const images = await page.evaluate(() => {
+    const w = 96, h = 128;
+    const make = shifted => {
+      const surface = document.createElement('canvas');
+      surface.width = w; surface.height = h;
+      const c = surface.getContext('2d');
+      const image = c.createImageData(w, h);
+      for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+        const dx = 2 * x / (w - 1) - 1, dy = 2 * y / (h - 1) - 1;
+        const disc = Math.max(0, 55 - Math.hypot(x - 44 - (shifted ? 3 : 0), y - 65) * 2);
+        const rgb = [105 + disc + x * .35, 115 + disc / 2 + y * .25, 130 + disc / 3];
+        const shift = shifted ? [9 + 16 * dx + 7 * dy, 5 - 11 * dx + 9 * dy, -4 + 6 * dx - 5 * dy] : [0, 0, 0];
+        const offset = (y * w + x) * 4;
+        for (let ch = 0; ch < 3; ch++) image.data[offset + ch] = Math.max(0, Math.min(255, rgb[ch] + shift[ch]));
+        image.data[offset + 3] = 255;
+      }
+      c.putImageData(image, 0, 0);
+      return surface.toDataURL('image/png').split(',')[1];
+    };
+    return { source: make(false), target: make(true) };
+  });
+  await page.locator('#fitnessMorphLab summary').click();
+  await page.locator('#fitnessSource').setInputFiles({
+    name: 'observed-source.png', mimeType: 'image/png', buffer: Buffer.from(images.source, 'base64'),
+  });
+  await page.locator('#fitnessTarget').setInputFiles({
+    name: 'observed-target.png', mimeType: 'image/png', buffer: Buffer.from(images.target, 'base64'),
+  });
+  await page.locator('#runSwarmFit').click();
+  await page.waitForFunction(() => {
+    const t = document.getElementById('fitnessStatus')?.textContent || '';
+    return t.includes('Accepted:') || t.includes('Not accepted:') || t.includes('requires');
+  }, null, { timeout: 35000 });
+  assert.match(await page.locator('#fitnessEvidence').innerText(), /held-out error/);
+  const fitHistory = await page.evaluate(() =>
+    window.SynthAIComputer.fitnessMorph.history('studio-lighting'));
+  assert.equal(fitHistory.length, 1);
+  assert.equal(fitHistory[0].input.samples, undefined,
+    'real pixels and private images are absent from the append-only event history');
+  const lightingImage = await page.locator('#fitnessPreview').evaluate(canvas =>
+    Array.from(canvas.getContext('2d').getImageData(10, 15, 1, 1).data));
+  assert.equal(lightingImage[3], 255);
+
+  await page.locator('#runFrameMorph').click();
+  await page.waitForFunction(() =>
+    (document.getElementById('fitnessStatus')?.textContent || '').includes('Executable frame morph rendered'),
+    null, { timeout: 35000 });
+  assert.match(await page.locator('#fitnessEvidence').innerText(), /native Simlish mesh vertices/);
+  const morphImage = await page.locator('#fitnessPreview').evaluate(canvas =>
+    Array.from(canvas.getContext('2d').getImageData(10, 15, 1, 1).data));
+  assert.equal(morphImage[3], 255);
+  const morphs = await page.evaluate(() => window.SynthAIComputer.formations.list()
+    .filter(f => f.id.startsWith('simlish:')).map(f => f.id));
+  assert.deepEqual(morphs, ['simlish:frame-geometry', 'simlish:swarm-lighting']);
+
+  await page.reload({ waitUntil: 'load' });
+  await page.waitForFunction(() => Boolean(window.SynthAIComputer?.fitnessMorph));
+  assert.equal((await page.evaluate(() => window.SynthAIComputer.fitnessMorph.history())).length, 1);
+  const restoredForms = await page.evaluate(() => window.SynthAIComputer.formations.list()
+    .filter(f => f.id.startsWith('simlish:')).map(f => f.id));
+  assert.deepEqual(restoredForms, morphs, 'real native geometry and fitness formations recover from IndexedDB');
+  console.log('Real browser images: local Simlish CPU PSO fitness + triangle-warp image morph + IndexedDB replay: PASS');
   assert.equal(offDevice.length, 0, 'no off-device browser requests during test');
   assert.deepEqual(errors, [], 'no browser runtime errors');
   console.log('Browser formation: native Klein + ATO execution, offline action, local memory replay, bottom navigation: PASS');
