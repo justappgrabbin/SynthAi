@@ -6,11 +6,6 @@ on:
       - 'computer/**'
       - 'public/**'
       - '.github/workflows/swarm-os-computer-formation.yml'
-  pull_request:
-    paths:
-      - 'computer/**'
-      - 'public/**'
-      - '.github/workflows/swarm-os-computer-formation.yml'
   workflow_dispatch:
 permissions:
   contents: read
