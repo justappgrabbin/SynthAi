@@ -1,0 +1,41 @@
+name: Relay verification and APK
+on:
+  workflow_dispatch:
+  push:
+    branches: [fix/relay-browser-runtime]
+  pull_request:
+    paths: ['computer/**', 'public/**', 'android/**', 'package*.json', 'requirements.txt', '.github/workflows/relay.yml']
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - run: python -m pip install -r requirements.txt
+      - run: npm ci
+      - run: npm test
+      - run: npx playwright install --with-deps chromium
+      - run: RELAY_TEST_BROWSER=1 node --test computer/tests/worker.test.mjs
+      - run: npm run test:browser
+      - name: Build development APK
+        env:
+          ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
+        run: |
+          export PATH="$JAVA_HOME/bin:$PATH"
+          "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" 'platforms;android-35' 'build-tools;35.0.0'
+          bash android/build-apk.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: SynthAI-Relay-development
+          path: android/build/SynthAI-Relay-debug.apk
