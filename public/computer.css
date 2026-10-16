@@ -14,3 +14,11 @@
 .formation-memory .panel-head{margin:0 0 8px}
 .formation-memory h3{margin:3px 0}
 @media(max-width:520px){.formation-controls{display:grid}.formation-controls button{width:100%}}
+
+/* Visual morph and held-out evaluation remain in the SAME Computer Systems view. */
+.fitness-morph-panel{border:1px solid var(--line);border-radius:14px;padding:14px;margin:16px 0;background:#100b18}
+.fitness-morph-panel summary{cursor:pointer;font-weight:700;color:#e5cfff}
+.fitness-morph-panel[open] summary{margin-bottom:14px}
+.fitness-morph-panel canvas{display:block;width:min(100%,360px);height:auto;aspect-ratio:3/2;image-rendering:auto;border:1px solid var(--line);border-radius:10px;margin:12px 0;background:#0d0913}
+.fitness-morph-panel input[type=file]{min-width:0;font-size:.77rem}
+.fitness-morph-panel .formation-controls label{min-width:0;flex:1 1 200px}

@@ -99,6 +99,7 @@ export class ComputerRuntime {
     });
     this.capabilities.register('formation_execution', { providers: [FORMATION_PROVIDER] });
     if (this.platform === 'browser') await this.enableNativeKlein();
+    if (this.platform === 'browser') await this.enableFitnessMorph();
 
     this.capabilityRegistryService = await new CapabilityRegistryService({ bus: this.bus }).load();
     this.services.register('capability-registry', { provider: this.capabilityRegistryService, contract: 'queryCapability' });
@@ -158,6 +159,16 @@ export class ComputerRuntime {
       provider: this.nativeKlein, contract: 'autoling.recognize/diseminer.ingest/replay',
     });
     return this.nativeKlein;
+  }
+  async enableFitnessMorph() {
+    if (this.fitnessMorph) return this.fitnessMorph;
+    const { ComputerFitnessMorph } = await import('./services/fitness-morph.mjs');
+    this.fitnessMorph = await new ComputerFitnessMorph({ computer: this }).boot();
+    this.services.register('fitness-morph', {
+      provider: this.fitnessMorph,
+      contract: 'fitness.fit/interpolate/formation/replay',
+    });
+    return this.fitnessMorph;
   }
   registerFormationOperation(id, implementation) { this.formations.registerOperation(id, implementation); return this; }
   createFormation(spec) { return this.formations.create(spec); }

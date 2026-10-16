@@ -1,6 +1,7 @@
 import { ComputerRuntime } from '/computer-runtime/ComputerRuntime.mjs';
 import { LocalStoragePersistence } from '/computer-runtime/core/kernel.mjs';
 import { mountSwarmComputerUI } from '/swarm-ui.mjs';
+import { mountFitnessMorphUI } from '/fitness-morph-ui.mjs';
 
 const $ = selector => document.querySelector(selector);
 const $$ = selector => [...document.querySelectorAll(selector)];
@@ -14,6 +15,7 @@ const computer = await new ComputerRuntime({
 
 globalThis.SynthAIComputer = computer;
 const swarmUI = mountSwarmComputerUI({ computer });
+mountFitnessMorphUI({ computer });
 
 let currentProjectId = localStorage.synthaiCurrentProject || '';
 let activity = [];

@@ -159,6 +159,21 @@
             <div class="panel-head"><div><small>NOTEBOOK HISTORY</small><h3>Klein lexical memory</h3></div></div>
             <div id="formationMemory" class="muted">No lexical records written by this Computer session.</div>
           </div>
+          <details class="fitness-morph-panel" id="fitnessMorphLab">
+            <summary>Swarm fitness · executable visual morph</summary>
+            <p class="muted">Compare your own source and target images locally. The original Simlish particle swarm fits measured lighting using held-out pixels; its triangle mesh morph interpolates the actual image frames. Raw images are not saved in the Computer event log.</p>
+            <div class="formation-controls">
+              <label>Source image<input type="file" accept="image/*" id="fitnessSource" aria-label="Source image for local swarm fitness"></label>
+              <label>Target image<input type="file" accept="image/*" id="fitnessTarget" aria-label="Target image for local swarm fitness"></label>
+            </div>
+            <div class="row">
+              <button class="primary" id="runSwarmFit">Fit lighting with PSO</button>
+              <button class="quiet" id="runFrameMorph">Morph actual image frames</button>
+            </div>
+            <p class="message" role="status" id="fitnessStatus">Choose two local images to compare and morph.</p>
+            <canvas id="fitnessPreview" width="192" height="128" aria-label="Locally fitted or morphing image preview"></canvas>
+            <p class="muted" id="fitnessEvidence">Only bounded, measured fitness and morph geometry are claimed here.</p>
+          </details>
           <details class="formation-teacher">
             <summary>Teach AUTOLING a new grammar relation</summary>
             <p class="muted">This is a real learned rule, kept with Computer history and applied by the recovered AUTOLING implementation.</p>

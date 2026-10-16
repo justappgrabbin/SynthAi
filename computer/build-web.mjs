@@ -24,6 +24,7 @@ const files = [
   'registry/capability-registry.json',
   'services/executable-formations.mjs',
   'services/native-klein-memory.mjs',
+  'services/fitness-morph.mjs',
 ];
 for (const file of files) {
   await cp(new URL('./' + file, import.meta.url), new URL('./' + file, to));
@@ -31,4 +32,8 @@ for (const file of files) {
 const ato = 'donors/recovered/synthai-r21.22-self-cultivation-graph-integrated/vendor/ato-core/src/';
 await mkdir(new URL('./' + ato, to), { recursive: true });
 await cp(new URL('./' + ato, import.meta.url), new URL('./' + ato, to), { recursive: true });
+const morph = 'donors/verified/simlish/';
+await mkdir(new URL('./' + morph, to), { recursive: true });
+await cp(new URL('./' + morph, import.meta.url), new URL('./' + morph, to), { recursive: true });
+
 console.log('Computer browser runtime staged with recovered ATO Core and IndexedDB event history');
