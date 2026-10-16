@@ -28,6 +28,16 @@ test('ACCEPTANCE 12: real native AUTOLING→Diseminer documents and vectors surv
     const first = await boot();
     assert.equal(first.nativeKlein.autoLing.id, 'autoling');
     assert.equal(first.nativeKlein.diseminer.id, 'diseminer');
+    await first.nativeKlein.learnRule({
+      id: 'admires.v1', relation: 'ADMIRES',
+      pattern: ['$entity', 'admires', '$quality'],
+      template: '$entity admires $quality',
+    });
+    assert.equal((await first.nativeKlein.snapshot()).rules.length, 3);
+    await assert.rejects(() => first.nativeKlein.learnRule({
+      id: 'admires.v1', relation: 'ADMIRES',
+      pattern: ['$entity', 'admires', '$quality'], template: '$entity admires $quality',
+    }), /already exists/);
 
     await first.createFormation({
       id: 'ling-node', address: first.nativeKlein.autoLing.address,
@@ -43,6 +53,8 @@ test('ACCEPTANCE 12: real native AUTOLING→Diseminer documents and vectors surv
     assert.equal(composed.revisions[0].lineage.generation, 1);
     const output = await first.executeFormation('klein-language-memory', { text: 'fox is curious' });
     assert.equal(Object.values(output.outputs)[0].relation, 'HAS_PROPERTY');
+    const learnedOutput = await first.executeFormation('ling-node', { text: 'fox admires moon' });
+    assert.equal(learnedOutput.outputs.result.matches[0].relation, 'ADMIRES');
     const before = await first.nativeKlein.snapshot();
     assert.equal(before.documentCount, 1);
     assert.deepEqual(before.documents[0].tokens, ['fox', 'is', 'curious']);
@@ -54,6 +66,10 @@ test('ACCEPTANCE 12: real native AUTOLING→Diseminer documents and vectors surv
     const restarted = await boot();
     const memory = await restarted.nativeKlein.snapshot();
     assert.deepEqual(memory.documents, before.documents);
+    assert.deepEqual(memory.rules, before.rules);
+    const postRestartRule = await restarted.executeFormation('ling-node', { text: 'owl admires moon' });
+    assert.equal(postRestartRule.outputs.result.matches[0].relation, 'ADMIRES');
+    assert.equal((await restarted.eventEmitter.history('klein:autoling-memory')).length, 1);
     assert.deepEqual(memory.terms, before.terms);
     assert.equal(restarted.formations.describe('klein-language-memory').revisions.length, 1);
     const second = await restarted.executeFormation('klein-language-memory', { text: 'owl is patient' });
