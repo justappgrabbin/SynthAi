@@ -1,0 +1,105 @@
+{
+  "release": "SynthAI Full Suite r21.22-closure",
+  "base": "SynthAI-FULL-SUITE-r21.21-suite1.zip",
+  "policy": "capability counts only when reachable from live Synthia runtime and verified; preserve donors without fake resolver substitution",
+  "integrated": [
+    {
+      "capability": "verification closure",
+      "changes": [
+        "restored 51 historical/current tests",
+        "restored references/EXTERNAL-PATTERNS.md",
+        "restored knowledge/source-index.json",
+        "restored MERGE_PROVENANCE_R17.json",
+        "restored MERGE_PROVENANCE_R21_3.json"
+      ]
+    },
+    {
+      "capability": "embodied morph expression",
+      "changes": [
+        "restored 64 sprites across luminal/mythic/synthetic/terrane families"
+      ]
+    },
+    {
+      "capability": "self-build from source archives",
+      "changes": [
+        "restored lineage-consistent Morph-MIR semantic reconstruction and ZIP self-build files",
+        "updated MorphMirAdapter to expose ingest_project, ingest_zip, self_build, self_rebuild, rebuild, reconstruct"
+      ]
+    },
+    {
+      "capability": "human-design cultivation",
+      "changes": [
+        "added HumanDesignNetwork",
+        "added live human-design organ",
+        "normal request routing",
+        "profile/path/compare/experiment methods",
+        "cultivation cycle carries active design path",
+        "reachability audit check"
+      ]
+    },
+    {
+      "capability": "offline closure",
+      "changes": [
+        "service worker precache contains every required cached file",
+        "cache version bumped to r21.22 closure"
+      ]
+    }
+  ],
+  "verified": [
+    "lifecycle persist/reload/continue",
+    "dynamic morph + morph restoration",
+    "self-forming/autopoiesis",
+    "source mutation/build contracts",
+    "ZIP self-build",
+    "semantic reconstruction",
+    "upload-aware morphing",
+    "Supabase resolution contract",
+    "cultivation real-world feedback",
+    "Human Design cultivation route",
+    "visual self-design",
+    "WebView static reachability with zero Node-only imports",
+    "browser effector contract/authorization",
+    "64 morph sprites"
+  ],
+  "hostBoundary": {
+    "internetPages": "Synthia browser cognition/effectors are present; arbitrary live page execution still requires mounted native/backend browser executor",
+    "androidApk": "existing r21.21 APK was not modified because in-place asset changes invalidate signing; rebuild APK from this closure suite"
+  },
+  "cultivationRecommendation": {
+    "engine": "existing CultivationProgram",
+    "personalization": "HumanDesignNetwork",
+    "nextCandidate": "user-success microprocess rhythm, integrated only if it adds measurable value without duplicating LivingLoop",
+    "content": "Programmer self-cultivation guide as optional gamified knowledge/progression source"
+  },
+  "donors": [
+    {
+      "file": "SynthAI-FULL-SUITE-r21.21-suite1.zip",
+      "sha256": "d2620ee94609a13beaaaaac198abe5ad52904a0880518f2edf800c5fbd6d0350"
+    },
+    {
+      "file": "Synthia-Atomic-Organism-v1.0.0(1).zip",
+      "sha256": "c41db406aa9d9a7b922aa15fdbac5f13d70eb7854c6f0125722407574ec9dd5d"
+    },
+    {
+      "file": "Human-Design-Success-Network-v0.1.zip",
+      "sha256": "3d2ae22d1ea49e4e4b66c5735605705aff733bbeb829e5062fcf222357dccaa6"
+    },
+    {
+      "file": "Human-Design-Path-Network-v1.zip",
+      "sha256": "d6844cb8924822eeae15ee286d9232beefbab85cd91364224546121402697e55"
+    },
+    {
+      "file": "user-success-microprocess-automaton-v0.2.0.zip",
+      "sha256": "08c6cfcb203b49416e2ae6905ab6939dc070bbd176542fb31b2baf8abc90b9ba"
+    },
+    {
+      "file": "A-Programmer-s-Guide-to-Self-Cultivation-master.zip",
+      "sha256": "fdd85031fddc59b2081dd91868c9bd8a4c30a2f2fb2ecc39c4829aa8f331cc2e"
+    },
+    {
+      "file": "zip-visual-editor (6).zip",
+      "sha256": "3f3264a3cc80b6b6c26888a9ab521bd1221277decf8a8a906a018c949bdf7550"
+    }
+  ],
+  "createdAt": "2026-08-28T14:05:00-07:00"
+}

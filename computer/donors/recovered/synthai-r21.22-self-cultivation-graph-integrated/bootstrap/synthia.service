@@ -1,0 +1,46 @@
+[Unit]
+Description=Synthia Automaton Daemon
+After=network.target
+StartLimitIntervalSec=60
+StartLimitBurst=5
+
+[Service]
+Type=simple
+
+# --- run as a dedicated non-root user, not your login user ---
+# sudo useradd --system --create-home --shell /usr/sbin/nologin synthia
+User=synthia
+Group=synthia
+
+# --- where the code lives (this repo) ---
+WorkingDirectory=/opt/synthia
+
+# --- where state persists; keep this OUTSIDE the code directory ---
+Environment=SYNTHIA_STATE_PATH=/var/lib/synthia/state.json
+Environment=SYNTHIA_PORT=4570
+Environment=SYNTHIA_HOST=127.0.0.1
+Environment=SYNTHIA_MODE=complement
+
+ExecStart=/usr/bin/node bootstrap/daemon.mjs
+
+# --- keep it alive across crashes; don't hot-loop-crash forever ---
+Restart=always
+RestartSec=5
+
+# --- sandbox the process even though it's already non-root ---
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+ReadWritePaths=/var/lib/synthia
+
+# --- keep it from ever going wild on a shared box ---
+MemoryMax=512M
+CPUQuota=100%
+
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=synthia
+
+[Install]
+WantedBy=multi-user.target

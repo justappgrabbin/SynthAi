@@ -1,0 +1,41 @@
+{
+  "release": "SynthAI Full Suite r21.22-closure",
+  "authoritativeRuntime": "core/SynthiaUnit.mjs",
+  "subsystems": [
+    "ATO/Klein tool stack",
+    "Tool Factory reconciliation",
+    "5D state/address substrate",
+    "Resonance pathways",
+    "Autopoietic organism",
+    "Cultivation",
+    "Living world",
+    "Self edit/build contracts",
+    "Android self compile contract",
+    "Admin/local ingest",
+    "Graph Center",
+    "Games",
+    "Human Design cultivation path",
+    "Semantic ZIP self-build/reconstruction"
+  ],
+  "interfaces": [
+    "os",
+    "notebook",
+    "bodygraph"
+  ],
+  "graphFamilies": [
+    "Knowledge",
+    "Causal",
+    "Phase",
+    "Temporal",
+    "Dependency"
+  ],
+  "autonomyPolicy": "user switches + evidence/confidence gated organism actions",
+  "knownHostBoundary": "Live arbitrary-internet page execution requires a mounted native/backend browser executor; planning, perception contracts, consent gating, verification, and local WebView runtime remain in Synthia.",
+  "closureNotes": [
+    "restored full verification corpus",
+    "restored knowledge/source-index and provenance files",
+    "restored 64 morph sprites",
+    "restored lineage-consistent Morph-MIR self-build/semantic reconstruction set",
+    "wired Human Design network into normal Synthia routing and cultivation cycles"
+  ]
+}

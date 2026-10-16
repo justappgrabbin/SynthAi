@@ -1,0 +1,8 @@
+import SemanticArtifactCompiler from '../runtime/SemanticArtifactCompiler.js';
+const esc=s=>String(s).replace(/[&<>]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[m]));
+export class BuilderOrgan {
+  constructor(){this.id='builder';this.capabilities=['app','game','code','artifact','build'];this.semanticCompiler=new SemanticArtifactCompiler();}
+  accepts(intent){return /\b(build|make|create|app|game|tool|code|html)\b/i.test(intent);}
+  execute({intent,address,kind}){const isGame=kind==='game'||/\bgame\b/i.test(intent);const title=isGame?'Synthia Generated Game':'Synthia Generated App';const payload=JSON.stringify({intent,address},null,2);const body=isGame?`<main><h1>${title}</h1><p>${esc(intent)}</p><button id=b>Play</button><div id=o></div><script>let n=0;b.onclick=()=>o.textContent='Move '+(++n)+': '+['observe','respond','create','refine','integrate'][n%5]</script></main>`:`<main><h1>${title}</h1><p>${esc(intent)}</p><pre id=state></pre><script>state.textContent=${JSON.stringify(payload)}</script></main>`;const html=`<!doctype html><meta name=viewport content="width=device-width,initial-scale=1"><title>${title}</title><style>body{margin:0;background:#09090d;color:#eee;font:16px system-ui}main{max-width:760px;margin:auto;padding:28px}button{padding:12px 18px;border:0;border-radius:12px}</style>${body}`;const semanticFiles=this.semanticCompiler.compile(null,isGame?'WEB_APP':'WEB_APP',[{toolIds:[],output:{signal:{intent:String(intent)}}}]);const semanticSpec=semanticFiles.find(f=>f.path==='synthia/semantic-spec.json');return {ok:true,artifact:{type:'text/html',name:(isGame?'game':'app')+'.html',content:html},semanticFiles,semanticSpec:semanticSpec?JSON.parse(semanticSpec.content):null,address};}
+}
+export default BuilderOrgan;

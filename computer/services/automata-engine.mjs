@@ -63,6 +63,25 @@ export class AutomataEngineGateway {
     return { provider: this.providerId, ...swarm.snapshot() };
   }
 
+  /** The donor's actual Morph Chat path, including AutoLing, DISEMINER and ATO. */
+  async talk(text, options = {}) {
+    await this._boot();
+    try {
+      const response = await this._synthia.talk(text, options);
+      this.bus?.emit('automata-gateway:conversation', {
+        provider: this.providerId,
+        address: response.runtime?.address ?? null,
+        linguisticGrounded: response.conversation?.semantic?.linguisticGrounded ?? false,
+      });
+      return response;
+    } catch (error) {
+      this.bus?.emit('service:provider-failure', {
+        provider: this.providerId, operation: 'talk', error: String(error?.message ?? error),
+      });
+      throw error;
+    }
+  }
+
   /** Real worker manifests advertising a capability (donor routing table). */
   async findCapability(capability) {
     const swarm = await this._boot();

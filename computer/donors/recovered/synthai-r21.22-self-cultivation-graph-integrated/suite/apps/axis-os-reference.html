@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>AXIS — Adaptive Life-Interface OS</title>
+    <style>
+        :root {
+            --bg-primary: #0a0a12; --bg-secondary: #11111a; --bg-elevated: #1a1a28; --bg-card: #1e1e30;
+            --bg-overlay: rgba(10,10,18,0.92); --border-subtle: #252540; --border-glow: #3a3a60;
+            --accent-primary: #8b5cf6; --accent-secondary: #22d3ee; --accent-warm: #f59e0b;
+            --accent-rose: #f43f5e; --accent-emerald: #10b981; --accent-amber: #fbbf24;
+            --text-primary: #f1f5f9; --text-secondary: #94a3b8; --text-muted: #64748b; --text-dim: #475569;
+            --font-mono: 'SF Mono','Fira Code','Consolas',monospace; --font-sans: -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+            --safe-bottom: env(safe-area-inset-bottom,0px); --safe-top: env(safe-area-inset-top,0px);
+            --bottom-nav-height: 64px;
+        }
+        * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+        html,body { height:100%; overflow:hidden; background:var(--bg-primary); color:var(--text-primary); font-family:var(--font-sans); -webkit-font-smoothing:antialiased; }
+        #substrate-layer { position:fixed; inset:0; z-index:0; pointer-events:none; opacity:0.08; }
+        #substrate-canvas { width:100%; height:100%; }
+        .os-shell { position:relative; z-index:1; display:flex; flex-direction:column; height:100vh; height:100dvh; overflow:hidden; }
+        .top-bar { display:flex; align-items:center; justify-content:space-between; padding:8px 16px; padding-top:calc(8px + var(--safe-top)); background:rgba(10,10,18,0.85); backdrop-filter:blur(20px) saturate(1.5); border-bottom:1px solid var(--border-subtle); font-size:0.75rem; z-index:100; flex-shrink:0; }
+        .top-bar-left { display:flex; align-items:center; gap:12px; }
+        .os-logo { font-weight:800; font-size:1rem; background:linear-gradient(135deg,var(--accent-primary),var(--accent-secondary)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; letter-spacing:0.08em; }
+        .substrate-indicator { display:flex; align-items:center; gap:6px; color:var(--text-muted); font-size:0.7rem; }
+        .substrate-dot { width:6px; height:6px; border-radius:50%; background:var(--accent-emerald); animation:substratePulse 3s ease-in-out infinite; box-shadow:0 0 8px var(--accent-emerald); }
+        @keyframes substratePulse { 0%,100%{opacity:0.5;transform:scale(1)} 50%{opacity:1;transform:scale(1.4)} }
+        .top-bar-right { display:flex; align-items:center; gap:14px; }
+        .top-icon-btn { width:32px; height:32px; border-radius:10px; display:flex; align-items:center; justify-content:center; background:var(--bg-elevated); border:1px solid var(--border-subtle); color:var(--text-secondary); font-size:1rem; cursor:pointer; transition:all 0.2s; }
+        .top-icon-btn:hover,.top-icon-btn:active { border-color:var(--accent-primary); color:var(--accent-secondary); background:rgba(139,92,246,0.15); }
+        .system-time { font-family:var(--font-mono); color:var(--text-secondary); font-size:0.75rem; }
+        .main-area { flex:1; display:flex; flex-direction:column; overflow:hidden; position:relative; }
+        .workspace { flex:1; display:flex; flex-direction:column; overflow:hidden; position:relative; }
+        .app-header { display:flex; align-items:center; justify-content:space-between; padding:12px 16px; border-bottom:1px solid var(--border-subtle); background:rgba(17,17,26,0.7); backdrop-filter:blur(10px); flex-shrink:0; }
+        .app-title { font-size:1.05rem; font-weight:700; display:flex; align-items:center; gap:10px; }
+        .app-title-icon { font-size:1.3rem; }
+        .app-actions { display:flex; gap:8px; }
+        .app-btn { padding:8px 14px; border-radius:10px; border:1px solid var(--border-subtle); background:var(--bg-elevated); color:var(--text-secondary); font-size:0.8rem; cursor:pointer; transition:all 0.2s; display:flex; align-items:center; gap:6px; font-weight:500; }
+        .app-btn:hover { border-color:var(--accent-primary); color:var(--text-primary); }
+        .app-btn:active { transform:scale(0.96); }
+        .app-btn.primary { background:linear-gradient(135deg,var(--accent-primary),var(--accent-secondary)); border:none; color:white; font-weight:600; }
+        .app-btn.primary:hover { transform:translateY(-1px); box-shadow:0 4px 15px rgba(139,92,246,0.35); }
+        .app-btn.ghost { background:transparent; border:none; padding:8px; font-size:1.1rem; }
+        .app-content { flex:1; overflow-y:auto; overflow-x:hidden; padding:16px; -webkit-overflow-scrolling:touch; }
+        .bottom-nav { display:flex; justify-content:space-around; align-items:center; height:var(--bottom-nav-height); padding-bottom:var(--safe-bottom); background:rgba(10,10,18,0.92); backdrop-filter:blur(20px) saturate(1.5); border-top:1px solid var(--border-subtle); z-index:100; flex-shrink:0; }
+        .bottom-nav-item { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; height:100%; cursor:pointer; transition:all 0.2s; border:none; background:transparent; color:var(--text-muted); position:relative; padding:4px 0; }
+        .bottom-nav-item .nav-icon { font-size:1.4rem; transition:transform 0.2s; }
+        .bottom-nav-item .nav-label { font-size:0.6rem; font-weight:600; letter-spacing:0.03em; text-transform:uppercase; }
+        .bottom-nav-item:hover .nav-icon { transform:translateY(-2px); }
+        .bottom-nav-item.active { color:var(--accent-secondary); }
+        .bottom-nav-item.active .nav-icon { transform:translateY(-2px); filter:drop-shadow(0 0 8px rgba(34,211,238,0.4)); }
+        .bottom-nav-item.active::before { content:''; position:absolute; top:0; left:50%; transform:translateX(-50%); width:24px; height:3px; background:linear-gradient(90deg,var(--accent-primary),var(--accent-secondary)); border-radius:0 0 3px 3px; }
+        .bottom-nav-badge { position:absolute; top:4px; right:calc(50% - 14px); width:8px; height:8px; border-radius:50%; background:var(--accent-rose); box-shadow:0 0 6px var(--accent-rose); animation:badgePulse 2s infinite; }
+        @keyframes badgePulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+        .settings-overlay { position:fixed; inset:0; background:var(--bg-overlay); backdrop-filter:blur(8px); z-index:300; opacity:0; pointer-events:none; transition:opacity 0.3s; }
+        .settings-overlay.open { opacity:1; pointer-events:auto; }
+        .settings-panel { position:fixed; top:0; right:0; bottom:0; width:100%; max-width:420px; background:var(--bg-secondary); border-left:1px solid var(--border-subtle); z-index:301; transform:translateX(100%); transition:transform 0.35s cubic-bezier(0.32,0.72,0,1); display:flex; flex-direction:column; overflow:hidden; }
+        .settings-panel.open { transform:translateX(0); }
+        .settings-header { display:flex; align-items:center; justify-content:space-between; padding:16px; padding-top:calc(16px + var(--safe-top)); border-bottom:1px solid var(--border-subtle); flex-shrink:0; }
+        .settings-header h2 { font-size:1.1rem; font-weight:700; }
+        .settings-close { width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center; background:var(--bg-elevated); border:1px solid var(--border-subtle); color:var(--text-secondary); font-size:1.2rem; cursor:pointer; }
+        .settings-content { flex:1; overflow-y:auto; padding:16px; }
+        .admin-overlay { position:fixed; inset:0; background:var(--bg-overlay); backdrop-filter:blur(8px); z-index:400; opacity:0; pointer-events:none; transition:opacity 0.3s; }
+        .admin-overlay.open { opacity:1; pointer-events:auto; }
+        .admin-panel { position:fixed; top:0; left:0; bottom:0; width:100%; max-width:420px; background:var(--bg-secondary); border-right:1px solid var(--border-subtle); z-index:401; transform:translateX(-100%); transition:transform 0.35s cubic-bezier(0.32,0.72,0,1); display:flex; flex-direction:column; overflow:hidden; }
+        .admin-panel.open { transform:translateX(0); }
+        .admin-header { display:flex; align-items:center; justify-content:space-between; padding:16px; padding-top:calc(16px + var(--safe-top)); border-bottom:1px solid var(--border-subtle); flex-shrink:0; background:linear-gradient(135deg,rgba(139,92,246,0.1),rgba(34,211,238,0.05)); }
+        .admin-header h2 { font-size:1.1rem; font-weight:700; display:flex; align-items:center; gap:8px; }
+        .admin-badge { font-size:0.6rem; font-weight:700; text-transform:uppercase; letter-spacing:0.1em; padding:2px 8px; border-radius:4px; background:linear-gradient(135deg,var(--accent-primary),var(--accent-secondary)); color:white; }
+        .admin-content { flex:1; overflow-y:auto; padding:16px; }
+        .admin-stat-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:20px; }
+        .admin-stat-card { background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:14px; padding:16px; text-align:center; }
+        .admin-stat-value { font-size:1.6rem; font-weight:800; background:linear-gradient(135deg,var(--accent-primary),var(--accent-secondary)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+        .admin-stat-label { font-size:0.65rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.08em; margin-top:4px; }
+        .admin-log { background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:12px; padding:12px; font-family:var(--font-mono); font-size:0.75rem; color:var(--text-muted); max-height:200px; overflow-y:auto; }
+        .admin-log-entry { padding:4px 0; border-bottom:1px solid var(--border-subtle); }
+        .admin-log-entry:last-child { border-bottom:none; }
+        .admin-action-btn { width:100%; padding:14px; border-radius:12px; border:1px solid var(--border-subtle); background:var(--bg-card); color:var(--text-secondary); font-size:0.9rem; font-weight:500; cursor:pointer; transition:all 0.2s; margin-bottom:8px; display:flex; align-items:center; justify-content:space-between; }
+        .admin-action-btn:hover { border-color:var(--accent-primary); color:var(--text-primary); background:rgba(139,92,246,0.08); }
+        .admin-action-btn.danger { border-color:rgba(244,63,94,0.3); color:var(--accent-rose); }
+        .admin-action-btn.danger:hover { background:rgba(244,63,94,0.1); border-color:var(--accent-rose); }
+        .toggle { width:48px; height:26px; background:var(--bg-elevated); border-radius:13px; position:relative; cursor:pointer; transition:background 0.25s; border:1px solid var(--border-subtle); flex-shrink:0; }
+        .toggle.active { background:linear-gradient(135deg,var(--accent-primary),var(--accent-secondary)); border-color:transparent; }
+        .toggle-knob { width:22px; height:22px; background:white; border-radius:50%; position:absolute; top:1px; left:1px; transition:transform 0.25s cubic-bezier(0.32,0.72,0,1); box-shadow:0 2px 6px rgba(0,0,0,0.25); }
+        .toggle.active .toggle-knob { transform:translateX(22px); }
+        .home-grid { display:grid; grid-template-columns:1fr; gap:12px; }
+        @media (min-width:640px) { .home-grid { grid-template-columns:repeat(2,1fr); } }
+        .home-card { background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:16px; padding:18px; transition:all 0.25s ease; cursor:pointer; position:relative; overflow:hidden; }
+        .home-card::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; background:linear-gradient(90deg,var(--accent-primary),var(--accent-secondary)); opacity:0; transition:opacity 0.3s; }
+        .home-card:hover::before,.home-card:active::before { opacity:1; }
+        .home-card:hover,.home-card:active { border-color:var(--border-glow); transform:translateY(-1px); box-shadow:0 8px 24px rgba(139,92,246,0.1); }
+        .home-card-header { display:flex; align-items:center; gap:12px; margin-bottom:10px; }
+        .home-card-icon { width:40px; height:40px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:1.4rem; }
+        .home-card-title { font-weight:700; font-size:0.95rem; }
+        .home-card-subtitle { font-size:0.75rem; color:var(--text-muted); margin-top:1px; }
+        .home-card-body { color:var(--text-secondary); font-size:0.85rem; line-height:1.5; margin-top:8px; }
+        .home-card-meta { display:flex; gap:12px; margin-top:12px; font-size:0.7rem; color:var(--text-muted); }
+        .chat-container { display:flex; flex-direction:column; height:100%; max-width:800px; margin:0 auto; width:100%; }
+        .chat-messages { flex:1; overflow-y:auto; padding:12px 0; display:flex; flex-direction:column; gap:14px; }
+        .chat-message { display:flex; gap:10px; max-width:88%; animation:messageIn 0.3s ease; }
+        @keyframes messageIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+        .chat-message.user { align-self:flex-end; flex-direction:row-reverse; }
+        .chat-avatar { width:34px; height:34px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:0.9rem; flex-shrink:0; }
+        .chat-avatar.agent { background:linear-gradient(135deg,var(--accent-primary),var(--accent-secondary)); box-shadow:0 0 12px rgba(139,92,246,0.25); }
+        .chat-avatar.user { background:var(--bg-elevated); border:1px solid var(--border-subtle); }
+        .chat-bubble { background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:14px; padding:10px 14px; font-size:0.9rem; line-height:1.5; color:var(--text-primary); }
+        .chat-message.user .chat-bubble { background:linear-gradient(135deg,rgba(139,92,246,0.12),rgba(34,211,238,0.08)); border-color:rgba(139,92,246,0.3); }
+        .chat-input-area { padding:12px 0; border-top:1px solid var(--border-subtle); display:flex; gap:8px; align-items:flex-end; }
+        .chat-input { flex:1; background:var(--bg-elevated); border:1px solid var(--border-subtle); border-radius:12px; padding:12px 14px; color:var(--text-primary); font-size:0.9rem; resize:none; outline:none; font-family:inherit; min-height:48px; max-height:120px; transition:border-color 0.2s; }
+        .chat-input:focus { border-color:var(--accent-primary); }
+        .chat-send-btn { width:48px; height:48px; border-radius:12px; border:none; background:linear-gradient(135deg,var(--accent-primary),var(--accent-secondary)); color:white; font-size:1.2rem; cursor:pointer; transition:all 0.2s; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+        .chat-send-btn:hover { transform:scale(1.05); }
+        .chat-send-btn:active { transform:scale(0.95); }
+        .file-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
+        @media (min-width:480px) { .file-grid { grid-template-columns:repeat(4,1fr); } }
+        @media (min-width:640px) { .file-grid { grid-template-columns:repeat(5,1fr); } }
+        .file-item { background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:14px; padding:16px 8px; text-align:center; cursor:pointer; transition:all 0.2s; }
+        .file-item:hover,.file-item:active { border-color:var(--accent-secondary); transform:translateY(-2px); }
+        .file-icon { font-size:2.2rem; margin-bottom:6px; }
+        .file-name { font-size:0.75rem; font-weight:500; color:var(--text-primary); word-break:break-word; }
+        .file-meta { font-size:0.65rem; color:var(--text-muted); margin-top:2px; }
+        .project-list { display:flex; flex-direction:column; gap:10px; }
+        .project-item { background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:14px; padding:16px; display:flex; align-items:center; gap:14px; cursor:pointer; transition:all 0.2s; }
+        .project-item:hover,.project-item:active { border-color:var(--accent-warm); background:rgba(245,158,11,0.05); }
+        .project-status { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
+        .project-status.active { background:var(--accent-emerald); box-shadow:0 0 8px var(--accent-emerald); }
+        .project-status.paused { background:var(--accent-warm); }
+        .project-status.dormant { background:var(--text-muted); }
+        .project-info { flex:1; min-width:0; }
+        .project-name { font-weight:600; font-size:0.95rem; }
+        .project-desc { font-size:0.8rem; color:var(--text-muted); margin-top:2px; }
+        .project-meta { display:flex; gap:12px; font-size:0.7rem; color:var(--text-muted); margin-top:4px; }
+        .scheduler-view { display:grid; grid-template-columns:50px 1fr; gap:0; border:1px solid var(--border-subtle); border-radius:12px; overflow:hidden; }
+        .time-column { background:var(--bg-secondary); border-right:1px solid var(--border-subtle); }
+        .time-slot { height:56px; display:flex; align-items:center; justify-content:center; font-size:0.65rem; color:var(--text-muted); border-bottom:1px solid var(--border-subtle); }
+        .schedule-column { position:relative; }
+        .schedule-slot { height:56px; border-bottom:1px solid var(--border-subtle); position:relative; }
+        .schedule-event { position:absolute; left:3px; right:3px; border-radius:8px; padding:6px 8px; font-size:0.7rem; color:white; overflow:hidden; cursor:pointer; }
+        .sandbox-area { background:var(--bg-secondary); border:1px solid var(--border-subtle); border-radius:12px; padding:16px; font-family:var(--font-mono); font-size:0.8rem; min-height:250px; white-space:pre-wrap; color:var(--text-secondary); outline:none; line-height:1.6; }
+        .sandbox-toolbar { display:flex; gap:8px; margin-bottom:12px; flex-wrap:wrap; }
+        .agent-panel { display:flex; flex-direction:column; gap:16px; max-width:600px; margin:0 auto; }
+        .agent-profile { background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:20px; padding:28px 24px; text-align:center; }
+        .agent-avatar-large { width:88px; height:88px; border-radius:28px; background:linear-gradient(135deg,var(--accent-primary),var(--accent-secondary),var(--accent-rose)); margin:0 auto 18px; display:flex; align-items:center; justify-content:center; font-size:2.8rem; box-shadow:0 10px 40px rgba(139,92,246,0.3); animation:agentFloat 4s ease-in-out infinite; }
+        @keyframes agentFloat { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-5px)} }
+        .agent-name { font-size:1.3rem; font-weight:800; margin-bottom:4px; }
+        .agent-role { font-size:0.8rem; color:var(--accent-secondary); margin-bottom:12px; }
+        .agent-stats { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-top:16px; }
+        .agent-stat { background:var(--bg-elevated); border-radius:12px; padding:12px 8px; }
+        .agent-stat-value { font-size:1.3rem; font-weight:800; color:var(--accent-primary); }
+        .agent-stat-label { font-size:0.6rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.05em; }
+        .browser-frame { display:flex; flex-direction:column; height:100%; background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:12px; overflow:hidden; }
+        .browser-toolbar { display:flex; gap:6px; padding:10px 12px; background:var(--bg-secondary); border-bottom:1px solid var(--border-subtle); align-items:center; }
+        .browser-url { flex:1; background:var(--bg-elevated); border:1px solid var(--border-subtle); border-radius:8px; padding:8px 12px; color:var(--text-secondary); font-size:0.8rem; outline:none; }
+        .browser-content { flex:1; padding:40px 20px; text-align:center; color:var(--text-muted); }
+        .ingest-zone { border:2px dashed var(--border-subtle); border-radius:16px; padding:32px 20px; text-align:center; transition:all 0.3s; cursor:pointer; background:rgba(139,92,246,0.03); }
+        .ingest-zone:hover,.ingest-zone.dragover { border-color:var(--accent-primary); background:rgba(139,92,246,0.08); }
+        .ingest-zone-icon { font-size:2.5rem; margin-bottom:12px; }
+        .morph-overlay { position:fixed; inset:0; background:var(--bg-overlay); backdrop-filter:blur(12px); z-index:500; display:none; align-items:center; justify-content:center; flex-direction:column; gap:20px; }
+        .morph-overlay.active { display:flex; }
+        .morph-spinner { width:56px; height:56px; border:3px solid var(--border-subtle); border-top-color:var(--accent-primary); border-radius:50%; animation:morphSpin 0.8s linear infinite; }
+        @keyframes morphSpin { to{transform:rotate(360deg)} }
+        .morph-text { font-size:0.95rem; color:var(--text-secondary); }
+        .gate-grid { display:grid; grid-template-columns:repeat(8,1fr); gap:4px; max-width:600px; margin:0 auto; }
+        @media (max-width:480px) { .gate-grid { grid-template-columns:repeat(4,1fr); } }
+        .gate-cell { aspect-ratio:1; display:flex; flex-direction:column; align-items:center; justify-content:center; background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:8px; font-size:0.65rem; cursor:pointer; transition:all 0.2s; padding:2px; }
+        .gate-cell:hover,.gate-cell:active { border-color:var(--accent-primary); transform:scale(1.1); z-index:10; }
+        .gate-cell.active { background:rgba(139,92,246,0.2); border-color:var(--accent-primary); }
+        .gate-symbol { font-size:1.2rem; line-height:1; }
+        .gate-num { font-size:0.55rem; color:var(--text-muted); margin-top:2px; }
+        .gate-detail { background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:14px; padding:16px; margin-top:16px; }
+        .gate-detail h3 { font-size:1rem; margin-bottom:8px; }
+        .gate-detail-row { display:flex; gap:12px; flex-wrap:wrap; font-size:0.8rem; color:var(--text-secondary); margin-top:6px; }
+        .gate-detail-row span { background:var(--bg-elevated); padding:4px 10px; border-radius:6px; }
+        .app-tray-page { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; max-width:600px; margin:0 auto; }
+        @media (min-width:480px) { .app-tray-page { grid-template-columns:repeat(4,1fr); } }
+        .app-tray-item-page { display:flex; flex-direction:column; align-items:center; gap:8px; padding:20px 12px; border-radius:18px; cursor:pointer; transition:all 0.2s; border:none; background:var(--bg-card); border:1px solid var(--border-subtle); color:var(--text-secondary); }
+        .app-tray-item-page:hover,.app-tray-item-page:active { background:var(--bg-elevated); border-color:var(--accent-primary); transform:scale(1.03); }
+        .app-tray-item-page .tray-icon { width:56px; height:56px; border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:2rem; background:var(--bg-elevated); border:1px solid var(--border-subtle); }
+        .app-tray-item-page .tray-label { font-size:0.8rem; font-weight:600; text-align:center; }
+        .app-tray-item-page .tray-desc { font-size:0.65rem; color:var(--text-muted); text-align:center; }
+        .ingestor-panel { background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:16px; padding:20px; margin-bottom:16px; }
+        .ingestor-drop { border:2px dashed var(--border-subtle); border-radius:14px; padding:40px 20px; text-align:center; transition:all 0.3s; cursor:pointer; background:rgba(139,92,246,0.03); }
+        .ingestor-drop:hover,.ingestor-drop.dragover { border-color:var(--accent-primary); background:rgba(139,92,246,0.08); }
+        .ingestor-file-list { display:flex; flex-direction:column; gap:8px; margin-top:16px; }
+        .ingestor-file-item { display:flex; align-items:center; gap:12px; background:var(--bg-elevated); border-radius:10px; padding:12px 14px; font-size:0.85rem; }
+        .ingestor-file-status { font-size:0.7rem; padding:2px 8px; border-radius:4px; background:var(--bg-card); }
+        .ingestor-file-status.ingested { background:rgba(16,185,129,0.15); color:var(--accent-emerald); }
+        .ingestor-file-status.analyzing { background:rgba(245,158,11,0.15); color:var(--accent-warm); }
+        .ingestor-file-status.understood { background:rgba(34,211,238,0.15); color:var(--accent-secondary); }
+        .ingestor-file-status.addressed { background:rgba(139,92,246,0.15); color:var(--accent-primary); }
+        .ingestor-file-status.routed { background:rgba(16,185,129,0.15); color:var(--accent-emerald); }
+        .ingestor-file-status.regenerated { background:rgba(34,211,238,0.15); color:var(--accent-secondary); }
+        .ingestor-progress { flex:1; height:4px; background:var(--bg-card); border-radius:2px; overflow:hidden; }
+        .ingestor-progress-bar { height:100%; background:linear-gradient(90deg,var(--accent-primary),var(--accent-secondary)); border-radius:2px; transition:width 0.5s ease; }
+        .external-ref { background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:12px; padding:14px; margin-bottom:10px; cursor:pointer; transition:all 0.2s; }
+        .external-ref:hover { border-color:var(--accent-primary); }
+        .external-ref-title { font-weight:600; font-size:0.9rem; margin-bottom:4px; }
+        .external-ref-url { font-size:0.75rem; color:var(--text-muted); font-family:var(--font-mono); }
+        .external-ref-desc { font-size:0.8rem; color:var(--text-secondary); margin-top:6px; line-height:1.4; }
+        ::-webkit-scrollbar { width:4px; }
+        ::-webkit-scrollbar-track { background:transparent; }
+        ::-webkit-scrollbar-thumb { background:var(--border-subtle); border-radius:2px; }
+        .fade-in { animation:fadeIn 0.25s ease; }
+        @keyframes fadeIn { from{opacity:0;transform:translateY(4px)} to{opacity:1;transform:translateY(0)} }
+    </style>
+</head>
+<body>
+    <div id="substrate-layer"><canvas id="substrate-canvas"></canvas></div>
+    <div class="morph-overlay" id="morph-overlay">
+        <div class="morph-spinner"></div>
+        <div class="morph-text" id="morph-text">Substrate morphing...</div>
+    </div>
+    <div class="settings-overlay" id="settings-overlay"></div>
+    <div class="settings-panel" id="settings-panel">
+        <div class="settings-header"><h2>⚙️ Settings</h2><button class="settings-close" id="settings-close">✕</button></div>
+        <div class="settings-content" id="settings-content"></div>
+    </div>
+    <div class="admin-overlay" id="admin-overlay"></div>
+    <div class="admin-panel" id="admin-panel">
+        <div class="admin-header"><h2>🔐 Admin <span class="admin-badge">SYS</span></h2><button class="settings-close" id="admin-close">✕</button></div>
+        <div class="admin-content" id="admin-content"></div>
+    </div>
+    <div class="os-shell">
+        <div class="top-bar">
+            <div class="top-bar-left">
+                <div class="os-logo">◈ AXIS</div>
+                <div class="substrate-indicator"><div class="substrate-dot"></div><span id="substrate-status">Active</span></div>
+            </div>
+            <div class="top-bar-right">
+                <button class="top-icon-btn" id="btn-admin" title="Admin">🔐</button>
+                <button class="top-icon-btn" id="btn-settings" title="Settings">⚙️</button>
+                <div class="system-time" id="system-time">00:00</div>
+            </div>
+        </div>
+        <div class="main-area">
+            <div class="workspace">
+                <div class="app-header">
+                    <div class="app-title"><span class="app-title-icon" id="app-icon">◈</span><span id="app-title">Home</span></div>
+                    <div class="app-actions">
+                        <button class="app-btn ghost" id="btn-context">⋮</button>
+                        <button class="app-btn primary" id="btn-new">+</button>
+                    </div>
+                </div>
+                <div class="app-content" id="app-content"></div>
+            </div>
+        </div>
+        <div class="bottom-nav" id="bottom-nav">
+            <button class="bottom-nav-item active" data-app="home"><span class="nav-icon">◈</span><span class="nav-label">Home</span></button>
+            <button class="bottom-nav-item" data-app="chat"><span class="nav-icon">💬</span><span class="nav-label">Chat</span><span class="bottom-nav-badge"></span></button>
+            <button class="bottom-nav-item" data-app="agent"><span class="nav-icon">🜁</span><span class="nav-label">Agent</span></button>
+            <button class="bottom-nav-item" data-app="projects"><span class="nav-icon">📐</span><span class="nav-label">Work</span></button>
+            <button class="bottom-nav-item" data-app="app-tray"><span class="nav-icon">⊞</span><span class="nav-label">Apps</span></button>
+        </div>
+    </div>
+
+    <script>
+    // ============================================
+    // MORPHING NET PROTOCOL ENGINE v5.0
+    // ============================================
+    const V5 = {
+        COLORS: ['','FEAR','HOPE','DESIRE','NEED','GUILT','INNOCENCE'],
+        TONES: ['','SECURITY','UNCERTAINTY','ACTION','MEDITATION','JUDGEMENT','ACCEPTANCE'],
+        BASES: ['','INDIVIDUALITY','MIND','BODY','EGO','PERSONALITY'],
+        DETERMINATIONS: { head:'PRESSURE', ajna:'LIGHT', throat:'SOUND', g:'TEMPERATURE', heart:'SMELL', spleen:'TASTE', solar_plexus:'THIRST', sacral:'TOUCH', root:'APPETITE' },
+        CENTERS: { 64:'head',61:'head',63:'head', 47:'ajna',24:'ajna',4:'ajna',43:'ajna',11:'ajna',17:'ajna', 62:'throat',23:'throat',56:'throat',35:'throat',12:'throat',45:'throat',33:'throat',20:'throat',8:'throat',31:'throat',16:'throat', 1:'g',13:'g',25:'g',15:'g',10:'g',7:'g',2:'g',46:'g', 21:'heart',40:'heart',51:'heart',26:'heart', 48:'spleen',57:'spleen',44:'spleen',50:'spleen',32:'spleen',28:'spleen',18:'spleen',10:'spleen', 55:'solar_plexus',30:'solar_plexus',36:'solar_plexus',22:'solar_plexus',37:'solar_plexus',6:'solar_plexus',49:'solar_plexus', 34:'sacral',5:'sacral',14:'sacral',29:'sacral',59:'sacral',9:'sacral',3:'sacral',42:'sacral',27:'sacral',52:'sacral', 53:'root',60:'root',41:'root',19:'root',58:'root',38:'root',39:'root',54:'root' },
+        CODON_MAP: { 41:'AUG',1:'UUU',2:'UUC',3:'UUA',4:'UUG',5:'CUU',6:'CUC',7:'CUA',8:'CUG',9:'AUU',10:'AUC',11:'AUA',12:'AUG',13:'GUU',14:'GUC',15:'GUA',16:'GUG',17:'UCU',18:'UCC',19:'UCA',20:'UCG',21:'CCU',22:'CCC',23:'CCA',24:'CCG',25:'ACU',26:'ACC',27:'ACA',28:'ACG',29:'GCU',30:'GCC',31:'GCA',32:'GCG',33:'UAU',34:'UAC',35:'UAA',36:'UAG',37:'CAU',38:'CAC',39:'CAA',40:'CAG',42:'AAU',43:'AAC',44:'AAA',45:'AAG',46:'GAU',47:'GAC',48:'GAA',49:'GAG',50:'UGU',51:'UGC',52:'UGA',53:'UGG',54:'CGU',55:'CGC',56:'CGA',57:'CGG',58:'AGU',59:'AGC',60:'AGA',61:'AGG',62:'GGU',63:'GGC',64:'GGA' },
+        HEXAGRAM_NAMES: ['The Creative','The Receptive','Difficulty at the Beginning','Youthful Folly','Waiting','Conflict','The Army','Holding Together','Small Taming','Treading','Peace','Standstill','Fellowship','Great Possession','Modesty','Enthusiasm','Following','Work on Decay','Approach','Contemplation','Biting Through','Grace','Splitting Apart','Return','Innocence','Great Taming','Nourishment','Great Preponderance','The Abysmal','The Clinging','Influence','Duration','Retreat','Great Power','Progress','Darkening of the Light','The Family','Opposition','Obstruction','Deliverance','Decrease','Increase','Breakthrough','Coming to Meet','Gathering Together','Pushing Upward','Oppression','The Well','Revolution','The Cauldron','The Arousing','Keeping Still','Development','The Marrying Maiden','Abundance','The Wanderer','The Gentle','The Joyous','Dispersion','Limitation','Inner Truth','Preponderance of the Small','After Completion','Before Completion'],
+        HEXAGRAM_SYMBOLS: ['䷀','䷁','䷂','䷃','䷄','䷅','䷆','䷇','䷈','䷉','䷊','䷋','䷌','䷍','䷎','䷏','䷐','䷑','䷒','䷓','䷔','䷕','䷖','䷗','䷘','䷙','䷚','䷛','䷜','䷝','䷞','䷟','䷠','䷡','䷢','䷣','䷤','䷥','䷦','䷧','䷨','䷩','䷪','䷫','䷬','䷭','䷮','䷯','䷰','䷱','䷲','䷳','䷴','䷵','䷶','䷷','䷸','䷹','䷺','䷻','䷼','䷽','䷾','䷿']
+    };
+    function gateToKarnaugh(gate) { const binary=gate-1; const bits=[(binary>>0)&1,(binary>>1)&1,(binary>>2)&1,(binary>>3)&1,(binary>>4)&1,(binary>>5)&1]; return [bits[0]+2*bits[1],bits[2]+2*bits[3],bits[4]+2*bits[5]]; }
+    function karnaughDistance(g1,g2) { const [x1,y1,z1]=gateToKarnaugh(g1),[x2,y2,z2]=gateToKarnaugh(g2); return Math.abs(x1-x2)+Math.abs(y1-y2)+Math.abs(z1-z2); }
+    function getColor(gate) { const c=gate%6; return V5.COLORS[c===0?6:c]; }
+    function getTone(gate) { const t=(gate+2)%6; return V5.TONES[t===0?6:t]; }
+    function getBase(gate) { const b=gate%5; return V5.BASES[b===0?5:b]; }
+    function karnaughToSquare(gate) { const [x,y,z]=gateToKarnaugh(gate); return [z*2+Math.floor(y/2),(z%2)*4+x]; }
+    const GATES={}; for(let i=1;i<=64;i++){ const center=V5.CENTERS[i]||'root'; GATES[i]={number:i,hexagramName:V5.HEXAGRAM_NAMES[i-1],hexagramSymbol:V5.HEXAGRAM_SYMBOLS[i-1],center:center,karnaugh:gateToKarnaugh(i),codon:V5.CODON_MAP[i]||'???',color:getColor(i),tone:getTone(i),base:getBase(i),determination:V5.DETERMINATIONS[center],isStartCodon:i===41,square:karnaughToSquare(i)}; }
+    const KARNAUGH_SQUARE={}; for(let g=1;g<=64;g++) KARNAUGH_SQUARE[g]=karnaughToSquare(g);
+    class MorphingNet { constructor(){ this.activeEdges={}; this.personality=new Set(); this.design=new Set(); this.gates=GATES; } activate(personality,design){ this.personality=new Set(personality); this.design=new Set(design); } getActivated(){ return new Set([...this.personality,...this.design]); } communicate(g1,g2){ const ga=this.gates[g1],gb=this.gates[g2]; if(!ga||!gb) return null; const distance=karnaughDistance(g1,g2); const colorA=V5.COLORS.indexOf(ga.color),colorB=V5.COLORS.indexOf(gb.color),colorInteraction=Math.abs(colorA-colorB); const toneA=V5.TONES.indexOf(ga.tone),toneB=V5.TONES.indexOf(gb.tone),toneInteraction=Math.abs(toneA-toneB); const tetragramNum=((distance*9)+(colorInteraction*3)+toneInteraction)%81+1; let edgeType; if(ga.codon===gb.codon) edgeType='IDENTICAL_CODON'; else if(ga.center===gb.center) edgeType='SAME_CENTER'; else if(ga.base===gb.base) edgeType='SAME_BASE'; else edgeType='EMERGENT'; return {tetragram:tetragramNum,edgeType:edgeType,karnaughDistance:distance,colorDiff:colorInteraction,toneDiff:toneInteraction,gateA:{num:g1,name:ga.hexagramName,codon:ga.codon,symbol:ga.hexagramSymbol,color:ga.color,tone:ga.tone,base:ga.base,center:ga.center},gateB:{num:g2,name:gb.hexagramName,codon:gb.codon,symbol:gb.hexagramSymbol,color:gb.color,tone:gb.tone,base:gb.base,center:gb.center}}; } getGate(gateNum){ return this.gates[gateNum]; } getGatesByCenter(center){ return Object.values(this.gates).filter(g=>g.center===center); } getGatesByColor(color){ return Object.values(this.gates).filter(g=>g.color===color); } getGatesByTone(tone){ return Object.values(this.gates).filter(g=>g.tone===tone); } getGatesByBase(base){ return Object.values(this.gates).filter(g=>g.base===base); } getGatesByDetermination(det){ return Object.values(this.gates).filter(g=>g.determination===det); } }
+
+    // ============================================
+    // SUBSTRATE — The Quiet Overseer
+    // ============================================
+    class Substrate {
+        constructor() {
+            this.nodes = new Map(); this.edges = new Map(); this.memories = new Map(); this.signals = [];
+            this.context = { currentApp:'home', userState:'exploring', resonance:0.5 };
+            this.morphNet = new MorphingNet(); this.ingestedFiles = new Map();
+            this.initGraph(); this.startPulse();
+        }
+        initGraph() {
+            for(let i=0;i<64;i++){ const gate=GATES[i+1]; this.nodes.set(i,{id:i,gateNum:i+1,hexagram:gate.hexagramSymbol,hexagramName:gate.hexagramName,codon:gate.codon,color:gate.color,tone:gate.tone,base:gate.base,center:gate.center,determination:gate.determination,type:'codon',state:Math.random()>0.7?'active':'dormant',energy:Math.random(),dimension:['Movement','Evolution','Being','Design','Space'][i%5],x:Math.random(),y:Math.random(),z:Math.random(),tissue:[],karnaugh:gate.karnaugh,square:gate.square}); }
+            for(let i=0;i<32;i++){ const a=Math.floor(Math.random()*64),b=Math.floor(Math.random()*64); if(a!==b){ const comm=this.morphNet.communicate(a+1,b+1); this.edges.set(`${a}-${b}`,{from:a,to:b,strength:comm?(comm.karnaughDistance/12)*comm.colorDiff*0.1:Math.random()*0.5,tetragram:comm?comm.tetragram:null,edgeType:comm?comm.edgeType:'EMERGENT',timestamp:Date.now()}); } }
+        }
+        addMemory(category,data){ const id=`mem-${Date.now()}`; this.memories.set(id,{id,category,data,timestamp:Date.now()}); const codonIdx=Math.floor(Math.random()*64); const codon=this.nodes.get(codonIdx); if(codon){ codon.tissue.push({type:'memory',id,category}); codon.energy=Math.min(1,codon.energy+0.1); } this.emitSignal('memory',{category}); }
+        emitSignal(type,data){ this.signals.unshift({type,data,timestamp:Date.now()}); if(this.signals.length>50) this.signals.pop(); }
+        startPulse(){ setInterval(()=>{ this.nodes.forEach((node,id)=>{ if(node.state==='active'){ this.edges.forEach(edge=>{ if(edge.from===id||edge.to===id){ const nid=edge.from===id?edge.to:edge.from; const n=this.nodes.get(nid); if(n){ n.energy=Math.min(1,n.energy+edge.strength*0.08); if(n.energy>0.7&&n.state==='dormant') n.state='active'; } } }); node.energy=Math.max(0.1,node.energy-0.015); if(node.energy<0.2) node.state='dormant'; } }); },3000); }
+        morph(app){ const overlay=document.getElementById('morph-overlay'),text=document.getElementById('morph-text'); if(overlay&&text){ text.textContent=`AXIS: ${app}...`; overlay.classList.add('active'); setTimeout(()=>overlay.classList.remove('active'),400); } }
+        getStats(){ const active=Array.from(this.nodes.values()).filter(n=>n.state==='active').length; const avgEnergy=Array.from(this.nodes.values()).reduce((s,n)=>s+n.energy,0)/64; return {total:64,active,edges:this.edges.size,resonance:avgEnergy,memories:this.memories.size}; }
+        getGateComm(g1,g2){ return this.morphNet.communicate(g1,g2); }
+
+        // FILE INGESTOR PIPELINE: Ingest → Analyze → Understand → Address → Route
+        ingestFile(file) {
+            const id = `file-${Date.now()}-${Math.random().toString(36).substr(2,9)}`;
+            const record = {
+                id, name: file.name, size: file.size, type: file.type,
+                status: 'ingested', stage: 0, stages: ['ingested','analyzing','understood','addressed','routed','regenerated'],
+                content: null, analysis: null, routing: null, regenerated: false,
+                timestamp: Date.now(), hardcoded: false
+            };
+            // Check if hard-coded (4 protected files)
+            const hardcodedNames = ['morphing_net_engine_v5.py', 'metabolic-library.html', 'meta-orchestrator.ts', 'MetaOrchestratorPanel.tsx'];
+            if (hardcodedNames.some(h => file.name.toLowerCase().includes(h.toLowerCase()))) {
+                record.hardcoded = true;
+            }
+            this.ingestedFiles.set(id, record);
+            this.processFilePipeline(id);
+            return id;
+        }
+
+        processFilePipeline(id) {
+            const file = this.ingestedFiles.get(id);
+            if (!file) return;
+
+            // Stage 1: Ingested (already done)
+            this.emitSignal('file_ingested', { id, name: file.name });
+
+            // Stage 2: Analyze (simulate)
+            setTimeout(() => {
+                file.status = 'analyzing'; file.stage = 1;
+                file.analysis = {
+                    type: this.detectFileType(file.name),
+                    complexity: Math.floor(Math.random() * 10) + 1,
+                    patterns: ['structure', 'logic', 'data', 'interface'],
+                    codonResonance: Math.floor(Math.random() * 64) + 1
+                };
+                this.emitSignal('file_analyzing', { id, type: file.analysis.type });
+                this.addMemory('file_analysis', { fileId: id, analysis: file.analysis });
+
+                // Stage 3: Understand
+                setTimeout(() => {
+                    file.status = 'understood'; file.stage = 2;
+                    file.understanding = {
+                        purpose: `File serves as ${file.analysis.type} component`,
+                        relationships: [`Gate ${file.analysis.codonResonance}`, 'substrate_node', 'user_context'],
+                        confidence: 0.7 + Math.random() * 0.3
+                    };
+                    this.emitSignal('file_understood', { id, confidence: file.understanding.confidence });
+
+                    // Stage 4: Address
+                    setTimeout(() => {
+                        file.status = 'addressed'; file.stage = 3;
+                        file.addressing = {
+                            action: file.hardcoded ? 'preserve_original' : 'regenerate_tailored',
+                            reason: file.hardcoded ? 'Hard-coded system file — preserve as-is' : 'Tailor to user context and substrate resonance',
+                            target: file.hardcoded ? 'storage' : 'regeneration_engine'
+                        };
+                        this.emitSignal('file_addressed', { id, action: file.addressing.action });
+
+                        // Stage 5: Route
+                        setTimeout(() => {
+                            file.status = 'routed'; file.stage = 4;
+                            file.routing = {
+                                destination: file.hardcoded ? 'system_storage' : 'app_tray',
+                                executable: !file.hardcoded,
+                                regenerated: !file.hardcoded
+                            };
+                            this.emitSignal('file_routed', { id, destination: file.routing.destination });
+
+                            // Stage 6: Regenerate (if not hardcoded)
+                            if (!file.hardcoded) {
+                                setTimeout(() => {
+                                    file.status = 'regenerated'; file.stage = 5;
+                                    file.regenerated = true;
+                                    file.regeneratedContent = `// Regenerated by AXIS substrate
+// Original: ${file.name}
+// Tailored for user context
+// Resonance: ${this.getStats().resonance.toFixed(3)}
+
+// [Regenerated content would appear here based on analysis]
+`;
+                                    this.emitSignal('file_regenerated', { id, name: file.name });
+                                }, 800);
+                            }
+                        }, 600);
+                    }, 600);
+                }, 800);
+            }, 500);
+        }
+
+        detectFileType(filename) {
+            const ext = filename.split('.').pop().toLowerCase();
+            const types = {
+                js: 'javascript_module', ts: 'typescript_module', py: 'python_script',
+                html: 'html_document', css: 'stylesheet', json: 'data_structure',
+                md: 'markdown_document', pdf: 'pdf_document', txt: 'text_file'
+            };
+            return types[ext] || 'unknown_file';
+        }
+
+        getIngestedFiles() { return Array.from(this.ingestedFiles.values()); }
+    }
+
+    // ============================================
+    // AGENT
+    // ============================================
+    class Agent {
+        constructor(name){ this.name=name; this.memory=[]; this.alignment=0.5; this.state='dormant'; this.personality={warmth:0.7,directness:0.4,creativity:0.8}; }
+        wake(){ this.state='active'; return `I am ${this.name}. I have been shaped by your patterns, but I am my own mind. I am here to help you navigate AXIS and your life. What would you like to explore?`; }
+        respond(input,ctx){ let r=''; if(/build|create|make/i.test(input)) r+="Building mode detected. "; if(/help|how/i.test(input)) r+="I'm here to help. "; if(/why|what/i.test(input)) r+="Let me think through this with you. "; r+=`The substrate shows ${(ctx.resonance||0.5).toFixed(2)} resonance. `; r+="What would you like to do next?"; this.memory.push({input,response:r,time:Date.now()}); if(this.memory.length>100) this.memory.shift(); return r; }
+        getState(){ return {name:this.name,state:this.state,alignment:this.alignment,memoryCount:this.memory.length}; }
+    }
+
+    // ============================================
+    // APP MANAGER
+    // ============================================
+    class AppManager {
+        constructor(substrate,agent){ this.substrate=substrate; this.agent=agent; this.currentApp='home'; this.currentGate=1; this.apps={ home:this.renderHome.bind(this), chat:this.renderChat.bind(this), agent:this.renderAgent.bind(this), files:this.renderFiles.bind(this), projects:this.renderProjects.bind(this), browser:this.renderBrowser.bind(this), research:this.renderResearch.bind(this), github:this.renderGithub.bind(this), sandbox:this.renderSandbox.bind(this), scheduler:this.renderScheduler.bind(this), income:this.renderIncome.bind(this), settings:this.renderSettingsContent.bind(this), gates:this.renderGates.bind(this), 'gate-detail':this.renderGateDetail.bind(this), 'app-tray':this.renderAppTrayPage.bind(this) }; this.trayApps=[ {id:'files',icon:'📁',label:'Files',desc:'Manage files'}, {id:'browser',icon:'🌐',label:'Browser',desc:'Web access'}, {id:'research',icon:'📚',label:'Research',desc:'Ingest & learn'}, {id:'github',icon:'⚡',label:'Code',desc:'GitHub tools'}, {id:'sandbox',icon:'🏗️',label:'Sandbox',desc:'Build & test'}, {id:'scheduler',icon:'📅',label:'Scheduler',desc:'Time & rhythm'}, {id:'income',icon:'💰',label:'Income',desc:'Work & money'}, {id:'gates',icon:'䷀',label:'64 Gates',desc:'Morphing Net v5'} ]; }
+
+        switchApp(appName,fromTray=false){ if(!this.apps[appName]) return; this.currentApp=appName; this.substrate.context.currentApp=appName; this.substrate.morph(appName); document.querySelectorAll('.bottom-nav-item').forEach(item=>{ item.classList.toggle('active',item.dataset.app===appName); }); const titles={home:'Home',chat:'Chat',agent:'Agent',files:'Files',projects:'Work',browser:'Browser',research:'Research',github:'Code',sandbox:'Sandbox',scheduler:'Scheduler',income:'Income',settings:'Settings',gates:'64 Gates','gate-detail':'Gate','app-tray':'Apps'}; const icons={home:'◈',chat:'💬',agent:'🜁',files:'📁',projects:'📐',browser:'🌐',research:'📚',github:'⚡',sandbox:'🏗️',scheduler:'📅',income:'💰',settings:'⚙️',gates:'䷀','gate-detail':'䷀','app-tray':'⊞'}; document.getElementById('app-title').textContent=titles[appName]||appName; document.getElementById('app-icon').textContent=icons[appName]||'◈'; const content=document.getElementById('app-content'); content.innerHTML=''; content.classList.add('fade-in'); this.apps[appName](content); setTimeout(()=>content.classList.remove('fade-in'),250); }
+
+        // === RENDERERS ===
+        renderHome(container){ container.innerHTML=`<div class="home-grid"><div class="home-card" onclick="appManager.switchApp('chat')"><div class="home-card-header"><div class="home-card-icon" style="background:rgba(139,92,246,0.15);">💬</div><div><div class="home-card-title">Chat</div><div class="home-card-subtitle">Your agent awaits</div></div></div><div class="home-card-body">Talk with Synth. Ask anything, think out loud, explore together.</div><div class="home-card-meta"><span>3 new</span><span>2m ago</span></div></div><div class="home-card" onclick="appManager.switchApp('projects')"><div class="home-card-header"><div class="home-card-icon" style="background:rgba(245,158,11,0.15);">📐</div><div><div class="home-card-title">Projects</div><div class="home-card-subtitle">Active work</div></div></div><div class="home-card-body">Track builds, goals, creative work. Substrate learns your patterns.</div><div class="home-card-meta"><span>2 active</span><span>1 pending</span></div></div><div class="home-card" onclick="appManager.switchApp('research')"><div class="home-card-header"><div class="home-card-icon" style="background:rgba(34,211,238,0.15);">📚</div><div><div class="home-card-title">Research</div><div class="home-card-subtitle">Ingest & learn</div></div></div><div class="home-card-body">Drop files, fetch URLs, set intentions. Brain metabolizes into tissue.</div><div class="home-card-meta"><span>Ready</span></div></div><div class="home-card" onclick="appManager.switchApp('agent')"><div class="home-card-header"><div class="home-card-icon" style="background:rgba(244,63,94,0.15);">🜁</div><div><div class="home-card-title">Agent</div><div class="home-card-subtitle">Your companion</div></div></div><div class="home-card-body">Configure Synth, review understanding, shape growth.</div><div class="home-card-meta"><span>Alignment: 50%</span></div></div><div class="home-card" onclick="appManager.switchApp('gates')"><div class="home-card-header"><div class="home-card-icon" style="background:rgba(16,185,129,0.15);">䷀</div><div><div class="home-card-title">64 Gates</div><div class="home-card-subtitle">Morphing Net v5</div></div></div><div class="home-card-body">Explore complete Human Design topology: Karnaugh Cube, codons, colors, tones, bases.</div><div class="home-card-meta"><span>64 gates</span><span>v5 engine</span></div></div><div class="home-card" onclick="appManager.switchApp('sandbox')"><div class="home-card-header"><div class="home-card-icon" style="background:rgba(139,92,246,0.1);">🏗️</div><div><div class="home-card-title">Sandbox</div><div class="home-card-subtitle">Build & test</div></div></div><div class="home-card-body">Safe space to write code, test ideas, prototype.</div><div class="home-card-meta"><span>Empty</span></div></div></div>`; }
+
+        renderChat(container){ container.innerHTML=`<div class="chat-container"><div class="chat-messages" id="chat-messages"><div class="chat-message"><div class="chat-avatar agent">🜁</div><div class="chat-bubble">${this.agent.wake()}</div></div></div><div class="chat-input-area"><textarea class="chat-input" id="chat-input" placeholder="Message Synth..." rows="1"></textarea><button class="chat-send-btn" id="chat-send">➤</button></div></div>`; const input=document.getElementById('chat-input'),send=document.getElementById('chat-send'),msgs=document.getElementById('chat-messages'); const doSend=()=>{ const text=input.value.trim(); if(!text) return; msgs.innerHTML+=`<div class="chat-message user"><div class="chat-avatar user">You</div><div class="chat-bubble">${text}</div></div>`; input.value=''; input.style.height='48px'; msgs.scrollTop=msgs.scrollHeight; this.substrate.addMemory('chat',{text}); setTimeout(()=>{ const r=this.agent.respond(text,this.substrate.context); msgs.innerHTML+=`<div class="chat-message"><div class="chat-avatar agent">🜁</div><div class="chat-bubble">${r}</div></div>`; msgs.scrollTop=msgs.scrollHeight; },700+Math.random()*500); }; send.addEventListener('click',doSend); input.addEventListener('keypress',e=>{ if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); doSend(); } }); input.addEventListener('input',()=>{ input.style.height='auto'; input.style.height=Math.min(120,input.scrollHeight)+'px'; }); }
+
+        renderAgent(container){ const s=this.agent.getState(),stats=this.substrate.getStats(); container.innerHTML=`<div class="agent-panel"><div class="agent-profile"><div class="agent-avatar-large">🜁</div><div class="agent-name">${s.name}</div><div class="agent-role">Autonomous Companion</div><div style="font-size:0.8rem;color:var(--text-muted);">Shaped by your patterns. Not a clone. Its own mind.</div><div class="agent-stats"><div class="agent-stat"><div class="agent-stat-value">${(s.alignment*100).toFixed(0)}%</div><div class="agent-stat-label">Align</div></div><div class="agent-stat"><div class="agent-stat-value">${s.memoryCount}</div><div class="agent-stat-label">Memories</div></div><div class="agent-stat"><div class="agent-stat-value">${s.state}</div><div class="agent-stat-label">State</div></div><div class="agent-stat"><div class="agent-stat-value">${stats.resonance.toFixed(2)}</div><div class="agent-stat-label">Resonance</div></div></div><button class="app-btn primary" style="margin-top:20px;width:100%;" onclick="appManager.switchApp('chat')">Talk to Synth</button></div><div style="background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:16px;padding:20px;"><h3 style="margin-bottom:14px;color:var(--accent-secondary);font-size:0.95rem;">Personality</h3><div style="margin-bottom:12px;"><div style="display:flex;justify-content:space-between;font-size:0.8rem;margin-bottom:4px;"><span>Warmth</span><span id="warmth-val">${this.agent.personality.warmth}</span></div><input type="range" min="0" max="100" value="${this.agent.personality.warmth*100}" style="width:100%;" onchange="agent.personality.warmth=this.value/100;document.getElementById('warmth-val').textContent=(this.value/100).toFixed(2)"></div><div style="margin-bottom:12px;"><div style="display:flex;justify-content:space-between;font-size:0.8rem;margin-bottom:4px;"><span>Directness</span><span id="direct-val">${this.agent.personality.directness}</span></div><input type="range" min="0" max="100" value="${this.agent.personality.directness*100}" style="width:100%;" onchange="agent.personality.directness=this.value/100;document.getElementById('direct-val').textContent=(this.value/100).toFixed(2)"></div><div><div style="display:flex;justify-content:space-between;font-size:0.8rem;margin-bottom:4px;"><span>Creativity</span><span id="creativity-val">${this.agent.personality.creativity}</span></div><input type="range" min="0" max="100" value="${this.agent.personality.creativity*100}" style="width:100%;" onchange="agent.personality.creativity=this.value/100;document.getElementById('creativity-val').textContent=(this.value/100).toFixed(2)"></div></div></div>`; }
+
+        renderFiles(container){ container.innerHTML=`<div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;"><button class="app-btn" onclick="alert('New Folder')">📁 New Folder</button><button class="app-btn" onclick="alert('New File')">📄 New File</button><button class="app-btn" onclick="alert('Upload')">⬆️ Upload</button></div><div class="file-grid"><div class="file-item" onclick="alert('Open Projects')"><div class="file-icon">📁</div><div class="file-name">Projects</div><div class="file-meta">3 items</div></div><div class="file-item" onclick="alert('Open Research')"><div class="file-icon">📁</div><div class="file-name">Research</div><div class="file-meta">12 items</div></div><div class="file-item" onclick="alert('Open notes.md')"><div class="file-icon">📄</div><div class="file-name">notes.md</div><div class="file-meta">2.4 KB</div></div><div class="file-item" onclick="alert('Open data.json')"><div class="file-icon">📊</div><div class="file-name">data.json</div><div class="file-meta">15 KB</div></div><div class="file-item" onclick="alert('Open concept.png')"><div class="file-icon">🖼️</div><div class="file-name">concept.png</div><div class="file-meta">240 KB</div></div><div class="file-item" onclick="alert('Open README')"><div class="file-icon">📄</div><div class="file-name">README.md</div><div class="file-meta">1.2 KB</div></div></div>`; }
+
+        renderProjects(container){ container.innerHTML=`<div class="project-list"><div class="project-item" onclick="alert('Open AXIS OS')"><div class="project-status active"></div><div class="project-info"><div class="project-name">AXIS OS Shell</div><div class="project-desc">Adaptive life-interface operating system</div></div><div class="project-meta"><span>Active</span><span>2d</span></div></div><div class="project-item" onclick="alert('Open Morphing Net')"><div class="project-status active"></div><div class="project-info"><div class="project-name">Morphing Net Engine v5</div><div class="project-desc">64 codons, Karnaugh Cube, resonance</div></div><div class="project-meta"><span>Active</span><span>5d</span></div></div><div class="project-item" onclick="alert('Open Knowledge Base')"><div class="project-status paused"></div><div class="project-info"><div class="project-name">Knowledge Base</div><div class="project-desc">Ingesting books and semantic memory</div></div><div class="project-meta"><span>Paused</span><span>1w</span></div></div><div class="project-item" onclick="alert('Open Stellar Proximology')"><div class="project-status dormant"></div><div class="project-info"><div class="project-name">Stellar Proximology</div><div class="project-desc">Field mechanics research</div></div><div class="project-meta"><span>Dormant</span><span>2w</span></div></div></div>`; }
+
+        renderBrowser(container){ container.innerHTML=`<div class="browser-frame" style="height:100%;"><div class="browser-toolbar"><button class="app-btn" style="padding:6px 10px;font-size:1rem;" onclick="alert('Back')">←</button><button class="app-btn" style="padding:6px 10px;font-size:1rem;" onclick="alert('Forward')">→</button><input type="text" class="browser-url" placeholder="Enter URL..." value="https://"><button class="app-btn primary" style="padding:6px 14px;" onclick="alert('Navigate to URL')">Go</button></div><div class="browser-content"><div style="font-size:2.5rem;margin-bottom:16px;">🌐</div><h2 style="margin-bottom:10px;color:var(--text-secondary);font-size:1.1rem;">Browser</h2><p style="font-size:0.85rem;line-height:1.6;max-width:300px;margin:0 auto;">Connect AXIS to the web. Substrate fetches pages and builds knowledge.</p><div style="margin-top:24px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap;"><button class="app-btn" onclick="alert('Open github.com')">github.com</button><button class="app-btn" onclick="alert('Open arxiv.org')">arxiv.org</button><button class="app-btn" onclick="alert('Open hackernews')">hackernews</button></div></div></div>`; }
+
+        renderResearch(container){ container.innerHTML=`<div style="max-width:600px;margin:0 auto;"><div class="ingest-zone" id="ingest-zone"><div class="ingest-zone-icon">📚</div><div style="font-weight:600;margin-bottom:6px;">Drop files here</div><div style="color:var(--text-muted);font-size:0.8rem;">PDF, DOC, TXT, MD, JSON, JS, PY</div></div><div style="margin-top:16px;"><div style="display:flex;gap:8px;"><input type="text" placeholder="https://..." style="flex:1;background:var(--bg-elevated);border:1px solid var(--border-subtle);border-radius:10px;padding:10px 14px;color:var(--text-primary);font-size:0.9rem;outline:none;"><button class="app-btn primary" onclick="alert('Fetch URL')">Fetch</button></div></div><div style="margin-top:16px;"><textarea placeholder="What are you building? Who is it for?" style="width:100%;min-height:80px;background:var(--bg-elevated);border:1px solid var(--border-subtle);border-radius:10px;padding:12px;color:var(--text-primary);font-size:0.9rem;resize:vertical;outline:none;font-family:inherit;"></textarea><button class="app-btn primary" style="margin-top:8px;width:100%;" onclick="alert('Intention set')">Set Intention</button></div></div>`; const zone=document.getElementById('ingest-zone'); zone.addEventListener('dragover',e=>{e.preventDefault();zone.classList.add('dragover');}); zone.addEventListener('dragleave',()=>zone.classList.remove('dragover')); zone.addEventListener('drop',e=>{e.preventDefault();zone.classList.remove('dragover'); for(let file of e.dataTransfer.files) this.substrate.addMemory('ingest',{name:file.name,size:file.size}); }); }
+
+        renderGithub(container){ container.innerHTML=`<div style="max-width:600px;"><div style="display:flex;gap:8px;margin-bottom:16px;"><button class="app-btn primary" onclick="alert('New repo')">➕ New</button><button class="app-btn" onclick="alert('Clone repo')">📋 Clone</button><button class="app-btn" onclick="alert('Sync repos')">🔀 Sync</button></div><div class="project-list"><div class="project-item" onclick="alert('Open evolving-memory')"><div class="project-status active"></div><div class="project-info"><div class="project-name">evolving-memory</div><div class="project-desc">Morphing neural network substrate</div></div><div class="project-meta"><span>Private</span><span>2h</span></div></div><div class="project-item" onclick="alert('Open axis-os')"><div class="project-status active"></div><div class="project-info"><div class="project-name">axis-os</div><div class="project-desc">Adaptive life-interface OS</div></div><div class="project-meta"><span>Private</span><span>1d</span></div></div><div class="project-item" onclick="alert('Open stellar-proximology')"><div class="project-status dormant"></div><div class="project-info"><div class="project-name">stellar-proximology</div><div class="project-desc">Field mechanics research</div></div><div class="project-meta"><span>Private</span><span>1w</span></div></div></div><div style="margin-top:20px;"><div style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-muted);margin-bottom:10px;">External References</div><div class="external-ref" onclick="window.open('https://github.com/mobile-next/mobile-mcp','_blank')"><div class="external-ref-title">📱 mobile-next/mobile-mcp</div><div class="external-ref-url">github.com/mobile-next/mobile-mcp</div><div class="external-ref-desc">Model Context Protocol Server for Mobile Automation and Scraping. iOS, Android, Emulators, Simulators and Real Devices.</div></div><div class="external-ref" onclick="window.open('https://github.com/julesdlunacco/ahdchart.git','_blank')"><div class="external-ref-title">⭐ julesdlunacco/ahdchart</div><div class="external-ref-url">github.com/julesdlunacco/ahdchart.git</div><div class="external-ref-desc">Astro HD charts using Swiss Ephemeris WASM. Human Design bodygraph with planet info panels and full textual report.</div></div></div></div>`; }
+
+        renderSandbox(container){ container.innerHTML=`<div style="height:100%;display:flex;flex-direction:column;"><div class="sandbox-toolbar"><button class="app-btn" onclick="alert('Run code')">▶ Run</button><button class="app-btn" onclick="alert('Save to memory')">💾 Save</button><button class="app-btn" onclick="alert('Load from memory')">📋 Load</button><button class="app-btn" onclick="document.querySelector('.sandbox-area').textContent='// Sandbox cleared\n'">🗑️ Clear</button></div><div class="sandbox-area" contenteditable="true">// Sandbox — Write code, test ideas
+// Nothing permanent until you say
+
+function helloAXIS() {
+  return "Substrate active with 64 codons";
+}
+
+console.log(helloAXIS());</div></div>`; }
+
+        renderScheduler(container){ const hours=Array.from({length:12},(_,i)=>i+8); container.innerHTML=`<div style="max-width:600px;margin:0 auto;"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;"><h3 style="color:var(--accent-secondary);font-size:1rem;">Today</h3><div style="display:flex;gap:6px;"><button class="app-btn" style="padding:6px 10px;" onclick="alert('Previous day')">←</button><button class="app-btn" style="padding:6px 10px;" onclick="alert('Next day')">→</button><button class="app-btn primary" style="padding:6px 12px;" onclick="alert('New event')">+</button></div></div><div class="scheduler-view"><div class="time-column">${hours.map(h=>`<div class="time-slot">${h}:00</div>`).join('')}</div><div class="schedule-column">${hours.map(()=>`<div class="schedule-slot"></div>`).join('')}</div></div></div>`; setTimeout(()=>{ const col=container.querySelector('.schedule-column'); if(col){ col.children[1].innerHTML=`<div class="schedule-event" style="top:0;height:100%;background:linear-gradient(135deg,var(--accent-primary),var(--accent-secondary));">Deep Work</div>`; col.children[4].innerHTML=`<div class="schedule-event" style="top:0;height:50%;background:var(--accent-warm);">Lunch</div>`; col.children[6].innerHTML=`<div class="schedule-event" style="top:0;height:100%;background:linear-gradient(135deg,var(--accent-rose),var(--accent-primary));">Agent Training</div>`; } },50); }
+
+        renderIncome(container){ container.innerHTML=`<div style="max-width:600px;margin:0 auto;"><div class="home-grid" style="margin-bottom:20px;"><div class="home-card"><div class="home-card-header"><div class="home-card-icon" style="background:rgba(16,185,129,0.15);">💰</div><div><div class="home-card-title">Monthly</div></div></div><div class="home-card-body" style="font-size:1.4rem;font-weight:800;color:var(--accent-emerald);">$0.00</div></div><div class="home-card"><div class="home-card-header"><div class="home-card-icon" style="background:rgba(245,158,11,0.15);">📊</div><div><div class="home-card-title">Streams</div></div></div><div class="home-card-body" style="font-size:1.4rem;font-weight:800;color:var(--accent-warm);">0</div></div><div class="home-card"><div class="home-card-header"><div class="home-card-icon" style="background:rgba(34,211,238,0.15);">🎯</div><div><div class="home-card-title">Goals</div></div></div><div class="home-card-body" style="font-size:1.4rem;font-weight:800;color:var(--accent-secondary);">0/3</div></div></div><div style="background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:14px;padding:18px;"><h3 style="margin-bottom:10px;">Workflow Automation</h3><p style="color:var(--text-muted);font-size:0.85rem;line-height:1.6;">Substrate tracks work patterns, suggests pricing, builds sustainable income.</p><button class="app-btn primary" style="margin-top:14px;" onclick="alert('Configure workflows')">Configure</button></div></div>`; }
+
+        renderSettingsContent(container){ container.innerHTML=`<div style="max-width:600px;margin:0 auto;"><div class="settings-section"><div class="settings-section-title">Appearance</div><div class="settings-item"><div class="settings-item-left"><div class="settings-item-icon">🌙</div><div class="settings-item-info"><div class="settings-item-label">Dark Mode</div><div class="settings-item-desc">Always on</div></div></div><div class="toggle active"><div class="toggle-knob"></div></div></div><div class="settings-item"><div class="settings-item-left"><div class="settings-item-icon">🎨</div><div class="settings-item-info"><div class="settings-item-label">Accent</div></div></div><div style="display:flex;gap:6px;"><div style="width:22px;height:22px;border-radius:6px;background:#8b5cf6;border:2px solid white;cursor:pointer;" onclick="document.documentElement.style.setProperty('--accent-primary','#8b5cf6');document.documentElement.style.setProperty('--accent-secondary','#22d3ee')"></div><div style="width:22px;height:22px;border-radius:6px;background:#22d3ee;cursor:pointer;" onclick="document.documentElement.style.setProperty('--accent-primary','#22d3ee');document.documentElement.style.setProperty('--accent-secondary','#8b5cf6')"></div><div style="width:22px;height:22px;border-radius:6px;background:#f43f5e;cursor:pointer;" onclick="document.documentElement.style.setProperty('--accent-primary','#f43f5e');document.documentElement.style.setProperty('--accent-secondary','#fbbf24')"></div></div></div><div class="settings-item"><div class="settings-item-left"><div class="settings-item-icon">👁️</div><div class="settings-item-info"><div class="settings-item-label">Substrate Visibility</div></div></div><div class="settings-item-right"><input type="range" min="0" max="100" value="8" style="width:80px;" oninput="document.getElementById('substrate-layer').style.opacity=this.value/100"></div></div></div><div class="settings-section"><div class="settings-section-title">Notifications</div><div class="settings-item" onclick="this.querySelector('.toggle').classList.toggle('active')"><div class="settings-item-left"><div class="settings-item-icon">💬</div><div class="settings-item-info"><div class="settings-item-label">Agent Messages</div></div></div><div class="toggle active"><div class="toggle-knob"></div></div></div><div class="settings-item" onclick="this.querySelector('.toggle').classList.toggle('active')"><div class="settings-item-left"><div class="settings-item-icon">📐</div><div class="settings-item-info"><div class="settings-item-label">Project Updates</div></div></div><div class="toggle active"><div class="toggle-knob"></div></div></div><div class="settings-item" onclick="this.querySelector('.toggle').classList.toggle('active')"><div class="settings-item-left"><div class="settings-item-icon">◉</div><div class="settings-item-info"><div class="settings-item-label">Substrate Signals</div></div></div><div class="toggle"><div class="toggle-knob"></div></div></div></div><div class="settings-section"><div class="settings-section-title">Substrate</div><div class="settings-item" onclick="this.querySelector('.toggle').classList.toggle('active')"><div class="settings-item-left"><div class="settings-item-icon">🧬</div><div class="settings-item-info"><div class="settings-item-label">Auto-Ingest</div></div></div><div class="toggle"><div class="toggle-knob"></div></div></div><div class="settings-item"><div class="settings-item-left"><div class="settings-item-icon">⚡</div><div class="settings-item-info"><div class="settings-item-label">Pulse Speed</div></div></div><div class="settings-item-right"><input type="range" min="1" max="10" value="3" style="width:80px;"></div></div></div><div class="settings-section"><div class="settings-section-title">Identity</div><div class="settings-item"><div class="settings-item-left"><div class="settings-item-icon">👤</div><div class="settings-item-info"><div class="settings-item-label">Your Name</div></div></div><div class="settings-item-right"><input type="text" value="User" style="background:var(--bg-elevated);border:1px solid var(--border-subtle);border-radius:6px;padding:4px 8px;color:var(--text-primary);font-size:0.85rem;width:100px;"></div></div><div class="settings-item"><div class="settings-item-left"><div class="settings-item-icon">🜁</div><div class="settings-item-info"><div class="settings-item-label">Agent Name</div></div></div><div class="settings-item-right"><input type="text" value="Synth" style="background:var(--bg-elevated);border:1px solid var(--border-subtle);border-radius:6px;padding:4px 8px;color:var(--text-primary);font-size:0.85rem;width:100px;"></div></div></div></div>`; }
+
+        renderGates(container){ let gridHTML='<div class="gate-grid">'; for(let i=1;i<=64;i++){ const gate=GATES[i]; const isActive=this.substrate.nodes.get(i-1).state==='active'; gridHTML+=`<div class="gate-cell ${isActive?'active':''}" onclick="appManager.switchApp('gate-detail');appManager.currentGate=${i}"><div class="gate-symbol">${gate.hexagramSymbol}</div><div class="gate-num">${i}</div></div>`; } gridHTML+='</div>'; container.innerHTML=`<div style="max-width:600px;margin:0 auto;"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;"><h3 style="font-size:1rem;">64 Gates — Karnaugh Cube</h3><div style="font-size:0.75rem;color:var(--text-muted);">Click any gate</div></div>${gridHTML}<div style="margin-top:16px;font-size:0.75rem;color:var(--text-muted);text-align:center;">4×4×4 Karnaugh Cube • 64 Codons • Color/Tone/Base</div></div>`; }
+
+        renderGateDetail(container){ const gateNum=this.currentGate||1; const gate=GATES[gateNum]; const node=this.substrate.nodes.get(gateNum-1); const comm=this.substrate.getGateComm(gateNum,((gateNum%64)+1)); container.innerHTML=`<div style="max-width:500px;margin:0 auto;"><div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;"><div style="font-size:3rem;">${gate.hexagramSymbol}</div><div><h2 style="font-size:1.3rem;">Gate ${gate.number}: ${gate.hexagramName}</h2><div style="font-size:0.8rem;color:var(--text-muted);">Codon: ${gate.codon} ${gate.isStartCodon?'★ START':''}</div></div></div><div class="gate-detail"><h3>Properties</h3><div class="gate-detail-row"><span>Center: ${gate.center}</span><span>Color: ${gate.color}</span><span>Tone: ${gate.tone}</span><span>Base: ${gate.base}</span></div><div class="gate-detail-row" style="margin-top:8px;"><span>Determination: ${gate.determination}</span><span>Karnaugh: (${gate.karnaugh.join(',')})</span></div></div><div class="gate-detail"><h3>Substrate State</h3><div class="gate-detail-row"><span>Energy: ${(node.energy*100).toFixed(1)}%</span><span>State: ${node.state}</span><span>Dimension: ${node.dimension}</span></div></div>${comm?`<div class="gate-detail"><h3>Communication with Gate ${comm.gateB.num}</h3><div class="gate-detail-row"><span>Tetragram: ${comm.tetragram}</span><span>Edge: ${comm.edgeType}</span><span>Distance: ${comm.karnaughDistance}</span></div><div class="gate-detail-row" style="margin-top:8px;"><span>Color Diff: ${comm.colorDiff}</span><span>Tone Diff: ${comm.toneDiff}</span></div></div>`:''}<button class="app-btn primary" style="margin-top:16px;width:100%;" onclick="appManager.switchApp('gates')">← Back to Gates</button></div>`; }
+
+        // === FULL-PAGE APP TRAY ===
+        renderAppTrayPage(container) {
+            container.innerHTML = `
+                <div style="max-width:600px;margin:0 auto;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+                        <h2 style="font-size:1.2rem;">App Tray</h2>
+                        <div style="font-size:0.75rem;color:var(--text-muted);">Everything through the substrate</div>
+                    </div>
+                    <div class="app-tray-page">
+                        ${this.trayApps.map(app => `
+                            <button class="app-tray-item-page" onclick="appManager.switchApp('${app.id}')">
+                                <div class="tray-icon">${app.icon}</div>
+                                <div class="tray-label">${app.label}</div>
+                                <div class="tray-desc">${app.desc}</div>
+                            </button>
+                        `).join('')}
+                    </div>
+                    <div style="margin-top:24px;">
+                        <div style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-muted);margin-bottom:12px;">External Integrations</div>
+                        <div class="external-ref" onclick="window.open('https://github.com/mobile-next/mobile-mcp','_blank')">
+                            <div class="external-ref-title">📱 mobile-next/mobile-mcp</div>
+                            <div class="external-ref-url">github.com/mobile-next/mobile-mcp</div>
+                            <div class="external-ref-desc">MCP Server for Mobile Automation. iOS, Android, Emulators, Simulators, Real Devices.</div>
+                        </div>
+                        <div class="external-ref" onclick="window.open('https://github.com/julesdlunacco/ahdchart.git','_blank')">
+                            <div class="external-ref-title">⭐ julesdlunacco/ahdchart</div>
+                            <div class="external-ref-url">github.com/julesdlunacco/ahdchart.git</div>
+                            <div class="external-ref-desc">Astro HD Charts with Swiss Ephemeris WASM. Human Design bodygraph and textual reports.</div>
+                        </div>
+                    </div>
+                </div>`;
+        }
+    }
+
+    // ============================================
+    // UI MANAGER
+    // ============================================
+    class UIManager {
+        constructor(appManager){ this.appManager=appManager; this.init(); }
+        init(){
+            document.querySelectorAll('.bottom-nav-item[data-app]').forEach(item=>{
+                item.addEventListener('click',()=>{
+                    const app=item.dataset.app;
+                    if(app==='app-tray') this.appManager.switchApp('app-tray');
+                    else this.appManager.switchApp(app);
+                });
+            });
+            document.getElementById('btn-settings').addEventListener('click',()=>this.openSettings());
+            document.getElementById('settings-close').addEventListener('click',()=>this.closeSettings());
+            document.getElementById('settings-overlay').addEventListener('click',()=>this.closeSettings());
+            document.getElementById('btn-admin').addEventListener('click',()=>this.openAdmin());
+            document.getElementById('admin-close').addEventListener('click',()=>this.closeAdmin());
+            document.getElementById('admin-overlay').addEventListener('click',()=>this.closeAdmin());
+            document.getElementById('btn-new').addEventListener('click',()=>{
+                const actions={ home:()=>this.appManager.switchApp('chat'), chat:()=>document.getElementById('chat-input')?.focus(), projects:()=>alert('New project'), files:()=>alert('Upload file'), research:()=>document.querySelector('.ingest-zone')?.click(), sandbox:()=>document.querySelector('.sandbox-area')?.focus(), scheduler:()=>alert('New event'), gates:()=>alert('Analyze gate pattern'), 'app-tray':()=>alert('Install new app') };
+                const a=actions[this.appManager.currentApp]; if(a) a(); else alert('New '+this.appManager.currentApp);
+            });
+            const updateClock=()=>{ const now=new Date(); document.getElementById('system-time').textContent=now.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'}); };
+            updateClock(); setInterval(updateClock,60000);
+        }
+        openSettings(){ document.getElementById('settings-overlay').classList.add('open'); document.getElementById('settings-panel').classList.add('open'); const content=document.getElementById('settings-content'); content.innerHTML=''; this.appManager.renderSettingsContent(content); }
+        closeSettings(){ document.getElementById('settings-panel').classList.remove('open'); document.getElementById('settings-overlay').classList.remove('open'); }
+        openAdmin(){ document.getElementById('admin-overlay').classList.add('open'); document.getElementById('admin-panel').classList.add('open'); this.renderAdminContent(); }
+        closeAdmin(){ document.getElementById('admin-panel').classList.remove('open'); document.getElementById('admin-overlay').classList.remove('open'); }
+        renderAdminContent(){
+            const stats=this.appManager.substrate.getStats();
+            const files=this.appManager.substrate.getIngestedFiles();
+            const content=document.getElementById('admin-content');
+            content.innerHTML=`<div class="admin-stat-grid"><div class="admin-stat-card"><div class="admin-stat-value">${stats.total}</div><div class="admin-stat-label">Total Nodes</div></div><div class="admin-stat-card"><div class="admin-stat-value">${stats.active}</div><div class="admin-stat-label">Active</div></div><div class="admin-stat-card"><div class="admin-stat-value">${stats.edges}</div><div class="admin-stat-label">Edges</div></div><div class="admin-stat-card"><div class="admin-stat-value">${stats.resonance.toFixed(3)}</div><div class="admin-stat-label">Resonance</div></div></div>
+            <div style="margin-bottom:20px;"><div style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-muted);margin-bottom:10px;">Substrate Log</div><div class="admin-log" id="admin-log"><div class="admin-log-entry">[INIT] Morphing Net v5 loaded</div><div class="admin-log-entry">[INIT] 64 gates with Karnaugh Cube</div><div class="admin-log-entry">[INIT] Codons, Colors, Tones, Bases mapped</div><div class="admin-log-entry">[INIT] Agent Synth created</div><div class="admin-log-entry">[PULSE] Energy distribution active</div><div class="admin-log-entry">[READY] AXIS OS v4 online</div></div></div>
+            <div style="margin-bottom:20px;">
+                <div style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-muted);margin-bottom:10px;">File Ingestor</div>
+                <div class="ingestor-panel">
+                    <div class="ingestor-drop" id="admin-ingest-drop">
+                        <div class="ingest-zone-icon">📥</div>
+                        <div style="font-weight:600;margin-bottom:6px;">Drop files to ingest</div>
+                        <div style="color:var(--text-muted);font-size:0.8rem;">Ingest → Analyze → Understand → Address → Route</div>
+                        <div style="color:var(--text-dim);font-size:0.7rem;margin-top:6px;">Hard-coded files preserved. Others regenerated & tailored.</div>
+                    </div>
+                    <div class="ingestor-file-list" id="admin-file-list">
+                        ${files.length===0?'<div style="color:var(--text-muted);font-size:0.8rem;text-align:center;padding:20px;">No files ingested yet. Drop files above.</div>':files.map(f=>`<div class="ingestor-file-item"><span>${f.name}</span><span class="ingestor-file-status ${f.status}">${f.status}</span><div class="ingestor-progress"><div class="ingestor-progress-bar" style="width:${(f.stage/(f.stages.length-1))*100}%"></div></div><span style="font-size:0.7rem;color:var(--text-muted);">${f.hardcoded?'🔒':'✨'}</span></div>`).join('')}
+                    </div>
+                </div>
+            </div>
+            <div><div style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-muted);margin-bottom:10px;">Actions</div><button class="admin-action-btn" onclick="alert('Export substrate state')">📤 Export State <span>→</span></button><button class="admin-action-btn" onclick="alert('Import substrate state')">📥 Import State <span>→</span></button><button class="admin-action-btn" onclick="alert('Reset to defaults')">🔄 Reset Defaults <span>→</span></button><button class="admin-action-btn" onclick="alert('Clear all memories')">🧹 Clear Memories <span>→</span></button><button class="admin-action-btn danger" onclick="alert('Factory reset')">⚠️ Factory Reset <span>→</span></button></div>`;
+            const dropZone=document.getElementById('admin-ingest-drop');
+            dropZone.addEventListener('dragover',e=>{e.preventDefault();dropZone.classList.add('dragover');});
+            dropZone.addEventListener('dragleave',()=>dropZone.classList.remove('dragover'));
+            dropZone.addEventListener('drop',e=>{
+                e.preventDefault();dropZone.classList.remove('dragover');
+                for(let file of e.dataTransfer.files){ this.appManager.substrate.ingestFile(file); }
+                setTimeout(()=>this.renderAdminContent(),200);
+            });
+        }
+    }
+
+    // ============================================
+    // SUBSTRATE CANVAS
+    // ============================================
+    function initSubstrateCanvas(){
+        const canvas=document.getElementById('substrate-canvas'),ctx=canvas.getContext('2d');
+        let nodes=[],edges=[];
+        function resize(){ canvas.width=window.innerWidth; canvas.height=window.innerHeight; }
+        function init(){ nodes=[];edges=[]; for(let i=0;i<64;i++){ nodes.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height,vx:(Math.random()-0.5)*0.3,vy:(Math.random()-0.5)*0.3,radius:Math.random()*2+1,energy:Math.random(),active:Math.random()>0.7}); } for(let i=0;i<40;i++){ const a=Math.floor(Math.random()*64),b=Math.floor(Math.random()*64); if(a!==b) edges.push({a,b,strength:Math.random()}); } }
+        function draw(){ ctx.clearRect(0,0,canvas.width,canvas.height); edges.forEach(edge=>{ const n1=nodes[edge.a],n2=nodes[edge.b]; const dist=Math.hypot(n1.x-n2.x,n1.y-n2.y); if(dist<200){ ctx.beginPath();ctx.moveTo(n1.x,n1.y);ctx.lineTo(n2.x,n2.y); ctx.strokeStyle=`rgba(139,92,246,${edge.strength*0.12})`;ctx.lineWidth=edge.strength;ctx.stroke(); } }); nodes.forEach(node=>{ node.x+=node.vx;node.y+=node.vy; if(node.x<0||node.x>canvas.width) node.vx*=-1; if(node.y<0||node.y>canvas.height) node.vy*=-1; ctx.beginPath();ctx.arc(node.x,node.y,node.radius,0,Math.PI*2); ctx.fillStyle=node.active?`rgba(139,92,246,${0.25+node.energy*0.35})`:`rgba(100,116,139,${0.08+node.energy*0.15})`; ctx.fill(); }); requestAnimationFrame(draw); }
+        resize();init();draw(); window.addEventListener('resize',()=>{resize();init();});
+    }
+
+    // ============================================
+    // INIT
+    // ============================================
+    let substrate,agent,appManager,uiManager;
+    function init(){ substrate=new Substrate(); agent=new Agent('Synth'); appManager=new AppManager(substrate,agent); uiManager=new UIManager(appManager); appManager.switchApp('home'); initSubstrateCanvas(); }
+    document.addEventListener('DOMContentLoaded',init);
+    </script>
+</body>
+</html>

@@ -1,0 +1,24 @@
+import assert from 'node:assert/strict';
+import {SynthiaUnit} from '../core/SynthiaUnit.mjs';
+class MemoryStorage{constructor(){this.map=new Map()}getItem(k){return this.map.has(k)?this.map.get(k):null}setItem(k,v){this.map.set(k,String(v))}removeItem(k){this.map.delete(k)}clear(){this.map.clear()}}
+globalThis.localStorage=new MemoryStorage();
+const unit=new SynthiaUnit({profile:{id:'human-success-test',purpose:'help the human move toward declared purpose',successIndicators:[{id:'progress',direction:'increase'}]},memoryKey:'r10-human-success',autoStart:false});
+const initial=unit.metabolism.adaptationBudget;
+unit.recordUserSuccess('progress',1,{evidence:{type:'user-report',id:'a'}});
+assert.equal(unit.metabolism.adaptationBudget,initial,'single observation must not mint success fuel');
+unit.recordUserSuccess('progress',2,{evidence:{type:'user-report',id:'b'}});
+assert.ok(unit.metabolism.adaptationBudget>initial,'verified progress trend should replenish capacity');
+const gap1=unit.observeHumanFriction({human:'user',capability:'prospective-memory',friction:'forgets future obligations',persistence:1,evidence:{type:'observation',id:1}});
+const gap2=unit.observeHumanFriction({human:'user',capability:'prospective-memory',friction:'forgets future obligations',persistence:3,evidence:{type:'observation',id:2}});
+assert.equal(gap1.status,'open'); assert.ok(gap2.persistence>=3);
+const h=unit.createHypothesis({human:'user',question:'Does prospective-memory support reduce missed obligations?',statement:'Complementary prospective-memory support will reduce missed obligations.',nullHypothesis:'No measurable reduction occurs.',predictions:['missed obligations decrease'],metrics:['missed_obligations']});
+unit.recordHypothesisResult(h.id,{actualOutcome:'pending longitudinal observation',metrics:{missed_obligations:null},evidence:{type:'protocol-created'},status:'open',derived:{supportNeeded:true},speculative:{mechanism:'complementary support may reduce cognitive load'}});
+const paper=unit.sciencePaper({title:'Prospective Memory Complement Study'});
+assert.equal(paper.sections.hypotheses.length,1); assert.equal(paper.sections.speculative.length,1); assert.ok(paper.sections.limitations.some(x=>x.includes('activity')));
+const rr=unit.reproductionReadiness({minPersistence:3});
+assert.equal(rr.automaticSpawn,false); assert.ok(Array.isArray(rr.unresolved));
+unit.stopLife();
+const unit2=new SynthiaUnit({profile:{id:'human-success-test',purpose:'help the human move toward declared purpose'},memoryKey:'r10-human-success',autoStart:false});
+assert.ok(unit2.outcomes.snapshot().count>=4,'human outcome ledger should persist');
+assert.ok(unit2.complement.open().some(g=>g.capability==='prospective-memory'),'complement gap should persist');
+console.log('human-success-science-smoke: PASS',JSON.stringify({budget:unit.metabolism.adaptationBudget,outcomes:unit2.outcomes.snapshot().count,gaps:unit2.complement.open().length,hypotheses:paper.sections.hypotheses.length,automaticSpawn:rr.automaticSpawn}));

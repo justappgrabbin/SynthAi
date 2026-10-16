@@ -1,0 +1,20 @@
+{
+  "name": "Synthia OS",
+  "short_name": "Synthia",
+  "id": "/synthia-residence-r21-5",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#111015",
+  "theme_color": "#17151b",
+  "orientation": "portrait-primary",
+  "description": "A local-first living Synthia residence.",
+  "icons": [
+    {
+      "src": "./assets/synthia-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

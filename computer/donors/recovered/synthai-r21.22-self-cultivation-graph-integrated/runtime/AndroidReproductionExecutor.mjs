@@ -1,0 +1,7 @@
+/** Concrete, explicit Android reproduction executor for Node/Termux hosts. */
+export class AndroidReproductionExecutor{
+  constructor({root='.'}={}){this.root=root;}
+  async inspect(){const fs=await import('node:fs/promises');const path=await import('node:path');const exists=async p=>fs.access(path.join(this.root,p)).then(()=>true).catch(()=>false);return {root:this.root,packageJson:await exists('package.json'),androidProject:await exists('android'),gradleWrapper:await exists('android/gradlew'),capacitorConfig:(await exists('capacitor.config.json'))||(await exists('capacitor.config.ts')),steps:['web-build','capacitor-sync','gradle-assemble-debug','verify-apk']};}
+  async build({run=false}={}){const status=await this.inspect();const commands=['npm run build','npx cap sync android','cd android && ./gradlew assembleDebug'];if(!run)return {...status,run:false,commands,note:'dry run only; pass run:true for explicit local execution'};if(!status.packageJson)throw new Error('package.json not found');const cp=await import('node:child_process');for(const command of commands){const r=cp.spawnSync(command,{cwd:this.root,shell:true,stdio:'inherit'});if(r.status!==0)throw new Error(`reproduction step failed: ${command}`);}const path=await import('node:path');return {...status,run:true,commands,apk:path.join(this.root,'android/app/build/outputs/apk/debug/app-debug.apk')};}
+}
+export default AndroidReproductionExecutor;

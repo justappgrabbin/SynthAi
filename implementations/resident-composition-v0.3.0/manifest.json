@@ -1,0 +1,140 @@
+{
+  "baseArchiveSha256": "a8557c949eaf992193966296ce37555749081e05361beaf239a3e87f9fd1f372",
+  "files": [
+    {
+      "path": "components/state-math/src/state-space/operators.js",
+      "baseSha256": "549d70c3e183d4cf555caef0658a4aa1742ffd6c761a34d11dd56181fc9c7a75",
+      "updatedSha256": "10887faaf724e1b4e3f9ac9f44015f07a126f679ad3b5f8359c6698130ebfaeb"
+    },
+    {
+      "path": "components/execution-spine/src/pure-synthia/state-space/operators.js",
+      "baseSha256": "549d70c3e183d4cf555caef0658a4aa1742ffd6c761a34d11dd56181fc9c7a75",
+      "updatedSha256": "4d2ed16abdc00ff9b92beec105e51f3e1d76d98b937940d511356d92eb6e7604"
+    },
+    {
+      "path": "components/organism/integration/StateOrganismBridge.mjs",
+      "baseSha256": "d1bacd7a7e2fd73267a088301bcf0adf16b24ca2a4d024f2e05eccf72bb803d6",
+      "updatedSha256": "e3cda790d8afa36cd395a3198bb404326ccc405266d81723031c762555a2ca6e"
+    },
+    {
+      "path": "components/organism/integration/SymbolCompositionGraph.mjs",
+      "baseSha256": null,
+      "updatedSha256": "4a854509443aff25d4824c116fdc19d0cac2b4072c9a5c1408568a90088837cb"
+    },
+    {
+      "path": "components/organism/browser/SymbolCompositionView.mjs",
+      "baseSha256": null,
+      "updatedSha256": "70dbe32932a5cfead299b6426cf3a37c463e39939c5a9a823ce51d1f52df78a3"
+    },
+    {
+      "path": "tests/composition-boundary.test.mjs",
+      "baseSha256": null,
+      "updatedSha256": "35f10e10f924806f7061790f719870139023b70822572c260c34ac68f7af81d1"
+    },
+    {
+      "path": "tests/local-execution-retention.test.mjs",
+      "baseSha256": null,
+      "updatedSha256": "3bc778fcebf7f4f8036e72c6bf7e263b0805d0518076191430b96b486d85902e"
+    },
+    {
+      "path": "src/dmsa-coordinate.mjs",
+      "baseSha256": null,
+      "updatedSha256": "68d599ae97ca92a848e6b241c0c491be15a8e7fa4d1388441d442d7ba5e6bf6d"
+    },
+    {
+      "path": "tests/dmsa-coordinate.test.mjs",
+      "baseSha256": null,
+      "updatedSha256": "08725c8c1f89746b21d2b37b47f03be101ccb0978a53b06d9c7ba29d8ee32a0d"
+    },
+    {
+      "path": "src/address-interop.mjs",
+      "baseSha256": "4edae8a4af8a3d06c2f82a5fe6f4ba2765490b89abe84f53b9500068304f2bba",
+      "updatedSha256": "32b95e39401f9b78c8a1786cdabbec72bfac13e031bbc246e63facfdd220645f"
+    },
+    {
+      "path": "components/state-math/src/grammar/parser.js",
+      "baseSha256": "35d5cab651f879de5f7428899b87cecb66654f2ab94fec7dec1ba468636c5f2f",
+      "updatedSha256": "cca4eb6c2976d42535079cb16913078201783a847da5acbd490614e51036305e"
+    },
+    {
+      "path": "components/execution-spine/src/pure-synthia/grammar/parser.js",
+      "baseSha256": "35d5cab651f879de5f7428899b87cecb66654f2ab94fec7dec1ba468636c5f2f",
+      "updatedSha256": "cca4eb6c2976d42535079cb16913078201783a847da5acbd490614e51036305e"
+    },
+    {
+      "path": "tests/spec-boundaries.test.mjs",
+      "baseSha256": null,
+      "updatedSha256": "e8f7b8ba4979a4ffde5c0b7046facc4d3c71f3889e39c108bcff95184f0572ae"
+    },
+    {
+      "path": "components/organism/organism/HumanOutcomeLedger.mjs",
+      "baseSha256": "6907569b9848d6e9b2521da3a8227df470fa24980cd71d981066fc0f6e9afd6f",
+      "updatedSha256": "23e8738a6abc62049002548619683eb5a838eb36632a56d001889c428305e447"
+    },
+    {
+      "path": "components/organism/organism/ScienceMode.mjs",
+      "baseSha256": "6d459db89c5aa7ece71042dfdb132a9c0370918dc8b22d47976d1fb310a973b1",
+      "updatedSha256": "8e9e09c53ae3e5a93c409d07f82e17fce02a7948e174d97db09d73f267b88b55"
+    },
+    {
+      "path": "tests/human-outcome-lineage.test.mjs",
+      "baseSha256": null,
+      "updatedSha256": "5dfe48d8a96f41073c4c312fbd8d923979ca927a0eb269e3cc8f7241f6fab018"
+    },
+    {
+      "path": "components/organism/organism/ComplementaryGapModel.mjs",
+      "baseSha256": "4f6fefb10a58eb4e56f1c66e294deded331da14a9cca17d83bf6886ebf8c69f0",
+      "updatedSha256": "19e72517aaa3db79e6ec6ce4bf63ace6ca6054fedbc8a198d4ba1cf12fd03ad2"
+    },
+    {
+      "path": "components/organism/organism/LivingLoop.mjs",
+      "baseSha256": "d4693647f895c58c04eb815afa49ae64240d4c2ccb7e77d7256625f3663ccc55",
+      "updatedSha256": "b3bb69a1a28be8358b7a2cfede09c2afa76c257278760f01373dcbde3f0a8790"
+    },
+    {
+      "path": "components/organism/core/SynthiaUnit.mjs",
+      "baseSha256": "1de4695deefc84fee2eaebf4025d9336c048689d89391a9551798cc85f04b5ce",
+      "updatedSha256": "9e6c4e62c6649d1967f53424b997389c4903daa45a5d76624c066c7307f189c9"
+    },
+    {
+      "path": "tests/gap-provision.test.mjs",
+      "baseSha256": null,
+      "updatedSha256": "b35503bcf76c46a8bd8e4923444c47231c010e8124ce7656eeb33cfc2f69a3c6"
+    },
+    {
+      "path": "components/organism/integration/WorldEmbodiment.mjs",
+      "baseSha256": null,
+      "updatedSha256": "9fe647fd5d47a9a9d5748b6f3074ee374900a1883662985abfbfeb636027e120"
+    },
+    {
+      "path": "components/organism/browser/LivingWorldView.mjs",
+      "baseSha256": "0308609c4d3a70508f667ab8b66607731ff1b90ec4ccf8f53be3efe1e9743929",
+      "updatedSha256": "0d150003b0cd222b22b85aec44100bb65fd5a3eeaae886b244ba6a7696bc2fd3"
+    },
+    {
+      "path": "src/ScientificSynthiaAssembly.mjs",
+      "baseSha256": "046b0c2d1a53a1a92e27b0968963ea1f5b65e03d3e902332b5bb88954784901e",
+      "updatedSha256": "614a190ee64bc6034a52ebe9d50855250e066544b88ca029404cd0b068899ea4"
+    },
+    {
+      "path": "tests/world-embodiment.test.mjs",
+      "baseSha256": null,
+      "updatedSha256": "f0d3772ff5377705fdf11feb5a8add17e650901b89742598bad2b8e8ae2ad660"
+    },
+    {
+      "path": "components/organism/processes/MeshArtifactGenerator.mjs",
+      "baseSha256": null,
+      "updatedSha256": "59c92598d2a946fcf847e238cf87aef49363222c670d5b1315e133f023a4585e"
+    },
+    {
+      "path": "components/organism/tests/mesh-artifact-generation.mjs",
+      "baseSha256": null,
+      "updatedSha256": "d19b9ad4f18bf75f5f7fbf7f0e5a0cf5e22b754c1eb7112969a9fa48af57523f"
+    },
+    {
+      "path": "components/organism/tests/klein-primary-source-examples.mjs",
+      "baseSha256": null,
+      "updatedSha256": "286958eebe246a856e9c951f3882ce2a61a7d75370017116c27f7858e279339d"
+    }
+  ]
+}

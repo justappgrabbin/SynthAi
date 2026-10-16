@@ -1,0 +1,8 @@
+import fs from 'node:fs';import assert from 'node:assert/strict';
+for(const f of ['index.html','app.mjs','styles.css','browser/KnowledgeVault.mjs','browser/ValidatedLearningStore.mjs','browser/LearningMesh.mjs','browser/MCPChairClient.mjs','bootstrap/serve.mjs','knowledge/source-index.json','organism/CultivationProgram.mjs'])assert.ok(fs.existsSync(f),`missing ${f}`);
+const html=fs.readFileSync('index.html','utf8');const runtimeHtml=fs.readFileSync('synthia-runtime.html','utf8');for(const x of ['data-panel="ground"','data-panel="world"','data-panel="workshop"','data-panel="learn"','data-panel="system"','fileInput','startCycle'])assert.ok(runtimeHtml.includes(x),`missing runtime UI ${x}`);assert.ok(html.includes('synthia-runtime.html'),'phone shell missing runtime bridge');
+for(const x of ['approveResidence'])assert.ok(!html.includes(x),`obsolete blocking residence surface remains ${x}`);
+for(const x of ['manifest.webmanifest','serviceWorker.register','beforeinstallprompt'])assert.ok(runtimeHtml.includes(x),`self-install runtime surface missing ${x}`);
+const app=fs.readFileSync('app.mjs','utf8');assert.ok(!app.includes('approveResidence'),'approval gate still wired');assert.ok(app.includes("setStatus('ready · cultivation ground active')"),'cultivation ground not ready on boot');assert.ok(app.includes('createCultivationCycle'),'cultivation cycle UI not wired');
+const sources=JSON.parse(fs.readFileSync('knowledge/source-index.json'));assert.equal(sources.type,'external-knowledge-source-index');assert.ok(sources.files.length>0);assert.ok(sources.files.every(x=>x.bundled===false));
+console.log('USABILITY PASS: immediate cultivation ground + world + workshop + learning + MCP; no PWA/install/residence gate');

@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "selected": "procedural-raster",
+  "reason": "All scene features are supported by the deterministic local raster renderer.",
+  "unsupported": [],
+  "fallbacks": [
+    "host-graphics",
+    "media-renderer"
+  ],
+  "mediaRenderer": {
+    "automatonId": "media-renderer",
+    "renderer": "graphics",
+    "requiredHostCapabilities": [
+      "graphics"
+    ]
+  }
+}

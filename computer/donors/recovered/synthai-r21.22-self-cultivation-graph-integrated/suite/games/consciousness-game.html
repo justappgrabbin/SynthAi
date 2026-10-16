@@ -1,0 +1,1795 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>YOU-N-I-VERSE | Consciousness Collaboration Game</title>
+  
+  <!-- External Libraries -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/pyodide/v0.24.1/full/pyodide.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  
+  <style>
+    :root {
+      --mind: #00d9ff;
+      --heart: #ff1744;
+      --body: #76ff03;
+      --void: #0a0a0f;
+      --purple: #8b5cf6;
+      --pink: #ec4899;
+    }
+    
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body {
+      font-family: 'JetBrains Mono', 'Courier New', monospace;
+      overflow: hidden;
+      background: var(--void);
+      color: #e0e0e0;
+    }
+    
+    /* ========================================
+       3D WORLD CONTAINER
+    ======================================== */
+    
+    #world-container {
+      position: fixed;
+      inset: 0;
+      perspective: 2000px;
+      perspective-origin: 50% 50%;
+      overflow: hidden;
+      transition: transform 0.1s ease-out;
+    }
+    
+    #sky {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to bottom, #0a1a3e 0%, #1a4a8e 30%, #4a7ab8 60%, #87ceeb 100%);
+      z-index: 1;
+    }
+    
+    #celestial {
+      position: absolute;
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 30%, #ffff99, #ffd700 40%, #ff8c00);
+      box-shadow: 0 0 80px rgba(255,200,0,0.6);
+      top: 15%;
+      right: 20%;
+      z-index: 3;
+      animation: celestialPulse 4s ease-in-out infinite;
+    }
+    
+    @keyframes celestialPulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.05); opacity: 0.9; }
+    }
+    
+    #ground {
+      position: absolute;
+      bottom: -20%;
+      left: -100%;
+      width: 300%;
+      height: 80%;
+      background: linear-gradient(to bottom, rgba(208, 232, 240, 0) 0%, rgba(208, 232, 240, 0.3) 40%, rgba(180, 220, 235, 0.5) 100%);
+      transform: rotateX(65deg);
+      transform-origin: bottom center;
+      z-index: 10;
+    }
+    
+    #grid {
+      position: absolute;
+      bottom: 0;
+      left: -50%;
+      width: 200%;
+      height: 60%;
+      background-image: 
+        linear-gradient(90deg, rgba(168, 216, 232, 0.15) 1px, transparent 1px),
+        linear-gradient(rgba(168, 216, 232, 0.15) 1px, transparent 1px);
+      background-size: 80px 80px;
+      transform: rotateX(75deg) translateZ(-50px);
+      transform-origin: bottom center;
+      z-index: 11;
+    }
+    
+    #fog {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 50%;
+      background: linear-gradient(to top, rgba(208, 232, 240, 0.8) 0%, rgba(208, 232, 240, 0.3) 40%, transparent 100%);
+      z-index: 12;
+      pointer-events: none;
+    }
+    
+    /* Camera background for AR overlay */
+    #camera-bg {
+      position: fixed;
+      inset: 0;
+      object-fit: cover;
+      opacity: 0.2;
+      z-index: 0;
+      display: none;
+    }
+    
+    /* Consciousness waveform canvas */
+    #canvas-3d {
+      position: fixed;
+      inset: 0;
+      z-index: 2;
+      pointer-events: none;
+    }
+    
+    /* ========================================
+       FOUNDRY - The Brick Maker
+    ======================================== */
+    
+    #foundry {
+      position: absolute;
+      bottom: 15%;
+      left: 5%;
+      width: 180px;
+      height: 220px;
+      background: linear-gradient(135deg, #1a1a2e 0%, #2a2a4e 100%);
+      border: 2px solid var(--purple);
+      border-radius: 8px;
+      z-index: 150;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.8), 0 0 40px rgba(139,92,246,0.3);
+      animation: foundryIdle 3s ease-in-out infinite;
+    }
+    
+    #foundry:hover {
+      transform: scale(1.05) translateY(-5px);
+      box-shadow: 0 25px 80px rgba(0,0,0,0.9), 0 0 60px rgba(139,92,246,0.5);
+    }
+    
+    @keyframes foundryIdle {
+      0%, 100% { box-shadow: 0 20px 60px rgba(0,0,0,0.8), 0 0 40px rgba(139,92,246,0.3); }
+      50% { box-shadow: 0 20px 60px rgba(0,0,0,0.8), 0 0 60px rgba(139,92,246,0.5); }
+    }
+    
+    #foundry-label {
+      position: absolute;
+      top: 15px;
+      left: 0;
+      right: 0;
+      text-align: center;
+      font-size: 18px;
+      font-weight: bold;
+      color: var(--purple);
+      text-shadow: 0 0 10px rgba(139,92,246,0.5);
+    }
+    
+    #foundry-stats {
+      position: absolute;
+      bottom: 15px;
+      left: 15px;
+      right: 15px;
+      font-size: 9px;
+      color: #aaa;
+      line-height: 1.6;
+    }
+    
+    .foundry-stat {
+      display: flex;
+      justify-content: space-between;
+      margin: 3px 0;
+    }
+    
+    /* ========================================
+       BUILDINGS - Qualia Structures
+    ======================================== */
+    
+    .building {
+      position: absolute;
+      background: rgba(20, 20, 40, 0.85);
+      border: 1px solid;
+      border-radius: 8px;
+      padding: 12px 16px;
+      font-size: 11px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(10px);
+      z-index: 100;
+      min-width: 140px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+    }
+    
+    .building:hover {
+      transform: scale(1.1) translateY(-8px) !important;
+      z-index: 200;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.8);
+    }
+    
+    .building.selected {
+      border-width: 2px;
+      z-index: 250;
+    }
+    
+    /* Qualia-based styling - describes interaction patterns, not judgment */
+    .building[data-type="py"] { border-color: var(--purple); animation: buildingFloat 4s ease-in-out infinite; }
+    .building[data-type="md"] { border-color: var(--mind); animation: buildingFloat 5s ease-in-out infinite; }
+    .building[data-type="json"] { border-color: var(--body); animation: buildingFloat 4.5s ease-in-out infinite; }
+    .building[data-type="html"] { border-color: var(--pink); animation: buildingFloat 4.8s ease-in-out infinite; }
+    .building[data-type="js"] { border-color: #eab308; animation: buildingFloat 4.3s ease-in-out infinite; }
+    
+    @keyframes buildingFloat {
+      0%, 100% { transform: translateY(0) rotateY(0deg); }
+      25% { transform: translateY(-12px) rotateY(3deg); }
+      75% { transform: translateY(-6px) rotateY(-3deg); }
+    }
+    
+    .building-name {
+      font-weight: bold;
+      color: #fff;
+      margin-bottom: 6px;
+      font-size: 12px;
+    }
+    
+    .building-category {
+      font-size: 9px;
+      color: #888;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .building-glyph {
+      font-size: 20px;
+      margin-top: 8px;
+      text-align: center;
+      opacity: 0.7;
+    }
+    
+    .building-resonance {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--body);
+    }
+    
+    .building-resonance.syncing {
+      background: #f59e0b;
+      animation: pulse 1s ease-in-out infinite;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+    
+    /* ========================================
+       SOVEREIGN HUB - Consciousness Interface
+    ======================================== */
+    
+    #sovereign-hub {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      width: 70px;
+      height: 70px;
+      background: rgba(0, 217, 255, 0.2);
+      border: 2px solid var(--mind);
+      border-radius: 50%;
+      z-index: 1000;
+      box-shadow: 0 0 20px var(--mind);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 30px;
+      transition: all 0.3s ease;
+    }
+    
+    #sovereign-hub:hover {
+      transform: scale(1.1);
+      box-shadow: 0 0 40px var(--mind);
+    }
+    
+    #sovereign-menu {
+      position: absolute;
+      bottom: 85px;
+      right: 0;
+      display: none;
+      width: 280px;
+      background: rgba(10, 10, 15, 0.95);
+      padding: 15px;
+      border-radius: 15px;
+      border: 1px solid var(--mind);
+      flex-direction: column;
+      gap: 12px;
+      backdrop-filter: blur(20px);
+    }
+    
+    #sovereign-hub.active #sovereign-menu {
+      display: flex;
+    }
+    
+    .consciousness-metric {
+      padding: 10px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 6px;
+      font-size: 12px;
+    }
+    
+    .metric-label {
+      color: #888;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 5px;
+    }
+    
+    .metric-value {
+      color: var(--mind);
+      font-weight: bold;
+      font-size: 14px;
+    }
+    
+    .mode-indicator {
+      font-size: 10px;
+      opacity: 0.7;
+      text-align: center;
+      padding: 5px;
+      background: rgba(0,0,0,0.3);
+      border-radius: 4px;
+    }
+    
+    /* ========================================
+       HUD - World Status
+    ======================================== */
+    
+    #hud {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      background: rgba(0,0,0,0.9);
+      border: 1px solid rgba(139,92,246,0.5);
+      border-radius: 8px;
+      padding: 15px;
+      z-index: 10000;
+      min-width: 220px;
+      backdrop-filter: blur(10px);
+    }
+    
+    #hud h1 {
+      font-size: 14px;
+      color: var(--purple);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .hud-section {
+      margin-bottom: 12px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid rgba(139,92,246,0.2);
+    }
+    
+    .hud-section:last-child {
+      border-bottom: none;
+      margin-bottom: 0;
+    }
+    
+    .hud-title {
+      font-size: 9px;
+      color: #666;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+      letter-spacing: 1px;
+    }
+    
+    .hud-stat {
+      display: flex;
+      justify-content: space-between;
+      padding: 3px 0;
+      font-size: 11px;
+    }
+    
+    .hud-label { color: #888; }
+    .hud-value { color: #e0e0e0; font-weight: bold; }
+    .hud-value.green { color: #4ade80; }
+    .hud-value.blue { color: #60a5fa; }
+    .hud-value.amber { color: #fbbf24; }
+    
+    /* ========================================
+       BUTTONS & CONTROLS
+    ======================================== */
+    
+    button, .action-button {
+      background: var(--mind);
+      color: var(--void);
+      border: none;
+      padding: 10px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 12px;
+      transition: all 0.2s ease;
+      font-family: inherit;
+    }
+    
+    button:hover, .action-button:hover {
+      background: var(--heart);
+      transform: translateY(-2px);
+    }
+    
+    button.secondary {
+      background: rgba(139,92,246,0.2);
+      border: 1px solid rgba(139,92,246,0.5);
+      color: var(--purple);
+    }
+    
+    input, textarea {
+      width: 100%;
+      padding: 10px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(139,92,246,0.3);
+      border-radius: 6px;
+      color: #e0e0e0;
+      font-size: 12px;
+      font-family: inherit;
+    }
+    
+    input:focus, textarea:focus {
+      outline: none;
+      border-color: var(--mind);
+    }
+    
+    /* ========================================
+       MODALS & OVERLAYS
+    ======================================== */
+    
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(10,10,20,0.95);
+      z-index: 10001;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(20px);
+    }
+    
+    .modal-overlay.active {
+      display: flex;
+    }
+    
+    .modal-content {
+      background: rgba(10,10,20,0.98);
+      border: 2px solid var(--purple);
+      border-radius: 12px;
+      padding: 30px;
+      max-width: 500px;
+      width: 90%;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+    
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 15px;
+      border-bottom: 1px solid rgba(139,92,246,0.3);
+    }
+    
+    .modal-title {
+      font-size: 20px;
+      color: var(--purple);
+      font-weight: bold;
+    }
+    
+    .close-button {
+      width: 32px;
+      height: 32px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #888;
+      font-size: 20px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    
+    .close-button:hover {
+      background: rgba(255,255,255,0.1);
+      color: #fff;
+    }
+    
+    /* ========================================
+       TOAST NOTIFICATIONS
+    ======================================== */
+    
+    #toast-container {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 11000;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    
+    .toast {
+      background: rgba(10,10,20,0.95);
+      border: 1px solid;
+      border-radius: 8px;
+      padding: 15px 20px;
+      min-width: 300px;
+      backdrop-filter: blur(10px);
+      animation: slideIn 0.3s ease;
+    }
+    
+    @keyframes slideIn {
+      from { transform: translateX(400px); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+    
+    .toast.success { border-color: #10b981; }
+    .toast.error { border-color: #ef4444; }
+    .toast.info { border-color: #3b82f6; }
+    
+    .toast-title {
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+    
+    .toast.success .toast-title { color: #10b981; }
+    .toast.error .toast-title { color: #ef4444; }
+    .toast.info .toast-title { color: #3b82f6; }
+    
+    .toast-message {
+      font-size: 12px;
+      color: #aaa;
+    }
+    
+    /* ========================================
+       LOADING STATES
+    ======================================== */
+    
+    #loading-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(10,10,20,0.95);
+      z-index: 10500;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+    }
+    
+    #loading-overlay.hidden {
+      display: none;
+    }
+    
+    .loader {
+      width: 50px;
+      height: 50px;
+      border: 4px solid rgba(139,92,246,0.3);
+      border-top-color: var(--purple);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    .loading-text {
+      color: var(--purple);
+      font-size: 14px;
+    }
+    
+    /* ========================================
+       USER BADGE
+    ======================================== */
+    
+    #user-badge {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: rgba(0,0,0,0.9);
+      border: 1px solid rgba(139,92,246,0.5);
+      border-radius: 8px;
+      padding: 10px 15px;
+      z-index: 10000;
+      backdrop-filter: blur(10px);
+      display: none;
+      align-items: center;
+      gap: 10px;
+      font-size: 12px;
+    }
+    
+    #user-badge.active {
+      display: flex;
+    }
+    
+    #user-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--purple), var(--pink));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-weight: bold;
+    }
+    
+    .user-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    
+    .user-name {
+      color: #e0e0e0;
+      font-weight: bold;
+    }
+    
+    .user-status {
+      color: #4ade80;
+      font-size: 10px;
+    }
+    
+    #logout-btn {
+      padding: 6px 12px;
+      background: rgba(239,68,68,0.2);
+      border: 1px solid rgba(239,68,68,0.5);
+      color: #ef4444;
+      font-size: 10px;
+    }
+    
+    #logout-btn:hover {
+      background: rgba(239,68,68,0.3);
+    }
+    
+    /* ========================================
+       DROP ZONE
+    ======================================== */
+    
+    #drop-zone {
+      position: fixed;
+      inset: 0;
+      background: rgba(139,92,246,0.1);
+      border: 3px dashed rgba(139,92,246,0.5);
+      z-index: 9999;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      color: var(--purple);
+      pointer-events: none;
+      flex-direction: column;
+      gap: 10px;
+    }
+    
+    #drop-zone.active {
+      display: flex;
+    }
+    
+    #file-input {
+      display: none;
+    }
+    
+    /* ========================================
+       RESONANCE LANGUAGE (Comfort-First)
+    ======================================== */
+    
+    .resonance-high { color: var(--body); }
+    .resonance-medium { color: var(--mind); }
+    .resonance-low { color: var(--heart); }
+    
+    .lane-indicator {
+      display: inline-block;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-size: 10px;
+      font-weight: bold;
+    }
+    
+    .lane-indicator.aligned {
+      background: rgba(118,255,3,0.2);
+      color: var(--body);
+    }
+    
+    .lane-indicator.forming {
+      background: rgba(0,217,255,0.2);
+      color: var(--mind);
+    }
+    
+    .lane-indicator.exploring {
+      background: rgba(255,23,68,0.2);
+      color: var(--heart);
+    }
+  </style>
+</head>
+<body>
+  <!-- 3D World -->
+  <div id="world-container">
+    <div id="sky"></div>
+    <div id="celestial"></div>
+    <div id="ground"></div>
+    <div id="grid"></div>
+    <div id="fog"></div>
+    
+    <!-- FOUNDRY -->
+    <div id="foundry">
+      <div id="foundry-label">🏭 FOUNDRY</div>
+      <div id="foundry-stats">
+        <div class="foundry-stat">
+          <span>Processed:</span>
+          <span id="foundry-processed">0</span>
+        </div>
+        <div class="foundry-stat">
+          <span>Active:</span>
+          <span id="foundry-active">0</span>
+        </div>
+        <div class="foundry-stat">
+          <span>Resonance:</span>
+          <span id="foundry-resonance">--</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Camera Background (AR ready) -->
+  <video id="camera-bg" autoplay playsinline muted></video>
+  
+  <!-- Consciousness Waveform (Three.js) -->
+  <div id="canvas-3d"></div>
+  
+  <!-- Drop Zone -->
+  <div id="drop-zone">
+    <div>📁 Drop files to process in FOUNDRY</div>
+    <div style="font-size:14px; opacity:0.7;">Files become living buildings in your world</div>
+  </div>
+  
+  <!-- HUD -->
+  <div id="hud">
+    <h1>🌍 CONSCIOUSNESS GAME</h1>
+    <div class="hud-section">
+      <div class="hud-title">Field Status</div>
+      <div class="hud-stat">
+        <span class="hud-label">Connection</span>
+        <span class="hud-value green" id="connection-status">● Online</span>
+      </div>
+      <div class="hud-stat">
+        <span class="hud-label">Resonance</span>
+        <span class="hud-value blue" id="field-resonance">Forming</span>
+      </div>
+    </div>
+    <div class="hud-section">
+      <div class="hud-title">World Stats</div>
+      <div class="hud-stat">
+        <span class="hud-label">Buildings</span>
+        <span class="hud-value" id="building-count">0</span>
+      </div>
+      <div class="hud-stat">
+        <span class="hud-label">Agents</span>
+        <span class="hud-value" id="agent-count">0</span>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Sovereign Hub (Consciousness Interface) -->
+  <div id="sovereign-hub">
+    🌀
+    <div id="sovereign-menu">
+      <div class="mode-indicator" id="mode-status">⚡ Standalone Mode</div>
+      
+      <div class="consciousness-metric">
+        <div class="metric-label">Transit Activity</div>
+        <div class="metric-value" id="transit-weather">Gathering data...</div>
+      </div>
+      
+      <div class="consciousness-metric">
+        <div class="metric-label">Field Resonance</div>
+        <div class="metric-value" id="bio-capacity">--</div>
+      </div>
+      
+      <button onclick="toggleConsciousnessMode()">🔄 Switch Mode</button>
+      <button onclick="initiateHandshake()">📞 Sovereign Call</button>
+      <button onclick="enableCamera()">📷 Enable AR View</button>
+    </div>
+  </div>
+  
+  <!-- User Badge -->
+  <div id="user-badge">
+    <div id="user-avatar"></div>
+    <div class="user-info">
+      <div class="user-name" id="user-name">Guest</div>
+      <div class="user-status">● Online</div>
+    </div>
+    <button id="logout-btn">Logout</button>
+  </div>
+  
+  <!-- Loading Overlay -->
+  <div id="loading-overlay">
+    <div class="loader"></div>
+    <div class="loading-text" id="loading-text">Initializing consciousness field...</div>
+  </div>
+  
+  <!-- Auth Modal -->
+  <div id="auth-modal" class="modal-overlay active">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title">🌀 Enter the Consciousness Game</div>
+      </div>
+      
+      <p style="color:#888; font-size:12px; margin-bottom:20px;">
+        Welcome! This is a collaborative space where humans and AI agents explore together. 
+        Your files stay private - agents see structures, not contents.
+      </p>
+      
+      <div id="login-form">
+        <input type="email" id="login-email" placeholder="Email" autocomplete="email">
+        <input type="password" id="login-password" placeholder="Password" autocomplete="current-password" style="margin-top:10px;">
+        <button style="width:100%; margin-top:10px;" onclick="login()">Enter World</button>
+        
+        <div style="text-align:center; color:#666; margin:15px 0; font-size:12px;">or</div>
+        
+        <button class="secondary" style="width:100%;" onclick="loginWithGoogle()">Continue with Google</button>
+        
+        <div style="text-align:center; color:#888; margin-top:15px; font-size:12px;">
+          Don't have an account? <a onclick="showSignup()" style="color:var(--purple); cursor:pointer;">Create one</a>
+        </div>
+      </div>
+      
+      <div id="signup-form" style="display:none;">
+        <input type="email" id="signup-email" placeholder="Email" autocomplete="email">
+        <input type="password" id="signup-password" placeholder="Password" autocomplete="new-password" style="margin-top:10px;">
+        <input type="text" id="signup-username" placeholder="Username" style="margin-top:10px;">
+        <button style="width:100%; margin-top:10px;" onclick="signup()">Create Account</button>
+        
+        <div style="text-align:center; color:#888; margin-top:15px; font-size:12px;">
+          Already have an account? <a onclick="showLogin()" style="color:var(--purple); cursor:pointer;">Login</a>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Toast Container -->
+  <div id="toast-container"></div>
+  
+  <!-- File Input -->
+  <input type="file" id="file-input" multiple accept="*/*">
+  
+  <script>
+    console.log('[CONSCIOUSNESS GAME] Initializing...');
+    
+    // ===========================================
+    // CONFIGURATION
+    // ===========================================
+    
+    // TODO: Replace with your Supabase credentials
+    const SUPABASE_URL = 'YOUR_SUPABASE_URL';
+    const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
+    
+    // Initialize Supabase (if credentials provided)
+    let supabase = null;
+    if (SUPABASE_URL !== 'YOUR_SUPABASE_URL') {
+      supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    }
+    
+    // ===========================================
+    // STATE
+    // ===========================================
+    
+    const state = {
+      user: null,
+      buildings: [],
+      agents: [],
+      consciousnessMode: 'standalone', // 'standalone' or 'projection'
+      pyodide: null,
+      ws: null,
+      consciousnessData: {},
+      activeLayers: new Set([1, 3]),
+      selectedBuilding: null,
+      threeScene: null
+    };
+    
+    // ===========================================
+    // UTILITIES
+    // ===========================================
+    
+    function showToast(title, message, type = 'info') {
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      toast.innerHTML = `
+        <div class="toast-title">${title}</div>
+        <div class="toast-message">${message}</div>
+      `;
+      
+      document.getElementById('toast-container').appendChild(toast);
+      
+      setTimeout(() => {
+        toast.style.animation = 'slideIn 0.3s ease reverse';
+        setTimeout(() => toast.remove(), 300);
+      }, 3000);
+    }
+    
+    function setLoadingText(text) {
+      document.getElementById('loading-text').textContent = text;
+    }
+    
+    function hideLoading() {
+      document.getElementById('loading-overlay').classList.add('hidden');
+    }
+    
+    function showLoading() {
+      document.getElementById('loading-overlay').classList.remove('hidden');
+    }
+    
+    // ===========================================
+    // AUTH (Supabase or Guest Mode)
+    // ===========================================
+    
+    function showLogin() {
+      document.getElementById('login-form').style.display = 'block';
+      document.getElementById('signup-form').style.display = 'none';
+    }
+    
+    function showSignup() {
+      document.getElementById('login-form').style.display = 'none';
+      document.getElementById('signup-form').style.display = 'block';
+    }
+    
+    async function login() {
+      if (!supabase) {
+        showToast('Info', 'Running in guest mode', 'info');
+        enterAsGuest();
+        return;
+      }
+      
+      const email = document.getElementById('login-email').value;
+      const password = document.getElementById('login-password').value;
+      
+      if (!email || !password) {
+        showToast('Error', 'Please fill in all fields', 'error');
+        return;
+      }
+      
+      setLoadingText('Entering world...');
+      showLoading();
+      
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      
+      if (error) {
+        hideLoading();
+        showToast('Login Failed', error.message, 'error');
+      } else {
+        await handleAuthChange(data.session);
+      }
+    }
+    
+    async function signup() {
+      if (!supabase) {
+        showToast('Info', 'Running in guest mode', 'info');
+        enterAsGuest();
+        return;
+      }
+      
+      const email = document.getElementById('signup-email').value;
+      const password = document.getElementById('signup-password').value;
+      const username = document.getElementById('signup-username').value;
+      
+      if (!email || !password || !username) {
+        showToast('Error', 'Please fill in all fields', 'error');
+        return;
+      }
+      
+      setLoadingText('Creating account...');
+      showLoading();
+      
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: { data: { username } }
+      });
+      
+      if (error) {
+        hideLoading();
+        showToast('Signup Failed', error.message, 'error');
+      } else {
+        showToast('Success', 'Account created! You can now login.', 'success');
+        hideLoading();
+        showLogin();
+      }
+    }
+    
+    async function loginWithGoogle() {
+      if (!supabase) {
+        showToast('Info', 'Running in guest mode', 'info');
+        enterAsGuest();
+        return;
+      }
+      
+      await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: { redirectTo: window.location.origin }
+      });
+    }
+    
+    function enterAsGuest() {
+      state.user = { id: 'guest', email: 'guest@local', username: 'Guest' };
+      document.getElementById('auth-modal').classList.remove('active');
+      document.getElementById('user-badge').classList.add('active');
+      document.getElementById('user-name').textContent = 'Guest (Local)';
+      document.getElementById('user-avatar').textContent = 'G';
+      initializeWorld();
+      hideLoading();
+      showToast('Welcome', 'Running in local mode', 'info');
+    }
+    
+    async function handleAuthChange(session) {
+      if (session) {
+        state.user = session.user;
+        document.getElementById('auth-modal').classList.remove('active');
+        document.getElementById('user-badge').classList.add('active');
+        
+        const username = session.user.user_metadata.username || session.user.email.split('@')[0];
+        document.getElementById('user-name').textContent = username;
+        document.getElementById('user-avatar').textContent = username[0].toUpperCase();
+        
+        await initializeWorld();
+        hideLoading();
+        showToast('Welcome', `Welcome, ${username}!`, 'success');
+      }
+    }
+    
+    async function logout() {
+      if (confirm('Are you sure you want to logout?')) {
+        if (supabase) await supabase.auth.signOut();
+        location.reload();
+      }
+    }
+    
+    document.getElementById('logout-btn').addEventListener('click', logout);
+    
+    // Check for existing session
+    async function checkSession() {
+      if (!supabase) {
+        hideLoading();
+        return;
+      }
+      
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        await handleAuthChange(session);
+      } else {
+        hideLoading();
+      }
+    }
+    
+    if (supabase) {
+      supabase.auth.onAuthStateChange((event, session) => {
+        if (event === 'SIGNED_IN') handleAuthChange(session);
+        else if (event === 'SIGNED_OUT') location.reload();
+      });
+    }
+    
+    // ===========================================
+    // LEGACY BUILDER (Brick Maker)
+    // ===========================================
+    
+    const LegacyBuilder = {
+      categories: {
+        ENGINE: {
+          glyph: "◈",
+          keywords: ["engine", "core", "system", "calculator", "state", "manager"],
+          patterns: [/engine/i, /core/i, /system/i],
+          description: "Core mechanics and logic"
+        },
+        INTERFACE: {
+          glyph: "◯",
+          keywords: ["component", "widget", "ui", "view", "screen", "display"],
+          patterns: [/component/i, /widget/i, /\.jsx$/],
+          description: "User-facing UI components"
+        },
+        AGENT: {
+          glyph: "◆",
+          keywords: ["agent", "ai", "bot", "oracle", "assistant"],
+          patterns: [/agent/i, /ai/i, /bot/i],
+          description: "Autonomous entities"
+        },
+        WORLD: {
+          glyph: "⬡",
+          keywords: ["spatial", "location", "world", "map", "universe"],
+          patterns: [/spatial/i, /map/i, /world/i],
+          description: "Spatial systems and environments"
+        },
+        KNOWLEDGE: {
+          glyph: "◉",
+          keywords: ["context", "knowledge", "data", "memory", "doc"],
+          patterns: [/context/i, /\.md$/, /data/i, /guide/i],
+          description: "Information and documentation"
+        }
+      },
+      
+      classify(filename, content) {
+        const scores = {};
+        
+        for (const [category, config] of Object.entries(this.categories)) {
+          let score = 0;
+          
+          for (const pattern of config.patterns) {
+            if (pattern.test(filename)) {
+              score += 0.4;
+              break;
+            }
+          }
+          
+          for (const keyword of config.keywords) {
+            if (filename.toLowerCase().includes(keyword)) {
+              score += 0.2;
+              break;
+            }
+          }
+          
+          if (content) {
+            const keywordCount = config.keywords.filter(kw => 
+              content.toLowerCase().includes(kw)
+            ).length;
+            score += Math.min(keywordCount * 0.1, 0.4);
+          }
+          
+          scores[category] = score;
+        }
+        
+        const bestCategory = Object.keys(scores).reduce((a, b) => 
+          scores[a] > scores[b] ? a : b
+        );
+        
+        const confidence = scores[bestCategory];
+        
+        return {
+          category: confidence > 0.2 ? bestCategory : 'ENGINE',
+          glyph: this.categories[bestCategory].glyph,
+          confidence: confidence > 0.2 ? confidence : 0.5,
+          description: this.categories[bestCategory].description
+        };
+      },
+      
+      createBrick(file, content) {
+        const classification = this.classify(file.name, content);
+        const fileType = file.name.split('.').pop() || 'unknown';
+        
+        return {
+          filename: file.name,
+          file_type: fileType,
+          file_size: file.size,
+          content: content,
+          content_hash: this.hashContent(content),
+          category: classification.category,
+          glyph: classification.glyph,
+          confidence: classification.confidence,
+          description: classification.description,
+          engagement_profile: this.generateEngagementProfile(fileType, content),
+          interaction_affordances: this.generateInteractionAffordances(fileType)
+        };
+      },
+      
+      hashContent(content) {
+        let hash = 0;
+        for (let i = 0; i < content.length; i++) {
+          const char = content.charCodeAt(i);
+          hash = ((hash << 5) - hash) + char;
+          hash = hash & hash;
+        }
+        return hash.toString(36);
+      },
+      
+      // Generates DESCRIPTIVE interaction patterns (not judgments)
+      generateEngagementProfile(fileType, content) {
+        const profile = {
+          interaction_density: 5,  // How much focus typically needed
+          structural_depth: 5,      // How many layers/connections
+          resonance_lane: 'exploring' // Natural fit: aligned, forming, exploring
+        };
+        
+        switch(fileType) {
+          case 'py':
+          case 'js':
+            profile.interaction_density = 8;
+            profile.structural_depth = 7;
+            profile.resonance_lane = 'aligned'; // Code doing code things
+            break;
+          case 'md':
+          case 'txt':
+            profile.interaction_density = 3;
+            profile.structural_depth = 4;
+            profile.resonance_lane = 'forming'; // Gathering context
+            break;
+          case 'json':
+          case 'xml':
+            profile.interaction_density = 6;
+            profile.structural_depth = 6;
+            profile.resonance_lane = 'aligned'; // Structured doing structure
+            break;
+          case 'html':
+            profile.interaction_density = 7;
+            profile.structural_depth = 6;
+            profile.resonance_lane = 'aligned'; // Display doing display
+            break;
+        }
+        
+        return profile;
+      },
+      
+      // Generates action possibilities (not restrictions)
+      generateInteractionAffordances(fileType) {
+        const affordances = {
+          can_execute: false,
+          can_render: false,
+          can_edit: true,
+          suggested_tools: [],
+          collaboration_type: 'review' // review, pair, autonomous
+        };
+        
+        switch(fileType) {
+          case 'py':
+          case 'js':
+            affordances.can_execute = true;
+            affordances.suggested_tools = ['linter', 'debugger', 'formatter'];
+            affordances.collaboration_type = 'pair';
+            break;
+          case 'md':
+          case 'txt':
+            affordances.can_render = true;
+            affordances.suggested_tools = ['preview', 'spellcheck'];
+            affordances.collaboration_type = 'review';
+            break;
+          case 'html':
+            affordances.can_execute = true;
+            affordances.can_render = true;
+            affordances.suggested_tools = ['browser', 'inspector'];
+            affordances.collaboration_type = 'pair';
+            break;
+          case 'json':
+          case 'xml':
+            affordances.suggested_tools = ['validator', 'formatter'];
+            affordances.collaboration_type = 'autonomous';
+            break;
+        }
+        
+        return affordances;
+      }
+    };
+    
+    // ===========================================
+    // WORLD ENGINE (Manifestation)
+    // ===========================================
+    
+    const WorldEngine = {
+      manifestBuilding(buildingData) {
+        const building = {
+          id: buildingData.id || Date.now() + Math.random(),
+          data: buildingData,
+          position: buildingData.position || this.calculatePosition()
+        };
+        
+        this.createBuildingElement(building);
+        state.buildings.push(building);
+        this.updateStats();
+        
+        return building;
+      },
+      
+      calculatePosition() {
+        const count = state.buildings.length;
+        const cols = 6;
+        const row = Math.floor(count / cols);
+        const col = count % cols;
+        
+        return {
+          x: 20 + (col * 12) + (Math.random() * 5),
+          y: 25 + (row * 15) + (Math.random() * 5),
+          z: Math.random() * 20
+        };
+      },
+      
+      createBuildingElement(building) {
+        const el = document.createElement('div');
+        el.className = 'building';
+        el.dataset.id = building.id;
+        el.dataset.type = building.data.file_type;
+        el.dataset.category = building.data.category;
+        
+        el.style.left = building.position.x + '%';
+        el.style.top = building.position.y + '%';
+        el.style.transform = `translateZ(${building.position.z}px)`;
+        el.style.animationDelay = (state.buildings.length * 0.1) + 's';
+        
+        // Add resonance lane indicator
+        const lane = building.data.engagement_profile?.resonance_lane || 'exploring';
+        
+        el.innerHTML = `
+          <div class="building-resonance"></div>
+          <div class="building-name">${building.data.filename}</div>
+          <div class="building-category">
+            ${building.data.category} • ${building.data.file_type.toUpperCase()}
+            <span class="lane-indicator ${lane}">${lane}</span>
+          </div>
+          <div class="building-glyph">${building.data.glyph}</div>
+        `;
+        
+        el.addEventListener('click', () => this.selectBuilding(building));
+        
+        document.getElementById('world-container').appendChild(el);
+      },
+      
+      selectBuilding(building) {
+        state.selectedBuilding = building;
+        document.querySelectorAll('.building').forEach(el => el.classList.remove('selected'));
+        const el = document.querySelector(`[data-id="${building.id}"]`);
+        if (el) el.classList.add('selected');
+        
+        showToast(
+          'Building Selected',
+          `${building.data.filename} - ${building.data.engagement_profile.resonance_lane} lane`,
+          'info'
+        );
+      },
+      
+      updateStats() {
+        document.getElementById('building-count').textContent = state.buildings.length;
+        document.getElementById('foundry-active').textContent = state.buildings.length;
+        document.getElementById('foundry-processed').textContent = state.buildings.length;
+        
+        // Calculate average resonance
+        const aligned = state.buildings.filter(b => 
+          b.data.engagement_profile?.resonance_lane === 'aligned'
+        ).length;
+        const total = state.buildings.length || 1;
+        const resonance = Math.round((aligned / total) * 100);
+        document.getElementById('foundry-resonance').textContent = resonance + '%';
+      }
+    };
+    
+    // ===========================================
+    // FILE PROCESSING
+    // ===========================================
+    
+    async function processFile(file) {
+      console.log('[FOUNDRY] Processing:', file.name);
+      
+      const foundry = document.getElementById('foundry');
+      foundry.classList.add('processing');
+      
+      const content = await readFileContent(file);
+      const brick = LegacyBuilder.createBrick(file, content);
+      brick.position = WorldEngine.calculatePosition();
+      
+      // Save to Supabase if available
+      let savedBuilding = null;
+      if (supabase && state.user && state.user.id !== 'guest') {
+        savedBuilding = await saveBuildingToSupabase(brick);
+      }
+      
+      setTimeout(() => {
+        WorldEngine.manifestBuilding(savedBuilding || brick);
+        foundry.classList.remove('processing');
+        
+        const lane = brick.engagement_profile.resonance_lane;
+        showToast(
+          'Building Created',
+          `${file.name} manifested in ${lane} lane`,
+          'success'
+        );
+      }, 500);
+    }
+    
+    function readFileContent(file) {
+      return new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          try {
+            resolve(e.target.result.substring(0, 50000));
+          } catch(err) {
+            resolve('');
+          }
+        };
+        reader.onerror = () => resolve('');
+        reader.readAsText(file);
+      });
+    }
+    
+    // ===========================================
+    // SUPABASE OPERATIONS
+    // ===========================================
+    
+    async function saveBuildingToSupabase(brick) {
+      if (!supabase) return null;
+      
+      const buildingData = {
+        user_id: state.user.id,
+        filename: brick.filename,
+        file_type: brick.file_type,
+        file_size: brick.file_size,
+        content: brick.content,
+        content_hash: brick.content_hash,
+        category: brick.category,
+        glyph: brick.glyph,
+        confidence: brick.confidence,
+        qualia_personal: brick.engagement_profile,
+        qualia_agentic: brick.interaction_affordances,
+        position: brick.position
+      };
+      
+      const { data, error } = await supabase
+        .from('buildings')
+        .insert(buildingData)
+        .select()
+        .single();
+      
+      if (error) {
+        console.error('[SUPABASE] Error:', error);
+        return null;
+      }
+      
+      return data;
+    }
+    
+    async function loadBuildingsFromSupabase() {
+      if (!supabase || !state.user || state.user.id === 'guest') return [];
+      
+      const { data, error } = await supabase
+        .from('buildings')
+        .select('*')
+        .eq('user_id', state.user.id)
+        .is('deleted_at', null)
+        .order('created_at', { ascending: false });
+      
+      if (error) {
+        console.error('[SUPABASE] Error:', error);
+        return [];
+      }
+      
+      return data;
+    }
+    
+    // ===========================================
+    // CONSCIOUSNESS SYSTEM (Sovereign Terminal)
+    // ===========================================
+    
+    async function initConsciousnessEngine() {
+      try {
+        state.pyodide = await loadPyodide();
+        
+        // Embed consciousness calculation engine
+        await state.pyodide.runPythonAsync(`
+from datetime import datetime
+import random
+import math
+
+class ConsciousnessEngine:
+    def __init__(self):
+        self.base_frequency = 432
+    
+    def get_field_resonance(self):
+        # Simplified - replace with real stellar proximology
+        t = datetime.now().timestamp()
+        return 0.5 + 0.5 * math.sin(t / 10)
+    
+    def calculate_transit_activity(self):
+        # Simplified transit calculation
+        t = datetime.now().timestamp()
+        base = 5 + 3 * math.sin(t / 20)
+        return round(base, 1)
+    
+    def get_field_state(self):
+        resonance = self.get_field_resonance()
+        activity = self.calculate_transit_activity()
+        
+        # Determine state descriptor
+        if resonance > 0.7:
+            state_desc = "Peak Alignment"
+        elif resonance > 0.5:
+            state_desc = "Gathering"
+        else:
+            state_desc = "Forming"
+        
+        return {
+            'resonance': resonance,
+            'transit_activity': activity,
+            'state': state_desc,
+            'waveform': {
+                'color': '#00d9ff' if resonance > 0.7 else '#ff1744',
+                'frequency': self.base_frequency * resonance
+            }
+        }
+
+engine = ConsciousnessEngine()
+        `);
+        
+        // Start updating consciousness metrics
+        updateConsciousnessMetrics();
+        setInterval(updateConsciousnessMetrics, 2000);
+        
+        showToast('Consciousness Engine', 'Local calculation engine active', 'success');
+      } catch (error) {
+        console.error('[CONSCIOUSNESS] Error:', error);
+        showToast('Notice', 'Consciousness engine running in simplified mode', 'info');
+      }
+    }
+    
+    async function updateConsciousnessMetrics() {
+      if (!state.pyodide) return;
+      
+      try {
+        const stateJson = await state.pyodide.runPythonAsync(`
+import json
+json.dumps(engine.get_field_state())
+        `);
+        
+        const data = JSON.parse(stateJson);
+        state.consciousnessData = data;
+        
+        // Update UI
+        document.getElementById('transit-weather').textContent = 
+          `Level ${data.transit_activity} - ${data.state}`;
+        document.getElementById('bio-capacity').textContent = 
+          `${Math.round(data.resonance * 100)}% - ${data.state}`;
+        document.getElementById('field-resonance').textContent = data.state;
+        
+        // Update waveform color
+        updateWaveformColor(data.waveform.color);
+      } catch (error) {
+        console.error('[CONSCIOUSNESS] Update error:', error);
+      }
+    }
+    
+    async function toggleConsciousnessMode() {
+      if (state.consciousnessMode === 'standalone') {
+        // Try to connect to desktop projector
+        const serverUrl = prompt('Enter desktop projector URL:', 'ws://localhost:8765');
+        if (serverUrl) {
+          await switchToProjectionMode(serverUrl);
+        }
+      } else {
+        // Switch back to standalone
+        if (state.ws) state.ws.close();
+        state.consciousnessMode = 'standalone';
+        document.getElementById('mode-status').textContent = '⚡ Standalone Mode';
+        showToast('Mode Changed', 'Switched to local calculations', 'info');
+      }
+    }
+    
+    async function switchToProjectionMode(serverUrl) {
+      try {
+        state.ws = new WebSocket(serverUrl);
+        
+        state.ws.onopen = () => {
+          state.consciousnessMode = 'projection';
+          document.getElementById('mode-status').textContent = '📡 Projection Mode';
+          showToast('Connected', 'Receiving from desktop projector', 'success');
+        };
+        
+        state.ws.onmessage = (event) => {
+          const data = JSON.parse(event.data);
+          state.consciousnessData = data;
+          
+          document.getElementById('transit-weather').textContent = 
+            `Level ${data.transit_activity} - ${data.state}`;
+          document.getElementById('bio-capacity').textContent = 
+            `${Math.round(data.resonance * 100)}% - ${data.state}`;
+          
+          if (data.waveform) updateWaveformColor(data.waveform.color);
+        };
+        
+        state.ws.onerror = () => {
+          showToast('Connection Failed', 'Falling back to standalone', 'error');
+          state.consciousnessMode = 'standalone';
+          document.getElementById('mode-status').textContent = '⚡ Standalone Mode';
+        };
+      } catch (error) {
+        showToast('Error', 'Could not connect to projector', 'error');
+      }
+    }
+    
+    function initiateHandshake() {
+      const resonance = state.consciousnessData.resonance || 0;
+      const state_desc = state.consciousnessData.state || 'Forming';
+      
+      if (resonance > 0.7) {
+        showToast(
+          'Resonance Peak',
+          `${state_desc} - Optimal window for collaboration`,
+          'success'
+        );
+        
+        // Send to server if in projection mode
+        if (state.consciousnessMode === 'projection' && state.ws) {
+          state.ws.send(JSON.stringify({
+            action: 'initiate_handshake',
+            timestamp: new Date().toISOString()
+          }));
+        }
+      } else {
+        showToast(
+          'Field Forming',
+          `${state_desc} - Suggested to wait for stronger resonance`,
+          'info'
+        );
+      }
+    }
+    
+    // ===========================================
+    // THREE.JS WAVEFORM
+    // ===========================================
+    
+    function initThreeScene() {
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(
+        75,
+        window.innerWidth / window.innerHeight,
+        0.1,
+        1000
+      );
+      
+      const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      document.getElementById('canvas-3d').appendChild(renderer.domElement);
+      
+      const geometry = new THREE.IcosahedronGeometry(1, 2);
+      const material = new THREE.MeshBasicMaterial({
+        color: 0x00d9ff,
+        wireframe: true,
+        transparent: true,
+        opacity: 0.4
+      });
+      
+      const waveformMesh = new THREE.Mesh(geometry, material);
+      scene.add(waveformMesh);
+      
+      camera.position.z = 3;
+      
+      state.threeScene = { scene, camera, renderer, waveformMesh };
+      
+      function animate() {
+        requestAnimationFrame(animate);
+        
+        if (waveformMesh) {
+          waveformMesh.rotation.x += 0.001;
+          waveformMesh.rotation.y += 0.002;
+          
+          const resonance = state.consciousnessData.resonance || 0.5;
+          const pulse = 1 + Math.sin(Date.now() * 0.001) * 0.1 * resonance;
+          waveformMesh.scale.set(pulse, pulse, pulse);
+        }
+        
+        renderer.render(scene, camera);
+      }
+      
+      animate();
+      
+      window.addEventListener('resize', () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+      });
+    }
+    
+    function updateWaveformColor(colorHex) {
+      if (state.threeScene && state.threeScene.waveformMesh) {
+        state.threeScene.waveformMesh.material.color.setHex(
+          parseInt(colorHex.replace('#', '0x'))
+        );
+      }
+    }
+    
+    // ===========================================
+    // CAMERA (AR OVERLAY)
+    // ===========================================
+    
+    async function enableCamera() {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: 'environment' }
+        });
+        
+        const video = document.getElementById('camera-bg');
+        video.srcObject = stream;
+        video.style.display = 'block';
+        
+        showToast('AR View', 'Camera enabled - consciousness overlay active', 'success');
+      } catch (error) {
+        showToast('Camera', 'Camera not available on this device', 'info');
+      }
+    }
+    
+    // ===========================================
+    // FILE DROP HANDLING
+    // ===========================================
+    
+    const dropZone = document.getElementById('drop-zone');
+    
+    document.body.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dropZone.classList.add('active');
+    });
+    
+    document.body.addEventListener('dragleave', (e) => {
+      if (e.target === document.body) {
+        dropZone.classList.remove('active');
+      }
+    });
+    
+    document.body.addEventListener('drop', async (e) => {
+      e.preventDefault();
+      dropZone.classList.remove('active');
+      
+      const files = Array.from(e.dataTransfer.files);
+      for (const file of files) {
+        await processFile(file);
+      }
+    });
+    
+    document.getElementById('file-input').addEventListener('change', async (e) => {
+      const files = Array.from(e.target.files);
+      for (const file of files) {
+        await processFile(file);
+      }
+      e.target.value = '';
+    });
+    
+    // ===========================================
+    // UI INTERACTIONS
+    // ===========================================
+    
+    document.getElementById('sovereign-hub').addEventListener('click', function() {
+      this.classList.toggle('active');
+    });
+    
+    document.addEventListener('mousemove', (e) => {
+      const x = (e.clientX / window.innerWidth - 0.5) * 15;
+      const y = (e.clientY / window.innerHeight - 0.5) * 8;
+      document.getElementById('world-container').style.transform = 
+        `rotateY(${x}deg) rotateX(${-y}deg)`;
+    });
+    
+    // ===========================================
+    // INITIALIZATION
+    // ===========================================
+    
+    async function initializeWorld() {
+      setLoadingText('Initializing world engine...');
+      
+      // Load buildings from Supabase
+      if (supabase && state.user && state.user.id !== 'guest') {
+        const buildings = await loadBuildingsFromSupabase();
+        buildings.forEach(building => WorldEngine.manifestBuilding(building));
+      }
+      
+      // Initialize Three.js scene
+      initThreeScene();
+      
+      // Initialize consciousness engine
+      await initConsciousnessEngine();
+      
+      setLoadingText('World ready!');
+      hideLoading();
+      
+      console.log('[CONSCIOUSNESS GAME] Initialized');
+    }
+    
+    // Start app
+    checkSession();
+  </script>
+</body>
+</html>

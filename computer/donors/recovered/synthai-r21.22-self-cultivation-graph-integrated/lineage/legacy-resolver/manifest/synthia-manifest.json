@@ -1,0 +1,3021 @@
+{
+ "generated": "2026-08-11T07:02:27.024Z",
+ "modules": [
+  {
+   "name": "STATUS.md",
+   "canonical": {
+    "path": "src/STATUS.md",
+    "hash": "4535119ab54a",
+    "size": 3943,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_2_WIRED/Synthia_Progressive_Upgrade_v0_2/STATUS.md"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "EnhancedAutoLing.ts",
+   "canonical": {
+    "path": "src/UPGRADES/adapters/EnhancedAutoLing.ts",
+    "hash": "19b0d73ee7a7",
+    "size": 6014,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/adapters/EnhancedAutoLing.ts"
+   },
+   "variantCount": 1,
+   "variants": [
+    {
+     "path": "resolver/variants/EnhancedAutoLing.ts/99fcbe9b1b05.ts",
+     "hash": "99fcbe9b1b05",
+     "size": 5848,
+     "sourceOrigin": "Synthia_Progressive_Upgrade_v0_2_WIRED/Synthia_Progressive_Upgrade_v0_2/UPGRADES/adapters/EnhancedAutoLing.ts",
+     "allOccurrences": [
+      "Synthia_Progressive_Upgrade_v0_2_WIRED/Synthia_Progressive_Upgrade_v0_2/UPGRADES/adapters/EnhancedAutoLing.ts"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "EnhancedDiseminer.ts",
+   "canonical": {
+    "path": "src/UPGRADES/adapters/EnhancedDiseminer.ts",
+    "hash": "9b98cb294c8b",
+    "size": 4164,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/adapters/EnhancedDiseminer.ts"
+   },
+   "variantCount": 1,
+   "variants": [
+    {
+     "path": "resolver/variants/EnhancedDiseminer.ts/f3819197f4f9.ts",
+     "hash": "f3819197f4f9",
+     "size": 3953,
+     "sourceOrigin": "Synthia_Progressive_Upgrade_v0_2_WIRED/Synthia_Progressive_Upgrade_v0_2/UPGRADES/adapters/EnhancedDiseminer.ts",
+     "allOccurrences": [
+      "Synthia_Progressive_Upgrade_v0_2_WIRED/Synthia_Progressive_Upgrade_v0_2/UPGRADES/adapters/EnhancedDiseminer.ts"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "MorphMirAdapter.ts",
+   "canonical": {
+    "path": "src/UPGRADES/adapters/MorphMirAdapter.ts",
+    "hash": "df5dc634e7e0",
+    "size": 3393,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_2_WIRED/Synthia_Progressive_Upgrade_v0_2/UPGRADES/adapters/MorphMirAdapter.ts"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "adapter-smoke.test.ts",
+   "canonical": {
+    "path": "src/UPGRADES/adapters/adapter-smoke.test.ts",
+    "hash": "756444fb1a51",
+    "size": 1211,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/adapters/adapter-smoke.test.ts"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "SynthiaToolBootstrap.ts",
+   "canonical": {
+    "path": "src/UPGRADES/bootstrap/SynthiaToolBootstrap.ts",
+    "hash": "12d31dd19000",
+    "size": 5883,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/bootstrap/SynthiaToolBootstrap.ts"
+   },
+   "variantCount": 3,
+   "variants": [
+    {
+     "path": "resolver/variants/SynthiaToolBootstrap.ts/d4998d30e11b.ts",
+     "hash": "d4998d30e11b",
+     "size": 9645,
+     "sourceOrigin": "Synthia_Progressive_Upgrade_v0_5_MERGED/Synthia_Progressive_Upgrade_v0_5/UPGRADES/bootstrap/SynthiaToolBootstrap.ts",
+     "allOccurrences": [
+      "Synthia_Progressive_Upgrade_v0_5_MERGED/Synthia_Progressive_Upgrade_v0_5/UPGRADES/bootstrap/SynthiaToolBootstrap.ts"
+     ]
+    },
+    {
+     "path": "resolver/variants/SynthiaToolBootstrap.ts/c88aa2a24ad9.ts",
+     "hash": "c88aa2a24ad9",
+     "size": 5581,
+     "sourceOrigin": "Synthia_Progressive_Upgrade_v0_5_FIXED/Synthia_Progressive_Upgrade_v0_5/UPGRADES/_preserved_v0_3/bootstrap/SynthiaToolBootstrap.ts",
+     "allOccurrences": [
+      "Synthia_Progressive_Upgrade_v0_5_FIXED/Synthia_Progressive_Upgrade_v0_5/UPGRADES/_preserved_v0_3/bootstrap/SynthiaToolBootstrap.ts",
+      "Synthia_Progressive_Upgrade_v0_5_MERGED/Synthia_Progressive_Upgrade_v0_5/UPGRADES/_preserved_v0_3/bootstrap/SynthiaToolBootstrap.ts",
+      "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/_preserved_v0_3/bootstrap/SynthiaToolBootstrap.ts"
+     ]
+    },
+    {
+     "path": "resolver/variants/SynthiaToolBootstrap.ts/c0ea10048161.ts",
+     "hash": "c0ea10048161",
+     "size": 6225,
+     "sourceOrigin": "Synthia_Progressive_Upgrade_v0_2_WIRED/Synthia_Progressive_Upgrade_v0_2/UPGRADES/bootstrap/SynthiaToolBootstrap.ts",
+     "allOccurrences": [
+      "Synthia_Progressive_Upgrade_v0_2_WIRED/Synthia_Progressive_Upgrade_v0_2/UPGRADES/bootstrap/SynthiaToolBootstrap.ts"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "createSynthiaRuntime.ts",
+   "canonical": {
+    "path": "src/UPGRADES/bootstrap/createSynthiaRuntime.ts",
+    "hash": "f53f683e56dd",
+    "size": 890,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/bootstrap/createSynthiaRuntime.ts"
+   },
+   "variantCount": 1,
+   "variants": [
+    {
+     "path": "resolver/variants/createSynthiaRuntime.ts/93642b08a83d.ts",
+     "hash": "93642b08a83d",
+     "size": 462,
+     "sourceOrigin": "Synthia_Progressive_Upgrade_v0_2_WIRED/Synthia_Progressive_Upgrade_v0_2/UPGRADES/bootstrap/createSynthiaRuntime.ts",
+     "allOccurrences": [
+      "Synthia_Progressive_Upgrade_v0_2_WIRED/Synthia_Progressive_Upgrade_v0_2/UPGRADES/bootstrap/createSynthiaRuntime.ts"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "EnhancedAutoLing.js",
+   "canonical": {
+    "path": "src/UPGRADES/compiled/UPGRADES/adapters/EnhancedAutoLing.js",
+    "hash": "5952d279e09c",
+    "size": 5466,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_5_MERGED/Synthia_Progressive_Upgrade_v0_5/UPGRADES/compiled/UPGRADES/adapters/EnhancedAutoLing.js"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "EnhancedDiseminer.js",
+   "canonical": {
+    "path": "src/UPGRADES/compiled/UPGRADES/adapters/EnhancedDiseminer.js",
+    "hash": "0ceb199b8c32",
+    "size": 4119,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_5_MERGED/Synthia_Progressive_Upgrade_v0_5/UPGRADES/compiled/UPGRADES/adapters/EnhancedDiseminer.js"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "autoling.js",
+   "canonical": {
+    "path": "src/UPGRADES/compiled/runtime/autoling.js",
+    "hash": "90bbee991d11",
+    "size": 27977,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/compiled/runtime/autoling.js"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "diseminer.js",
+   "canonical": {
+    "path": "src/UPGRADES/compiled/runtime/diseminer.js",
+    "hash": "1a932f0c052c",
+    "size": 29947,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/compiled/runtime/diseminer.js"
+   },
+   "variantCount": 1,
+   "variants": [
+    {
+     "path": "resolver/variants/diseminer.js/4b1add876f07.js",
+     "hash": "4b1add876f07",
+     "size": 2288,
+     "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/runtime/diseminer.js",
+     "allOccurrences": [
+      "Synthia_Progressive_Upgrade_v0_2_WIRED/Synthia_Progressive_Upgrade_v0_2/runtime/diseminer.js",
+      "Synthia_Progressive_Upgrade_v0_5_FIXED/Synthia_Progressive_Upgrade_v0_5/runtime/diseminer.js",
+      "Synthia_Progressive_Upgrade_v0_5_MERGED/Synthia_Progressive_Upgrade_v0_5/runtime/diseminer.js",
+      "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/runtime/diseminer.js"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "boolean-operator-bank.mjs",
+   "canonical": {
+    "path": "src/UPGRADES/shared/boolean-operator-bank.mjs",
+    "hash": "e7921b2ce333",
+    "size": 3453,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/shared/boolean-operator-bank.mjs"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "boolean-operator-bank.test.mjs",
+   "canonical": {
+    "path": "src/UPGRADES/shared/boolean-operator-bank.test.mjs",
+    "hash": "93704da1c2cb",
+    "size": 1412,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/shared/boolean-operator-bank.test.mjs"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "tsconfig.json",
+   "canonical": {
+    "path": "src/UPGRADES/tsconfig.json",
+    "hash": "5839d4e39176",
+    "size": 413,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/tsconfig.json"
+   },
+   "variantCount": 1,
+   "variants": [
+    {
+     "path": "resolver/variants/tsconfig.json/3edbb437bbe8.json",
+     "hash": "3edbb437bbe8",
+     "size": 471,
+     "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/runtime/_nested/diseminer-mcp-server/tsconfig.json",
+     "allOccurrences": [
+      "Synthia_Progressive_Upgrade_v0_2_WIRED/Synthia_Progressive_Upgrade_v0_2/runtime/_nested/diseminer-mcp-server/tsconfig.json",
+      "Synthia_Progressive_Upgrade_v0_2_WIRED/Synthia_Progressive_Upgrade_v0_2/runtime/diseminer-mcp-server(3)_extracted/tsconfig.json",
+      "Synthia_Progressive_Upgrade_v0_2_WIRED/Synthia_Progressive_Upgrade_v0_2/runtime/diseminer-mcp-server_extracted/tsconfig.json",
+      "Synthia_Progressive_Upgrade_v0_5_FIXED/Synthia_Progressive_Upgrade_v0_5/runtime/_nested/diseminer-mcp-server/tsconfig.json",
+      "Synthia_Progressive_Upgrade_v0_5_FIXED/Synthia_Progressive_Upgrade_v0_5/runtime/diseminer-mcp-server(3)_extracted/tsconfig.json",
+      "Synthia_Progressive_Upgrade_v0_5_FIXED/Synthia_Progressive_Upgrade_v0_5/runtime/diseminer-mcp-server_extracted/tsconfig.json",
+      "Synthia_Progressive_Upgrade_v0_5_MERGED/Synthia_Progressive_Upgrade_v0_5/runtime/_nested/diseminer-mcp-server/tsconfig.json",
+      "Synthia_Progressive_Upgrade_v0_5_MERGED/Synthia_Progressive_Upgrade_v0_5/runtime/diseminer-mcp-server(3)_extracted/tsconfig.json",
+      "Synthia_Progressive_Upgrade_v0_5_MERGED/Synthia_Progressive_Upgrade_v0_5/runtime/diseminer-mcp-server_extracted/tsconfig.json",
+      "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/runtime/_nested/diseminer-mcp-server/tsconfig.json",
+      "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/runtime/diseminer-mcp-server(3)_extracted/tsconfig.json",
+      "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/runtime/diseminer-mcp-server_extracted/tsconfig.json"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "README.md",
+   "canonical": {
+    "path": "src/vendor/diseminer-mcp-server/README.md",
+    "hash": "952631fa13a1",
+    "size": 4349,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/runtime/_nested/diseminer-mcp-server/README.md"
+   },
+   "variantCount": 3,
+   "variants": [
+    {
+     "path": "resolver/variants/README.md/ad1616c1b01d.md",
+     "hash": "ad1616c1b01d",
+     "size": 2650,
+     "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/vendor/integrated-tool-factory/README.md",
+     "allOccurrences": [
+      "Synthia_Progressive_Upgrade_v0_2_WIRED/Synthia_Progressive_Upgrade_v0_2/UPGRADES/vendor/integrated-tool-factory/README.md",
+      "Synthia_Progressive_Upgrade_v0_5_FIXED/Synthia_Progressive_Upgrade_v0_5/UPGRADES/vendor/integrated-tool-factory/README.md",
+      "Synthia_Progressive_Upgrade_v0_5_MERGED/Synthia_Progressive_Upgrade_v0_5/UPGRADES/vendor/integrated-tool-factory/README.md",
+      "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/vendor/integrated-tool-factory/README.md",
+      "integrated-tool-factory-v1_5_0/README.md"
+     ]
+    },
+    {
+     "path": "resolver/variants/README.md/38ef918305fc.md",
+     "hash": "38ef918305fc",
+     "size": 3754,
+     "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/vendor/ato-core/README.md",
+     "allOccurrences": [
+      "Synthia_Progressive_Upgrade_v0_2_WIRED/Synthia_Progressive_Upgrade_v0_2/UPGRADES/vendor/ato-core/README.md",
+      "Synthia_Progressive_Upgrade_v0_5_FIXED/Synthia_Progressive_Upgrade_v0_5/UPGRADES/vendor/ato-core/README.md",
+      "Synthia_Progressive_Upgrade_v0_5_MERGED/Synthia_Progressive_Upgrade_v0_5/UPGRADES/vendor/ato-core/README.md",
+      "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/vendor/ato-core/README.md"
+     ]
+    },
+    {
+     "path": "resolver/variants/README.md/635300d08da8.md",
+     "hash": "635300d08da8",
+     "size": 3585,
+     "sourceOrigin": "resonance-engine-substrate/check_src/README.md",
+     "allOccurrences": [
+      "resonance-engine-substrate/check_src/README.md"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "demo.mjs",
+   "canonical": {
+    "path": "src/UPGRADES/vendor/integrated-tool-factory/demo.mjs",
+    "hash": "133a12fe560e",
+    "size": 656,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/vendor/integrated-tool-factory/demo.mjs"
+   },
+   "variantCount": 1,
+   "variants": [
+    {
+     "path": "resolver/variants/demo.mjs/595b09b4f2a8.mjs",
+     "hash": "595b09b4f2a8",
+     "size": 3784,
+     "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/vendor/ato-core/demo.mjs",
+     "allOccurrences": [
+      "Synthia_Progressive_Upgrade_v0_2_WIRED/Synthia_Progressive_Upgrade_v0_2/UPGRADES/vendor/ato-core/demo.mjs",
+      "Synthia_Progressive_Upgrade_v0_5_FIXED/Synthia_Progressive_Upgrade_v0_5/UPGRADES/vendor/ato-core/demo.mjs",
+      "Synthia_Progressive_Upgrade_v0_5_MERGED/Synthia_Progressive_Upgrade_v0_5/UPGRADES/vendor/ato-core/demo.mjs",
+      "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/vendor/ato-core/demo.mjs"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "package.json",
+   "canonical": {
+    "path": "src/vendor/diseminer-mcp-server/package.json",
+    "hash": "fed3bce3c854",
+    "size": 752,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/runtime/_nested/diseminer-mcp-server/package.json"
+   },
+   "variantCount": 6,
+   "variants": [
+    {
+     "path": "resolver/variants/package.json/146735bff98a.json",
+     "hash": "146735bff98a",
+     "size": 349,
+     "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/vendor/integrated-tool-factory/package.json",
+     "allOccurrences": [
+      "Synthia_Progressive_Upgrade_v0_2_WIRED/Synthia_Progressive_Upgrade_v0_2/UPGRADES/vendor/integrated-tool-factory/package.json",
+      "Synthia_Progressive_Upgrade_v0_5_FIXED/Synthia_Progressive_Upgrade_v0_5/UPGRADES/vendor/integrated-tool-factory/package.json",
+      "Synthia_Progressive_Upgrade_v0_5_MERGED/Synthia_Progressive_Upgrade_v0_5/UPGRADES/vendor/integrated-tool-factory/package.json",
+      "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/vendor/integrated-tool-factory/package.json"
+     ]
+    },
+    {
+     "path": "resolver/variants/package.json/9c881cb92b3e.json",
+     "hash": "9c881cb92b3e",
+     "size": 224,
+     "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/vendor/ato-core/package.json",
+     "allOccurrences": [
+      "Synthia_Progressive_Upgrade_v0_2_WIRED/Synthia_Progressive_Upgrade_v0_2/UPGRADES/vendor/ato-core/package.json",
+      "Synthia_Progressive_Upgrade_v0_5_FIXED/Synthia_Progressive_Upgrade_v0_5/UPGRADES/vendor/ato-core/package.json",
+      "Synthia_Progressive_Upgrade_v0_5_MERGED/Synthia_Progressive_Upgrade_v0_5/UPGRADES/vendor/ato-core/package.json",
+      "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/vendor/ato-core/package.json"
+     ]
+    },
+    {
+     "path": "resolver/variants/package.json/4402d75d5a66.json",
+     "hash": "4402d75d5a66",
+     "size": 172,
+     "sourceOrigin": "Synthia_Progressive_Upgrade_v0_5_MERGED/Synthia_Progressive_Upgrade_v0_5/package.json",
+     "allOccurrences": [
+      "Synthia_Progressive_Upgrade_v0_5_FIXED/Synthia_Progressive_Upgrade_v0_5/package.json",
+      "Synthia_Progressive_Upgrade_v0_5_MERGED/Synthia_Progressive_Upgrade_v0_5/package.json"
+     ]
+    },
+    {
+     "path": "resolver/variants/package.json/94d09f0030ff.json",
+     "hash": "94d09f0030ff",
+     "size": 385,
+     "sourceOrigin": "resonance-engine-substrate/check_src/package.json",
+     "allOccurrences": [
+      "resonance-engine-substrate/check_src/package.json"
+     ]
+    },
+    {
+     "path": "resolver/variants/package.json/018893680c29.json",
+     "hash": "018893680c29",
+     "size": 349,
+     "sourceOrigin": "integrated-tool-factory-v1_5_0/package.json",
+     "allOccurrences": [
+      "integrated-tool-factory-v1_5_0/package.json"
+     ]
+    },
+    {
+     "path": "resolver/variants/package.json/4bb5d5c4df50.json",
+     "hash": "4bb5d5c4df50",
+     "size": 225,
+     "sourceOrigin": "Synthia_Progressive_Upgrade_v0_2_WIRED/Synthia_Progressive_Upgrade_v0_2/package.json",
+     "allOccurrences": [
+      "Synthia_Progressive_Upgrade_v0_2_WIRED/Synthia_Progressive_Upgrade_v0_2/package.json"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "activation.mjs",
+   "canonical": {
+    "path": "src/UPGRADES/vendor/ato-core/src/activation.mjs",
+    "hash": "a4d5237d820e",
+    "size": 3631,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/vendor/ato-core/src/activation.mjs"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "address-space.mjs",
+   "canonical": {
+    "path": "src/UPGRADES/vendor/ato-core/src/address-space.mjs",
+    "hash": "112504b21742",
+    "size": 4943,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/vendor/ato-core/src/address-space.mjs"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "anomata.mjs",
+   "canonical": {
+    "path": "src/UPGRADES/vendor/ato-core/src/anomata.mjs",
+    "hash": "91b2c1574637",
+    "size": 3853,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/vendor/ato-core/src/anomata.mjs"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "association.mjs",
+   "canonical": {
+    "path": "src/UPGRADES/vendor/ato-core/src/association.mjs",
+    "hash": "8b0d99de273b",
+    "size": 3474,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/vendor/ato-core/src/association.mjs"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "automaton.mjs",
+   "canonical": {
+    "path": "src/UPGRADES/vendor/ato-core/src/automaton.mjs",
+    "hash": "6bea009b52bb",
+    "size": 9074,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/vendor/ato-core/src/automaton.mjs"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "autonomy.mjs",
+   "canonical": {
+    "path": "src/UPGRADES/vendor/ato-core/src/autonomy.mjs",
+    "hash": "ddbbbe767d2b",
+    "size": 4416,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/vendor/ato-core/src/autonomy.mjs"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "boolean-ato.mjs",
+   "canonical": {
+    "path": "src/UPGRADES/vendor/ato-core/src/boolean-ato.mjs",
+    "hash": "ac47508bf355",
+    "size": 6092,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/vendor/ato-core/src/boolean-ato.mjs"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "bootstrap.mjs",
+   "canonical": {
+    "path": "src/UPGRADES/vendor/ato-core/src/bootstrap.mjs",
+    "hash": "300881f8fb0e",
+    "size": 1678,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/vendor/ato-core/src/bootstrap.mjs"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "browser-form.mjs",
+   "canonical": {
+    "path": "src/UPGRADES/vendor/ato-core/src/browser-form.mjs",
+    "hash": "adb66eebd7cb",
+    "size": 7786,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/vendor/ato-core/src/browser-form.mjs"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "companion.mjs",
+   "canonical": {
+    "path": "src/UPGRADES/vendor/ato-core/src/companion.mjs",
+    "hash": "a0559685a2ce",
+    "size": 3575,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/vendor/ato-core/src/companion.mjs"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "computational-grammar-coder.mjs",
+   "canonical": {
+    "path": "src/UPGRADES/vendor/ato-core/src/computational-grammar-coder.mjs",
+    "hash": "7b4034dda1e3",
+    "size": 4125,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/vendor/ato-core/src/computational-grammar-coder.mjs"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "emergence.mjs",
+   "canonical": {
+    "path": "src/UPGRADES/vendor/ato-core/src/emergence.mjs",
+    "hash": "ec857e0ded2a",
+    "size": 4147,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/vendor/ato-core/src/emergence.mjs"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "entry.mjs",
+   "canonical": {
+    "path": "src/UPGRADES/vendor/ato-core/src/entry.mjs",
+    "hash": "c13d3e706216",
+    "size": 595,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/vendor/ato-core/src/entry.mjs"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "expression.mjs",
+   "canonical": {
+    "path": "src/UPGRADES/vendor/ato-core/src/expression.mjs",
+    "hash": "d7ba0a85e25c",
+    "size": 2437,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/vendor/ato-core/src/expression.mjs"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "families.mjs",
+   "canonical": {
+    "path": "src/UPGRADES/vendor/ato-core/src/families.mjs",
+    "hash": "37b06bf5ff2c",
+    "size": 6726,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/vendor/ato-core/src/families.mjs"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "gate-address.mjs",
+   "canonical": {
+    "path": "src/UPGRADES/vendor/ato-core/src/gate-address.mjs",
+    "hash": "a911a836dd0c",
+    "size": 2762,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/vendor/ato-core/src/gate-address.mjs"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "gate-data.mjs",
+   "canonical": {
+    "path": "src/UPGRADES/vendor/ato-core/src/gate-data.mjs",
+    "hash": "dd24ad3aa87e",
+    "size": 14162,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/vendor/ato-core/src/gate-data.mjs"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "generative-emergence.mjs",
+   "canonical": {
+    "path": "src/UPGRADES/vendor/ato-core/src/generative-emergence.mjs",
+    "hash": "1f26522f86e3",
+    "size": 5683,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/vendor/ato-core/src/generative-emergence.mjs"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "host.mjs",
+   "canonical": {
+    "path": "src/UPGRADES/vendor/ato-core/src/host.mjs",
+    "hash": "6b2622d4cf92",
+    "size": 3525,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/vendor/ato-core/src/host.mjs"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "iching.mjs",
+   "canonical": {
+    "path": "src/UPGRADES/vendor/ato-core/src/iching.mjs",
+    "hash": "73c064adf78e",
+    "size": 2564,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/vendor/ato-core/src/iching.mjs"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "index.mjs",
+   "canonical": {
+    "path": "src/UPGRADES/vendor/ato-core/src/index.mjs",
+    "hash": "e66e207f3b85",
+    "size": 13897,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/vendor/ato-core/src/index.mjs"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "interpretations.mjs",
+   "canonical": {
+    "path": "src/UPGRADES/vendor/ato-core/src/interpretations.mjs",
+    "hash": "400e14cdf3da",
+    "size": 2061,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/vendor/ato-core/src/interpretations.mjs"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "king-wen.mjs",
+   "canonical": {
+    "path": "src/UPGRADES/vendor/ato-core/src/king-wen.mjs",
+    "hash": "74ff6042b793",
+    "size": 3679,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/vendor/ato-core/src/king-wen.mjs"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "klein-iching.mjs",
+   "canonical": {
+    "path": "src/UPGRADES/vendor/ato-core/src/klein-iching.mjs",
+    "hash": "58d2030f5e2a",
+    "size": 4673,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/vendor/ato-core/src/klein-iching.mjs"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "klein-tools.mjs",
+   "canonical": {
+    "path": "src/UPGRADES/vendor/ato-core/src/klein-tools.mjs",
+    "hash": "415b32db25d3",
+    "size": 13363,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/vendor/ato-core/src/klein-tools.mjs"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "media-renderers.mjs",
+   "canonical": {
+    "path": "src/UPGRADES/vendor/ato-core/src/media-renderers.mjs",
+    "hash": "743897c2e608",
+    "size": 1212,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/vendor/ato-core/src/media-renderers.mjs"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "organism.mjs",
+   "canonical": {
+    "path": "src/UPGRADES/vendor/ato-core/src/organism.mjs",
+    "hash": "ceec86cc83a1",
+    "size": 4234,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/vendor/ato-core/src/organism.mjs"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "promotion.mjs",
+   "canonical": {
+    "path": "src/UPGRADES/vendor/ato-core/src/promotion.mjs",
+    "hash": "86870caaef06",
+    "size": 3016,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/vendor/ato-core/src/promotion.mjs"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "quality-transfer.mjs",
+   "canonical": {
+    "path": "src/UPGRADES/vendor/ato-core/src/quality-transfer.mjs",
+    "hash": "52f2aa13a35e",
+    "size": 2790,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/vendor/ato-core/src/quality-transfer.mjs"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "research-browser.mjs",
+   "canonical": {
+    "path": "src/UPGRADES/vendor/ato-core/src/research-browser.mjs",
+    "hash": "ba99546d93ff",
+    "size": 6021,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/vendor/ato-core/src/research-browser.mjs"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "shell-bridge.mjs",
+   "canonical": {
+    "path": "src/UPGRADES/vendor/ato-core/src/shell-bridge.mjs",
+    "hash": "342cfb68912a",
+    "size": 6943,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/vendor/ato-core/src/shell-bridge.mjs"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "state-space-kernel.mjs",
+   "canonical": {
+    "path": "src/UPGRADES/vendor/ato-core/src/state-space-kernel.mjs",
+    "hash": "b3064f06c724",
+    "size": 5425,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/vendor/ato-core/src/state-space-kernel.mjs"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "success.mjs",
+   "canonical": {
+    "path": "src/UPGRADES/vendor/ato-core/src/success.mjs",
+    "hash": "ea77603b6ea8",
+    "size": 6158,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/vendor/ato-core/src/success.mjs"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "tray.mjs",
+   "canonical": {
+    "path": "src/UPGRADES/vendor/ato-core/src/tray.mjs",
+    "hash": "0dd7001f52a3",
+    "size": 1705,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/vendor/ato-core/src/tray.mjs"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "workspace.mjs",
+   "canonical": {
+    "path": "src/UPGRADES/vendor/ato-core/src/workspace.mjs",
+    "hash": "025100b083d0",
+    "size": 5622,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/vendor/ato-core/src/workspace.mjs"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "activation.test.mjs",
+   "canonical": {
+    "path": "src/UPGRADES/vendor/ato-core/test/activation.test.mjs",
+    "hash": "8ae56bd6b7ec",
+    "size": 1317,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/vendor/ato-core/test/activation.test.mjs"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "ato.test.mjs",
+   "canonical": {
+    "path": "src/UPGRADES/vendor/ato-core/test/ato.test.mjs",
+    "hash": "90da32196b1a",
+    "size": 3694,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/vendor/ato-core/test/ato.test.mjs"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "autonomy.test.mjs",
+   "canonical": {
+    "path": "src/UPGRADES/vendor/ato-core/test/autonomy.test.mjs",
+    "hash": "8cc83bb2169e",
+    "size": 1949,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/vendor/ato-core/test/autonomy.test.mjs"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "bootstrap.test.mjs",
+   "canonical": {
+    "path": "src/UPGRADES/vendor/ato-core/test/bootstrap.test.mjs",
+    "hash": "a7249e6b4f30",
+    "size": 1080,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/vendor/ato-core/test/bootstrap.test.mjs"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "browser-research-interpretation.test.mjs",
+   "canonical": {
+    "path": "src/UPGRADES/vendor/ato-core/test/browser-research-interpretation.test.mjs",
+    "hash": "13b0360df790",
+    "size": 3208,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/vendor/ato-core/test/browser-research-interpretation.test.mjs"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "companion.test.mjs",
+   "canonical": {
+    "path": "src/UPGRADES/vendor/ato-core/test/companion.test.mjs",
+    "hash": "88f72a498a26",
+    "size": 1680,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/vendor/ato-core/test/companion.test.mjs"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "computational-grammar-coder.test.mjs",
+   "canonical": {
+    "path": "src/UPGRADES/vendor/ato-core/test/computational-grammar-coder.test.mjs",
+    "hash": "09df08a976be",
+    "size": 1289,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/vendor/ato-core/test/computational-grammar-coder.test.mjs"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "emergence-promotion.test.mjs",
+   "canonical": {
+    "path": "src/UPGRADES/vendor/ato-core/test/emergence-promotion.test.mjs",
+    "hash": "547b8bc45e77",
+    "size": 2367,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/vendor/ato-core/test/emergence-promotion.test.mjs"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "families.test.mjs",
+   "canonical": {
+    "path": "src/UPGRADES/vendor/ato-core/test/families.test.mjs",
+    "hash": "618e39779d34",
+    "size": 2415,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/vendor/ato-core/test/families.test.mjs"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "gate-address.test.mjs",
+   "canonical": {
+    "path": "src/UPGRADES/vendor/ato-core/test/gate-address.test.mjs",
+    "hash": "28cdfa21fe8c",
+    "size": 2778,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/vendor/ato-core/test/gate-address.test.mjs"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "generative-expression.test.mjs",
+   "canonical": {
+    "path": "src/UPGRADES/vendor/ato-core/test/generative-expression.test.mjs",
+    "hash": "d3244eba4c1d",
+    "size": 4041,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/vendor/ato-core/test/generative-expression.test.mjs"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "host.test.mjs",
+   "canonical": {
+    "path": "src/UPGRADES/vendor/ato-core/test/host.test.mjs",
+    "hash": "41037dce43c6",
+    "size": 1215,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/vendor/ato-core/test/host.test.mjs"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "klein-iching.test.mjs",
+   "canonical": {
+    "path": "src/UPGRADES/vendor/ato-core/test/klein-iching.test.mjs",
+    "hash": "0105f91cbd40",
+    "size": 1486,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/vendor/ato-core/test/klein-iching.test.mjs"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "klein-tools.test.mjs",
+   "canonical": {
+    "path": "src/UPGRADES/vendor/ato-core/test/klein-tools.test.mjs",
+    "hash": "40471eee357f",
+    "size": 3498,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/vendor/ato-core/test/klein-tools.test.mjs"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "organism.test.mjs",
+   "canonical": {
+    "path": "src/UPGRADES/vendor/ato-core/test/organism.test.mjs",
+    "hash": "592ac5b21621",
+    "size": 1792,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/vendor/ato-core/test/organism.test.mjs"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "quality-transfer.test.mjs",
+   "canonical": {
+    "path": "src/UPGRADES/vendor/ato-core/test/quality-transfer.test.mjs",
+    "hash": "e9db6fcc5efa",
+    "size": 1873,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/vendor/ato-core/test/quality-transfer.test.mjs"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "source-mechanisms.test.mjs",
+   "canonical": {
+    "path": "src/UPGRADES/vendor/ato-core/test/source-mechanisms.test.mjs",
+    "hash": "4f16fc763739",
+    "size": 2475,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/vendor/ato-core/test/source-mechanisms.test.mjs"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "success-tray.test.mjs",
+   "canonical": {
+    "path": "src/UPGRADES/vendor/ato-core/test/success-tray.test.mjs",
+    "hash": "58ee7c1ca719",
+    "size": 1983,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/vendor/ato-core/test/success-tray.test.mjs"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "torture-mesh.test.mjs",
+   "canonical": {
+    "path": "src/UPGRADES/vendor/ato-core/test/torture-mesh.test.mjs",
+    "hash": "7c312ae2d065",
+    "size": 3335,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/vendor/ato-core/test/torture-mesh.test.mjs"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "workspace.test.mjs",
+   "canonical": {
+    "path": "src/UPGRADES/vendor/ato-core/test/workspace.test.mjs",
+    "hash": "7d02a800e5f0",
+    "size": 1909,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/vendor/ato-core/test/workspace.test.mjs"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "DATASET_PROVENANCE.md",
+   "canonical": {
+    "path": "src/UPGRADES/vendor/integrated-tool-factory/DATASET_PROVENANCE.md",
+    "hash": "c795ee2be5bb",
+    "size": 9689,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/vendor/integrated-tool-factory/DATASET_PROVENANCE.md"
+   },
+   "variantCount": 1,
+   "variants": [
+    {
+     "path": "resolver/variants/DATASET_PROVENANCE.md/600eef60bd9d.md",
+     "hash": "600eef60bd9d",
+     "size": 8083,
+     "sourceOrigin": "integrated-tool-factory-v1_5_0/DATASET_PROVENANCE.md",
+     "allOccurrences": [
+      "integrated-tool-factory-v1_5_0/DATASET_PROVENANCE.md"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "ato-native-bridge.mjs",
+   "canonical": {
+    "path": "src/UPGRADES/vendor/integrated-tool-factory/src/ato-native-bridge.mjs",
+    "hash": "3c484a57bf02",
+    "size": 5237,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/vendor/integrated-tool-factory/src/ato-native-bridge.mjs"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "integrated-tool-factory.mjs",
+   "canonical": {
+    "path": "src/UPGRADES/vendor/integrated-tool-factory/src/integrated-tool-factory.mjs",
+    "hash": "e22aefb46a50",
+    "size": 29725,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/vendor/integrated-tool-factory/src/integrated-tool-factory.mjs"
+   },
+   "variantCount": 1,
+   "variants": [
+    {
+     "path": "resolver/variants/integrated-tool-factory.mjs/8d9e7eb68b5c.mjs",
+     "hash": "8d9e7eb68b5c",
+     "size": 28985,
+     "sourceOrigin": "integrated-tool-factory-v1_5_0/src/integrated-tool-factory.mjs",
+     "allOccurrences": [
+      "integrated-tool-factory-v1_5_0/src/integrated-tool-factory.mjs"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "ato-native-bridge.test.mjs",
+   "canonical": {
+    "path": "src/UPGRADES/vendor/integrated-tool-factory/test/ato-native-bridge.test.mjs",
+    "hash": "01f17f8604ff",
+    "size": 2477,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/vendor/integrated-tool-factory/test/ato-native-bridge.test.mjs"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "integrated-tool-factory.test.mjs",
+   "canonical": {
+    "path": "src/UPGRADES/vendor/integrated-tool-factory/test/integrated-tool-factory.test.mjs",
+    "hash": "10815c258d72",
+    "size": 2891,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/vendor/integrated-tool-factory/test/integrated-tool-factory.test.mjs"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "standalone-export.test.mjs",
+   "canonical": {
+    "path": "src/UPGRADES/vendor/integrated-tool-factory/test/standalone-export.test.mjs",
+    "hash": "5f608941bdb0",
+    "size": 2153,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/vendor/integrated-tool-factory/test/standalone-export.test.mjs"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "index.ts",
+   "canonical": {
+    "path": "src/UPGRADES/vendor/morph-mir-system/index.ts",
+    "hash": "32227fea6474",
+    "size": 647,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_5_MERGED/Synthia_Progressive_Upgrade_v0_5/UPGRADES/vendor/morph-mir-system/index.ts"
+   },
+   "variantCount": 1,
+   "variants": [
+    {
+     "path": "resolver/variants/index.ts/e7461e7b84b2.ts",
+     "hash": "e7461e7b84b2",
+     "size": 4174,
+     "sourceOrigin": "Synthia_Progressive_Upgrade_v0_5_MERGED/Synthia_Progressive_Upgrade_v0_5/UPGRADES/vendor/morph-mir-system/types/index.ts",
+     "allOccurrences": [
+      "Synthia_Progressive_Upgrade_v0_2_WIRED/Synthia_Progressive_Upgrade_v0_2/UPGRADES/vendor/morph-mir-system/types/index.ts",
+      "Synthia_Progressive_Upgrade_v0_5_MERGED/Synthia_Progressive_Upgrade_v0_5/UPGRADES/vendor/morph-mir-system/types/index.ts"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "mirAnalyzer.ts",
+   "canonical": {
+    "path": "src/UPGRADES/vendor/morph-mir-system/lib/mirAnalyzer.ts",
+    "hash": "7ff6cf37cf74",
+    "size": 9940,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_5_MERGED/Synthia_Progressive_Upgrade_v0_5/UPGRADES/vendor/morph-mir-system/lib/mirAnalyzer.ts"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "mirRenderer.ts",
+   "canonical": {
+    "path": "src/UPGRADES/vendor/morph-mir-system/lib/mirRenderer.ts",
+    "hash": "2d7929af4745",
+    "size": 7219,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_5_MERGED/Synthia_Progressive_Upgrade_v0_5/UPGRADES/vendor/morph-mir-system/lib/mirRenderer.ts"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "morphMemoryEngine.ts",
+   "canonical": {
+    "path": "src/UPGRADES/vendor/morph-mir-system/lib/morphMemoryEngine.ts",
+    "hash": "abbd6da68024",
+    "size": 28051,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_5_MERGED/Synthia_Progressive_Upgrade_v0_5/UPGRADES/vendor/morph-mir-system/lib/morphMemoryEngine.ts"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "ChangingLineEngine.js",
+   "canonical": {
+    "path": "src/UPGRADES/vendor/src-donor/src/core/ChangingLineEngine.js",
+    "hash": "73f68641f6c4",
+    "size": 3633,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/vendor/src-donor/src/core/ChangingLineEngine.js"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "HexagramNode.js",
+   "canonical": {
+    "path": "src/UPGRADES/vendor/src-donor/src/core/HexagramNode.js",
+    "hash": "c67519bf3458",
+    "size": 6124,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/vendor/src-donor/src/core/HexagramNode.js"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "OntologicalAddress.js",
+   "canonical": {
+    "path": "src/UPGRADES/vendor/src-donor/src/core/OntologicalAddress.js",
+    "hash": "afbb6587e130",
+    "size": 14134,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/vendor/src-donor/src/core/OntologicalAddress.js"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "StateSpaceLayer.js",
+   "canonical": {
+    "path": "src/UPGRADES/vendor/src-donor/src/core/StateSpaceLayer.js",
+    "hash": "958f0602d4ef",
+    "size": 2985,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/vendor/src-donor/src/core/StateSpaceLayer.js"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "StateSpaceModel.js",
+   "canonical": {
+    "path": "src/UPGRADES/vendor/src-donor/src/core/StateSpaceModel.js",
+    "hash": "7c76c668181f",
+    "size": 5406,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/vendor/src-donor/src/core/StateSpaceModel.js"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "CausalGraph.js",
+   "canonical": {
+    "path": "src/UPGRADES/vendor/src-donor/src/core/layers/CausalGraph.js",
+    "hash": "c232592c24be",
+    "size": 2373,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/vendor/src-donor/src/core/layers/CausalGraph.js"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "DependencyGraph.js",
+   "canonical": {
+    "path": "src/UPGRADES/vendor/src-donor/src/core/layers/DependencyGraph.js",
+    "hash": "4608c26b1915",
+    "size": 3205,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/vendor/src-donor/src/core/layers/DependencyGraph.js"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "KnowledgeGraph.js",
+   "canonical": {
+    "path": "src/UPGRADES/vendor/src-donor/src/core/layers/KnowledgeGraph.js",
+    "hash": "59e3d1bc4aa0",
+    "size": 1924,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/vendor/src-donor/src/core/layers/KnowledgeGraph.js"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "StateSpace.js",
+   "canonical": {
+    "path": "src/UPGRADES/vendor/src-donor/src/core/layers/StateSpace.js",
+    "hash": "65e98f3d6cf3",
+    "size": 2878,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/vendor/src-donor/src/core/layers/StateSpace.js"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "TemporalGraph.js",
+   "canonical": {
+    "path": "src/UPGRADES/vendor/src-donor/src/core/layers/TemporalGraph.js",
+    "hash": "4ed2cccf041b",
+    "size": 3159,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/vendor/src-donor/src/core/layers/TemporalGraph.js"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "hexagrams.js",
+   "canonical": {
+    "path": "src/UPGRADES/vendor/src-donor/src/data/hexagrams.js",
+    "hash": "4fe1d12acd30",
+    "size": 7157,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/vendor/src-donor/src/data/hexagrams.js"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "sequences.js",
+   "canonical": {
+    "path": "src/UPGRADES/vendor/src-donor/src/data/sequences.js",
+    "hash": "700476e0da3e",
+    "size": 4103,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/vendor/src-donor/src/data/sequences.js"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "AstroQualities.js",
+   "canonical": {
+    "path": "src/UPGRADES/vendor/src-donor/src/generators/AstroQualities.js",
+    "hash": "69027b982e4b",
+    "size": 12892,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/vendor/src-donor/src/generators/AstroQualities.js"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "AutoLing.js",
+   "canonical": {
+    "path": "src/UPGRADES/vendor/src-donor/src/generators/AutoLing.js",
+    "hash": "13f9a91f73fd",
+    "size": 26781,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/vendor/src-donor/src/generators/AutoLing.js"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "Disseminer.js",
+   "canonical": {
+    "path": "src/UPGRADES/vendor/src-donor/src/generators/Disseminer.js",
+    "hash": "378e858235e2",
+    "size": 6580,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/vendor/src-donor/src/generators/Disseminer.js"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "MorphoAnalyzer.js",
+   "canonical": {
+    "path": "src/UPGRADES/vendor/src-donor/src/generators/MorphoAnalyzer.js",
+    "hash": "6daaaef52305",
+    "size": 9310,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/vendor/src-donor/src/generators/MorphoAnalyzer.js"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "SemNet.js",
+   "canonical": {
+    "path": "src/UPGRADES/vendor/src-donor/src/generators/SemNet.js",
+    "hash": "bde67d0a8cb4",
+    "size": 12142,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/vendor/src-donor/src/generators/SemNet.js"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "ToolFactory.js",
+   "canonical": {
+    "path": "src/UPGRADES/vendor/src-donor/src/generators/ToolFactory.js",
+    "hash": "164096377541",
+    "size": 16386,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/vendor/src-donor/src/generators/ToolFactory.js"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "UPGRADE_MAP.md",
+   "canonical": {
+    "path": "src/UPGRADE_MAP.md",
+    "hash": "4f5e813fe1e5",
+    "size": 3799,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADE_MAP.md"
+   },
+   "variantCount": 2,
+   "variants": [
+    {
+     "path": "resolver/variants/UPGRADE_MAP.md/fec15195d88b.md",
+     "hash": "fec15195d88b",
+     "size": 4982,
+     "sourceOrigin": "Synthia_Progressive_Upgrade_v0_5_MERGED/Synthia_Progressive_Upgrade_v0_5/UPGRADE_MAP.md",
+     "allOccurrences": [
+      "Synthia_Progressive_Upgrade_v0_5_FIXED/Synthia_Progressive_Upgrade_v0_5/UPGRADE_MAP.md",
+      "Synthia_Progressive_Upgrade_v0_5_MERGED/Synthia_Progressive_Upgrade_v0_5/UPGRADE_MAP.md",
+      "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/preserved_v0_5/UPGRADE_MAP.md"
+     ]
+    },
+    {
+     "path": "resolver/variants/UPGRADE_MAP.md/b797aec6b0ce.md",
+     "hash": "b797aec6b0ce",
+     "size": 3080,
+     "sourceOrigin": "Synthia_Progressive_Upgrade_v0_2_WIRED/Synthia_Progressive_Upgrade_v0_2/UPGRADE_MAP.md",
+     "allOccurrences": [
+      "Synthia_Progressive_Upgrade_v0_2_WIRED/Synthia_Progressive_Upgrade_v0_2/UPGRADE_MAP.md"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "orchestrator-smoke-test.ts",
+   "canonical": {
+    "path": "src/orchestrator-smoke-test.ts",
+    "hash": "34534bdb16a4",
+    "size": 2176,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_2_WIRED/Synthia_Progressive_Upgrade_v0_2/orchestrator-smoke-test.ts"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "package-lock.json",
+   "canonical": {
+    "path": "src/package-lock.json",
+    "hash": "0632206a6be0",
+    "size": 15965,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_5_MERGED/Synthia_Progressive_Upgrade_v0_5/package-lock.json"
+   },
+   "variantCount": 1,
+   "variants": [
+    {
+     "path": "resolver/variants/package-lock.json/cd5a898ae44b.json",
+     "hash": "cd5a898ae44b",
+     "size": 15965,
+     "sourceOrigin": "Synthia_Progressive_Upgrade_v0_2_WIRED/Synthia_Progressive_Upgrade_v0_2/package-lock.json",
+     "allOccurrences": [
+      "Synthia_Progressive_Upgrade_v0_2_WIRED/Synthia_Progressive_Upgrade_v0_2/package-lock.json"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "5d-autoling-engine.js",
+   "canonical": {
+    "path": "src/runtime/5d-autoling-engine.js",
+    "hash": "12ca96d27ee4",
+    "size": 34865,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/runtime/5d-autoling-engine.js"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "ArcRuntime.ts",
+   "canonical": {
+    "path": "src/runtime/ArcRuntime.ts",
+    "hash": "092119870adb",
+    "size": 2171,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/runtime/ArcRuntime.ts"
+   },
+   "variantCount": 1,
+   "variants": [
+    {
+     "path": "resolver/variants/ArcRuntime.ts/8c8d99c753be.ts",
+     "hash": "8c8d99c753be",
+     "size": 1578,
+     "sourceOrigin": "Synthia_Progressive_Upgrade_v0_2_WIRED/Synthia_Progressive_Upgrade_v0_2/runtime/ArcRuntime.ts",
+     "allOccurrences": [
+      "Synthia_Progressive_Upgrade_v0_2_WIRED/Synthia_Progressive_Upgrade_v0_2/runtime/ArcRuntime.ts"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "ArtifactAssembler.ts",
+   "canonical": {
+    "path": "src/runtime/ArtifactAssembler.ts",
+    "hash": "509b8ba532fb",
+    "size": 11639,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/runtime/ArtifactAssembler.ts"
+   },
+   "variantCount": 3,
+   "variants": [
+    {
+     "path": "resolver/variants/ArtifactAssembler.ts/e7c2ddcaecc6.ts",
+     "hash": "e7c2ddcaecc6",
+     "size": 11194,
+     "sourceOrigin": "Synthia_Progressive_Upgrade_v0_5_MERGED/Synthia_Progressive_Upgrade_v0_5/runtime/ArtifactAssembler.ts",
+     "allOccurrences": [
+      "Synthia_Progressive_Upgrade_v0_5_FIXED/Synthia_Progressive_Upgrade_v0_5/runtime/ArtifactAssembler.ts",
+      "Synthia_Progressive_Upgrade_v0_5_MERGED/Synthia_Progressive_Upgrade_v0_5/runtime/ArtifactAssembler.ts",
+      "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/preserved_v0_5/runtime/ArtifactAssembler.ts"
+     ]
+    },
+    {
+     "path": "resolver/variants/ArtifactAssembler.ts/503b60d1da0a.ts",
+     "hash": "503b60d1da0a",
+     "size": 10839,
+     "sourceOrigin": "Synthia_Progressive_Upgrade_v0_5_FIXED/Synthia_Progressive_Upgrade_v0_5/UPGRADES/preserved_v0_4/ArtifactAssembler.ts",
+     "allOccurrences": [
+      "Synthia_Progressive_Upgrade_v0_5_FIXED/Synthia_Progressive_Upgrade_v0_5/UPGRADES/preserved_v0_4/ArtifactAssembler.ts",
+      "Synthia_Progressive_Upgrade_v0_5_MERGED/Synthia_Progressive_Upgrade_v0_5/UPGRADES/preserved_v0_4/ArtifactAssembler.ts",
+      "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/preserved_v0_4/ArtifactAssembler.ts"
+     ]
+    },
+    {
+     "path": "resolver/variants/ArtifactAssembler.ts/cb5a72d355fc.ts",
+     "hash": "cb5a72d355fc",
+     "size": 4338,
+     "sourceOrigin": "Synthia_Progressive_Upgrade_v0_5_FIXED/Synthia_Progressive_Upgrade_v0_5/runtime/_preserved_v0_3/ArtifactAssembler.ts",
+     "allOccurrences": [
+      "Synthia_Progressive_Upgrade_v0_2_WIRED/Synthia_Progressive_Upgrade_v0_2/runtime/ArtifactAssembler.ts",
+      "Synthia_Progressive_Upgrade_v0_5_FIXED/Synthia_Progressive_Upgrade_v0_5/runtime/_preserved_v0_3/ArtifactAssembler.ts",
+      "Synthia_Progressive_Upgrade_v0_5_MERGED/Synthia_Progressive_Upgrade_v0_5/runtime/_preserved_v0_3/ArtifactAssembler.ts",
+      "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/runtime/_preserved_v0_3/ArtifactAssembler.ts"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "ArtifactValidator.ts",
+   "canonical": {
+    "path": "src/runtime/ArtifactValidator.ts",
+    "hash": "bbc97bc112a1",
+    "size": 2622,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/runtime/ArtifactValidator.ts"
+   },
+   "variantCount": 1,
+   "variants": [
+    {
+     "path": "resolver/variants/ArtifactValidator.ts/fe090dea61fa.ts",
+     "hash": "fe090dea61fa",
+     "size": 961,
+     "sourceOrigin": "Synthia_Progressive_Upgrade_v0_5_FIXED/Synthia_Progressive_Upgrade_v0_5/runtime/_preserved_v0_3/ArtifactValidator.ts",
+     "allOccurrences": [
+      "Synthia_Progressive_Upgrade_v0_2_WIRED/Synthia_Progressive_Upgrade_v0_2/runtime/ArtifactValidator.ts",
+      "Synthia_Progressive_Upgrade_v0_5_FIXED/Synthia_Progressive_Upgrade_v0_5/runtime/_preserved_v0_3/ArtifactValidator.ts",
+      "Synthia_Progressive_Upgrade_v0_5_MERGED/Synthia_Progressive_Upgrade_v0_5/runtime/_preserved_v0_3/ArtifactValidator.ts",
+      "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/runtime/_preserved_v0_3/ArtifactValidator.ts"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "CapabilityRegistry.ts",
+   "canonical": {
+    "path": "src/runtime/CapabilityRegistry.ts",
+    "hash": "05e658814561",
+    "size": 875,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/runtime/CapabilityRegistry.ts"
+   },
+   "variantCount": 1,
+   "variants": [
+    {
+     "path": "resolver/variants/CapabilityRegistry.ts/26f21a2ab092.ts",
+     "hash": "26f21a2ab092",
+     "size": 433,
+     "sourceOrigin": "Synthia_Progressive_Upgrade_v0_2_WIRED/Synthia_Progressive_Upgrade_v0_2/runtime/CapabilityRegistry.ts",
+     "allOccurrences": [
+      "Synthia_Progressive_Upgrade_v0_2_WIRED/Synthia_Progressive_Upgrade_v0_2/runtime/CapabilityRegistry.ts"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "ChannelRegistry.ts",
+   "canonical": {
+    "path": "src/runtime/ChannelRegistry.ts",
+    "hash": "8394a4c30b84",
+    "size": 3306,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/runtime/ChannelRegistry.ts"
+   },
+   "variantCount": 2,
+   "variants": [
+    {
+     "path": "resolver/variants/ChannelRegistry.ts/635a0f4f471e.ts",
+     "hash": "635a0f4f471e",
+     "size": 3106,
+     "sourceOrigin": "Synthia_Progressive_Upgrade_v0_5_FIXED/Synthia_Progressive_Upgrade_v0_5/runtime/_preserved_v0_3/ChannelRegistry.ts",
+     "allOccurrences": [
+      "Synthia_Progressive_Upgrade_v0_5_FIXED/Synthia_Progressive_Upgrade_v0_5/runtime/_preserved_v0_3/ChannelRegistry.ts",
+      "Synthia_Progressive_Upgrade_v0_5_MERGED/Synthia_Progressive_Upgrade_v0_5/runtime/_preserved_v0_3/ChannelRegistry.ts",
+      "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/runtime/_preserved_v0_3/ChannelRegistry.ts"
+     ]
+    },
+    {
+     "path": "resolver/variants/ChannelRegistry.ts/3e60e548433e.ts",
+     "hash": "3e60e548433e",
+     "size": 2330,
+     "sourceOrigin": "Synthia_Progressive_Upgrade_v0_2_WIRED/Synthia_Progressive_Upgrade_v0_2/runtime/ChannelRegistry.ts",
+     "allOccurrences": [
+      "Synthia_Progressive_Upgrade_v0_2_WIRED/Synthia_Progressive_Upgrade_v0_2/runtime/ChannelRegistry.ts"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "ChannelResolver.ts",
+   "canonical": {
+    "path": "src/runtime/ChannelResolver.ts",
+    "hash": "9d315fc99a79",
+    "size": 2389,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/runtime/ChannelResolver.ts"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "CollapseResolver.ts",
+   "canonical": {
+    "path": "src/runtime/CollapseResolver.ts",
+    "hash": "264afff5e551",
+    "size": 1686,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/runtime/CollapseResolver.ts"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "DeepStructureLearner.test.ts",
+   "canonical": {
+    "path": "src/runtime/DeepStructureLearner.test.ts",
+    "hash": "fdc867edede3",
+    "size": 11748,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/runtime/DeepStructureLearner.test.ts"
+   },
+   "variantCount": 1,
+   "variants": [
+    {
+     "path": "resolver/variants/DeepStructureLearner.test.ts/7d352cdb2d8d.ts",
+     "hash": "7d352cdb2d8d",
+     "size": 11807,
+     "sourceOrigin": "Synthia_Progressive_Upgrade_v0_5_FIXED/Synthia_Progressive_Upgrade_v0_5/UPGRADES/preserved_v0_4/DeepStructureLearner.test.ts",
+     "allOccurrences": [
+      "Synthia_Progressive_Upgrade_v0_2_WIRED/Synthia_Progressive_Upgrade_v0_2/runtime/DeepStructureLearner.test.ts",
+      "Synthia_Progressive_Upgrade_v0_5_FIXED/Synthia_Progressive_Upgrade_v0_5/UPGRADES/preserved_v0_4/DeepStructureLearner.test.ts",
+      "Synthia_Progressive_Upgrade_v0_5_MERGED/Synthia_Progressive_Upgrade_v0_5/UPGRADES/preserved_v0_4/DeepStructureLearner.test.ts",
+      "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/preserved_v0_4/DeepStructureLearner.test.ts"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "DeepStructureLearner.ts",
+   "canonical": {
+    "path": "src/runtime/DeepStructureLearner.ts",
+    "hash": "8b16c4f3e509",
+    "size": 21291,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/runtime/DeepStructureLearner.ts"
+   },
+   "variantCount": 1,
+   "variants": [
+    {
+     "path": "resolver/variants/DeepStructureLearner.ts/5f723470ec22.ts",
+     "hash": "5f723470ec22",
+     "size": 20333,
+     "sourceOrigin": "Synthia_Progressive_Upgrade_v0_5_FIXED/Synthia_Progressive_Upgrade_v0_5/UPGRADES/preserved_v0_4/DeepStructureLearner.ts",
+     "allOccurrences": [
+      "Synthia_Progressive_Upgrade_v0_2_WIRED/Synthia_Progressive_Upgrade_v0_2/runtime/DeepStructureLearner.ts",
+      "Synthia_Progressive_Upgrade_v0_5_FIXED/Synthia_Progressive_Upgrade_v0_5/UPGRADES/preserved_v0_4/DeepStructureLearner.ts",
+      "Synthia_Progressive_Upgrade_v0_5_MERGED/Synthia_Progressive_Upgrade_v0_5/UPGRADES/preserved_v0_4/DeepStructureLearner.ts",
+      "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/preserved_v0_4/DeepStructureLearner.ts"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "ExpressionPlanner.ts",
+   "canonical": {
+    "path": "src/runtime/ExpressionPlanner.ts",
+    "hash": "f482d620065a",
+    "size": 2645,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/runtime/ExpressionPlanner.ts"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "GraphRuntime.ts",
+   "canonical": {
+    "path": "src/runtime/GraphRuntime.ts",
+    "hash": "7628731d49c1",
+    "size": 21765,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/runtime/GraphRuntime.ts"
+   },
+   "variantCount": 4,
+   "variants": [
+    {
+     "path": "resolver/variants/GraphRuntime.ts/9a4cfa8de176.ts",
+     "hash": "9a4cfa8de176",
+     "size": 19245,
+     "sourceOrigin": "Synthia_Progressive_Upgrade_v0_5_MERGED/Synthia_Progressive_Upgrade_v0_5/runtime/GraphRuntime.ts",
+     "allOccurrences": [
+      "Synthia_Progressive_Upgrade_v0_5_FIXED/Synthia_Progressive_Upgrade_v0_5/runtime/GraphRuntime.ts",
+      "Synthia_Progressive_Upgrade_v0_5_MERGED/Synthia_Progressive_Upgrade_v0_5/runtime/GraphRuntime.ts",
+      "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/preserved_v0_5/runtime/GraphRuntime.ts"
+     ]
+    },
+    {
+     "path": "resolver/variants/GraphRuntime.ts/513734bac5dd.ts",
+     "hash": "513734bac5dd",
+     "size": 18186,
+     "sourceOrigin": "Synthia_Progressive_Upgrade_v0_5_FIXED/Synthia_Progressive_Upgrade_v0_5/UPGRADES/preserved_v0_4/GraphRuntime.ts",
+     "allOccurrences": [
+      "Synthia_Progressive_Upgrade_v0_5_FIXED/Synthia_Progressive_Upgrade_v0_5/UPGRADES/preserved_v0_4/GraphRuntime.ts",
+      "Synthia_Progressive_Upgrade_v0_5_MERGED/Synthia_Progressive_Upgrade_v0_5/UPGRADES/preserved_v0_4/GraphRuntime.ts",
+      "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/preserved_v0_4/GraphRuntime.ts"
+     ]
+    },
+    {
+     "path": "resolver/variants/GraphRuntime.ts/e05be7cff823.ts",
+     "hash": "e05be7cff823",
+     "size": 17846,
+     "sourceOrigin": "Synthia_Progressive_Upgrade_v0_5_FIXED/Synthia_Progressive_Upgrade_v0_5/runtime/_preserved_v0_3/GraphRuntime.ts",
+     "allOccurrences": [
+      "Synthia_Progressive_Upgrade_v0_5_FIXED/Synthia_Progressive_Upgrade_v0_5/runtime/_preserved_v0_3/GraphRuntime.ts",
+      "Synthia_Progressive_Upgrade_v0_5_MERGED/Synthia_Progressive_Upgrade_v0_5/runtime/_preserved_v0_3/GraphRuntime.ts",
+      "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/runtime/_preserved_v0_3/GraphRuntime.ts"
+     ]
+    },
+    {
+     "path": "resolver/variants/GraphRuntime.ts/5522b8bfd540.ts",
+     "hash": "5522b8bfd540",
+     "size": 16261,
+     "sourceOrigin": "Synthia_Progressive_Upgrade_v0_2_WIRED/Synthia_Progressive_Upgrade_v0_2/runtime/GraphRuntime.ts",
+     "allOccurrences": [
+      "Synthia_Progressive_Upgrade_v0_2_WIRED/Synthia_Progressive_Upgrade_v0_2/runtime/GraphRuntime.ts"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "InteractiveLearner.test.ts",
+   "canonical": {
+    "path": "src/runtime/InteractiveLearner.test.ts",
+    "hash": "5a1ae637ac9f",
+    "size": 9717,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/runtime/InteractiveLearner.test.ts"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "InteractiveLearner.ts",
+   "canonical": {
+    "path": "src/runtime/InteractiveLearner.ts",
+    "hash": "c1116ab84246",
+    "size": 19933,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/runtime/InteractiveLearner.ts"
+   },
+   "variantCount": 1,
+   "variants": [
+    {
+     "path": "resolver/variants/InteractiveLearner.ts/6dfdbf687a4a.ts",
+     "hash": "6dfdbf687a4a",
+     "size": 20031,
+     "sourceOrigin": "Synthia_Progressive_Upgrade_v0_5_FIXED/Synthia_Progressive_Upgrade_v0_5/UPGRADES/preserved_v0_4/InteractiveLearner.ts",
+     "allOccurrences": [
+      "Synthia_Progressive_Upgrade_v0_2_WIRED/Synthia_Progressive_Upgrade_v0_2/runtime/InteractiveLearner.ts",
+      "Synthia_Progressive_Upgrade_v0_5_FIXED/Synthia_Progressive_Upgrade_v0_5/UPGRADES/preserved_v0_4/InteractiveLearner.ts",
+      "Synthia_Progressive_Upgrade_v0_5_MERGED/Synthia_Progressive_Upgrade_v0_5/UPGRADES/preserved_v0_4/InteractiveLearner.ts",
+      "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/preserved_v0_4/InteractiveLearner.ts"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "KleinAutoLing.ts",
+   "canonical": {
+    "path": "src/runtime/KleinAutoLing.ts",
+    "hash": "185e072e3d53",
+    "size": 21782,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/runtime/KleinAutoLing.ts"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "MessageBus.ts",
+   "canonical": {
+    "path": "src/runtime/MessageBus.ts",
+    "hash": "3e4e1fa6cf4e",
+    "size": 1462,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/runtime/MessageBus.ts"
+   },
+   "variantCount": 1,
+   "variants": [
+    {
+     "path": "resolver/variants/MessageBus.ts/705f818b00c0.ts",
+     "hash": "705f818b00c0",
+     "size": 967,
+     "sourceOrigin": "Synthia_Progressive_Upgrade_v0_2_WIRED/Synthia_Progressive_Upgrade_v0_2/runtime/MessageBus.ts",
+     "allOccurrences": [
+      "Synthia_Progressive_Upgrade_v0_2_WIRED/Synthia_Progressive_Upgrade_v0_2/runtime/MessageBus.ts"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "README-SynthiaOS.md",
+   "canonical": {
+    "path": "src/runtime/README-SynthiaOS.md",
+    "hash": "39b86ffd51ed",
+    "size": 7132,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/runtime/README-SynthiaOS.md"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "SacralAnalogyEngine.test.ts",
+   "canonical": {
+    "path": "src/runtime/SacralAnalogyEngine.test.ts",
+    "hash": "b9d07e32c671",
+    "size": 9817,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/runtime/SacralAnalogyEngine.test.ts"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "SacralAnalogyEngine.ts",
+   "canonical": {
+    "path": "src/runtime/SacralAnalogyEngine.ts",
+    "hash": "7fcab41cdc37",
+    "size": 22063,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/runtime/SacralAnalogyEngine.ts"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "StyleControlEngine.test.ts",
+   "canonical": {
+    "path": "src/runtime/StyleControlEngine.test.ts",
+    "hash": "a90d779bb12b",
+    "size": 12406,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/runtime/StyleControlEngine.test.ts"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "StyleControlEngine.ts",
+   "canonical": {
+    "path": "src/runtime/StyleControlEngine.ts",
+    "hash": "d4c014ec7571",
+    "size": 13386,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/runtime/StyleControlEngine.ts"
+   },
+   "variantCount": 1,
+   "variants": [
+    {
+     "path": "resolver/variants/StyleControlEngine.ts/d68035c25ec3.ts",
+     "hash": "d68035c25ec3",
+     "size": 13495,
+     "sourceOrigin": "Synthia_Progressive_Upgrade_v0_5_FIXED/Synthia_Progressive_Upgrade_v0_5/UPGRADES/preserved_v0_4/StyleControlEngine.ts",
+     "allOccurrences": [
+      "Synthia_Progressive_Upgrade_v0_2_WIRED/Synthia_Progressive_Upgrade_v0_2/runtime/StyleControlEngine.ts",
+      "Synthia_Progressive_Upgrade_v0_5_FIXED/Synthia_Progressive_Upgrade_v0_5/UPGRADES/preserved_v0_4/StyleControlEngine.ts",
+      "Synthia_Progressive_Upgrade_v0_5_MERGED/Synthia_Progressive_Upgrade_v0_5/UPGRADES/preserved_v0_4/StyleControlEngine.ts",
+      "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/preserved_v0_4/StyleControlEngine.ts"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "SurfaceCoordinator.ts",
+   "canonical": {
+    "path": "src/runtime/SurfaceCoordinator.ts",
+    "hash": "60b8c704a5f7",
+    "size": 1697,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/runtime/SurfaceCoordinator.ts"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "SurfaceTransformEngine.test.ts",
+   "canonical": {
+    "path": "src/runtime/SurfaceTransformEngine.test.ts",
+    "hash": "e861bcece39e",
+    "size": 9728,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/runtime/SurfaceTransformEngine.test.ts"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "SurfaceTransformEngine.ts",
+   "canonical": {
+    "path": "src/runtime/SurfaceTransformEngine.ts",
+    "hash": "d8b0791ef1bb",
+    "size": 20801,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/runtime/SurfaceTransformEngine.ts"
+   },
+   "variantCount": 1,
+   "variants": [
+    {
+     "path": "resolver/variants/SurfaceTransformEngine.ts/b28f86d9df31.ts",
+     "hash": "b28f86d9df31",
+     "size": 18423,
+     "sourceOrigin": "Synthia_Progressive_Upgrade_v0_5_FIXED/Synthia_Progressive_Upgrade_v0_5/UPGRADES/preserved_v0_4/SurfaceTransformEngine.ts",
+     "allOccurrences": [
+      "Synthia_Progressive_Upgrade_v0_2_WIRED/Synthia_Progressive_Upgrade_v0_2/runtime/SurfaceTransformEngine.ts",
+      "Synthia_Progressive_Upgrade_v0_5_FIXED/Synthia_Progressive_Upgrade_v0_5/UPGRADES/preserved_v0_4/SurfaceTransformEngine.ts",
+      "Synthia_Progressive_Upgrade_v0_5_MERGED/Synthia_Progressive_Upgrade_v0_5/UPGRADES/preserved_v0_4/SurfaceTransformEngine.ts",
+      "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/preserved_v0_4/SurfaceTransformEngine.ts"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "SynthiaSubstrate.ts",
+   "canonical": {
+    "path": "src/runtime/SynthiaSubstrate.ts",
+    "hash": "271f160f7a9b",
+    "size": 23503,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/runtime/SynthiaSubstrate.ts"
+   },
+   "variantCount": 1,
+   "variants": [
+    {
+     "path": "resolver/variants/SynthiaSubstrate.ts/1afba0c5041c.ts",
+     "hash": "1afba0c5041c",
+     "size": 23538,
+     "sourceOrigin": "Synthia_Progressive_Upgrade_v0_5_FIXED/Synthia_Progressive_Upgrade_v0_5/UPGRADES/preserved_v0_4/SynthiaSubstrate.ts",
+     "allOccurrences": [
+      "Synthia_Progressive_Upgrade_v0_2_WIRED/Synthia_Progressive_Upgrade_v0_2/runtime/SynthiaSubstrate.ts",
+      "Synthia_Progressive_Upgrade_v0_5_FIXED/Synthia_Progressive_Upgrade_v0_5/UPGRADES/preserved_v0_4/SynthiaSubstrate.ts",
+      "Synthia_Progressive_Upgrade_v0_5_MERGED/Synthia_Progressive_Upgrade_v0_5/UPGRADES/preserved_v0_4/SynthiaSubstrate.ts",
+      "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/preserved_v0_4/SynthiaSubstrate.ts"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "ToolRegistry.ts",
+   "canonical": {
+    "path": "src/runtime/ToolRegistry.ts",
+    "hash": "8ded8f7b87e2",
+    "size": 4019,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/runtime/ToolRegistry.ts"
+   },
+   "variantCount": 2,
+   "variants": [
+    {
+     "path": "resolver/variants/ToolRegistry.ts/c01518bd0be0.ts",
+     "hash": "c01518bd0be0",
+     "size": 2179,
+     "sourceOrigin": "Synthia_Progressive_Upgrade_v0_5_FIXED/Synthia_Progressive_Upgrade_v0_5/UPGRADES/preserved_v0_4/ToolRegistry.ts",
+     "allOccurrences": [
+      "Synthia_Progressive_Upgrade_v0_5_FIXED/Synthia_Progressive_Upgrade_v0_5/UPGRADES/preserved_v0_4/ToolRegistry.ts",
+      "Synthia_Progressive_Upgrade_v0_5_MERGED/Synthia_Progressive_Upgrade_v0_5/UPGRADES/preserved_v0_4/ToolRegistry.ts",
+      "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/preserved_v0_4/ToolRegistry.ts"
+     ]
+    },
+    {
+     "path": "resolver/variants/ToolRegistry.ts/eac8f9bb45a3.ts",
+     "hash": "eac8f9bb45a3",
+     "size": 1752,
+     "sourceOrigin": "Synthia_Progressive_Upgrade_v0_2_WIRED/Synthia_Progressive_Upgrade_v0_2/runtime/ToolRegistry.ts",
+     "allOccurrences": [
+      "Synthia_Progressive_Upgrade_v0_2_WIRED/Synthia_Progressive_Upgrade_v0_2/runtime/ToolRegistry.ts"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "ToolScheduler.ts",
+   "canonical": {
+    "path": "src/runtime/ToolScheduler.ts",
+    "hash": "2f094b85a7f4",
+    "size": 7132,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/runtime/ToolScheduler.ts"
+   },
+   "variantCount": 2,
+   "variants": [
+    {
+     "path": "resolver/variants/ToolScheduler.ts/12c71e4618ba.ts",
+     "hash": "12c71e4618ba",
+     "size": 4569,
+     "sourceOrigin": "Synthia_Progressive_Upgrade_v0_5_FIXED/Synthia_Progressive_Upgrade_v0_5/UPGRADES/preserved_v0_4/ToolScheduler.ts",
+     "allOccurrences": [
+      "Synthia_Progressive_Upgrade_v0_5_FIXED/Synthia_Progressive_Upgrade_v0_5/UPGRADES/preserved_v0_4/ToolScheduler.ts",
+      "Synthia_Progressive_Upgrade_v0_5_MERGED/Synthia_Progressive_Upgrade_v0_5/UPGRADES/preserved_v0_4/ToolScheduler.ts",
+      "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/preserved_v0_4/ToolScheduler.ts"
+     ]
+    },
+    {
+     "path": "resolver/variants/ToolScheduler.ts/1d64731358be.ts",
+     "hash": "1d64731358be",
+     "size": 2166,
+     "sourceOrigin": "Synthia_Progressive_Upgrade_v0_2_WIRED/Synthia_Progressive_Upgrade_v0_2/runtime/ToolScheduler.ts",
+     "allOccurrences": [
+      "Synthia_Progressive_Upgrade_v0_2_WIRED/Synthia_Progressive_Upgrade_v0_2/runtime/ToolScheduler.ts"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "LivingMirrorApp.tsx",
+   "canonical": {
+    "path": "src/vendor/diseminer-mcp-server/LivingMirrorApp.tsx",
+    "hash": "b7dc4a15e84b",
+    "size": 19830,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/runtime/_nested/diseminer-mcp-server/LivingMirrorApp.tsx"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "ato-engine.ts",
+   "canonical": {
+    "path": "src/vendor/diseminer-mcp-server/ato-engine.ts",
+    "hash": "fda57315607d",
+    "size": 15004,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/runtime/_nested/diseminer-mcp-server/ato-engine.ts"
+   },
+   "variantCount": 1,
+   "variants": [
+    {
+     "path": "resolver/variants/ato-engine.ts/c73c424898c8.ts",
+     "hash": "c73c424898c8",
+     "size": 15006,
+     "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/runtime/diseminer-mcp-server(3)_extracted/ato-engine.ts",
+     "allOccurrences": [
+      "Synthia_Progressive_Upgrade_v0_2_WIRED/Synthia_Progressive_Upgrade_v0_2/runtime/diseminer-mcp-server(3)_extracted/ato-engine.ts",
+      "Synthia_Progressive_Upgrade_v0_2_WIRED/Synthia_Progressive_Upgrade_v0_2/runtime/diseminer-mcp-server_extracted/ato-engine.ts",
+      "Synthia_Progressive_Upgrade_v0_5_FIXED/Synthia_Progressive_Upgrade_v0_5/runtime/diseminer-mcp-server(3)_extracted/ato-engine.ts",
+      "Synthia_Progressive_Upgrade_v0_5_FIXED/Synthia_Progressive_Upgrade_v0_5/runtime/diseminer-mcp-server_extracted/ato-engine.ts",
+      "Synthia_Progressive_Upgrade_v0_5_MERGED/Synthia_Progressive_Upgrade_v0_5/runtime/diseminer-mcp-server(3)_extracted/ato-engine.ts",
+      "Synthia_Progressive_Upgrade_v0_5_MERGED/Synthia_Progressive_Upgrade_v0_5/runtime/diseminer-mcp-server_extracted/ato-engine.ts",
+      "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/runtime/diseminer-mcp-server(3)_extracted/ato-engine.ts",
+      "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/runtime/diseminer-mcp-server_extracted/ato-engine.ts"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "diseminer-mcp-server.ts",
+   "canonical": {
+    "path": "src/vendor/diseminer-mcp-server/diseminer-mcp-server.ts",
+    "hash": "116b0ae9b8b8",
+    "size": 26170,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/runtime/_nested/diseminer-mcp-server/diseminer-mcp-server.ts"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "klein-tool-engine.ts",
+   "canonical": {
+    "path": "src/vendor/diseminer-mcp-server/klein-tool-engine.ts",
+    "hash": "f46e149355c5",
+    "size": 19938,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/runtime/_nested/diseminer-mcp-server/klein-tool-engine.ts"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "mcp-client.ts",
+   "canonical": {
+    "path": "src/vendor/diseminer-mcp-server/mcp-client.ts",
+    "hash": "1b3b69390e0a",
+    "size": 3302,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/runtime/_nested/diseminer-mcp-server/mcp-client.ts"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "monte-carlo-sampler.ts",
+   "canonical": {
+    "path": "src/vendor/diseminer-mcp-server/monte-carlo-sampler.ts",
+    "hash": "0324f76287f5",
+    "size": 17506,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/runtime/_nested/diseminer-mcp-server/monte-carlo-sampler.ts"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "diseminer-engine.ts",
+   "canonical": {
+    "path": "src/vendor/youniverse-diseminer-3/diseminer-engine.ts",
+    "hash": "bde12d776877",
+    "size": 53273,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/runtime/_nested/youniverse-diseminer-3/diseminer-engine.ts"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "diseminer-integration.ts",
+   "canonical": {
+    "path": "src/vendor/youniverse-diseminer-3/diseminer-integration.ts",
+    "hash": "f079586fca74",
+    "size": 9294,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/runtime/_nested/youniverse-diseminer-3/diseminer-integration.ts"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "diseminer-js-changes.ts",
+   "canonical": {
+    "path": "src/vendor/youniverse-diseminer-3/diseminer-js-changes.ts",
+    "hash": "c85793b218f4",
+    "size": 8828,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/runtime/_nested/youniverse-diseminer-3/diseminer-js-changes.ts"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "youniverse-diseminer-reassembled.html",
+   "canonical": {
+    "path": "src/vendor/youniverse-diseminer-3/youniverse-diseminer-reassembled.html",
+    "hash": "bb41caa6280b",
+    "size": 75506,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/runtime/_nested/youniverse-diseminer-3/youniverse-diseminer-reassembled.html"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "GraphRuntime.original.ts",
+   "canonical": {
+    "path": "src/runtime/_preserved/GraphRuntime.original.ts",
+    "hash": "c9920e6ba96b",
+    "size": 15594,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/runtime/_preserved/GraphRuntime.original.ts"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "ToolRegistry.original.ts",
+   "canonical": {
+    "path": "src/runtime/_preserved/ToolRegistry.original.ts",
+    "hash": "759a2b1bce33",
+    "size": 1510,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/runtime/_preserved/ToolRegistry.original.ts"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "ToolScheduler.original.ts",
+   "canonical": {
+    "path": "src/runtime/_preserved/ToolScheduler.original.ts",
+    "hash": "fe2506ffd4ad",
+    "size": 1781,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/runtime/_preserved/ToolScheduler.original.ts"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "autoling.ts",
+   "canonical": {
+    "path": "src/runtime/autoling.ts",
+    "hash": "8f76adcef218",
+    "size": 28230,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/runtime/autoling.ts"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "autoling_backend.py",
+   "canonical": {
+    "path": "src/runtime/autoling_backend.py",
+    "hash": "f8c238b2aea7",
+    "size": 21582,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/runtime/autoling_backend.py"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "autoling_core.py",
+   "canonical": {
+    "path": "src/runtime/autoling_core.py",
+    "hash": "9f3134146eba",
+    "size": 8689,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/runtime/autoling_core.py"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "autoling_mesh.js",
+   "canonical": {
+    "path": "src/runtime/autoling_mesh (1).js",
+    "hash": "dc17fc15c4aa",
+    "size": 25667,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/runtime/autoling_mesh (1).js"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "autoling_morph_engine.js",
+   "canonical": {
+    "path": "src/runtime/autoling_morph_engine.js",
+    "hash": "2c33b3119edf",
+    "size": 51348,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/runtime/autoling_morph_engine.js"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "autoling_organism_v3.py",
+   "canonical": {
+    "path": "src/runtime/autoling_organism_v3.py",
+    "hash": "91a2c074af54",
+    "size": 46368,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/runtime/autoling_organism_v3.py"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "automatic-novel-writer.ts",
+   "canonical": {
+    "path": "src/runtime/automatic-novel-writer.ts",
+    "hash": "f1296dbcc5f0",
+    "size": 30411,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/runtime/automatic-novel-writer.ts"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "autonovel-messy-engine (1).ts",
+   "canonical": {
+    "path": "src/runtime/autonovel-messy-engine (1) (1).ts",
+    "hash": "4dd35154a1a2",
+    "size": 34689,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/runtime/autonovel-messy-engine (1) (1).ts"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "autonovel-messy-engine.ts",
+   "canonical": {
+    "path": "src/runtime/autonovel-messy-engine (1).ts",
+    "hash": "4dd35154a1a2",
+    "size": 34689,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/runtime/autonovel-messy-engine (1).ts"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "autonovel.ts",
+   "canonical": {
+    "path": "src/runtime/autonovel.ts",
+    "hash": "613b0568c246",
+    "size": 18196,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/runtime/autonovel.ts"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "diseminer.ts",
+   "canonical": {
+    "path": "src/runtime/diseminer.ts",
+    "hash": "0c3eac9d6b98",
+    "size": 30432,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/runtime/diseminer.ts"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "disseminer.ts",
+   "canonical": {
+    "path": "src/runtime/disseminer.ts",
+    "hash": "0e0a10b86fec",
+    "size": 20031,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/runtime/disseminer.ts"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "foundations.ts",
+   "canonical": {
+    "path": "src/runtime/foundations.ts",
+    "hash": "63f5c13385bf",
+    "size": 21556,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/runtime/foundations.ts"
+   },
+   "variantCount": 2,
+   "variants": [
+    {
+     "path": "resolver/variants/foundations.ts/c7dfb49a9594.ts",
+     "hash": "c7dfb49a9594",
+     "size": 19505,
+     "sourceOrigin": "Synthia_Progressive_Upgrade_v0_5_MERGED/Synthia_Progressive_Upgrade_v0_5/runtime/foundations.ts",
+     "allOccurrences": [
+      "Synthia_Progressive_Upgrade_v0_5_FIXED/Synthia_Progressive_Upgrade_v0_5/runtime/foundations.ts",
+      "Synthia_Progressive_Upgrade_v0_5_MERGED/Synthia_Progressive_Upgrade_v0_5/runtime/foundations.ts",
+      "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/preserved_v0_5/runtime/foundations.ts"
+     ]
+    },
+    {
+     "path": "resolver/variants/foundations.ts/fcfa24cdb307.ts",
+     "hash": "fcfa24cdb307",
+     "size": 19035,
+     "sourceOrigin": "Synthia_Progressive_Upgrade_v0_5_FIXED/Synthia_Progressive_Upgrade_v0_5/runtime/_preserved_v0_3/foundations.ts",
+     "allOccurrences": [
+      "Synthia_Progressive_Upgrade_v0_2_WIRED/Synthia_Progressive_Upgrade_v0_2/runtime/foundations.ts",
+      "Synthia_Progressive_Upgrade_v0_5_FIXED/Synthia_Progressive_Upgrade_v0_5/runtime/_preserved_v0_3/foundations.ts",
+      "Synthia_Progressive_Upgrade_v0_5_MERGED/Synthia_Progressive_Upgrade_v0_5/runtime/_preserved_v0_3/foundations.ts",
+      "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/runtime/_preserved_v0_3/foundations.ts"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "dialogue.txt",
+   "canonical": {
+    "path": "src/runtime/incoming/dialogue.txt",
+    "hash": "fdbbba214fc8",
+    "size": 205,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/runtime/incoming/dialogue.txt"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "game_design.md",
+   "canonical": {
+    "path": "src/runtime/incoming/game_design.md",
+    "hash": "91ead796da23",
+    "size": 275,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/runtime/incoming/game_design.md"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "index.html",
+   "canonical": {
+    "path": "src/runtime/incoming/index.html",
+    "hash": "2a8270da59e1",
+    "size": 119,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/runtime/incoming/index.html"
+   },
+   "variantCount": 1,
+   "variants": [
+    {
+     "path": "resolver/variants/index.html/31ff9ca5efe0.html",
+     "hash": "31ff9ca5efe0",
+     "size": 13304,
+     "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/runtime/index.html",
+     "allOccurrences": [
+      "Synthia_Progressive_Upgrade_v0_2_WIRED/Synthia_Progressive_Upgrade_v0_2/runtime/index.html",
+      "Synthia_Progressive_Upgrade_v0_5_FIXED/Synthia_Progressive_Upgrade_v0_5/runtime/index.html",
+      "Synthia_Progressive_Upgrade_v0_5_MERGED/Synthia_Progressive_Upgrade_v0_5/runtime/index.html",
+      "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/runtime/index.html"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "test_app.py",
+   "canonical": {
+    "path": "src/runtime/incoming/test_app.py",
+    "hash": "f8a5dafeacc6",
+    "size": 202,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/runtime/incoming/test_app.py"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "layer4_diseminer.js",
+   "canonical": {
+    "path": "src/runtime/layer4_diseminer.js",
+    "hash": "4f4e5e9d0b7c",
+    "size": 17350,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/runtime/layer4_diseminer.js"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "meshServer.js",
+   "canonical": {
+    "path": "src/runtime/meshServer.js",
+    "hash": "a3ed5a51f1c7",
+    "size": 13632,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/runtime/meshServer.js"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "mesh_builder.py",
+   "canonical": {
+    "path": "src/runtime/mesh_builder.py",
+    "hash": "e8b0704a06ec",
+    "size": 7681,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/runtime/mesh_builder.py"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "messy_backend.py",
+   "canonical": {
+    "path": "src/runtime/messy_backend.py",
+    "hash": "5eb8513c8860",
+    "size": 20905,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/runtime/messy_backend.py"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "messy_neural_v2.py",
+   "canonical": {
+    "path": "src/runtime/messy_neural_v2.py",
+    "hash": "c7293a17387d",
+    "size": 38179,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/runtime/messy_neural_v2.py"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "monte-carlo-grammar-engine.ts",
+   "canonical": {
+    "path": "src/runtime/monte-carlo-grammar-engine.ts",
+    "hash": "a0244263a605",
+    "size": 28345,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/runtime/monte-carlo-grammar-engine.ts"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "morphbus.py",
+   "canonical": {
+    "path": "src/runtime/morphbus.py",
+    "hash": "71017229fc15",
+    "size": 10358,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/runtime/morphbus.py"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "organ_01_diseminer.py",
+   "canonical": {
+    "path": "src/runtime/organ_01_diseminer.py",
+    "hash": "b0869bcb7376",
+    "size": 18141,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/runtime/organ_01_diseminer.py"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "organ_base.py",
+   "canonical": {
+    "path": "src/runtime/organ_base.py",
+    "hash": "a6323dd6c82c",
+    "size": 7980,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/runtime/organ_base.py"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "diseminer-js-changes.js",
+   "canonical": {
+    "path": "src/vendor/youniverse-diseminer-3/diseminer-js-changes.js",
+    "hash": "c85793b218f4",
+    "size": 8828,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/runtime/youniverse-diseminer-3_extracted/diseminer-js-changes.js"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "youniverse-dise-part1.html",
+   "canonical": {
+    "path": "src/vendor/youniverse-diseminer-3/youniverse-dise-part1.html",
+    "hash": "df4f2afa701a",
+    "size": 14823,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/runtime/youniverse-diseminer-3_extracted/youniverse-dise-part1.html"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "youniverse-dise-part2.html",
+   "canonical": {
+    "path": "src/vendor/youniverse-diseminer-3/youniverse-dise-part2.html",
+    "hash": "6d568583f599",
+    "size": 6213,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/runtime/youniverse-diseminer-3_extracted/youniverse-dise-part2.html"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "youniverse-dise-part3.js",
+   "canonical": {
+    "path": "src/vendor/youniverse-diseminer-3/youniverse-dise-part3.js",
+    "hash": "a81fddead5da",
+    "size": 21208,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/runtime/youniverse-diseminer-3_extracted/youniverse-dise-part3.js"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "youniverse-dise-part4.js",
+   "canonical": {
+    "path": "src/vendor/youniverse-diseminer-3/youniverse-dise-part4.js",
+    "hash": "10cff0449abf",
+    "size": 13547,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/runtime/youniverse-diseminer-3_extracted/youniverse-dise-part4.js"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "youniverse-dise-part5.js",
+   "canonical": {
+    "path": "src/vendor/youniverse-diseminer-3/youniverse-dise-part5.js",
+    "hash": "6b5bf81e2ada",
+    "size": 19715,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/runtime/youniverse-diseminer-3_extracted/youniverse-dise-part5.js"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "smoke-test.ts",
+   "canonical": {
+    "path": "src/smoke-test.ts",
+    "hash": "f13df5257caa",
+    "size": 3562,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_2_WIRED/Synthia_Progressive_Upgrade_v0_2/smoke-test.ts"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "FIELD_LAYOUT_DEFERRED.md",
+   "canonical": {
+    "path": "src/FIELD_LAYOUT_DEFERRED.md",
+    "hash": "4d0b62908e6b",
+    "size": 915,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/FIELD_LAYOUT_DEFERRED.md"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "MOVE_FIX.md",
+   "canonical": {
+    "path": "src/MOVE_FIX.md",
+    "hash": "01debd7fbf1c",
+    "size": 1671,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_5_MERGED/Synthia_Progressive_Upgrade_v0_5/MOVE_FIX.md"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "TEST_RESULTS.md",
+   "canonical": {
+    "path": "src/TEST_RESULTS.md",
+    "hash": "b62b3a48f4f3",
+    "size": 3288,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/TEST_RESULTS.md"
+   },
+   "variantCount": 1,
+   "variants": [
+    {
+     "path": "resolver/variants/TEST_RESULTS.md/9e0b22fe88ec.md",
+     "hash": "9e0b22fe88ec",
+     "size": 2718,
+     "sourceOrigin": "Synthia_Progressive_Upgrade_v0_5_MERGED/Synthia_Progressive_Upgrade_v0_5/TEST_RESULTS.md",
+     "allOccurrences": [
+      "Synthia_Progressive_Upgrade_v0_5_FIXED/Synthia_Progressive_Upgrade_v0_5/TEST_RESULTS.md",
+      "Synthia_Progressive_Upgrade_v0_5_MERGED/Synthia_Progressive_Upgrade_v0_5/TEST_RESULTS.md",
+      "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/preserved_v0_5/TEST_RESULTS.md"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "FactoryToolGenerator.ts",
+   "canonical": {
+    "path": "src/UPGRADES/autonomy/FactoryToolGenerator.ts",
+    "hash": "91a9189ee061",
+    "size": 6627,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/autonomy/FactoryToolGenerator.ts"
+   },
+   "variantCount": 1,
+   "variants": [
+    {
+     "path": "resolver/variants/FactoryToolGenerator.ts/f54b840337a5.ts",
+     "hash": "f54b840337a5",
+     "size": 6281,
+     "sourceOrigin": "Synthia_Progressive_Upgrade_v0_5_FIXED/Synthia_Progressive_Upgrade_v0_5/UPGRADES/_preserved_v0_3/autonomy/FactoryToolGenerator.ts",
+     "allOccurrences": [
+      "Synthia_Progressive_Upgrade_v0_5_FIXED/Synthia_Progressive_Upgrade_v0_5/UPGRADES/_preserved_v0_3/autonomy/FactoryToolGenerator.ts",
+      "Synthia_Progressive_Upgrade_v0_5_MERGED/Synthia_Progressive_Upgrade_v0_5/UPGRADES/_preserved_v0_3/autonomy/FactoryToolGenerator.ts",
+      "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/_preserved_v0_3/autonomy/FactoryToolGenerator.ts"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "artifact-materialization-smoke.test.ts",
+   "canonical": {
+    "path": "src/UPGRADES/autonomy/artifact-materialization-smoke.test.ts",
+    "hash": "8abb1f7006c5",
+    "size": 2061,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/autonomy/artifact-materialization-smoke.test.ts"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "artifact-materialization-unit.test.ts",
+   "canonical": {
+    "path": "src/UPGRADES/autonomy/artifact-materialization-unit.test.ts",
+    "hash": "c2c83e39b287",
+    "size": 3504,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/autonomy/artifact-materialization-unit.test.ts"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "autonomy-smoke.test.ts",
+   "canonical": {
+    "path": "src/UPGRADES/autonomy/autonomy-smoke.test.ts",
+    "hash": "0dc9e3b7a1fe",
+    "size": 2003,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/autonomy/autonomy-smoke.test.ts"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "channel-topology-smoke.test.ts",
+   "canonical": {
+    "path": "src/UPGRADES/autonomy/channel-topology-smoke.test.ts",
+    "hash": "a1b817d8e1e6",
+    "size": 635,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/autonomy/channel-topology-smoke.test.ts"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "learning-loop-smoke.test.ts",
+   "canonical": {
+    "path": "src/UPGRADES/autonomy/learning-loop-smoke.test.ts",
+    "hash": "1d65ba3bc6b7",
+    "size": 6349,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/autonomy/learning-loop-smoke.test.ts"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "ArtifactAssembler.v0_3.ts",
+   "canonical": {
+    "path": "src/UPGRADES/legacy/runtime/ArtifactAssembler.v0_3.ts",
+    "hash": "cb5a72d355fc",
+    "size": 4338,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/legacy/runtime/ArtifactAssembler.v0_3.ts"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "ArtifactValidator.v0_3.ts",
+   "canonical": {
+    "path": "src/UPGRADES/legacy/runtime/ArtifactValidator.v0_3.ts",
+    "hash": "fe090dea61fa",
+    "size": 961,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/legacy/runtime/ArtifactValidator.v0_3.ts"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "ChannelRegistry.v0_3.ts",
+   "canonical": {
+    "path": "src/UPGRADES/legacy/runtime/ChannelRegistry.v0_3.ts",
+    "hash": "635a0f4f471e",
+    "size": 3106,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/legacy/runtime/ChannelRegistry.v0_3.ts"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "tsconfig.learner-tests.json",
+   "canonical": {
+    "path": "src/UPGRADES/tsconfig.learner-tests.json",
+    "hash": "9dc0af817636",
+    "size": 600,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/tsconfig.learner-tests.json"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "tsconfig.learners.json",
+   "canonical": {
+    "path": "src/UPGRADES/tsconfig.learners.json",
+    "hash": "43f8a8ebbf62",
+    "size": 511,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/tsconfig.learners.json"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "tsconfig.learning-loop-test.json",
+   "canonical": {
+    "path": "src/UPGRADES/tsconfig.learning-loop-test.json",
+    "hash": "fdfdade33a5b",
+    "size": 1117,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/tsconfig.learning-loop-test.json"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "tsconfig.v0_3.json",
+   "canonical": {
+    "path": "src/UPGRADES/tsconfig.v0_3.json",
+    "hash": "1777ffbd5301",
+    "size": 1022,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/tsconfig.v0_3.json"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "tsconfig.v0_4.json",
+   "canonical": {
+    "path": "src/UPGRADES/tsconfig.v0_4.json",
+    "hash": "1777ffbd5301",
+    "size": 1022,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/tsconfig.v0_4.json"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "tsconfig.v0_5.json",
+   "canonical": {
+    "path": "src/UPGRADES/tsconfig.v0_5.json",
+    "hash": "626297699ffb",
+    "size": 1335,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/tsconfig.v0_5.json"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "VERSION.md",
+   "canonical": {
+    "path": "src/VERSION.md",
+    "hash": "36fc1ed730c9",
+    "size": 883,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/VERSION.md"
+   },
+   "variantCount": 1,
+   "variants": [
+    {
+     "path": "resolver/variants/VERSION.md/74cf8ff46007.md",
+     "hash": "74cf8ff46007",
+     "size": 351,
+     "sourceOrigin": "Synthia_Progressive_Upgrade_v0_5_MERGED/Synthia_Progressive_Upgrade_v0_5/VERSION.md",
+     "allOccurrences": [
+      "Synthia_Progressive_Upgrade_v0_5_FIXED/Synthia_Progressive_Upgrade_v0_5/VERSION.md",
+      "Synthia_Progressive_Upgrade_v0_5_MERGED/Synthia_Progressive_Upgrade_v0_5/VERSION.md",
+      "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/preserved_v0_5/VERSION.md"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "EventMesh.ts",
+   "canonical": {
+    "path": "src/runtime/EventMesh.ts",
+    "hash": "ad9cef912b6b",
+    "size": 2231,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/runtime/EventMesh.ts"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "RuntimeLearningCoordinator.ts",
+   "canonical": {
+    "path": "src/runtime/RuntimeLearningCoordinator.ts",
+    "hash": "fd375e8f4fa1",
+    "size": 11462,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/runtime/RuntimeLearningCoordinator.ts"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "ToolBase.ts",
+   "canonical": {
+    "path": "src/runtime/ToolBase.ts",
+    "hash": "125548c91f74",
+    "size": 811,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/runtime/ToolBase.ts"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "ArcRuntime.v0_2.ts",
+   "canonical": {
+    "path": "src/runtime/_preserved_v0_2/ArcRuntime.v0_2.ts",
+    "hash": "8c8d99c753be",
+    "size": 1578,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/runtime/_preserved_v0_2/ArcRuntime.v0_2.ts"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "CapabilityRegistry.v0_2.ts",
+   "canonical": {
+    "path": "src/runtime/_preserved_v0_2/CapabilityRegistry.v0_2.ts",
+    "hash": "26f21a2ab092",
+    "size": 433,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/runtime/_preserved_v0_2/CapabilityRegistry.v0_2.ts"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "ChannelRegistry.v0_2.ts",
+   "canonical": {
+    "path": "src/runtime/_preserved_v0_2/ChannelRegistry.v0_2.ts",
+    "hash": "3e60e548433e",
+    "size": 2330,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/runtime/_preserved_v0_2/ChannelRegistry.v0_2.ts"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "GraphRuntime.v0_2.ts",
+   "canonical": {
+    "path": "src/runtime/_preserved_v0_2/GraphRuntime.v0_2.ts",
+    "hash": "5522b8bfd540",
+    "size": 16261,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/runtime/_preserved_v0_2/GraphRuntime.v0_2.ts"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "MessageBus.v0_2.ts",
+   "canonical": {
+    "path": "src/runtime/_preserved_v0_2/MessageBus.v0_2.ts",
+    "hash": "705f818b00c0",
+    "size": 967,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/runtime/_preserved_v0_2/MessageBus.v0_2.ts"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "SynthiaToolBootstrap.v0_2.ts",
+   "canonical": {
+    "path": "src/runtime/_preserved_v0_2/SynthiaToolBootstrap.v0_2.ts",
+    "hash": "9516bdef02d1",
+    "size": 5947,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/runtime/_preserved_v0_2/SynthiaToolBootstrap.v0_2.ts"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "ToolRegistry.v0_2.ts",
+   "canonical": {
+    "path": "src/runtime/_preserved_v0_2/ToolRegistry.v0_2.ts",
+    "hash": "eac8f9bb45a3",
+    "size": 1752,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/runtime/_preserved_v0_2/ToolRegistry.v0_2.ts"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "ToolScheduler.v0_2.ts",
+   "canonical": {
+    "path": "src/runtime/_preserved_v0_2/ToolScheduler.v0_2.ts",
+    "hash": "1d64731358be",
+    "size": 2166,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/runtime/_preserved_v0_2/ToolScheduler.v0_2.ts"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "createSynthiaRuntime.v0_2.ts",
+   "canonical": {
+    "path": "src/runtime/_preserved_v0_2/createSynthiaRuntime.v0_2.ts",
+    "hash": "93642b08a83d",
+    "size": 462,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/runtime/_preserved_v0_2/createSynthiaRuntime.v0_2.ts"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "MERGE_NOTES.md",
+   "canonical": {
+    "path": "src/MERGE_NOTES.md",
+    "hash": "ce796cf13cae",
+    "size": 2860,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_5_MERGED/Synthia_Progressive_Upgrade_v0_5/MERGE_NOTES.md"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "engine.ts",
+   "canonical": {
+    "path": "src/UPGRADES/vendor/autonovel-messy/engine.ts",
+    "hash": "c82f0e9918fa",
+    "size": 43365,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_5_MERGED/Synthia_Progressive_Upgrade_v0_5/UPGRADES/vendor/autonovel-messy/engine.ts"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "ANTICIPATORY_MESH_MEMORY.md",
+   "canonical": {
+    "path": "src/ANTICIPATORY_MESH_MEMORY.md",
+    "hash": "cbd698693035",
+    "size": 3251,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/ANTICIPATORY_MESH_MEMORY.md"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "tsconfig.anticipatory-runtime-test.json",
+   "canonical": {
+    "path": "src/UPGRADES/tsconfig.anticipatory-runtime-test.json",
+    "hash": "22cb013c402c",
+    "size": 1503,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/tsconfig.anticipatory-runtime-test.json"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "tsconfig.anticipatory-test.json",
+   "canonical": {
+    "path": "src/UPGRADES/tsconfig.anticipatory-test.json",
+    "hash": "753ba7b006c5",
+    "size": 390,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/tsconfig.anticipatory-test.json"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "tsconfig.v0_6.json",
+   "canonical": {
+    "path": "src/UPGRADES/tsconfig.v0_6.json",
+    "hash": "78372e9a4558",
+    "size": 1379,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/UPGRADES/tsconfig.v0_6.json"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "AnticipatoryGraphRuntime.test.ts",
+   "canonical": {
+    "path": "src/runtime/AnticipatoryGraphRuntime.test.ts",
+    "hash": "402f994199d6",
+    "size": 2301,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/runtime/AnticipatoryGraphRuntime.test.ts"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "AnticipatoryMeshMemory.test.ts",
+   "canonical": {
+    "path": "src/runtime/AnticipatoryMeshMemory.test.ts",
+    "hash": "973a36ec9c4e",
+    "size": 6223,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/runtime/AnticipatoryMeshMemory.test.ts"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "AnticipatoryMeshMemory.ts",
+   "canonical": {
+    "path": "src/runtime/AnticipatoryMeshMemory.ts",
+    "hash": "a5589220b767",
+    "size": 12023,
+    "sourceOrigin": "Synthia_Progressive_Upgrade_v0_6/Synthia_Progressive_Upgrade_v0_6/runtime/AnticipatoryMeshMemory.ts"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "dimension-terms.json",
+   "canonical": {
+    "path": "src/resonance-engine-substrate/src/data/dimension-terms.json",
+    "hash": "e1a794bb344a",
+    "size": 30914,
+    "sourceOrigin": "resonance-engine-substrate/check_src/src/data/dimension-terms.json"
+   },
+   "variantCount": 0,
+   "variants": []
+  },
+  {
+   "name": "DimensionRouter.js",
+   "canonical": {
+    "path": "src/resonance-engine-substrate/src/generators/DimensionRouter.js",
+    "hash": "40cb824cac42",
+    "size": 7911,
+    "sourceOrigin": "resonance-engine-substrate/check_src/src/generators/DimensionRouter.js"
+   },
+   "variantCount": 0,
+   "variants": []
+  }
+ ]
+}

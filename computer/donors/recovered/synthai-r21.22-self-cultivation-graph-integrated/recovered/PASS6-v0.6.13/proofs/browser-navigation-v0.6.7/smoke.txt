@@ -1,0 +1,15 @@
+--- autonomous browser navigation smoke ---
+[AUTOLING] Initialized - Sheldon Klein inspired linguistic fieldworker
+[DISEMINER] Initialized - Distributional-Semantics Inference Maker
+[AUTOLING] Running full pipeline on: "I need to fill out an application for a job"
+[AUTOLING] Frame 1: Learning from "I need to fill out an application for a job"
+[AUTOLING] H1 coined: S_1 -> I need to fill out an application for a job
+[AUTOLING] CAN YOU SAY: I need to fill out an application for a job
+[DISEMINER] Building distributional space from 1 documents
+[DISEMINER] Distributional space built: 6 words
+[DISEMINER] Extracting claims from: contact-1-3228775828
+[DISEMINER] Extracted 1 claims
+  discovered: Work With Us -> Open Roles & Apply
+  reached: Candidate Application
+  filled: name/email; preserved human-only signature boundary
+--- autonomous browser navigation smoke complete ---

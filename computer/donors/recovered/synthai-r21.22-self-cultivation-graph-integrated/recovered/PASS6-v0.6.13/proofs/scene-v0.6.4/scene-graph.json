@@ -1,0 +1,102 @@
+{
+  "schemaVersion": 1,
+  "intent": "Create a five-second video where a gold sphere rises behind a mountain at sunset while the camera slowly pans right",
+  "medium": "video",
+  "canvas": {
+    "width": 640,
+    "height": 360
+  },
+  "environment": {
+    "kind": "sunset",
+    "sky": {
+      "top": "#4c2f7a",
+      "bottom": "#ffb36b"
+    },
+    "ambient": 0.72
+  },
+  "entities": [
+    {
+      "id": "sphere-1",
+      "type": "object",
+      "geometry": "sphere",
+      "material": {
+        "color": "#d4af37",
+        "glow": true
+      },
+      "transform": {
+        "x": 0.52,
+        "y": 0.72,
+        "z": -1,
+        "scale": 1
+      }
+    },
+    {
+      "id": "mountain-1",
+      "type": "object",
+      "geometry": "mountain",
+      "material": {
+        "color": "#2b2636",
+        "glow": false
+      },
+      "transform": {
+        "x": 0.5,
+        "y": 0.68,
+        "z": 0,
+        "scale": 1
+      }
+    }
+  ],
+  "relations": [
+    {
+      "type": "behind",
+      "subject": "sphere-1",
+      "object": "mountain-1"
+    }
+  ],
+  "camera": {
+    "projection": "orthographic-2d",
+    "x": 0,
+    "y": 0,
+    "zoom": 1,
+    "motion": {
+      "property": "x",
+      "from": 0,
+      "to": 0.1,
+      "easing": "smoothstep"
+    }
+  },
+  "timeline": {
+    "durationSeconds": 5,
+    "fps": 30,
+    "tracks": [
+      {
+        "target": "sphere-1",
+        "property": "y",
+        "from": 0.72,
+        "to": 0.34,
+        "easing": "smoothstep"
+      },
+      {
+        "target": "camera",
+        "property": "x",
+        "from": 0,
+        "to": 0.1,
+        "easing": "smoothstep"
+      }
+    ]
+  },
+  "features": [
+    "background.gradient",
+    "camera.pan",
+    "geometry.mountain",
+    "geometry.sphere",
+    "lighting.sunset",
+    "material.glow",
+    "material.solid",
+    "timeline.position"
+  ],
+  "output": {
+    "format": "webm",
+    "filename": "scene.webm"
+  }
+}

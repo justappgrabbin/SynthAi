@@ -1,0 +1,45 @@
+{
+  "version": "0.11.3-r21.3",
+  "base": {
+    "file": "Adaya-Automaton-ORGANISM-v0.11.2-r21.2-DEVELOPMENTAL-SELF.zip",
+    "sha256": "b1b9a7fde8ee519aa3c39792abd4f4bc71e1c53fa701bb273d649b4e384efba3"
+  },
+  "donors": [
+    {
+      "file": "unified.zip",
+      "sha256": "fd0ea23498cb23084318c0b1c6fa1375297cc7f12b1f71c507a72ddb312e5483",
+      "role": "evolutionary ancestry for runtime learning, aspiration, anticipatory memory, ATO factory and complementarity; only current-compatible concepts retained"
+    },
+    {
+      "file": "Synthia-Phone-Merged-v0.7.2.zip",
+      "sha256": "8a74ae8f674dba22e759322ca53f1b43d9248300e5dd5d20d55652bf0a18f884",
+      "role": "5D emergent mesh, causal trace, persistent AUTOLING/code-DNA learning, task continuity and four-breed semantic renderer frames"
+    }
+  ],
+  "active_integrations": [
+    "EmergenceEngine",
+    "UserDevelopmentModel",
+    "CoupledDevelopmentEngine",
+    "5D EmergentMesh",
+    "PersistentLearningOrgan",
+    "CodeDNALearner",
+    "TaskContinuity",
+    "LivingWorldView",
+    "64 semantic creature frames"
+  ],
+  "not_promoted": [
+    "older canned partner profiles",
+    "prewritten emergent hypotheses",
+    "simulated ephemeris download/test paths",
+    "Phone donor PWA/APK/install shell",
+    "duplicate donor copies"
+  ],
+  "security": {
+    "bundledRuntimeState": false,
+    "bundledMcpToken": false
+  },
+  "distribution": {
+    "remoteKnowledgeCorpusBundled": false,
+    "androidPackagingBundled": false
+  }
+}
