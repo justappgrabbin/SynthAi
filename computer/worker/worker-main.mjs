@@ -53,6 +53,7 @@ try {
       if (!job.output) {
         // The constructor provides the actual workspace without mounting unrelated server providers.
         const computer = new ComputerRuntime();
+        await computer.boot();
         const builder = new RelayBuilder(computer);
         const project = await builder.build(job.spec);
         await checkpoint(job, 'built', { output: computer.projects.snapshot(project.id) });
