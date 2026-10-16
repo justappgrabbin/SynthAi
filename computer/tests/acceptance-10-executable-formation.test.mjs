@@ -41,7 +41,12 @@ test('ACCEPTANCE 10: persistent formation creation, graph morph, activation and 
   try {
     const runtime1 = await boot();
     assert.ok(runtime1.services.has('formation-execution'));
-    assert.ok(runtime1.capabilityRegistry.get('formation-execution'));
+    assert.ok(runtime1.capabilityRegistry.get('formation_execution'));
+    const capability = runtime1.queryCapability('formation_execution');
+    assert.equal(capability.found, true);
+    assert.equal(capability.providers[0].provider_id, FORMATION_PROVIDER);
+    assert.equal(capability.providers[0].status, 'VERIFIED');
+    assert.ok(capability.providers[0].verification_evidence.length > 0);
     await runtime1.createFormation({
       id: 'purpose-reader', address: ADDRESS, purpose: 'purpose-retained',
       graph: { nodes: [{ id: 'input' }, { id: 'result' }],
