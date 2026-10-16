@@ -40,7 +40,7 @@ test('ACCEPTANCE 10: persistent formation creation, graph morph, activation and 
   try {
     const runtime1 = await boot();
     assert.ok(runtime1.services.has('formation-execution'));
-    assert.ok(runtime1.capabilities.get('formation-execution'));
+    assert.ok(runtime1.capabilityRegistry.get('formation-execution'));
     const created = await runtime1.createFormation({
       id: 'morphing-graph', address: ADDRESS, graph: graph1(),
       purpose: 'prove structural execution',
