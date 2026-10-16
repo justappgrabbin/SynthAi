@@ -1,0 +1,37 @@
+name: SWARM-OS Computer Formation Verification
+on:
+  push:
+    branches: [swarm-os-computer-formation-20261016]
+    paths:
+      - 'computer/services/executable-formations.mjs'
+      - 'computer/ComputerRuntime.mjs'
+      - 'computer/tests/acceptance-10-executable-formation.test.mjs'
+      - '.github/workflows/swarm-os-computer-formation.yml'
+  pull_request:
+    paths:
+      - 'computer/services/executable-formations.mjs'
+      - 'computer/ComputerRuntime.mjs'
+      - 'computer/tests/acceptance-10-executable-formation.test.mjs'
+      - '.github/workflows/swarm-os-computer-formation.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax validation
+        run: |
+          node --check computer/services/executable-formations.mjs
+          node --check computer/ComputerRuntime.mjs
+          node --check computer/tests/acceptance-10-executable-formation.test.mjs
+      - name: Persistent formation and native Klein integration tests
+        run: node --test computer/tests/acceptance-10-executable-formation.test.mjs
+      - name: Computer acceptance regression suite
+        run: npm run test:computer
+      - name: Existing Computer browser build
+        run: npm run build:computer
