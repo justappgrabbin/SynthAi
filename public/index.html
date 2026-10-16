@@ -130,6 +130,36 @@
           <div class="panel-head"><div><small>MACRO REGISTRY</small><h3>SynthAI family</h3></div></div>
           <div id="systemsList" class="cards"></div>
         </article>
+        <article class="panel swarm-panel" id="swarmPanel">
+          <div class="panel-head">
+            <div><small>LOCAL ATO EXECUTION</small><h3>Executable formations</h3></div>
+            <span class="pill" id="formationStatus">Local runtime</span>
+          </div>
+          <p class="muted">Compose native Klein tools through your existing state space and ATO engine. Execution and lexical memory stay on this device.</p>
+          <div class="row">
+            <button class="primary" id="assembleKlein">Assemble AUTOLING + Diseminer</button>
+            <button class="quiet" id="refreshFormations">Refresh formations</button>
+          </div>
+          <div id="formationMessage" class="message" role="status">No changes made yet.</div>
+          <div id="formationList" class="formation-list"></div>
+          <div class="formation-controls">
+            <label>Executable formation
+              <select id="formationPicker" aria-label="Executable formation">
+                <option value="">Assemble a formation first</option>
+              </select>
+            </label>
+            <label>Sentence to process
+              <input id="formationText" value="wolf is curious" autocomplete="off"
+                aria-label="Text for the selected formation">
+            </label>
+            <button class="primary" id="runFormation">Execute formation</button>
+          </div>
+          <div class="formation-output" id="formationOutput" role="status" aria-live="polite">Select and execute a formation to see its actual output.</div>
+          <div class="formation-memory">
+            <div class="panel-head"><div><small>NOTEBOOK HISTORY</small><h3>Klein lexical memory</h3></div></div>
+            <div id="formationMemory" class="muted">No lexical records written by this Computer session.</div>
+          </div>
+        </article>
       </section>
 
       <section class="view" id="activity">
