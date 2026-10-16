@@ -151,7 +151,7 @@ export class ComputerFormationService {
     }
   }
 
-  #prepare(formationId, revisionId, address, purpose, graph) {
+  #prepare(formationId, revisionId, address, purpose, graph, lineage = null) {
     this.#bindDependentOperations(graph, revisionId);
     const compiled = this.compiler.compile({
       id: revisionId, address, purpose, graph,
@@ -168,6 +168,7 @@ export class ComputerFormationService {
       metadata: {
         family: 'computer-executable-formation',
         formationId, revisionId, artifactId: compiled.artifact.id,
+        generation: lineage?.generation ?? 0,
       },
     });
     return { automaton, compiled };
@@ -176,7 +177,7 @@ export class ComputerFormationService {
   #mount(revision, formation, prepared) {
     if (this.compiled.has(revision.id)) return;
     const item = prepared || this.#prepare(
-      formation.id, revision.id, formation.address, formation.purpose, revision.graph,
+      formation.id, revision.id, formation.address, formation.purpose, revision.graph, revision.lineage,
     );
     if (item.compiled.artifact.id !== revision.artifactId)
       throw new Error('Recovered formation artifact checksum mismatch: ' + revision.id);
@@ -259,7 +260,7 @@ export class ComputerFormationService {
       const normalized = this.kernel.get(address).address;
       const revisionId = revisionKey(id, 1);
       const graphSnapshot = clone(graph);
-      const prepared = this.#prepare(id, revisionId, normalized, purpose, graphSnapshot);
+      const prepared = this.#prepare(id, revisionId, normalized, purpose, graphSnapshot, lineage);
       return this.#commit(id, 'create', {
         manifestVersion: FORMATION_MANIFEST,
         formationId: id, revisionId, previousRevision: null,
@@ -277,12 +278,14 @@ export class ComputerFormationService {
       const revisionId = revisionKey(id, f.revisions.length + 1);
       try {
         const graphSnapshot = clone(graph);
-        const prepared = this.#prepare(id, revisionId, f.address, f.purpose, graphSnapshot);
+        const prepared = this.#prepare(id, revisionId, f.address, f.purpose, graphSnapshot,
+          f.revisions.at(-1)?.lineage);
         return await this.#commit(id, 'transform', {
           manifestVersion: FORMATION_MANIFEST,
           formationId: id, revisionId, previousRevision: f.activeRevision,
           address: clone(f.address), purpose: f.purpose,
           reason, graph: graphSnapshot, artifactId: prepared.compiled.artifact.id,
+          lineage: clone(f.revisions.at(-1)?.lineage ?? null),
         }, prepared, f.address, previous);
       } catch (error) {
         // Only reject invalid input; a failed persistence write must not be
