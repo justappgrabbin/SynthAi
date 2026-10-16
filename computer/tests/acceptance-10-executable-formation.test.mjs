@@ -28,7 +28,8 @@ const graph2 = () => ({
 });
 const bindOperations = runtime => runtime
   .registerFormationOperation('test.double', n => n * 2)
-  .registerFormationOperation('test.increment', n => n + 1);
+  .registerFormationOperation('test.increment', n => n + 1)
+  .registerFormationOperation('test.inspect-purpose', (value, context) => context.purpose);
 
 test('ACCEPTANCE 10: persistent formation creation, graph morph, activation and restart recovery', async t => {
   const dir = await mkdtemp(join(tmpdir(), 'synthai-formation-'));
@@ -41,6 +42,12 @@ test('ACCEPTANCE 10: persistent formation creation, graph morph, activation and 
     const runtime1 = await boot();
     assert.ok(runtime1.services.has('formation-execution'));
     assert.ok(runtime1.capabilityRegistry.get('formation-execution'));
+    await runtime1.createFormation({
+      id: 'purpose-reader', address: ADDRESS, purpose: 'purpose-retained',
+      graph: { nodes: [{ id: 'input' }, { id: 'result' }],
+        edges: [{ from: 'input', to: 'result', functionId: 'test.inspect-purpose' }] },
+    });
+    assert.equal((await runtime1.executeFormation('purpose-reader', null)).outputs.result, 'purpose-retained');
     const created = await runtime1.createFormation({
       id: 'morphing-graph', address: ADDRESS, graph: graph1(),
       purpose: 'prove structural execution',
@@ -59,6 +66,8 @@ test('ACCEPTANCE 10: persistent formation creation, graph morph, activation and 
     assert.equal((await runtime1.executeFormation('morphing-graph', 2, { revisionId: oldRevision })).outputs.result, 4);
     const projected = runtime1.formations.kernel.project(ADDRESS, 'code');
     assert.equal(projected.value.activeRevision, newRevision, 'code projection points to active version');
+    assert.equal(projected.value.formations['morphing-graph'].activeRevision, newRevision);
+    assert.equal(projected.value.formations['purpose-reader'].activeRevision, 'formation:purpose-reader@1');
 
     // Activation chooses a historical executable revision WITHOUT deleting the new one.
     await runtime1.activateFormation('morphing-graph', oldRevision);
@@ -74,6 +83,8 @@ test('ACCEPTANCE 10: persistent formation creation, graph morph, activation and 
     // FRESH COMPUTER: event replay reconstructs current activation and BOTH graphs.
     const runtime2 = await boot();
     const recovered = runtime2.formations.describe('morphing-graph');
+    assert.equal((await runtime2.executeFormation('purpose-reader', null)).outputs.result,
+      'purpose-retained', 'ATO purpose passed to installed operation after fresh boot');
     assert.deepEqual(recovered.revisions, runtime1.formations.describe('morphing-graph').revisions);
     assert.equal(recovered.activeRevision, oldRevision);
     assert.equal((await runtime2.executeFormation('morphing-graph', 3)).outputs.result, 6);
