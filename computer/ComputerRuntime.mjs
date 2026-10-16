@@ -90,7 +90,7 @@ export class ComputerRuntime {
     // Only an addressed code projection is kept in memory. No competing storage.
     this.formations = await new ComputerFormationService({ computer: this }).recover();
     this.services.register('formation-execution', { provider: this.formations, contract: 'create/transform/activate/execute/history' });
-    this.capabilities.register('formation-execution', { providers: [FORMATION_PROVIDER] });
+    this.capabilities.register('formation_execution', { providers: [FORMATION_PROVIDER] });
     this.addressService = new AddressService({ bus: this.bus });
     this.stateResolver = new StateResolver({
       bus: this.bus,
