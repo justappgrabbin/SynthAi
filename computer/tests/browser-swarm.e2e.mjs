@@ -169,13 +169,29 @@ try {
   const morphImage = await page.locator('#fitnessPreview').evaluate(canvas =>
     Array.from(canvas.getContext('2d').getImageData(10, 15, 1, 1).data));
   assert.equal(morphImage[3], 255);
+  await page.locator('#evolveLighting').click();
+  await page.waitForFunction(() => /^(Accepted:|Rejected:)/.test(
+    document.getElementById('fitnessStatus')?.textContent || ''),
+    null, { timeout: 35000 });
+  assert.match(await page.locator('#fitnessEvidence').innerText(), /candidate selected/);
+  const historyOfEvolution = await page.evaluate(() =>
+    window.SynthAIComputer.fitnessMorph.evolutionHistory());
+  assert.equal(historyOfEvolution.length, 1);
+  assert.equal(historyOfEvolution[0].result.candidates.length, 2);
+  assert.equal(historyOfEvolution[0].input.samples, undefined);
+  const evolved = await page.evaluate(() =>
+    window.SynthAIComputer.formations.describe('simlish:lighting-active'));
+  assert.ok(evolved.activeRevision);
+  assert.match(evolved.revisions[0].graph.edges[0].functionId, /simlish.evolution.constant/);
+
   const morphs = await page.evaluate(() => window.SynthAIComputer.formations.list()
     .filter(f => f.id.startsWith('simlish:')).map(f => f.id));
-  assert.deepEqual(morphs, ['simlish:frame-geometry', 'simlish:swarm-lighting']);
+  assert.deepEqual(morphs, ['simlish:frame-geometry', 'simlish:lighting-active', 'simlish:lighting-constant', 'simlish:lighting-gradient', 'simlish:swarm-lighting']);
 
   await page.reload({ waitUntil: 'load' });
   await page.waitForFunction(() => Boolean(window.SynthAIComputer?.fitnessMorph));
   assert.equal((await page.evaluate(() => window.SynthAIComputer.fitnessMorph.history())).length, 1);
+  assert.equal((await page.evaluate(() => window.SynthAIComputer.fitnessMorph.evolutionHistory())).length, 1);
   const restoredForms = await page.evaluate(() => window.SynthAIComputer.formations.list()
     .filter(f => f.id.startsWith('simlish:')).map(f => f.id));
   assert.deepEqual(restoredForms, morphs, 'real native geometry and fitness formations recover from IndexedDB');

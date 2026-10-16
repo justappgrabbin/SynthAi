@@ -168,8 +168,15 @@
             </div>
             <div class="row">
               <button class="primary" id="runSwarmFit">Fit lighting with PSO</button>
+              <button class="primary" id="evolveLighting">Evolve executable lighting graph</button>
               <button class="quiet" id="runFrameMorph">Morph actual image frames</button>
             </div>
+            <div class="row" id="studioCharacterControls" hidden>
+              <button class="quiet" id="useStudioCharacter">Use saved Studio character as source</button>
+              <button class="primary" id="applyStudioFitness" disabled>Apply accepted expression to Studio character</button>
+              <a href="../index.html" id="returnToStudioFitness" aria-label="Return to original Studio">Return to Studio</a>
+            </div>
+            <p class="message" role="status" id="studioCharacterStatus" hidden>Studio artwork remains in its original on-device project store.</p>
             <p class="message" role="status" id="fitnessStatus">Choose two local images to compare and morph.</p>
             <canvas id="fitnessPreview" width="192" height="128" aria-label="Locally fitted or morphing image preview"></canvas>
             <p class="muted" id="fitnessEvidence">Only bounded, measured fitness and morph geometry are claimed here.</p>

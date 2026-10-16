@@ -1,7 +1,7 @@
 name: SWARM-OS Computer Formation Verification
 on:
   push:
-    branches: [swarm-os-computer-formation-20261016, swarm-os-fitness-morph-20261016]
+    branches: [swarm-os-computer-formation-20261016, swarm-os-fitness-morph-20261016, swarm-os-formation-evolution-20261016]
     paths:
       - 'computer/**'
       - 'public/**'
@@ -32,9 +32,10 @@ jobs:
           node --check computer/tests/acceptance-11-recursive-formation.test.mjs
           node --check computer/services/fitness-morph.mjs
           node --check computer/tests/acceptance-13-fitness-morph.test.mjs
+          node --check computer/tests/acceptance-14-formation-evolution.test.mjs
           node --check public/fitness-morph-ui.mjs
       - name: Persistent formation and native Klein integration tests
-        run: node --test computer/tests/acceptance-10-executable-formation.test.mjs computer/tests/acceptance-11-recursive-formation.test.mjs computer/tests/acceptance-13-fitness-morph.test.mjs
+        run: node --test computer/tests/acceptance-10-executable-formation.test.mjs computer/tests/acceptance-11-recursive-formation.test.mjs computer/tests/acceptance-13-fitness-morph.test.mjs computer/tests/acceptance-14-formation-evolution.test.mjs
       - name: Install existing Penta ephemeris test dependency
         run: python3 -m pip install ephem
       - name: Computer acceptance regression suite

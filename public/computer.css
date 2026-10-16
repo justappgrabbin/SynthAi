@@ -22,3 +22,7 @@
 .fitness-morph-panel canvas{display:block;width:min(100%,360px);height:auto;aspect-ratio:3/2;image-rendering:auto;border:1px solid var(--line);border-radius:10px;margin:12px 0;background:#0d0913}
 .fitness-morph-panel input[type=file]{min-width:0;font-size:.77rem}
 .fitness-morph-panel .formation-controls label{min-width:0;flex:1 1 200px}
+
+/* Keep Studio-only controls absent in standalone browser Computer, even with row layout. */
+#studioCharacterControls[hidden],#studioCharacterStatus[hidden]{display:none!important}
+#studioCharacterControls a{color:var(--accent);align-self:center;text-decoration:underline}

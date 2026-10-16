@@ -62,6 +62,23 @@ function lightingPreview(source, values) {
 export function mountFitnessMorphUI({ computer }) {
   if (!computer?.fitnessMorph) throw new Error('Native Simlish swarm donor not mounted');
   let busy = false;
+  let studioCharacter = null;
+  let acceptedEvolution = null;
+  const clearAccepted = () => {
+    acceptedEvolution = null;
+    el('applyStudioFitness').disabled = true;
+  };
+  // This special relative module exists ONLY in the original Android
+  // YOU-N-I-VERSE assets. Browser-only Computer has no invented studio state.
+  if (globalThis.NativeDownloads) {
+    el('studioCharacterControls').hidden = false;
+    el('studioCharacterStatus').hidden = false;
+  }
+  el('fitnessSource').addEventListener('change', () => {
+    studioCharacter = null;
+    clearAccepted();
+  });
+  el('fitnessTarget').addEventListener('change', clearAccepted);
   const msg = (value, positive = false) => {
     el('fitnessStatus').textContent = value;
     el('fitnessStatus').className = 'message ' + (positive ? 'good' : '');
@@ -69,9 +86,9 @@ export function mountFitnessMorphUI({ computer }) {
   const withSurfaces = async callback => {
     if (busy) return;
     busy = true;
-    for (const button of ['runSwarmFit', 'runFrameMorph']) el(button).disabled = true;
+    for (const button of ['runSwarmFit', 'runFrameMorph', 'evolveLighting']) el(button).disabled = true;
     try {
-      const s = el('fitnessSource').files?.[0], t = el('fitnessTarget').files?.[0];
+      const s = studioCharacter?.file ?? el('fitnessSource').files?.[0], t = el('fitnessTarget').files?.[0];
       const [source, target] = await Promise.all([fromLocalFile(s), fromLocalFile(t)]);
       const address = computer.nativeKlein?.autoLing.address;
       if (!address) throw new Error('An existing donor address must be available before formation assembly');
@@ -81,7 +98,7 @@ export function mountFitnessMorphUI({ computer }) {
       msg(error.message);
     } finally {
       busy = false;
-      for (const button of ['runSwarmFit', 'runFrameMorph']) el(button).disabled = false;
+      for (const button of ['runSwarmFit', 'runFrameMorph', 'evolveLighting']) el(button).disabled = false;
     }
   };
   const show = canvas => {
@@ -103,6 +120,69 @@ export function mountFitnessMorphUI({ computer }) {
       ? 'Accepted: held-out image error improved and the existing MorphEngine expression changed.'
       : 'Not accepted: no held-out gain. The previous morph expression is preserved.', results.accepted);
   }));
+
+  el('useStudioCharacter').addEventListener('click', async () => {
+    if (busy) return;
+    try {
+      const { readStudioCharacter } = await import('../studio-bridge.mjs');
+      studioCharacter = await readStudioCharacter();
+      clearAccepted();
+      el('studioCharacterStatus').textContent =
+        'Original Studio ' + studioCharacter.world + ' character loaded locally · ' +
+        studioCharacter.activeLayerCount + ' prior fitted layer(s). The saved project remains unchanged.';
+      msg('Using the actual saved Studio character as source; choose a reference image to test.');
+    } catch (error) {
+      studioCharacter = null;
+      clearAccepted();
+      el('studioCharacterStatus').textContent = 'Studio character unavailable: ' + error.message;
+    }
+  });
+
+  el('evolveLighting').addEventListener('click', () => void withSurfaces(async (source, target) => {
+    clearAccepted();
+    msg('Executing both Simlish CPU PSO candidate formations against held-out pixels…');
+    const evidence = await computer.fitnessMorph.evolve(observations(source, target), [0, 0, 0]);
+    if (evidence.accepted) {
+      show(lightingPreview(source, evidence.coefficients));
+      if (studioCharacter) {
+        acceptedEvolution = { evidence, studioCharacter };
+        el('applyStudioFitness').disabled = false;
+      }
+    }
+    const metrics = evidence.candidates.map(c =>
+      c.strategy + ' held-out ' + c.heldOutAfter.toFixed(2)).join(' vs ');
+    el('fitnessEvidence').textContent = metrics +
+      ' · candidate selected: ' + (evidence.selected ?? 'none') +
+      ' · active ATO revision: ' + evidence.revision +
+      ' · graph transformed: ' + String(evidence.transformed);
+    msg(evidence.accepted ?
+      'Accepted: the best validated ATO graph and MorphEngine expression are retained.' :
+      'Rejected: no candidate improves held-out error; existing formation and character remain unchanged.',
+      evidence.accepted);
+  }));
+
+  el('applyStudioFitness').addEventListener('click', async () => {
+    if (!acceptedEvolution || busy) return;
+    el('applyStudioFitness').disabled = true;
+    try {
+      const { evidence, studioCharacter: state } = acceptedEvolution;
+      const { applyAcceptedStudioLighting } = await import('../studio-bridge.mjs');
+      const applied = await applyAcceptedStudioLighting({
+        coefficients: evidence.coefficients, evidence,
+        expectedSavedAt: state.savedAt, expectedLayerId: state.sourceLayerId,
+      });
+      acceptedEvolution = null;
+      studioCharacter = null;
+      el('studioCharacterStatus').textContent =
+        'Accepted lighting applied to original Studio project as layer ' +
+        applied.layerCount + '. Original artwork and all earlier layers are preserved.';
+      msg('Saved fitted appearance is ready in YOU-N-I-VERSE Studio.', true);
+    } catch (error) {
+      el('studioCharacterStatus').textContent =
+        'Not applied: ' + error.message + '. No Studio artwork was changed.';
+      clearAccepted();
+    }
+  });
 
   el('runFrameMorph').addEventListener('click', () => void withSurfaces(async (source, target) => {
     msg('Executing original Simlish triangle matching and ATO mesh interpolation…');
