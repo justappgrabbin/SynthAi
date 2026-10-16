@@ -57,10 +57,16 @@ export class ComputerFormationService {
   }
 
   #project(formation, event) {
+    const prior = this.kernel.project(formation.address, 'code');
+    const record = {
+      activeRevision: formation.activeRevision,
+      revisions: formation.revisions.map(({ id, artifactId }) => ({ id, artifactId })),
+    };
     this.kernel.annotate(formation.address, 'code', {
       formationId: formation.id,
       activeRevision: formation.activeRevision,
-      revisions: formation.revisions.map(({ id, artifactId }) => ({ id, artifactId })),
+      revisions: record.revisions,
+      formations: { ...(prior.value?.formations ?? {}), [formation.id]: record },
     }, { provider: FORMATION_PROVIDER, eventId: event.event_id });
   }
 
@@ -126,18 +132,17 @@ export class ComputerFormationService {
     return { automaton, compiled };
   }
 
-  #mount(revision, address, prepared) {
+  #mount(revision, formation, prepared) {
     if (this.compiled.has(revision.id)) return;
     const item = prepared || this.#prepare(
-      revision.id.split('@').slice(0, -1).join('@'),
-      revision.id, address, null, revision.graph,
+      formation.id, revision.id, formation.address, formation.purpose, revision.graph,
     );
     if (item.compiled.artifact.id !== revision.artifactId)
       throw new Error('Recovered formation artifact checksum mismatch: ' + revision.id);
     this.anomata.mount({
-      id: revision.id, address,
+      id: revision.id, address: formation.address,
       capabilities: [{
-        id: 'execute', address, input: 'json', output: 'json',
+        id: 'execute', address: formation.address, input: 'json', output: 'json',
         implementation: input => item.compiled.execute(input),
       }],
     });
@@ -183,7 +188,8 @@ export class ComputerFormationService {
       input: { action },
       pre_state: preState,
       post_state: status === 'success' ? {
-        activeRevision: result?.revisionId ?? preState?.activeRevision ?? null,
+        activeRevision: action === 'execute' ? (preState?.activeRevision ?? null) :
+          (result?.revisionId ?? preState?.activeRevision ?? null),
       } : preState,
       result: status === 'success' ? result : null,
       result_status: status,
@@ -200,7 +206,7 @@ export class ComputerFormationService {
     if (prepared) {
       const f = this.#require(id);
       const revision = f.revisions.at(-1);
-      this.#mount(revision, address, prepared);
+      this.#mount(revision, f, prepared);
     }
     return this.describe(id);
   }
@@ -270,7 +276,7 @@ export class ComputerFormationService {
     if (!version) throw new Error('Unknown formation revision: ' + chosen);
     try {
       if (!this.compiled.has(chosen))
-        this.#mount(version, f.address, null);
+        this.#mount(version, f, null);
       const outcome = await this.mesh.run(chosen, input);
       const native = outcome.outputs[chosen].result;
       const receipt = Object.freeze({
