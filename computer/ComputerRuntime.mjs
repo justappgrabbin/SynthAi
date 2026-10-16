@@ -98,6 +98,7 @@ export class ComputerRuntime {
       provider: this.formations, contract: 'create/transform/compose/activate/execute/history',
     });
     this.capabilities.register('formation_execution', { providers: [FORMATION_PROVIDER] });
+    if (this.platform === 'browser') await this.enableNativeKlein();
 
     this.capabilityRegistryService = await new CapabilityRegistryService({ bus: this.bus }).load();
     this.services.register('capability-registry', { provider: this.capabilityRegistryService, contract: 'queryCapability' });
@@ -149,6 +150,15 @@ export class ComputerRuntime {
   resolveState(entity, event, context) { return this.stateResolver.resolveState(entity, event, context); }
   emitEvent(event) { return this.eventEmitter.emitEvent(event); }
   executeOnSwarm(capability, input, ctx) { return this.automataGateway.execute(capability, input, ctx); }
+  async enableNativeKlein() {
+    if (this.nativeKlein) return this.nativeKlein;
+    const { NativeKleinMemory } = await import('./services/native-klein-memory.mjs');
+    this.nativeKlein = await new NativeKleinMemory({ computer: this }).boot();
+    this.services.register('klein-native-memory', {
+      provider: this.nativeKlein, contract: 'autoling.recognize/diseminer.ingest/replay',
+    });
+    return this.nativeKlein;
+  }
   registerFormationOperation(id, implementation) { this.formations.registerOperation(id, implementation); return this; }
   createFormation(spec) { return this.formations.create(spec); }
   transformFormation(id, graph, options) { return this.formations.transform(id, graph, options); }
