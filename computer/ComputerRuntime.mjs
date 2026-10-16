@@ -7,18 +7,14 @@ import { ProjectWorkspace } from './runtime/projects.mjs';
 import { GitHubWorkspaceAdapter } from './adapters/GitHubWorkspaceAdapter.mjs';
 import { registerCanonicalMicros } from './micros/MicroRegistry.mjs';
 import { registerSystemAdapters } from './adapters/SystemAdapters.mjs';
-import { AddressService } from './services/address-service.mjs';
-import { StateResolver } from './services/state-resolver.mjs';
 import { CapabilityRegistryService } from './registry/capability-registry.mjs';
-import { EventEmitter } from './events/event-emitter.mjs';
-import { AutomataEngineGateway } from './services/automata-engine.mjs';
-import { WorldEngineGateway } from './services/world-engine.mjs';
-import { PentaEphemerisService } from './services/penta-ephemeris.mjs';
-import { ExperimentLoop } from './services/experiment-loop.mjs';
 import { ComputerFormationService, FORMATION_PROVIDER } from './services/executable-formations.mjs';
 
 export class ComputerRuntime {
-  constructor({ persistence = new MemoryPersistence(), namespace = 'synthai-computer', github = null, eventLogPath = null } = {}) {
+  constructor({ persistence = new MemoryPersistence(), namespace = 'synthai-computer', github = null, eventLogPath = null, platform = typeof window === 'undefined' ? 'node' : 'browser' } = {}) {
+    if (!['node', 'browser'].includes(platform)) throw new TypeError('Unknown Computer platform: ' + platform);
+    this.platform = platform;
+    this.namespace = namespace;
     this.eventLogPath = eventLogPath;
     this.bus = new EventBus();
     this.state = new StateStore({ bus: this.bus, persistence, namespace });
@@ -81,43 +77,62 @@ export class ComputerRuntime {
       if (!this.capabilityRegistry.has(id)) this.capabilities.register(id, { providers: ['computer'] });
     }
 
-    // Stage-4a mount: Back-up- addressing + state-space providers behind
-    // Computer contracts. Services are Computer components; donor modules stay
-    // sovereign and are only wrapped (lazy dynamic import, failures surface
-    // as 'service:provider-failure' bus events).
-    this.eventEmitter = new EventEmitter({ bus: this.bus, ...(this.eventLogPath ? { logPath: this.eventLogPath } : {}) });
-    // Same Computer event ledger; real recovered ATO Core provides execution.
-    // Only an addressed code projection is kept in memory. No competing storage.
+    // One Computer, two platform-specific persistence implementations of the
+    // existing emitEvent/readAll grammar-v1 contract. Browser never imports
+    // Node-only providers (node:fs/child_process); Node keeps all donor mounts.
+    if (this.platform === 'browser') {
+      const { BrowserEventEmitter } = await import('./events/browser-event-emitter.mjs');
+      this.eventEmitter = new BrowserEventEmitter({ bus: this.bus, namespace: this.namespace });
+    } else {
+      const { EventEmitter } = await import('./events/event-emitter.mjs');
+      this.eventEmitter = new EventEmitter({
+        bus: this.bus, ...(this.eventLogPath ? { logPath: this.eventLogPath } : {}),
+      });
+    }
+    this.services.register('event-emitter', { provider: this.eventEmitter, contract: 'emitEvent/readAll/history' });
+
+    // Existing recovered ATO executes formations; the Computer event ledger
+    // remains the authority for identity, revisions and prior executions.
     this.formations = await new ComputerFormationService({ computer: this }).recover();
-    this.services.register('formation-execution', { provider: this.formations, contract: 'create/transform/activate/execute/history' });
-    this.capabilities.register('formation_execution', { providers: [FORMATION_PROVIDER] });
-    this.addressService = new AddressService({ bus: this.bus });
-    this.stateResolver = new StateResolver({
-      bus: this.bus,
-      addressService: this.addressService,
-      eventLog: () => this.eventEmitter.readAll(),
+    this.services.register('formation-execution', {
+      provider: this.formations, contract: 'create/transform/compose/activate/execute/history',
     });
+    this.capabilities.register('formation_execution', { providers: [FORMATION_PROVIDER] });
+
     this.capabilityRegistryService = await new CapabilityRegistryService({ bus: this.bus }).load();
-    this.addressService.capabilityRegistry = this.capabilityRegistryService; // routing_decision recording
-    this.services.register('event-emitter', { provider: this.eventEmitter, contract: 'emitEvent' });
-    this.services.register('address-service', { provider: this.addressService, contract: 'resolveAddress' });
-    this.services.register('state-resolver', { provider: this.stateResolver, contract: 'resolveState' });
     this.services.register('capability-registry', { provider: this.capabilityRegistryService, contract: 'queryCapability' });
-    // Stage-4b/Amendment-C: automata organism gateway (donor pure-synthia
-    // v0.4.0 swarm behind execute/route; gateway only, donor stays sovereign).
-    this.automataGateway = new AutomataEngineGateway({ bus: this.bus, state: this.state });
-    this.services.register('automata-engine', { provider: this.automataGateway, contract: 'execute' });
-    // Stage-4e: glowing-winner embodied world (donor EmbodiedWorldEngine) +
-    // Synthai2 penta ephemeris (python child_process donor boundary).
-    this.worldGateway = new WorldEngineGateway({ bus: this.bus });
-    this.services.register('world-engine', { provider: this.worldGateway, contract: 'worldEvent' });
-    this.pentaEphemeris = new PentaEphemerisService({ bus: this.bus });
-    this.services.register('penta-ephemeris', { provider: this.pentaEphemeris, contract: 'groupPenta' });
-    // Acceptance-7: experiment loop (donor HypothesisRegistry, wrap-only).
-    this.experiments = new ExperimentLoop({ bus: this.bus });
-    this.services.register('experiment-loop', { provider: this.experiments, contract: 'runExperiment' });
-    for (const id of ['resolve_address', 'resolve_state', 'emit_event', 'query_capability', 'automata_activation']) {
-      if (!this.capabilityRegistry.has(id)) this.capabilities.register(id, { providers: ['back-up-', 'computer'] });
+
+    if (this.platform === 'node') {
+      const [
+        { AddressService }, { StateResolver }, { AutomataEngineGateway },
+        { WorldEngineGateway }, { PentaEphemerisService }, { ExperimentLoop },
+      ] = await Promise.all([
+        import('./services/address-service.mjs'),
+        import('./services/state-resolver.mjs'),
+        import('./services/automata-engine.mjs'),
+        import('./services/world-engine.mjs'),
+        import('./services/penta-ephemeris.mjs'),
+        import('./services/experiment-loop.mjs'),
+      ]);
+      this.addressService = new AddressService({ bus: this.bus });
+      this.stateResolver = new StateResolver({
+        bus: this.bus, addressService: this.addressService,
+        eventLog: () => this.eventEmitter.readAll(),
+      });
+      this.addressService.capabilityRegistry = this.capabilityRegistryService;
+      this.services.register('address-service', { provider: this.addressService, contract: 'resolveAddress' });
+      this.services.register('state-resolver', { provider: this.stateResolver, contract: 'resolveState' });
+      this.automataGateway = new AutomataEngineGateway({ bus: this.bus, state: this.state });
+      this.services.register('automata-engine', { provider: this.automataGateway, contract: 'execute' });
+      this.worldGateway = new WorldEngineGateway({ bus: this.bus });
+      this.services.register('world-engine', { provider: this.worldGateway, contract: 'worldEvent' });
+      this.pentaEphemeris = new PentaEphemerisService({ bus: this.bus });
+      this.services.register('penta-ephemeris', { provider: this.pentaEphemeris, contract: 'groupPenta' });
+      this.experiments = new ExperimentLoop({ bus: this.bus });
+      this.services.register('experiment-loop', { provider: this.experiments, contract: 'runExperiment' });
+      for (const id of ['resolve_address', 'resolve_state', 'emit_event', 'query_capability', 'automata_activation'])
+        if (!this.capabilityRegistry.has(id))
+          this.capabilities.register(id, { providers: ['back-up-', 'computer'] });
     }
 
     await this.state.set('computer.boot', { status: 'ready', at: Date.now(), version: '0.2.0-project-workspace' }, { source: 'boot' });
