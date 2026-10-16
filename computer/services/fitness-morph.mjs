@@ -37,7 +37,8 @@ export class ComputerFitnessMorph {
 
   async boot() {
     this.computer.registerFormationOperation('simlish.swarm.fit-lighting', input => {
-      if (!validSamples(input?.samples) || !finiteRGB(input.baseline.map((v, i) => v + 120)) ||
+      if (!validSamples(input?.samples) || !Array.isArray(input?.baseline) ||
+          input.baseline.length !== 3 ||
           !input.baseline.every(v => Number.isFinite(v) && v >= -60 && v <= 60))
         throw new TypeError('Lighting fit requires 12-1000 actual RGB sample pairs and bounded baseline');
       return fitLighting(input.samples, input.baseline);
