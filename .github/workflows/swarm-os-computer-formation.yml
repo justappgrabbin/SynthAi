@@ -5,6 +5,7 @@ on:
     paths:
       - 'computer/services/executable-formations.mjs'
       - 'computer/ComputerRuntime.mjs'
+      - 'computer/registry/capability-registry.json'
       - 'computer/tests/acceptance-10-executable-formation.test.mjs'
       - 'computer/tests/acceptance-11-recursive-formation.test.mjs'
       - '.github/workflows/swarm-os-computer-formation.yml'
@@ -12,6 +13,7 @@ on:
     paths:
       - 'computer/services/executable-formations.mjs'
       - 'computer/ComputerRuntime.mjs'
+      - 'computer/registry/capability-registry.json'
       - 'computer/tests/acceptance-10-executable-formation.test.mjs'
       - 'computer/tests/acceptance-11-recursive-formation.test.mjs'
       - '.github/workflows/swarm-os-computer-formation.yml'
