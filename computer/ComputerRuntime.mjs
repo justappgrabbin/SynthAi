@@ -15,6 +15,7 @@ import { AutomataEngineGateway } from './services/automata-engine.mjs';
 import { WorldEngineGateway } from './services/world-engine.mjs';
 import { PentaEphemerisService } from './services/penta-ephemeris.mjs';
 import { ExperimentLoop } from './services/experiment-loop.mjs';
+import { ComputerFormationService, FORMATION_PROVIDER } from './services/executable-formations.mjs';
 
 export class ComputerRuntime {
   constructor({ persistence = new MemoryPersistence(), namespace = 'synthai-computer', github = null, eventLogPath = null } = {}) {
@@ -85,6 +86,11 @@ export class ComputerRuntime {
     // sovereign and are only wrapped (lazy dynamic import, failures surface
     // as 'service:provider-failure' bus events).
     this.eventEmitter = new EventEmitter({ bus: this.bus, ...(this.eventLogPath ? { logPath: this.eventLogPath } : {}) });
+    // Same Computer event ledger; real recovered ATO Core provides execution.
+    // Only an addressed code projection is kept in memory. No competing storage.
+    this.formations = await new ComputerFormationService({ computer: this }).recover();
+    this.services.register('formation-execution', { provider: this.formations, contract: 'create/transform/activate/execute/history' });
+    this.capabilities.register('formation-execution', { providers: [FORMATION_PROVIDER] });
     this.addressService = new AddressService({ bus: this.bus });
     this.stateResolver = new StateResolver({
       bus: this.bus,
@@ -128,6 +134,12 @@ export class ComputerRuntime {
   resolveState(entity, event, context) { return this.stateResolver.resolveState(entity, event, context); }
   emitEvent(event) { return this.eventEmitter.emitEvent(event); }
   executeOnSwarm(capability, input, ctx) { return this.automataGateway.execute(capability, input, ctx); }
+  registerFormationOperation(id, implementation) { this.formations.registerOperation(id, implementation); return this; }
+  createFormation(spec) { return this.formations.create(spec); }
+  transformFormation(id, graph, options) { return this.formations.transform(id, graph, options); }
+  activateFormation(id, revisionId) { return this.formations.activate(id, revisionId); }
+  executeFormation(id, input, options) { return this.formations.execute(id, input, options); }
+  formationHistory(id) { return this.formations.history(id); }
   worldEvent(event) { return this.worldGateway.process(event); }
   observeWorld() { return this.worldGateway.snapshot(); }
   groupPenta(members) { return this.pentaEphemeris.groupPenta(members); }
@@ -174,6 +186,7 @@ export class ComputerRuntime {
       agents: this.agents.list(),
       worlds: this.worlds.list(),
       artifacts: this.artifacts.list(),
+      formations: this.formations?.list() ?? [],
       projects: this.projects.list(),
       backends: this.backendsRegistry.list().map(({ id, status }) => ({ id, status })),
       capabilities: this.capabilityRegistry.list(),
