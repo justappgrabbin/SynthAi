@@ -71,10 +71,11 @@ export function mountSwarmComputerUI({ computer }) {
     if (computer.nativeKlein) {
       try {
         const snapshot = await computer.nativeKlein.snapshot();
-        byId('formationMemory').textContent = snapshot.documentCount
-          ? String(snapshot.documentCount) + ' native lexical records · ' +
-            String(snapshot.terms.length) + ' observed terms: ' + snapshot.terms.slice(0, 14).join(', ')
-          : 'Native Diseminer has no ingested records yet.';
+        byId('formationMemory').textContent =
+          String(snapshot.rules.length) + ' AUTOLING grammar rules · ' +
+          String(snapshot.documentCount) + ' native lexical records · ' +
+          String(snapshot.terms.length) + ' observed terms' +
+          (snapshot.terms.length ? ': ' + snapshot.terms.slice(0, 14).join(', ') : '.');
       } catch (error) {
         byId('formationMemory').textContent = 'Native memory unavailable: ' + error.message;
       }
@@ -147,6 +148,29 @@ export function mountSwarmComputerUI({ computer }) {
     }
   }
 
+  async function teachRule() {
+    if (!computer.nativeKlein) {
+      byId('ruleMessage').textContent = 'Native AUTOLING is not available.';
+      return;
+    }
+    const pattern = byId('rulePattern').value.trim().split(/\s+/).filter(Boolean);
+    const rule = {
+      id: byId('ruleId').value.trim(),
+      relation: byId('ruleRelation').value.trim(),
+      pattern,
+      template: byId('ruleTemplate').value.trim(),
+    };
+    try {
+      const learned = await computer.nativeKlein.learnRule(rule);
+      byId('ruleMessage').textContent =
+        'Native AUTOLING learned ' + learned.relation + ' (' + learned.id + '). This rule is preserved in Computer history.';
+      await render();
+    } catch (error) {
+      byId('ruleMessage').textContent = 'AUTOLING rule not accepted: ' + error.message;
+    }
+  }
+
+  byId('teachAutoling').addEventListener('click', teachRule);
   byId('assembleKlein').addEventListener('click', assemble);
   byId('refreshFormations').addEventListener('click', () => void render());
   byId('runFormation').addEventListener('click', execute);
