@@ -54,3 +54,30 @@ test('corrupt registration is reported but never removed from source state', asy
   assert.ok(second.registryRecovery.skipped.some(x => x.id === 'mount-broken'));
   assert.ok(second.state.get('mounts.mount-broken'));
 });
+
+test('conflicting persisted artifact registration is preserved, never replaced by legacy recovery', async () => {
+  const persistence = new MemoryPersistence();
+  const boot = () => new ComputerRuntime({ persistence, namespace: 'registry-recovery-conflict' }).boot();
+  const first = await boot();
+  const id = 'artifact-conflict';
+  const original = { id, path: '/artifacts/artifact-conflict/missing.js', source: 'original', status: 'incomplete' };
+  await first.state.set(`artifacts.items.${id}`, original);
+  await first.vfs.write('/artifacts/artifact-conflict/present.js', 'EXACT', { originalName: 'present.js' });
+  const second = await boot();
+  assert.deepEqual(second.state.get(`artifacts.items.${id}`), original);
+  assert.equal(second.artifacts.has(id), false);
+  assert.ok(second.registryRecovery.skipped.some(x => x.id === id && x.kind === 'legacy-artifact'));
+  assert.equal(second.vfs.read('/artifacts/artifact-conflict/present.js').content, 'EXACT');
+});
+
+test('ambiguous legacy VFS files are retained without arbitrary app registration', async () => {
+  const persistence = new MemoryPersistence();
+  const boot = () => new ComputerRuntime({ persistence, namespace: 'registry-recovery-ambiguous' }).boot();
+  const first = await boot();
+  await first.vfs.write('/artifacts/artifact-ambiguous/one.js', 'ONE', { originalName: 'one.js' });
+  await first.vfs.write('/artifacts/artifact-ambiguous/two.js', 'TWO', { originalName: 'two.js' });
+  const second = await boot();
+  assert.equal(second.artifacts.has('artifact-ambiguous'), false);
+  assert.equal(second.vfs.list('/artifacts/').length, 2);
+  assert.ok(second.registryRecovery.skipped.some(x => x.id === 'artifact-ambiguous'));
+});
