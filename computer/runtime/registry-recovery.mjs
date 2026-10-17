@@ -23,12 +23,29 @@ export async function restoreArtifactAndMountRegistries(runtime) {
   }
 
   // Older versions stored VFS bytes but kept artifact metadata only in RAM.
+  // Never replace an existing registration, even when it is invalid: the
+  // original may represent a missing file or a separate historical revision.
+  const legacyCandidates = new Map();
   for (const record of vfs.list('/artifacts/')) {
     const match = /^\/artifacts\/(artifact-[^/]+)\/(.+)$/.exec(record.path ?? '');
-    if (!match || artifacts.has(match[1])) continue;
-    const [, id] = match;
+    if (!match) continue;
+    const id = match[1];
+    if (!legacyCandidates.has(id)) legacyCandidates.set(id, []);
+    legacyCandidates.get(id).push(record);
+  }
+  for (const [id, candidates] of legacyCandidates) {
+    if (artifacts.has(id)) continue;
+    if (Object.hasOwn(saved ?? {}, id)) {
+      skip('legacy-artifact', id, 'existing persisted registration requires manual reconciliation');
+      continue;
+    }
+    if (candidates.length !== 1) {
+      skip('legacy-artifact', id, 'multiple VFS files share this artifact ID; provenance ambiguous');
+      continue;
+    }
+    const [record] = candidates;
     const meta = record.meta ?? {};
-    if (!meta.originalName) {
+    if (typeof meta.originalName !== 'string' || !meta.originalName) {
       skip('legacy-artifact', id, 'no originalName provenance');
       continue;
     }
