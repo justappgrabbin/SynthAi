@@ -4,6 +4,8 @@ import android.Manifest;
 import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Intent;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.net.Uri;
@@ -19,6 +21,10 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Hover-face launcher. Ported from Synthia 5.8 android-host MainActivity, reshaped as a light
@@ -142,6 +148,10 @@ public final class MainActivity extends Activity {
         });
         root.addView(start, matchWrap());
 
+        Button companionKey = button("Copy GPT/SynthAi continuity access key");
+        companionKey.setOnClickListener(v -> copyCompanionKey());
+        root.addView(companionKey, matchWrap());
+
         Button mic = button("Allow microphone (optional)");
         mic.setOnClickListener(v -> requestPermissions(new String[]{Manifest.permission.RECORD_AUDIO}, 102));
         root.addView(mic, matchWrap());
@@ -152,6 +162,25 @@ public final class MainActivity extends Activity {
 
         updateStatus();
         return root;
+    }
+
+    /** The key lives in Android-private persistent data, never in the packaged APK. */
+    private void copyCompanionKey() {
+        File keyFile = new File(getFilesDir(), "synthia58-data/synthia58/gpt-companion/access-key");
+        if (!keyFile.isFile()) {
+            Toast.makeText(this, "Companion not ready. Open the runtime and try again.", Toast.LENGTH_LONG).show();
+            return;
+        }
+        try {
+            String key = new String(Files.readAllBytes(keyFile.toPath()), StandardCharsets.UTF_8).trim();
+            if (!key.matches("[a-f0-9]{64}")) throw new IllegalStateException("Unexpected access key format");
+            ClipboardManager clipboard = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
+            if (clipboard == null) throw new IllegalStateException("Clipboard unavailable");
+            clipboard.setPrimaryClip(ClipData.newPlainText("Synthia companion access key", key));
+            Toast.makeText(this, "Copied companion key. Open the floating Synthia panel and paste it.", Toast.LENGTH_LONG).show();
+        } catch (Exception error) {
+            Toast.makeText(this, "Cannot read continuity key: " + error.getMessage(), Toast.LENGTH_LONG).show();
+        }
     }
 
     private void openOverlaySettings() {
