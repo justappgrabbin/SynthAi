@@ -42,6 +42,7 @@ public final class BridgeForegroundService extends Service {
                 .build();
 
         startForeground(58, notification);
+        DeviceInventorySweep.schedule(getApplicationContext());
         server = new LocalBridgeServer(getApplicationContext(), HoverPorts.BRIDGE_PORT);
         server.start();
         Log.i(HoverPorts.TAG, "HOVER_BRIDGE_STARTED port=" + HoverPorts.BRIDGE_PORT);
