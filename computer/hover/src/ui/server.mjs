@@ -61,12 +61,23 @@ export async function startSynthiaFrontScreen({
   synthia = null,
   persistenceDir = process.env.SYNTHIA_DATA_DIR ?? '.synthia-state',
 } = {}) {
-  const organism = synthia ?? await FederatedSynthia.create({ persistenceDir });
-  const solo = new SoloHoverRuntime({ organism, persistenceDir });
-  const resident17 = await createSynthia17Resident({ persistenceDir });
+  // Boot the companion before the larger organism. The Android interface and
+  // authenticated terminal must survive a broken Synthia initialization.
   const companion = await createCompanionBridge({ persistenceDir });
-  organism.attachResident17(resident17);
-  await solo.startTasks();
+  let organism = null;
+  let solo = null;
+  let resident17 = null;
+  let organismStartupError = null;
+  try {
+    organism = synthia ?? await FederatedSynthia.create({ persistenceDir });
+    solo = new SoloHoverRuntime({ organism, persistenceDir });
+    resident17 = await createSynthia17Resident({ persistenceDir });
+    organism.attachResident17(resident17);
+    await solo.startTasks();
+  } catch (error) {
+    organismStartupError = error;
+    console.error('Synthia organism unavailable; companion-only mode active:', error);
+  }
   const server = createServer(async (request, response) => {
     try {
       const url = new URL(request.url, `http://${request.headers.host ?? 'localhost'}`);
@@ -74,6 +85,19 @@ export async function startSynthiaFrontScreen({
       // Original Hover interfaces remain recoverable at /index.html and legacy routes.
       const companionResponse = await companion.handle(request, url);
       if (companionResponse) return reply(response, companionResponse.code, companionResponse.data);
+      if (!organism || !solo || !resident17) {
+        if (url.pathname === '/api/status' && request.method === 'GET') {
+          return reply(response, 200, {
+            ok: true, ready: false, structurallyReady: false,
+            identity: 'Synthia', companionReady: true, organismReady: false,
+            error: String(organismStartupError?.message || 'Synthia organism not initialized'),
+          });
+        }
+        // Static companion and preserved original assets remain available.
+        if (url.pathname.startsWith('/api/') || url.pathname.startsWith('/mcp/')) {
+          return reply(response, 503, { ok: false, error: 'Synthia organism offline; companion terminal and continuity remain available' });
+        }
+      }
       if (request.method === 'POST' && url.pathname === '/api/solo/talk/chat') {
         return reply(response, 200, await talkReply(await bodyOf(request)));
       }
@@ -429,7 +453,7 @@ export async function startSynthiaFrontScreen({
     server.once('error', reject);
     server.listen(port, host, resolve);
   });
-  server.on('close', () => { solo.stopTasks(); solo.browser.close().catch(() => {}); });
+  server.on('close', () => { solo?.stopTasks(); solo?.browser?.close().catch(() => {}); });
   const address = server.address();
   const actualPort = typeof address === 'object' ? address.port : port;
   return Object.freeze({ server, synthia: organism, solo, resident17, url: `http://${host}:${actualPort}` });
