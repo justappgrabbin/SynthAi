@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#10101d">
+<title>Synthia + GPT · Companion</title>
+<link rel="stylesheet" href="/companion.css">
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <div class="brand"><span class="orb" aria-hidden="true">✧</span><div><strong>Synthia <span class="plus">+</span> GPT</strong><small>one workspace · real receipts</small></div></div>
+    <div id="runtime-badge" class="runtime-badge">Checking runtime</div>
+  </header>
+  <div id="banner" class="banner" role="status" aria-live="polite">Connecting to local Synthia…</div>
+
+  <section id="pairing" class="pairing">
+    <div class="pair-copy"><strong>Unlock the local companion</strong><small>Copy the access key from the Android app launcher. This key stays on your device for this session.</small></div>
+    <form id="pair-form" class="horizontal"><input id="access-key" type="password" autocomplete="off" spellcheck="false" placeholder="Paste companion access key" aria-label="Companion access key"><button type="submit">Connect</button></form>
+  </section>
+
+  <main>
+    <section class="page visible" id="page-chat" aria-label="Workspace">
+      <div class="intro"><p class="eyebrow">THE SAME PLANE</p><h1>Build with continuity.</h1><p>One live Synthia runtime, one persistent handoff ledger, and the same work you can continue in ChatGPT.</p></div>
+      <div id="chat-messages" class="messages" aria-live="polite"><div class="message system">The workspace is here. Synthia will answer from her existing runtime when it is available; nothing is simulated.</div></div>
+      <form id="chat-form" class="composer"><textarea id="chat-input" rows="2" placeholder="Tell Synthia what to do or ask what is wired…" required></textarea><div class="composer-actions"><button id="mic" type="button" class="secondary">🎙 Speak</button><button id="say-last" type="button" class="secondary">Listen</button><button id="send-chat" type="submit">Send →</button></div></form>
+      <div class="quick"><button type="button" data-command="What real tools are wired and available?">Check hands</button><button type="button" data-command="What is the next concrete task for our companion?">Next task</button></div>
+    </section>
+
+    <section class="page" id="page-terminal" aria-label="Linux terminal">
+      <div class="intro"><p class="eyebrow">REAL EXECUTION</p><h1>Linux terminal</h1><p>Commands run in the APK's actual Linux userspace and return stdout, stderr and exit codes. Never simulated.</p></div>
+      <div class="details"><strong id="terminal-kind">Checking execution layer…</strong><small id="vm-note">A genuine VM must boot its own kernel. The existing PRoot guest does not.</small></div>
+      <div class="terminal"><pre id="terminal-output" aria-live="polite">Terminal ready for local authentication.</pre><form id="terminal-form" class="horizontal"><span class="prompt">$</span><input id="terminal-input" type="text" autocomplete="off" spellcheck="false" placeholder="uname -a" required><button type="submit">Run</button></form></div>
+      <p class="muted">Commands execute in the private companion workspace. Confirm every command before it runs; GitHub inbox suggestions are never executed automatically.</p>
+    </section>
+
+    <section class="page" id="page-hands" aria-label="Android hands">
+      <div class="intro"><p class="eyebrow">LIVE DEVICE</p><h1>Cynthia’s hands</h1><p>The existing Android Accessibility and app-launch bridge. Real capabilities only.</p></div>
+      <div class="details"><strong id="hands-status">Checking hands…</strong><small id="hands-details">No fake app catalog or device state.</small></div>
+      <div class="actions"><button type="button" id="hands-refresh">Refresh devices/apps</button></div>
+      <div id="hands-apps" class="apps"><p class="muted">Open this surface to read installed applications.</p></div>
+    </section>
+
+    <section class="page" id="page-continuity" aria-label="Continuity">
+      <div class="intro"><p class="eyebrow">PERSISTENT MEMORY</p><h1>Continuity & handoffs</h1><p>Append-only history with SHA-256 chain verification. Every action, decision and next step can carry an exact receipt.</p></div>
+      <div class="details"><strong id="ledger-position">Awaiting access key</strong><small id="ledger-head">No history invented.</small></div>
+      <form id="note-form" class="note-form"><label for="note-text">Add a checkpoint</label><textarea id="note-text" rows="3" placeholder="What was accomplished, what changed, what's next…" required></textarea><button type="submit">Save durable checkpoint</button></form>
+      <div class="actions"><button id="ledger-refresh" type="button">Refresh history</button><button id="ledger-export" type="button">Copy handoff snapshot</button></div>
+      <div id="events" class="events"><p class="muted">No continuity records loaded.</p></div>
+      <details class="github-connect"><summary>Connect a GitHub handoff</summary>
+        <p>A private repo lets ChatGPT's GitHub connection and Cynthia exchange saved snapshots and proposed work. This requires your own credential; nothing is uploaded before you connect and explicitly sync.</p>
+        <form id="github-form" class="stack"><label>Repository <input id="github-repo" placeholder="owner/private-repo" required></label><label>Branch <input id="github-branch" value="main" required></label><label>GitHub personal access token <input id="github-token" type="password" autocomplete="new-password" required></label><label class="check"><input id="github-public" type="checkbox"> I explicitly agree to publish these continuity records if the repository is public</label><button type="submit">Save connection</button></form>
+        <div class="actions"><button id="github-push" type="button">Push immutable snapshot</button><button id="github-pull" type="button">Receive GPT proposals</button></div>
+        <p id="github-status" class="muted">GitHub not connected.</p>
+      </details>
+    </section>
+  </main>
+
+  <nav class="bottom" aria-label="Primary">
+    <button class="active" type="button" data-page="chat"><span>✧</span>Workspace</button>
+    <button type="button" data-page="terminal"><span>⌘</span>Terminal</button>
+    <button type="button" data-page="hands"><span>◇</span>Hands</button>
+    <button type="button" data-page="continuity"><span>◷</span>Continuity</button>
+  </nav>
+</div>
+<script type="module" src="/companion.js"></script>
+</body>
+</html>
