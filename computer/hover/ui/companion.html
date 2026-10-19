@@ -112,6 +112,10 @@
           <label>Known gaps<textarea id="context-missing" rows="2"></textarea></label>
           <label>Next concrete task<textarea id="context-next" rows="2"></textarea></label>
           <label>Other context<textarea id="context-notes" rows="2"></textarea></label>
+          <label>Release acceptance criteria<textarea id="context-release" rows="2" placeholder="What must be proven before shipping?"></textarea></label>
+          <label>App decision<select id="context-decision"><option value="active">Active</option><option value="ship-candidate">Ship candidate — review evidence</option><option value="paused">Paused</option><option value="retired">Retired / drop it</option></select></label>
+          <label>Milestones (one per line: goal | todo/doing/blocked/verified | evidence)<textarea id="context-milestones" rows="5" placeholder="Installable APK | todo |&#10;Android hands connect | verified | Device test receipt #…"></textarea></label>
+          <div class="details"><strong id="context-progress">Progress unassessed</strong><small id="context-goal-status">Only verified milestones with evidence count as complete.</small></div>
           <button type="submit">Save project purpose & context</button>
           <p id="context-receipt" class="muted"></p>
         </form>
@@ -151,5 +155,6 @@
   </nav>
 </div>
 <script type="module" src="/companion.js"></script>
+<script type="module" src="/companion-extra.js"></script>
 </body>
 </html>
