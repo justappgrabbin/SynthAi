@@ -1,0 +1,22 @@
+{
+  "id": "app.synthai.continuity.acode",
+  "name": "SYNTHAI CONTINUITY",
+  "version": "0.1.0",
+  "main": "main.js",
+  "readme": "readme.md",
+  "minVersionCode": 958,
+  "price": 0,
+  "license": "MIT",
+  "keywords": [
+    "synthia",
+    "GPT",
+    "acode",
+    "continuity",
+    "file library"
+  ],
+  "author": {
+    "name": "Synthia Project",
+    "github": "justappgrabbin"
+  },
+  "repository": "https://github.com/justappgrabbin/SynthAi"
+}
