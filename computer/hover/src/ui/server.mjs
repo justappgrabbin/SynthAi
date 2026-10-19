@@ -6,6 +6,7 @@ import { FederatedSynthia } from '../federated-synthia.mjs';
 import { talkReply } from '../solo/talk-adapter.mjs';
 import { SoloHoverRuntime } from '../solo/solo-runtime.mjs';
 import { createSynthia17Resident } from '../solo/synthia17-resident.mjs';
+import { createCompanionBridge } from '../companion/bridge.mjs';
 
 const UI_ROOT = fileURLToPath(new URL('../../ui/', import.meta.url));
 const MIME = Object.freeze({
@@ -63,11 +64,16 @@ export async function startSynthiaFrontScreen({
   const organism = synthia ?? await FederatedSynthia.create({ persistenceDir });
   const solo = new SoloHoverRuntime({ organism, persistenceDir });
   const resident17 = await createSynthia17Resident({ persistenceDir });
+  const companion = await createCompanionBridge({ persistenceDir });
   organism.attachResident17(resident17);
   await solo.startTasks();
   const server = createServer(async (request, response) => {
     try {
       const url = new URL(request.url, `http://${request.headers.host ?? 'localhost'}`);
+      // The focused GPT/Synthia companion is now the phone's primary UI.
+      // Original Hover interfaces remain recoverable at /index.html and legacy routes.
+      const companionResponse = await companion.handle(request, url);
+      if (companionResponse) return reply(response, companionResponse.code, companionResponse.data);
       if (request.method === 'POST' && url.pathname === '/api/solo/talk/chat') {
         return reply(response, 200, await talkReply(await bodyOf(request)));
       }
@@ -406,7 +412,7 @@ export async function startSynthiaFrontScreen({
         return reply(response, result.ok === false ? 400 : 200, result);
       }
       if (request.method !== 'GET') return reply(response, 405, { ok: false, error: 'method not allowed' });
-      const requested = url.pathname === '/' ? 'index.html' : url.pathname.slice(1);
+      const requested = url.pathname === '/' ? 'companion.html' : url.pathname.slice(1);
       if (!/^[a-zA-Z0-9._/-]+$/.test(requested) || requested.includes('..')) {
         return reply(response, 400, { ok: false, error: 'invalid path' });
       }
