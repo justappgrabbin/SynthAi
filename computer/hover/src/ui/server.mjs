@@ -1,5 +1,7 @@
 import { createServer } from 'node:http';
 import { readFile } from 'node:fs/promises';
+import { createReadStream } from 'node:fs';
+import { Readable } from 'node:stream';
 import { extname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { FederatedSynthia } from '../federated-synthia.mjs';
@@ -84,6 +86,27 @@ export async function startSynthiaFrontScreen({
       // The focused GPT/Synthia companion is now the phone's primary UI.
       // Original Hover interfaces remain recoverable at /index.html and legacy routes.
       const companionResponse = await companion.handle(request, url);
+      if (companionResponse?.localFile) {
+        const { record, path } = companionResponse.localFile;
+        const filename = String(record.name || 'artifact.bin').replace(/[\r\n"\\/]/g,'_').slice(0,180);
+        response.writeHead(200, {'content-type':'application/octet-stream',
+          'content-disposition':'attachment; filename="' + filename + '"',
+          'content-length':record.size, 'cache-control':'no-store',
+          'x-content-type-options':'nosniff'});
+        return createReadStream(path).pipe(response);
+      }
+      if (companionResponse?.download) {
+        const { stream, filename, maxBytes } = companionResponse.download;
+        const safeName = String(filename).replace(/[\r\n"\\/]/g,'_').slice(0,120);
+        response.writeHead(200, {'content-type':'application/zip',
+          'content-disposition':'attachment; filename="' + safeName + '"',
+          'cache-control':'no-store','x-content-type-options':'nosniff'});
+        let n=0;
+        const source=Readable.fromWeb(stream);
+        source.on('data', chunk=>{n+=chunk.length;if(n>maxBytes) source.destroy(new Error('Artifact exceeded download size limit'));});
+        source.on('error',()=>response.destroy());
+        return source.pipe(response);
+      }
       if (companionResponse) return reply(response, companionResponse.code, companionResponse.data);
       if (!organism || !solo || !resident17) {
         if (url.pathname === '/api/status' && request.method === 'GET') {
