@@ -35,7 +35,7 @@ jobs:
           for file in computer/hover/src/companion/*.mjs computer/hover/ui/companion*.js computer/hover/src/ui/server.mjs integrations/acode-continuity/main.js; do
             node --check "$file"
           done
-          node --test computer/hover/test/27-continuity-companion.test.mjs
+          node --test computer/hover/test/27-continuity-companion.test.mjs computer/hover/test/28-sites-mcp-link.test.mjs
           test -s computer/hover/ui/prism-keys.html
           grep -q 'id="upload-files"' computer/hover/ui/companion.html
           test -f android-app/app/src/hover/java/app/synthai/hover/ContinuityFilePickerActivity.java
