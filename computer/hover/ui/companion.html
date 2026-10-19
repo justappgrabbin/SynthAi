@@ -63,8 +63,23 @@
         <button type="button" data-go-page="prism">🌈 Prism Keys — Send to Continuity</button>
         <button type="button" data-go-page="terminal">⌘ Real Linux Terminal</button>
         <button type="button" data-go-page="hands">◇ Android Hands</button>
+        <button type="button" data-go-page="sites">↔ SynthAi2 MCP — Check connection</button>
         <button type="button" data-go-page="learn">◎ Review conversations</button>
       </div>
+    </section>
+
+    <section class="page" id="page-sites" aria-label="SynthAi2 Sites MCP">
+      <div class="intro"><p class="eyebrow">EXISTING MCP SERVERS</p><h1>SynthAi2 ↔ Hover</h1><p>Hover keeps its local authenticated MCP (including Android Hands). This screen separately tests the published SynthAi2 Sites MCP server. The phone does not inherit your ChatGPT Sites login.</p></div>
+      <div class="details"><strong id="sites-mcp-state">Not checked from this phone</strong><small id="sites-mcp-detail">The working ChatGPT Sites connector may require separate authentication when called from Android.</small></div>
+      <div class="actions">
+        <button id="sites-mcp-test" type="button">Test live MCP handshake</button>
+        <button id="sites-mcp-status" type="button">Read SynthAi2 status</button>
+        <button id="sites-mcp-apps" type="button">List actual SynthAi2 app routes</button>
+      </div>
+      <div id="sites-mcp-tools" class="muted"></div>
+      <pre id="sites-mcp-output" class="terminal" style="padding:14px;white-space:pre-wrap;overflow-wrap:anywhere;min-height:120px" aria-live="polite">Awaiting a live authenticated server response.</pre>
+      <p class="muted">Endpoint: https://synthai2-computer.adayacarter8.chatgpt.site/mcp. If the Site requires viewer authorization, the Hover app will report that instead of claiming it is connected. This is not a cloud-to-phone tunnel.</p>
+      <button type="button" data-go-page="tools">← Back to tools</button>
     </section>
 
     <section class="page" id="page-prism" aria-label="Prism Keys">
@@ -183,5 +198,6 @@
 </div>
 <script type="module" src="/companion.js"></script>
 <script type="module" src="/companion-extra.js"></script>
+<script type="module" src="/companion-sites.js"></script>
 </body>
 </html>
