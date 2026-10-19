@@ -9,7 +9,37 @@ function validateRepository(value) {
   }
   return value;
 }
-const keys = ['purpose', 'whatExists', 'whatWorks', 'whatIsMissing', 'nextTask', 'notes'];
+const keys = ['purpose', 'whatExists', 'whatWorks', 'whatIsMissing', 'nextTask', 'notes', 'releaseCriteria'];
+const statuses = new Set(['todo','doing','blocked','verified']);
+const decisions = new Set(['active','ship-candidate','paused','retired']);
+function validateMilestones(raw) {
+  if (!Array.isArray(raw) || raw.length > 25) throw new Error('Use at most 25 milestones');
+  const names = new Set();
+  return raw.map((item, i) => {
+    const name = String(item?.name || '').trim();
+    const status = String(item?.status || 'todo');
+    const evidence = String(item?.evidence || '').trim();
+    if (!name || name.length > 180 || names.has(name.toLowerCase())) throw new Error('Milestone ' + (i+1) + ' has invalid/duplicate name');
+    if (!statuses.has(status)) throw new Error('Invalid milestone status');
+    if (evidence.length > 1000) throw new Error('Milestone evidence exceeds 1000 characters');
+    if (status === 'verified' && !evidence) throw new Error('Verified milestone "' + name + '" needs actual evidence');
+    names.add(name.toLowerCase());
+    return { name, status, evidence };
+  });
+}
+export function progressOf(project) {
+  const items = project?.milestones || [];
+  if (!items.length) return { percent: null, completed: 0, total: 0, blockers: 0, readiness: 'unassessed', note: 'Goals are not defined yet; cannot calculate progress.' };
+  const completed = items.filter(x => x.status === 'verified' && x.evidence).length;
+  const blockers = items.filter(x => x.status === 'blocked').length;
+  const percent = Math.round(completed / items.length * 100);
+  const readiness = project.decision === 'retired' ? 'retired'
+    : project.decision === 'paused' ? 'paused'
+    : completed === items.length && !blockers && project.releaseCriteria?.trim() ? 'review-for-release'
+    : blockers ? 'blocked' : 'in-progress';
+  return { percent, completed, total: items.length, blockers, readiness,
+    note: 'Evidence-backed milestone count only; not an estimate of remaining time or all work.' };
+}
 export function createProjectContexts({ ledger }) {
   function all() {
     const contexts = new Map();
@@ -23,7 +53,7 @@ export function createProjectContexts({ ledger }) {
         if (value && value.schema === 'synthai-project-context/v1') contexts.set(event.ref, { ...value, receipt: { seq: event.seq, hash: event.hash, timestamp: event.timestamp } });
       } catch { /* retain ledger integrity while isolating invalid legacy metadata */ }
     }
-    return Object.fromEntries(contexts);
+    return Object.fromEntries([...contexts].map(([key, value]) => [key, { ...value, progress: progressOf(value) }]));
   }
   function one(repository) { return all()[validateRepository(repository)] || null; }
   async function save(input) {
@@ -35,9 +65,12 @@ export function createProjectContexts({ ledger }) {
       if (text.length > 4000) throw new Error(field + ' exceeds 4000 characters');
       next[field] = text;
     }
+    next.milestones = validateMilestones(input?.milestones === undefined ? (current?.milestones || []) : input.milestones);
+    next.decision = input?.decision === undefined ? (current?.decision || 'active') : String(input.decision);
+    if (!decisions.has(next.decision)) throw new Error('Invalid project decision');
     if (!next.purpose.trim()) throw new Error('Every repository must have a purpose before saving a new context');
     const event = await ledger.append({ actor: 'human', type: 'project_context', ref: repository, content: JSON.stringify(next) });
-    return { ...next, receipt: { seq: event.seq, hash: event.hash, timestamp: event.timestamp } };
+    return { ...next, progress: progressOf(next), receipt: { seq: event.seq, hash: event.hash, timestamp: event.timestamp } };
   }
   return Object.freeze({ one, all, save });
 }
