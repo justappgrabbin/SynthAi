@@ -83,6 +83,19 @@ export async function startSynthiaFrontScreen({
   const server = createServer(async (request, response) => {
     try {
       const url = new URL(request.url, `http://${request.headers.host ?? 'localhost'}`);
+      // Only the existing SynthAi 2 IDE may invoke Continuity from a separate
+      // WebView origin. All content and mutations still require the install key.
+      const caller=request.headers.origin;
+      if ((caller==='http://127.0.0.1:5000'||caller==='http://localhost:5000')
+          && (url.pathname==='/mcp'||url.pathname.startsWith('/api/companion/'))) {
+        response.setHeader('Access-Control-Allow-Origin',caller);
+        response.setHeader('Vary','Origin');
+        response.setHeader('Access-Control-Allow-Methods','GET,POST,OPTIONS');
+        response.setHeader('Access-Control-Allow-Headers','Content-Type,x-synthia-access-key,Authorization');
+        response.setHeader('Access-Control-Max-Age','600');
+        if(request.method==='OPTIONS') {response.writeHead(204);response.end();return;}
+      }
+
       // The focused GPT/Synthia companion is now the phone's primary UI.
       // Original Hover interfaces remain recoverable at /index.html and legacy routes.
       const companionResponse = await companion.handle(request, url);
