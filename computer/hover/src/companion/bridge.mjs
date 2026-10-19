@@ -31,13 +31,13 @@ function terminalStatus() {
     note: 'No guest Linux kernel is booted by this runtime. A QEMU/AVF backend is required to label it a VM.',
   };
 }
-async function terminal(command, cwd) {
+async function terminal(command, workspace) {
   if (typeof command !== 'string' || !command.trim() || command.length > 1200) throw new Error('Shell command must be 1-1200 characters');
-  if (cwd && cwd !== 'workspace') throw new Error('Only the private continuity workspace is permitted');
+  if (typeof workspace !== 'string' || !workspace) throw new Error('Terminal workspace unavailable');
   const timeoutMs = 20000;
   return await new Promise((resolve) => {
     const child = spawn('/bin/sh', ['-lc', command], {
-      cwd, // replaced below
+      cwd: workspace,
       env: { ...process.env, HOME: process.env.HOME || '/root' },
       stdio: ['ignore', 'pipe', 'pipe'],
     });
@@ -117,7 +117,7 @@ export async function createCompanionBridge({ persistenceDir }) {
     }
     if (url.pathname === '/api/companion/terminal' && request.method === 'POST') {
       const data = await payload(request);
-      const result = await terminal(data.command, data.cwd ? ledger.root : ledger.root);
+      const result = await terminal(data.command, ledger.root);
       await ledger.append({ type: 'receipt', actor: 'terminal', content: JSON.stringify({
         command: String(data.command || '').slice(0, 1200), exitCode: result.code,
         timedOut: result.timedOut, stdout: result.stdout.slice(0, 2000), stderr: result.stderr.slice(0, 2000),
