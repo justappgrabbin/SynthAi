@@ -12,6 +12,7 @@ function validateRepository(value) {
 const keys = ['purpose', 'whatExists', 'whatWorks', 'whatIsMissing', 'nextTask', 'notes', 'releaseCriteria', 'androidPackageName'];
 const statuses = new Set(['todo','doing','blocked','verified']);
 const decisions = new Set(['active','ship-candidate','paused','retired']);
+const categories = new Set(['unclassified','computer','app','game','dimension','tool','service','other']);
 function validateMilestones(raw) {
   if (!Array.isArray(raw) || raw.length > 25) throw new Error('Use at most 25 milestones');
   const names = new Set();
@@ -67,7 +68,9 @@ export function createProjectContexts({ ledger }) {
     }
     next.milestones = validateMilestones(input?.milestones === undefined ? (current?.milestones || []) : input.milestones);
     next.decision = input?.decision === undefined ? (current?.decision || 'active') : String(input.decision);
+    next.category = input?.category === undefined ? (current?.category || 'unclassified') : String(input.category);
     if (!decisions.has(next.decision)) throw new Error('Invalid project decision');
+    if (!categories.has(next.category)) throw new Error('Invalid project category');
     if (next.androidPackageName && !/^[a-zA-Z0-9_]+(?:\.[a-zA-Z0-9_]+)+$/.test(next.androidPackageName)) throw new Error('Android package must be a valid installed app identifier');
     if (!next.purpose.trim()) throw new Error('Every repository must have a purpose before saving a new context');
     const event = await ledger.append({ actor: 'human', type: 'project_context', ref: repository, content: JSON.stringify(next) });
