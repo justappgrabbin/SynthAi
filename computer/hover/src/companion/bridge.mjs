@@ -1,6 +1,9 @@
 import { spawn } from 'node:child_process';
+import { createHash } from 'node:crypto';
 import { createContinuityLedger } from './continuity.mjs';
 import { createGitHubContinuityBridge } from './github-bridge.mjs';
+import { createRepoHub } from './repo-hub.mjs';
+import { createProjectContexts } from './project-context.mjs';
 
 const TOOL_DEFS = [
   { name: 'continuity_status', description: 'Read the current Synthia/GPT continuity position and true runtime type.', inputSchema: { type: 'object', properties: {} }, annotations: { readOnlyHint: true } },
@@ -66,6 +69,8 @@ function mcpText(value) {
 export async function createCompanionBridge({ persistenceDir }) {
   const ledger = await createContinuityLedger({ dataDir: persistenceDir });
   const github = await createGitHubContinuityBridge({ ledger });
+  const repos = await createRepoHub({ ledger, github: github.request, token: github.accessToken });
+  const contexts = createProjectContexts({ ledger });
 
   async function handle(request, url) {
     if (!url.pathname.startsWith('/api/companion/') && url.pathname !== '/mcp') return null;
@@ -119,10 +124,41 @@ export async function createCompanionBridge({ persistenceDir }) {
       const data = await payload(request);
       const result = await terminal(data.command, ledger.root);
       await ledger.append({ type: 'receipt', actor: 'terminal', content: JSON.stringify({
-        command: String(data.command || '').slice(0, 1200), exitCode: result.code,
-        timedOut: result.timedOut, stdout: result.stdout.slice(0, 2000), stderr: result.stderr.slice(0, 2000),
+        commandSha256: createHash('sha256').update(String(data.command || '')).digest('hex'),
+        exitCode: result.code, timedOut: result.timedOut,
+        stdoutSha256: createHash('sha256').update(result.stdout).digest('hex'),
+        stderrSha256: createHash('sha256').update(result.stderr).digest('hex'),
       }) });
       return { code: 200, data: { ...result, realExecution: true, runtime: terminalStatus() } };
+    }
+
+    if (url.pathname === '/api/companion/repos' && request.method === 'GET') {
+      return { code: 200, data: { ok: true, ...await repos.list({ page: Number(url.searchParams.get('page') || 1) }) } };
+    }
+    if (url.pathname === '/api/companion/repos/watched' && request.method === 'GET') {
+      return { code: 200, data: { ok: true, watched: repos.selected(), contexts: contexts.all() } };
+    }
+    if (url.pathname === '/api/companion/repos/select' && request.method === 'POST') {
+      return { code: 200, data: { ok: true, ...await repos.select(await payload(request)) } };
+    }
+    if (url.pathname === '/api/companion/repos/refresh' && request.method === 'POST') {
+      return { code: 200, data: { ok: true, ...await repos.refresh() } };
+    }
+    if (url.pathname === '/api/companion/repos/inspect' && request.method === 'GET') {
+      const repository = url.searchParams.get('repository');
+      return { code: 200, data: { ok: true, ...(await repos.inspect(repository)), context: contexts.one(repository) } };
+    }
+    if (url.pathname === '/api/companion/repos/context' && request.method === 'POST') {
+      return { code: 201, data: { ok: true, context: await contexts.save(await payload(request)) } };
+    }
+    if (url.pathname === '/api/companion/repos/dispatch' && request.method === 'POST') {
+      return { code: 202, data: { ok: true, ...await repos.dispatch(await payload(request)) } };
+    }
+    if (url.pathname === '/api/companion/repos/download' && request.method === 'GET') {
+      return { code: 200, download: await repos.download({
+        repository: url.searchParams.get('repository'),
+        artifact: url.searchParams.get('artifact'),
+      }) };
     }
     if (url.pathname === '/api/companion/github/status' && request.method === 'GET') {
       return { code: 200, data: { ok: true, ...github.status() } };
