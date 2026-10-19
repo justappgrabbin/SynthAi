@@ -8,8 +8,13 @@ import { createArtifactLibrary } from './artifact-library.mjs';
 import { createConversationLearning } from './conversation-learning.mjs';
 import { createContinuityTasks } from './tasks.mjs';
 import { AndroidHandBridge } from '../solo/android-hand-adapter.mjs';
+import { createSitesMcpLink, SYNTHAI2_MCP_URL } from './sites-mcp-link.mjs';
 
 const TOOL_DEFS = [
+  { name: 'android_hands_status', description: 'Read whether Cynthia\'s existing Android native Hands bridge is available. Does not control the phone.', inputSchema: { type: 'object', properties: {} }, annotations: { readOnlyHint: true } },
+  { name: 'android_hands_apps', description: 'Read visible launchable installed apps from the actual Android Hands bridge; never creates a fake list.', inputSchema: { type: 'object', properties: {} }, annotations: { readOnlyHint: true } },
+  { name: 'android_hands_propose_launch', description: 'Request a phone app launch for local human review. NEVER launches apps from MCP automatically.', inputSchema: { type: 'object', properties: { packageName: { type: 'string' } }, required: ['packageName'] } },
+  { name: 'synthai2_sites_status', description: 'Read connection diagnostics for the existing HTTPS SynthAi2 Sites MCP endpoint (not the local Hover MCP).', inputSchema: { type: 'object', properties: {} }, annotations: { readOnlyHint: true } },
   { name: 'continuity_status', description: 'Read the current Synthia/GPT continuity position and true runtime type.', inputSchema: { type: 'object', properties: {} }, annotations: { readOnlyHint: true } },
   { name: 'continuity_read', description: 'Read verified append-only handoff records. Nothing is inferred or invented.', inputSchema: { type: 'object', properties: { after: { type: 'integer', minimum: 0 }, limit: { type: 'integer', minimum: 1, maximum: 200 } } }, annotations: { readOnlyHint: true } },
   { name: 'continuity_note', description: 'Write a durable checkpoint, decision, receipt or next-step handoff for Cynthia and ChatGPT.', inputSchema: { type: 'object', properties: { content: { type: 'string' }, type: { type: 'string', enum: ['note', 'checkpoint', 'receipt', 'decision', 'handoff'] }, ref: { type: 'string' } }, required: ['content'] } },
@@ -93,6 +98,7 @@ export async function createCompanionBridge({ persistenceDir }) {
   const learning = createConversationLearning({ ledger, library });
   const tasks = createContinuityTasks({ ledger, contexts, repos, library });
   const phone = new AndroidHandBridge();
+  const sites = createSitesMcpLink();
 
   async function handle(request, url) {
     if (!url.pathname.startsWith('/api/companion/') && url.pathname !== '/mcp') return null;
@@ -119,7 +125,16 @@ export async function createCompanionBridge({ persistenceDir }) {
         const { name, arguments: args = {} } = rpc.params || {};
         try {
           let result;
-          if (name === 'continuity_status') result = { ...ledger.status(), terminal: terminalStatus(), github: github.status() };
+          if (name === 'android_hands_status') result = await phone.status();
+          else if (name === 'android_hands_apps') { const status = await phone.status(); result = status.reachable ? await phone.apps() : {reachable:false, status}; }
+          else if (name === 'android_hands_propose_launch') {
+            const packageName = String(args.packageName || '').trim();
+            if (!/^[a-zA-Z0-9_]+(?:\.[a-zA-Z0-9_]+)+$/.test(packageName)) throw Error('Valid Android package name required');
+            result = await ledger.append({type:'proposal',actor:'mcp-hands',ref:packageName,
+              content:JSON.stringify({action:'launch-installed-app',packageName,requiresLocalApproval:true,executed:false})});
+          }
+          else if (name === 'synthai2_sites_status') result = sites.status();
+          else if (name === 'continuity_status') result = { ...ledger.status(), terminal: terminalStatus(), github: github.status() };
           else if (name === 'continuity_read') result = { events: ledger.read({ after: args.after || 0, limit: Math.min(args.limit || 100, 200) }) };
           else if (name === 'continuity_note') result = await ledger.append({ type: args.type || 'handoff', actor: 'gpt', content: args.content, ref: args.ref });
           else if (name === 'continuity_propose') result = await ledger.append({ type: 'proposal', actor: 'gpt', content: JSON.stringify({ description: args.description, suggestedCommand: args.suggestedCommand || null, requiresLocalApproval: true }) });
@@ -144,6 +159,17 @@ export async function createCompanionBridge({ persistenceDir }) {
         }
       }
       return { code: 200, data: mcpError(rpc.id, -32601, 'Method not found') };
+    }
+    if (url.pathname === '/api/companion/sites/status' && request.method === 'GET') {
+      return {code:200,data:{ok:true, ...sites.status(), localMcp:'/mcp', androidHands:'separate, local Android native bridge'}};
+    }
+    if (url.pathname === '/api/companion/sites/discover' && request.method === 'POST') {
+      const result = await sites.discover();
+      return {code:200,data:{ok:result.connected,...result}};
+    }
+    if (url.pathname === '/api/companion/sites/call' && request.method === 'POST') {
+      const args = await payload(request, 12000);
+      return {code:200,data:{ok:true,name:args.name,result:await sites.call(args.name,args.arguments||{})}};
     }
     if (url.pathname === '/api/companion/events' && request.method === 'GET') {
       return { code: 200, data: { ok: true, events: ledger.read({ after: Number(url.searchParams.get('after') || 0), limit: Number(url.searchParams.get('limit') || 100) }), state: ledger.status() } };
@@ -330,5 +356,5 @@ export async function createCompanionBridge({ persistenceDir }) {
     }
     return { code: 404, data: { ok: false, error: 'Unknown companion operation' } };
   }
-  return Object.freeze({ handle, ledger, github, tasks, repos, library });
+  return Object.freeze({ handle, ledger, github, tasks, repos, library, sites });
 }
