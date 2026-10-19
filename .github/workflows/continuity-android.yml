@@ -1,0 +1,134 @@
+name: SYNTHAI CONTINUITY Android and Acode
+
+on:
+  push:
+    branches:
+      - feature/gpt-synthai-companion-20261018
+    paths:
+      - 'computer/hover/**'
+      - 'android-app/**'
+      - 'integrations/acode-continuity/**'
+      - '.github/workflows/continuity-android.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify actual companion code
+        run: |
+          set -euo pipefail
+          for file in computer/hover/src/companion/*.mjs computer/hover/ui/companion*.js computer/hover/src/ui/server.mjs integrations/acode-continuity/main.js; do
+            node --check "$file"
+          done
+          node --test computer/hover/test/27-continuity-companion.test.mjs
+          test -s computer/hover/ui/prism-keys.html
+          grep -q 'id="upload-files"' computer/hover/ui/companion.html
+          test -f android-app/app/src/hover/java/app/synthai/hover/ContinuityFilePickerActivity.java
+      - name: Package actual Acode plugin
+        run: |
+          python - <<'PY'
+          import json,zipfile,os
+          root='integrations/acode-continuity'
+          with open(root+'/plugin.json') as f:
+              plugin=json.load(f)
+          assert plugin['main']=='main.js' and plugin['id']=='app.synthai.continuity.acode'
+          os.makedirs('dist',exist_ok=True)
+          with zipfile.ZipFile('dist/synthai-continuity-acode-plugin.zip','w',zipfile.ZIP_DEFLATED) as z:
+              for name in ('plugin.json','main.js','readme.md'):
+                  z.write(root+'/'+name,arcname=name)
+          with zipfile.ZipFile('dist/synthai-continuity-acode-plugin.zip') as z:
+              assert z.testzip() is None
+          PY
+      - uses: docker/setup-qemu-action@v3
+        with:
+          platforms: arm64
+      - uses: docker/setup-buildx-action@v3
+      - name: Build real ARM64 Alpine rootfs with embedded MCP
+        run: |
+          set -euo pipefail
+          docker buildx build --platform linux/arm64 \
+            -f android-app/linux/Dockerfile.hover \
+            -t "synthai-continuity-rootfs:$GITHUB_SHA" --load .
+          container="$(docker create --platform linux/arm64 "synthai-continuity-rootfs:$GITHUB_SHA")"
+          mkdir -p /tmp/continuity-rootfs
+          docker export "$container" | tar -C /tmp/continuity-rootfs -xf -
+          docker rm "$container"
+          for file in src/companion/bridge.mjs src/companion/tasks.mjs ui/prism-keys.html ui/companion-extra.js; do
+            test -f "/tmp/continuity-rootfs/opt/synthia58/$file"
+          done
+          test -x /tmp/continuity-rootfs/usr/local/bin/node
+          mkdir -p android-app/app/src/hover/assets
+          tar --hard-dereference -C /tmp/continuity-rootfs -czf android-app/app/src/hover/assets/linux-rootfs.bundle .
+          printf '%s-synthia58-hover-1\n' "$GITHUB_SHA" > android-app/app/src/hover/assets/linux-rootfs.version
+          du -h android-app/app/src/hover/assets/linux-rootfs.bundle
+          sudo rm -rf /tmp/continuity-rootfs
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: android-actions/setup-android@v3
+        with:
+          packages: 'platform-tools platforms;android-35 build-tools;35.0.0'
+          log-accepted-android-sdk-licenses: 'false'
+      - name: Build pinned Android ARM64 PRoot native bridge
+        env:
+          OPENMINIS_COMMIT: 4ef29002e88db1e20e462ec2ff46916e8a7dcb45
+          NDK_VERSION: 28.0.13004108
+        run: |
+          set -euo pipefail
+          sdkmanager 'ndk;28.0.13004108'
+          git clone https://github.com/OpenMinis/OpenMinis.git /tmp/openminis
+          git -C /tmp/openminis checkout "$OPENMINIS_COMMIT"
+          git -C /tmp/openminis submodule update --init --recursive
+          export ANDROID_NDK_HOME="$ANDROID_SDK_ROOT/ndk/$NDK_VERSION"
+          bash /tmp/openminis/deps/build_proot.sh
+          mkdir -p android-app/app/src/main/jniLibs/arm64-v8a
+          for name in libproot.so libproot-loader.so libproot-loader32.so; do
+            cp "/tmp/openminis/src/android/app/src/main/jniLibs/arm64-v8a/$name" \
+              android-app/app/src/main/jniLibs/arm64-v8a/
+          done
+          mkdir -p android-app/app/src/main/assets/licenses
+          cp android-app/THIRD_PARTY_NOTICES.md android-app/app/src/main/assets/licenses/THIRD_PARTY_NOTICES.md
+          printf 'PRoot bridge source OpenMinis commit %s\n' "$OPENMINIS_COMMIT" \
+            > android-app/app/src/main/assets/licenses/linux-runtime-provenance.txt
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.7'
+      - name: Compile Hover-based Continuity APK
+        working-directory: android-app
+        run: gradle --no-daemon :app:assembleHoverDebug --stacktrace
+      - name: Verify real bundled APK payload
+        run: |
+          set -euo pipefail
+          APK=android-app/app/build/outputs/apk/hover/debug/app-hover-debug.apk
+          test -s "$APK"
+          unzip -l "$APK" > /tmp/continuity-apk-list.txt
+          grep -q 'assets/linux-rootfs.bundle' /tmp/continuity-apk-list.txt
+          grep -q 'lib/arm64-v8a/libproot.so' /tmp/continuity-apk-list.txt
+          unzip -p "$APK" assets/linux-rootfs.bundle | gzip -t
+          "$ANDROID_SDK_ROOT/build-tools/35.0.0/aapt2" dump badging "$APK" > /tmp/continuity-badging.txt
+          grep -q "package: name='app.synthai.android'" /tmp/continuity-badging.txt
+          grep -q 'SYNTHAI CONTINUITY' /tmp/continuity-badging.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: SYNTHAI-CONTINUITY-Android-debug-APK
+          path: android-app/app/build/outputs/apk/hover/debug/app-hover-debug.apk
+          if-no-files-found: error
+          retention-days: 30
+      - uses: actions/upload-artifact@v4
+        with:
+          name: SYNTHAI-CONTINUITY-Acode-Plugin
+          path: dist/synthai-continuity-acode-plugin.zip
+          if-no-files-found: error
+          retention-days: 30
