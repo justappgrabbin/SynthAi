@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Prism Keys · SYNTHAI CONTINUITY</title>
+<style>
+:root{--bg:#f6f4fb;--fg:#1d1b26;--card:#fff;--mut:#6b6880;--bd:#ddd8ea;--key:#e7e3f3;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#13111c;--fg:#f1eefc;--card:#1e1b2b;--mut:#a29fba;--bd:#34304a;--key:#2b2740}}
+:root[data-theme="dark"]{--bg:#13111c;--fg:#f1eefc;--card:#1e1b2b;--mut:#a29fba;--bd:#34304a;--key:#2b2740}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--fg);font:16px/1.4 system-ui,-apple-system,sans-serif;display:flex;flex-direction:column;overflow:hidden}
+header{display:flex;align-items:center;gap:10px;padding:8px 12px;flex-wrap:wrap}
+h1{font-size:18px;margin:0;flex:1;filter:hue-rotate(calc(var(--hs,0)*1deg));background:linear-gradient(90deg,#ff4d6d,#ff9f1c,#f4d35e,#2ec4b6,#4895ef,#9b5de5);-webkit-background-clip:text;background-clip:text;color:transparent}
+label{font-size:12px;color:var(--mut);display:flex;gap:4px;align-items:center}
+main{flex:1;overflow-y:auto;padding:0 12px 8px;min-height:0}
+#t{width:100%;min-height:96px;resize:none;border:2px solid var(--bd);border-radius:14px;background:var(--card);color:var(--fg);font:inherit;padding:10px;outline:none}
+#t:focus{border-color:#9b5de5}
+#view{margin:8px 0;padding:10px;border-radius:14px;background:var(--card);border:1px solid var(--bd);white-space:pre-wrap;word-break:break-word;min-height:44px}
+#view:empty::before{content:"claims light up here";color:var(--mut)}
+mark{--c:#999;background:color-mix(in srgb,var(--c) 28%,transparent);color:inherit;border-bottom:3px solid var(--c);border-radius:4px;padding:0 2px}
+mark sup{font-weight:700;color:var(--c);margin-left:2px}
+.rc{border-left:6px solid var(--c);background:var(--card);border-radius:10px;padding:8px 10px;margin:8px 0;font-size:14px}
+.rc q{display:block;font-style:italic;color:var(--mut);quotes:none;margin-bottom:4px}
+.vd{display:inline-block;font-size:11px;font-weight:700;padding:1px 8px;border-radius:99px;color:#fff;margin-right:6px;text-transform:uppercase}
+.rc ul{margin:4px 0 0;padding-left:18px}.rc a{color:#4895ef}
+.note{font-size:12px;color:var(--mut)}
+.k{transition:background .25s}
+.k.sp,.bar button,.bar select{filter:hue-rotate(calc(var(--hs,0)*1deg))}
+header select{font-size:12px;border-radius:8px;border:1px solid var(--bd);background:var(--card);color:var(--fg);padding:2px 4px}
+#view.code,#t.code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:14px;white-space:pre;overflow-x:auto;tab-size:2}
+.bar{display:flex;gap:6px;padding:6px 8px;overflow-x:auto;flex-shrink:0}
+.bar button,.bar select{flex:0 0 auto;border:0;border-radius:99px;padding:9px 14px;font:600 14px system-ui;color:#fff;cursor:pointer}
+.b1{background:#ff4d6d}.b2{background:#ff9f1c}.b3{background:#2ec4b6}.b4{background:#4895ef}.b5{background:#9b5de5}.b6{background:#f15bb5}
+.bar select{background:#ff9f1c;appearance:none}
+.bar button:disabled{opacity:.5}
+#kb{padding:4px 4px 8px;flex-shrink:0;user-select:none;-webkit-user-select:none;touch-action:manipulation}
+.row{display:flex}
+.k{flex:1;height:46px;margin:3px;border:0;border-radius:10px;font:600 19px system-ui;color:#fff;text-shadow:0 1px 1px #0004;cursor:pointer;padding:0;min-width:0}
+.k:active{filter:brightness(1.25);transform:scale(.95)}
+.k.s{background:var(--key);color:var(--fg);text-shadow:none;flex:1.5;font-size:15px}
+.k.sp{flex:4;background:linear-gradient(90deg,#ff4d6d,#ff9f1c,#f4d35e,#2ec4b6,#4895ef,#9b5de5)}
+.k.on{outline:3px solid #fff8;background:#9b5de5}
+#toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 250px);transform:translateX(-50%);background:#000d;color:#fff;padding:8px 14px;border-radius:99px;font-size:13px;opacity:0;transition:opacity .2s;pointer-events:none;max-width:90%;text-align:center}
+#toast.show{opacity:1}
+</style></head>
+<body>
+<header>
+  <h1>Prism Keys</h1>
+  <label><input type="checkbox" id="auto" checked> auto-punctuate</label>
+  <label><input type="checkbox" id="slang" checked> "then / thus / well" breaks</label>
+  <label><input type="checkbox" id="cd"> code mode</label>
+  <label>colors <select id="cm"><option value="drift">drift</option><option value="pulse">pulse on type</option><option value="still">still</option></select></label>
+</header>
+<main>
+  <textarea id="t" inputmode="none" placeholder="type with the keys below, no punctuation needed" spellcheck="false"></textarea>
+  <div id="view"></div>
+  <div id="recs"></div>
+</main>
+<div class="bar">
+  <button class="b1" id="bP">Punctuate</button>
+  <select id="tone"><option>clean</option><option>punchy</option><option>warm</option><option>formal</option><option>shorter</option><option>casual</option></select>
+  <button class="b2" id="bR">Rephrase</button>
+  <button class="b3" id="bC">Receipts</button>
+  <button class="b4" id="bA" disabled>Attach</button>
+  <button class="b5" id="bU">Undo</button>
+  <button class="b6" id="bK">Copy</button>
+  <button class="b7" id="bS" type="button" style="background:#7552b9">Send to Continuity</button>
+</div>
+<div id="kb"></div>
+<div id="toast"></div>
+<script>
+const $=s=>document.querySelector(s),T=$('#t'),PAL=['#ff4d6d','#ff9f1c','#e6b800','#2ec4b6','#4895ef','#9b5de5','#f15bb5'];
+let hist=[],sample=null,recs=null,tm,layer=0,shift=false;
+const toast=m=>{const e=$('#toast');e.textContent=m;e.classList.add('show');clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove('show'),2600)};
+const esc=s=>s.replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+if(window.claude&&claude.use)claude.use('sample').then(s=>{sample=s}).catch(()=>{});
+
+/* ---------- auto punctuation (local, offline) ---------- */
+const Q=/^(who|what|when|where|why|how|which|is|are|am|was|were|do|does|did|can|could|would|should|will|shall|have|has|had|whats|hows|isnt|arent|dont|wont)\b/i;
+const cap=s=>s.replace(/^(\W*)([a-z])/,(m,a,b)=>a+b.toUpperCase());
+const fixI=s=>s.replace(/\bi\b/g,'I');
+function fixSeg(s,slang){
+  s=s.trim().replace(/\s+/g,' ');if(!s)return '';
+  const w=s.split(' '),sents=[];let cur=[];
+  for(const x of w){
+    if(slang&&cur.length>=4&&/^(thus|then|well)$/i.test(x)){sents.push(cur);cur=[x]}else cur.push(x);
+  }
+  sents.push(cur);
+  return sents.map(a=>{
+    let t=a.join(' ');
+    t=t.replace(/(\S) (but|though|however|yet)\b/gi,(m,p,c)=>/[,;]$/.test(p)?m:p+', '+c);
+    t=t.replace(/^(thus|then|well)\b(?!,)(?= \S)/i,'$1,');
+    const q=Q.test(t);
+    t=cap(fixI(t));
+    return t+(q?'?':'.');
+  }).join(' ');
+}
+function punct(text,slang){
+  const re=/[^.!?\n]+[.!?]*|\n/g;let out='',m;
+  while((m=re.exec(text))){
+    const c=m[0];if(c==='\n'){out+=c;continue}
+    const [,lead,body,trail]=c.match(/^(\s*)([\s\S]*?)(\s*)$/);
+    if(!body){out+=c;continue}
+    out+=lead+(/[.!?]$/.test(body)?cap(fixI(body)):fixSeg(body,slang))+trail;
+  }
+  return out;
+}
+
+/* ---------- claim detection ---------- */
+const CL=[/\d/,/\b(studies|study|research|according|proves?|proven|shows?|data|statistics|scientists?|experts?|reports?|reported)\b/i,/\b(always|never|every(one|body|thing)?|nobody|no one|most|best|worst|biggest|largest|first|only|majority|all)\b/i,/\b(causes?|caused|leads? to|results? in|because|due to|linked to|increases?|decreases?|reduces?)\b/i,/\b(is|are|was|were)\s+(the|a|an|not)\b/i];
+function claims(text){
+  const re=/[^.!?\n]+[.!?]*/g,out=[];let m;
+  while((m=re.exec(text))){
+    const lead=m[0].match(/^\s*/)[0].length,t=m[0].trim();
+    if(t.split(/\s+/).length<4||/\?$/.test(t)||Q.test(t))continue;
+    const strong=CL.slice(0,4).some(r=>r.test(t));
+    const weak=CL[4].test(t)&&!/^(i|my|we|me)\b/i.test(t);
+    if(!strong&&!weak)continue;
+    if(/^(i|my|we)\b/i.test(t)&&!CL[0].test(t)&&!CL[1].test(t))continue;
+    const n=out.length+1;
+    out.push({n,text:t,start:m.index+lead,end:m.index+lead+t.length,color:PAL[(n-1)%PAL.length]});
+  }
+  return out;
+}
+function render(){if(code){$('#view').innerHTML=hl(T.value);return}
+  const v=T.value,cs=claims(v);let pos=0,h='';
+  for(const c of cs){h+=esc(v.slice(pos,c.start))+`<mark style="--c:${c.color}">${esc(v.slice(c.start,c.end))}<sup>${c.n}</sup></mark>`;pos=c.end}
+  $('#view').innerHTML=h+esc(v.slice(pos));
+}
+function setText(v){hist.push(T.value);if(hist.length>40)hist.shift();T.value=v;T.setSelectionRange(v.length,v.length);render()}
+
+/* ---------- input flow ---------- */
+function onInput(){
+  render();clearTimeout(tm);
+  if($('#auto').checked&&!code)tm=setTimeout(()=>{
+    if(T.selectionStart!==T.value.length)return;
+    const v=punct(T.value,$('#slang').checked);if(v!==T.value)setText(v);
+  },900);
+}
+T.addEventListener('input',onInput);
+const fire=()=>T.dispatchEvent(new Event('input'));
+function ins(t){T.setRangeText(t,T.selectionStart,T.selectionEnd,'end');fire()}
+function bs(){let s=T.selectionStart,e=T.selectionEnd;if(code&&s===e&&s>0&&PAIRS[T.value[s-1]]===T.value[s]){T.setRangeText('',s-1,s+1,'end');return fire()}if(s===e){if(!s)return;s--}T.setRangeText('',s,e,'end');fire()}
+
+/* ---------- buttons ---------- */
+$('#bP').onclick=()=>{const v=code?T.value.replace(/[ \t]+$/gm,'').replace(/\t/g,'  ').replace(/\n{3,}/g,'\n\n'):punct(T.value,$('#slang').checked);v!==T.value?setText(v):toast(code?'already tidy':'already punctuated')};
+$('#bU').onclick=()=>{if(!hist.length)return toast('nothing to undo');T.value=hist.pop();T.setSelectionRange(T.value.length,T.value.length);render()};
+$('#bK').onclick=async()=>{try{await navigator.clipboard.writeText(T.value);toast('copied')}catch{T.select();document.execCommand('copy');toast('copied')}};
+async function busy(btn,label,fn){const o=btn.textContent;btn.disabled=true;btn.textContent=label;try{await fn()}catch(e){toast(e&&e.code==='not_granted'?'permission needed to ask Claude':(e&&e.message)||'something failed')}btn.disabled=false;btn.textContent=o}
+$('#bR').onclick=()=>busy($('#bR'),'…',async()=>{
+  if(!sample)return toast('rephrase needs the published page (Claude access)');
+  const v=T.value.trim();if(!v)return toast('type something first');
+  if(code){const r=await sample(`Task: ${$('#tone').value}. Apply it to the code below. Keep behavior identical unless the task is find bugs, in which case fix them and add a one-line comment per fix. Return only the code, no markdown fences, no commentary.\n\n${v}`,{cache:false});return setText(r.text.replace(/^```\w*\n?|\n?```$/g,'').trim())}
+  const r=await sample(`Rewrite the text below in a ${$('#tone').value} tone. Keep the meaning, every fact and number, and the writer's voice. Fix punctuation and capitalization. Return only the rewritten text, no quotes, no commentary.\n\n${v}`,{cache:false});
+  setText(r.text.trim());
+});
+const VC={supported:'#2a9d5c',disputed:'#e63946',mixed:'#e6a100',unverifiable:'#7d7a90'};
+$('#bC').onclick=()=>busy($('#bC'),'…',async()=>{
+  if(!sample)return toast('receipts need the published page (Claude access)');if(code)return toast('receipts are for prose, switch code mode off');
+  const text=T.value,cs=claims(text);
+  if(!cs.length)return toast('no claims detected');
+  const r=await sample.json(`You are a fact-check desk. For each numbered claim return a JSON array of objects: {"n":number,"verdict":"supported"|"disputed"|"mixed"|"unverifiable","note":"one sentence on what the evidence says","sources":[{"title":"","publisher":"","year":""}]}. Only name sources you are confident really exist, with real publishers. If unsure give fewer or none and mark unverifiable. Never invent URLs. Return only the JSON array.\n\nClaims:\n${cs.map(c=>c.n+'. '+c.text).join('\n')}`,{cache:false});
+  const arr=Array.isArray(r)?r:(r&&r.results)||[];
+  recs={text,cs,arr};
+  $('#recs').innerHTML='<div class="note">Receipts are Claude\'s recall of sources, not a live lookup. Hit Look it up to confirm before you rely on one.</div>'+cs.map(c=>{
+    const x=arr.find(a=>a.n===c.n)||{verdict:'unverifiable',note:'no result returned',sources:[]};
+    const vc=VC[x.verdict]||VC.unverifiable;
+    return `<div class="rc" style="--c:${c.color}"><q>${c.n}. ${esc(c.text)}</q><span class="vd" style="background:${vc}">${esc(x.verdict||'unverifiable')}</span>${esc(x.note||'')}`+
+      ((x.sources&&x.sources.length)?'<ul>'+x.sources.map(s=>`<li>${esc([s.publisher,s.title,s.year].filter(Boolean).join(' — '))}</li>`).join('')+'</ul>':'')+
+      `<div><a target="_blank" rel="noopener" href="https://www.google.com/search?q=${encodeURIComponent(c.text)}">Look it up</a></div></div>`}).join('');
+  $('#bA').disabled=false;
+});
+$('#bA').onclick=()=>{
+  if(!recs||recs.text!==T.value)return toast('text changed, run Receipts again');
+  let t=recs.text,foot=[];
+  for(const c of [...recs.cs].reverse())t=t.slice(0,c.end)+` [${c.n}]`+t.slice(c.end);
+  for(const c of recs.cs){
+    const x=recs.arr.find(a=>a.n===c.n),s=(x&&x.sources)||[];
+    foot.push(`[${c.n}] `+(s.length?s.map(q=>[q.publisher,q.title&&`"${q.title}"`,q.year&&`(${q.year})`].filter(Boolean).join(', ')).join('; '):'no source confirmed'));
+  }
+  setText(t+'\n\nReceipts:\n'+foot.join('\n'));recs=null;$('#bA').disabled=true;$('#recs').innerHTML='';
+};
+
+/* ---------- multicolor keyboard ---------- */
+const L=[['qwertyuiop'.split(''),'asdfghjkl'.split(''),['⇧',...'zxcvbnm'.split(''),'⌫'],['123',',',' ','.','↵']],
+         ['1234567890'.split(''),['-','/',':',';','(',')','$','&','@','"'],['#+=',...'.,?!\''.split(''),'⌫'],['ABC',',',' ','.','↵']],
+         ['[]{}#%^*+='.split(''),'_\\|~<>`!?@'.split(''),['123','⇥',':',';','"',"'",'⌫'],['ABC',',',' ','.','↵']]];
+function build(){
+  const kb=$('#kb');kb.innerHTML='';
+  (code&&layer===0?[CODE_ROW,...L[0]]:L[layer]).forEach((r,ri)=>{
+    const d=document.createElement('div');d.className='row';
+    r.forEach((k,ci)=>{
+      const b=document.createElement('button');b.className='k';b.type='button';
+      const sp=['⇧','⌫','123','ABC','#+=','↵','⇥'].includes(k);
+      b.textContent=k===' '?'space':(shift&&layer===0&&k.length===1&&k!==','&&k!=='.'?k.toUpperCase():k);
+      if(k===' ')b.classList.add('sp');
+      else if(sp){b.classList.add('s');if(k==='⇧'&&shift)b.classList.add('on')}
+      else b.style.background=`hsl(calc(${(ci*34+ri*70+(layer*40))%360}deg + var(--hs,0) * 1deg) 72% 46%)`;
+      b.dataset.k=k;d.appendChild(b);
+    });
+    kb.appendChild(d);
+  });
+}
+let rep,code=false,cmode='drift',hs=0,lastT=0;
+const PAIRS={'(':')','[':']','{':'}','"':'"',"'":"'",'`':'`'},CLOSE=new Set([')',']','}','"',"'",'`']),CODE_ROW=['⇥','{','}','(',')','[',']','<','>','='];
+function setHs(v){hs=v%360;document.documentElement.style.setProperty('--hs',hs.toFixed(1))}
+requestAnimationFrame(function lp(t){if(cmode==='drift'&&t-lastT>60){lastT=t;setHs(hs+1)}requestAnimationFrame(lp)});
+function setCode(on){code=on;$('#tone').innerHTML=(on?['clean up','simplify','add comments','add types','find bugs']:['clean','punchy','warm','formal','shorter','casual']).map(x=>`<option>${x}</option>`).join('');$('#bR').textContent=on?'Refine':'Rephrase';$('#bP').textContent=on?'Tidy':'Punctuate';$('#view').classList.toggle('code',on);T.classList.toggle('code',on);T.placeholder=on?'code mode: brackets pair, enter auto-indents':'type with the keys below, no punctuation needed';layer=0;build();render()}
+function cins(ch){const s=T.selectionStart,e=T.selectionEnd,v=T.value;if(s===e&&CLOSE.has(ch)&&v[s]===ch){T.setSelectionRange(s+1,s+1);return fire()}if(PAIRS[ch]){if(s!==e){T.setRangeText(ch+v.slice(s,e)+PAIRS[ch],s,e,'end');return fire()}if(ch===PAIRS[ch]&&/\w/.test(v[s-1]||'')){return ins(ch)}T.setRangeText(ch+PAIRS[ch],s,e,'end');T.setSelectionRange(s+1,s+1);return fire()}ins(ch)}
+function enter(){const s=T.selectionStart,v=T.value,ls=s?v.lastIndexOf('\n',s-1)+1:0,line=v.slice(ls,s),ind=line.match(/^[ \t]*/)[0],p=v[s-1],n=v[s],more=/[{(\[:]$/.test(line.trimEnd())?'  ':'';if(p&&n&&PAIRS[p]===n&&p!=='"'&&p!=="'"&&p!=='`'){T.setRangeText('\n'+ind+more+'\n'+ind,s,T.selectionEnd,'end');const c=s+1+ind.length+more.length;T.setSelectionRange(c,c);return fire()}ins('\n'+ind+more)}
+const KW=/^(function|const|let|var|return|if|else|elif|for|while|class|import|from|export|def|in|of|new|await|async|try|catch|except|throw|raise|switch|case|break|continue|True|False|None|true|false|null|undefined|and|or|not|is|with|as|lambda|pass|yield|self|this|print)$/;
+function hl(v){let d=0;const sp=(c,t,x='')=>`<span style="color:${c};${x}">${esc(t)}</span>`;
+return v.replace(/(\/\/[^\n]*|#[^\n]*)|("(?:\\.|[^"\\\n])*"?|'(?:\\.|[^'\\\n])*'?|`(?:\\.|[^`\\])*`?)|(\b\d[\w.]*)|([A-Za-z_$][\w$]*)(?=\s*\()|([A-Za-z_$][\w$]*)|([{}()[\]])|([=+\-*\/%<>!&|^~?:;,.]+)|([\s\S])/g,
+(m,c,s,n,f,i,b,o)=>c?sp('#8a87a0',m,'font-style:italic'):s?sp('#2ec4b6',m):n?sp('#ff9f1c',m):f?sp(KW.test(m)?'#ff4d6d':'#4895ef',m):i?(KW.test(m)?sp('#ff4d6d',m,'font-weight:700'):esc(m)):b?(/[{(\[]/.test(b)?sp(PAL[d++%7],m,'font-weight:700'):sp(PAL[(--d<0?(d=0):d)%7],m,'font-weight:700')):o?sp('#f15bb5',m):esc(m))}
+let rep2;
+function press(k){
+  navigator.vibrate&&navigator.vibrate(6);if(cmode==='pulse')setHs(hs+14);
+  if(k==='⇧'){shift=!shift;return build()}
+  if(k==='123'){layer=1;return build()}
+  if(k==='ABC'){layer=0;return build()}if(k==='#+='){layer=2;return build()}
+  if(k==='⌫')return bs();
+  if(k==='↵')return code?enter():ins('\n');
+  {const ch=k===' '?' ':k==='⇥'?'  ':(shift&&layer===0&&k.length===1?k.toUpperCase():k);code?cins(ch):ins(ch)}
+  if(shift){shift=false;build()}
+}
+$('#kb').addEventListener('pointerdown',e=>{
+  const b=e.target.closest('.k');if(!b)return;e.preventDefault();
+  const k=b.dataset.k;press(k);
+  if(k==='⌫'){clearTimeout(rep);rep=setTimeout(function r(){bs();rep=setTimeout(r,60)},380)}
+});
+['pointerup','pointercancel','pointerleave'].forEach(ev=>$('#kb').addEventListener(ev,()=>clearTimeout(rep)));
+$('#cd').onchange=e=>setCode(e.target.checked);$('#cm').onchange=e=>{cmode=e.target.value;if(cmode==='still')setHs(0)};build();render();
+
+
+/* User-requested SYNTHAI CONTINUITY bridge.
+   Explicitly chosen text only. Never auto-capture background typing. */
+$('#bS').addEventListener('click',async()=>{
+  const selected=T.value.slice(T.selectionStart,T.selectionEnd).trim();
+  const content=selected || T.value.trim();
+  if(!content)return toast('Nothing to send');
+  if(content.length>15000)return toast('Select less than 15,000 characters');
+  if(!confirm('Save this chosen text into SYNTHAI CONTINUITY?'))return;
+  const key=sessionStorage.getItem('synthia-companion-key') || prompt('Paste your SYNTHAI CONTINUITY access key');
+  if(!key)return toast('Not connected');
+  const originalLabel=$('#bS').textContent;
+  $('#bS').disabled=true;$('#bS').textContent='Saving…';
+  try{
+    const response=await fetch('/api/companion/events',{
+      method:'POST',headers:{'content-type':'application/json','x-synthia-access-key':key},
+      body:JSON.stringify({
+        type:'conversation',actor:'prism',
+        content:content,ref:'prism-keys:user-selected',
+      }),
+    });
+    const body=await response.json().catch(()=>({}));
+    if(!response.ok)throw new Error(body.error||'Continuity was unreachable');
+    sessionStorage.setItem('synthia-companion-key',key);
+    toast('Saved to Continuity as receipt #'+body.event.seq);
+  }catch(error){toast('Not saved: '+String(error.message).slice(0,160));}
+  finally{$('#bS').disabled=false;$('#bS').textContent=originalLabel;}
+});
+</script>
+</body></html>
