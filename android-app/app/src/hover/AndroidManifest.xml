@@ -36,6 +36,24 @@
             </intent-filter>
         </activity>
 
+        <!-- Selected-text and Android Shares bridge; user confirmation mandatory. -->
+        <activity
+            android:name="app.synthai.hover.ContinuityShareActivity"
+            android:label="Send to SYNTHAI CONTINUITY"
+            android:exported="true"
+            android:theme="@android:style/Theme.Material.Light.NoActionBar">
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="text/plain" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.PROCESS_TEXT" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="text/plain" />
+            </intent-filter>
+        </activity>
+
         <activity
             android:name="app.synthai.hover.IdentityActivity"
             android:exported="false"
