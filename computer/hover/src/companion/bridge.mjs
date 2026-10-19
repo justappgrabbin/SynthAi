@@ -6,6 +6,7 @@ import { createRepoHub } from './repo-hub.mjs';
 import { createProjectContexts } from './project-context.mjs';
 import { createArtifactLibrary } from './artifact-library.mjs';
 import { createConversationLearning } from './conversation-learning.mjs';
+import { createContinuityTasks } from './tasks.mjs';
 import { AndroidHandBridge } from '../solo/android-hand-adapter.mjs';
 
 const TOOL_DEFS = [
@@ -21,6 +22,9 @@ const TOOL_DEFS = [
   { name: 'repo_inspect', description: 'Inspect source commits, GitHub Actions runs and available artifact downloads for a selected repository.', inputSchema: { type: 'object', properties: { repository: { type: 'string' } }, required: ['repository'] }, annotations: { readOnlyHint: true } },
   { name: 'repo_refresh', description: 'Refresh user-selected GitHub repository heads and record actual changes to the continuity ledger.', inputSchema: { type: 'object', properties: {} } },
   { name: 'learning_status', description: 'Get evidence-grounded learning statistics from imported conversations, receipts and explicit feedback.', inputSchema: { type: 'object', properties: {} }, annotations: { readOnlyHint: true } },
+  { name: 'task_list', description: 'Inspect the persistent proposed, blocked and review tasks for all selected projects.', inputSchema: {type:'object',properties:{repository:{type:'string'}}},annotations:{readOnlyHint:true}},
+  { name: 'task_add', description: 'Record a proposed project task for review; no code is run.', inputSchema: {type:'object',properties:{title:{type:'string'},description:{type:'string'},repository:{type:'string'}},required:['title']}},
+  { name: 'project_gap_audit', description: 'Compare goal records and selected parts with verified evidence and add unresolved tasks; no edits or installations.', inputSchema: {type:'object',properties:{}}},
   { name: 'conversation_review', description: 'Analyze supplied conversation text into cited requests, decisions, blockers and unverified solution proposals.', inputSchema: { type: 'object', properties: { content: { type: 'string' }, name: { type: 'string' } }, required: ['content'] } },
 ];
 
@@ -85,6 +89,7 @@ export async function createCompanionBridge({ persistenceDir }) {
   const contexts = createProjectContexts({ ledger });
   const library = await createArtifactLibrary({ ledger });
   const learning = createConversationLearning({ ledger, library });
+  const tasks = createContinuityTasks({ ledger, contexts, repos, library });
   const phone = new AndroidHandBridge();
 
   async function handle(request, url) {
@@ -125,6 +130,9 @@ export async function createCompanionBridge({ persistenceDir }) {
           else if (name === 'repo_refresh') result = await repos.refresh();
           else if (name === 'learning_status') result = learning.stats();
           else if (name === 'conversation_review') result = await learning.reviewText({ content: args.content, name: args.name || 'GPT shared conversation' });
+          else if (name === 'task_list') result = {tasks:tasks.list({repository:args.repository||undefined})};
+          else if (name === 'task_add') result = await tasks.add({title:args.title,description:args.description,repository:args.repository,source:'gpt'});
+          else if (name === 'project_gap_audit') result = await tasks.audit({create:true});
           else return { code: 200, data: mcpError(rpc.id, -32601, 'Unknown continuity tool') };
           return { code: 200, data: mcp(rpc.id, mcpText(result)) };
         } catch (error) {
@@ -194,6 +202,28 @@ export async function createCompanionBridge({ persistenceDir }) {
         return {code:413,data:{ok:false,error:'Standalone HTML preview limit is 1 MB'}};
       }
       return {code:200,htmlFile:item};
+    }
+
+    if (url.pathname === '/api/companion/tasks' && request.method === 'GET') {
+      return {code:200,data:{ok:true,tasks:tasks.list({repository:url.searchParams.get('repository')||undefined}),automation:tasks.status()}};
+    }
+    if (url.pathname === '/api/companion/tasks/new' && request.method === 'POST') {
+      return {code:201,data:{ok:true,task:await tasks.add(await payload(request))}};
+    }
+    if (url.pathname === '/api/companion/tasks/status' && request.method === 'POST') {
+      return {code:200,data:{ok:true,task:await tasks.set(await payload(request))}};
+    }
+    if (url.pathname === '/api/companion/tasks/audit' && request.method === 'POST') {
+      return {code:200,data:{ok:true,...await tasks.audit({create:true})}};
+    }
+    if (url.pathname === '/api/companion/tasks/sweep' && request.method === 'POST') {
+      return {code:200,data:{ok:true,...await tasks.sweep({force:true})}};
+    }
+    if (url.pathname === '/api/companion/tasks/auto' && request.method === 'POST') {
+      return {code:200,data:{ok:true,automation:await tasks.setAuto(await payload(request))}};
+    }
+    if (url.pathname === '/api/companion/tasks/gate-backlog' && request.method === 'POST') {
+      return {code:201,data:{ok:true,task:await tasks.seedFutureGateStudy()}};
     }
 
     if (url.pathname === '/api/companion/learn/status' && request.method === 'GET') {
@@ -276,5 +306,5 @@ export async function createCompanionBridge({ persistenceDir }) {
     }
     return { code: 404, data: { ok: false, error: 'Unknown companion operation' } };
   }
-  return Object.freeze({ handle, ledger, github });
+  return Object.freeze({ handle, ledger, github, tasks, repos, library });
 }
