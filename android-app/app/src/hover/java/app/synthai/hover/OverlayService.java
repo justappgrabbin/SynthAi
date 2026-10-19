@@ -16,6 +16,8 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.webkit.PermissionRequest;
 import android.webkit.WebChromeClient;
+import android.webkit.ValueCallback;
+import android.net.Uri;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -64,8 +66,16 @@ public final class OverlayService extends Service {
     private WindowManager.LayoutParams panelParams;
     private WebView panelWebView;
     private HoverVoice voice;
+    private static volatile ValueCallback<Uri[]> currentFilePicker;
     private boolean pageReady;
     private boolean pageFailed;
+
+    /** Receive document URIs only from an explicitly user-opened system picker. */
+    public static synchronized void onFilesPicked(Uri[] chosen) {
+        ValueCallback<Uri[]> callback=currentFilePicker;
+        currentFilePicker=null;
+        if(callback!=null)callback.onReceiveValue(chosen);
+    }
 
     public static void hideForAction(long millis) {
         OverlayService current = instance;
@@ -227,6 +237,22 @@ public final class OverlayService extends Service {
             }
         });
         panelWebView.setWebChromeClient(new WebChromeClient() {
+            @Override
+            public boolean onShowFileChooser(WebView webView, ValueCallback<Uri[]> callback, FileChooserParams params) {
+                onFilesPicked(null); // cancel prior picker rather than leaking its callback
+                currentFilePicker=callback;
+                try {
+                    Intent picker=new Intent(OverlayService.this,ContinuityFilePickerActivity.class);
+                    picker.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(picker);
+                    return true;
+                } catch(Exception error) {
+                    onFilesPicked(null);
+                    Log.e(HoverPorts.TAG,"CONTINUITY_FILE_PICKER_FAILED",error);
+                    return false;
+                }
+            }
+
             @Override
             public void onPermissionRequest(PermissionRequest request) {
                 // Microphone permission is granted only if the user granted Android RECORD_AUDIO.
