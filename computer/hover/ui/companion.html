@@ -4,13 +4,13 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#10101d">
-<title>Synthia + GPT · Companion</title>
+<title>SYNTHAI CONTINUITY · Service Hub</title>
 <link rel="stylesheet" href="/companion.css">
 </head>
 <body>
 <div class="app">
   <header class="top">
-    <div class="brand"><span class="orb" aria-hidden="true">✧</span><div><strong>Synthia <span class="plus">+</span> GPT</strong><small>one workspace · real receipts</small></div></div>
+    <div class="brand"><span class="orb" aria-hidden="true">✧</span><div><strong>SYNTHAI CONTINUITY</strong><small>GPT · Cynthia · all your app projects</small></div></div>
     <div id="runtime-badge" class="runtime-badge">Checking runtime</div>
   </header>
   <div id="banner" class="banner" role="status" aria-live="polite">Connecting to local Synthia…</div>
@@ -22,7 +22,7 @@
 
   <main id="workspace">
     <section class="page visible" id="page-chat" aria-label="Workspace">
-      <div class="intro"><p class="eyebrow">THE SAME PLANE</p><h1>Build with continuity.</h1><p>One live Synthia runtime, one persistent handoff ledger, and the same work you can continue in ChatGPT.</p></div>
+      <div class="intro"><p class="eyebrow">THE SAME PLANE</p><h1>One home for every app.</h1><p>Your service screen for Synthia and GPT: keep project context, review changes, preview builds and continue work with receipts.</p></div>
       <div id="chat-messages" class="messages" aria-live="polite"><div class="message system">The workspace is here. Synthia will answer from her existing runtime when it is available; nothing is simulated.</div></div>
       <form id="chat-form" class="composer"><textarea id="chat-input" rows="2" placeholder="Tell Synthia what to do or ask what is wired…" required></textarea><div class="composer-actions"><button id="mic" type="button" class="secondary">🎙 Speak</button><button id="say-last" type="button" class="secondary">Listen</button><button id="send-chat" type="submit">Send →</button></div></form>
       <div class="quick"><button type="button" data-command="What real tools are wired and available?">Check hands</button><button type="button" data-command="What is the next concrete task for our companion?">Next task</button></div>
@@ -40,6 +40,53 @@
       <div class="details"><strong id="hands-status">Checking hands…</strong><small id="hands-details">No fake app catalog or device state.</small></div>
       <div class="actions"><button type="button" id="hands-refresh">Refresh devices/apps</button></div>
       <div id="hands-apps" class="apps"><p class="muted">Open this surface to read installed applications.</p></div>
+    </section>
+
+
+    <section class="page" id="page-services" aria-label="Services and repositories">
+      <div class="intro"><p class="eyebrow">SYNTHAI SERVICES</p><h1>Choose your apps.</h1><p>Connect GitHub once in Continuity, then select which repositories this hub watches. Every app gets a purpose record, source commits, build receipts and direct links.</p></div>
+      <div class="details"><strong id="repo-service-status">Checking GitHub connection…</strong><small>Only repositories you select are watched. Refresh checks for changes; changes are never automatically deployed or merged.</small></div>
+      <div class="actions">
+        <button id="repo-list" type="button">Browse my repositories</button>
+        <button id="repo-refresh" type="button">Check selected for changes</button>
+      </div>
+      <label class="repo-label" for="repo-page">Repository page</label>
+      <select id="repo-page"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option></select>
+      <div id="repo-browser" class="repo-browser" aria-live="polite"><p class="muted">Connect GitHub first to browse your projects.</p></div>
+      <div class="details"><strong>Selected app</strong><small id="repo-selected-label">Select a GitHub repository above to inspect it.</small></div>
+      <section id="repo-detail" class="repo-detail" hidden>
+        <div class="service-head">
+          <h2 id="repo-name">Repository</h2>
+          <a id="repo-open" href="#" rel="noopener noreferrer" target="_blank">Open GitHub</a>
+        </div>
+        <p id="repo-description" class="muted"></p>
+        <p id="repo-branch" class="muted"></p>
+        <div class="actions">
+          <a id="repo-preview" href="#" target="_blank" rel="noopener noreferrer" hidden>Open project preview</a>
+          <button id="repo-unwatch" type="button" class="secondary">Stop watching</button>
+          <button id="repo-recheck" type="button">Reload build status</button>
+        </div>
+        <form id="project-context-form" class="stack context-form">
+          <h3>What this app is for</h3>
+          <label>Purpose<textarea id="context-purpose" rows="2" placeholder="What the app actually does and who it serves" required></textarea></label>
+          <label>Already present<textarea id="context-exists" rows="2"></textarea></label>
+          <label>Verified working<textarea id="context-works" rows="2"></textarea></label>
+          <label>Known gaps<textarea id="context-missing" rows="2"></textarea></label>
+          <label>Next concrete task<textarea id="context-next" rows="2"></textarea></label>
+          <label>Other context<textarea id="context-notes" rows="2"></textarea></label>
+          <button type="submit">Save project purpose & context</button>
+          <p id="context-receipt" class="muted"></p>
+        </form>
+        <h3>Latest commits</h3><div id="repo-commits" class="repo-list"></div>
+        <h3>Latest builds</h3><div id="repo-runs" class="repo-list"></div>
+        <h3>Available downloads</h3><div id="repo-artifacts" class="repo-list"></div>
+        <form id="repo-build-form" class="stack">
+          <h3>Build a new version on GitHub</h3>
+          <label>Select existing GitHub Actions workflow<select id="repo-workflow" required></select></label>
+          <button type="submit">Start selected build</button>
+          <small>Never modifies a repository file. GitHub Actions runs on the selected repository's configured branch.</small>
+        </form>
+      </section>
     </section>
 
     <section class="page" id="page-continuity" aria-label="Continuity">
@@ -61,6 +108,7 @@
     <button class="active" type="button" data-page="chat"><span>✧</span>Workspace</button>
     <button type="button" data-page="terminal"><span>⌘</span>Terminal</button>
     <button type="button" data-page="hands"><span>◇</span>Hands</button>
+    <button type="button" data-page="services"><span>▦</span>Services</button>
     <button type="button" data-page="continuity"><span>◷</span>Continuity</button>
   </nav>
 </div>
