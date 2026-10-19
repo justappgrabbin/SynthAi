@@ -84,6 +84,7 @@
 
     <section class="page" id="page-services" aria-label="Services and repositories">
       <div class="intro"><p class="eyebrow">SYNTHAI SERVICES</p><h1>Choose your apps.</h1><p>Connect GitHub once in Continuity, then select which repositories this hub watches. Every app gets a purpose record, source commits, build receipts and direct links.</p></div>
+      <div class="category-filter"><button class="active" type="button" data-category="all">All</button><button type="button" data-category="computer">Computers</button><button type="button" data-category="app">Apps</button><button type="button" data-category="game">Games</button><button type="button" data-category="dimension">Dimensions</button><button type="button" data-category="tool">Tools</button></div>
       <div class="details"><strong id="repo-service-status">Checking GitHub connection…</strong><small>Only repositories you select are watched. Refresh checks for changes; changes are never automatically deployed or merged.</small></div>
       <div class="actions">
         <button id="repo-list" type="button">Browse my repositories</button>
@@ -94,6 +95,16 @@
       <div id="repo-browser" class="repo-browser" aria-live="polite"><p class="muted">Connect GitHub first to browse your projects.</p></div>
       <div class="details"><strong>Installed-app updates</strong><small id="phone-sweep-status">Android will check the launchable apps visible to SYNTHAI CONTINUITY, approximately daily.</small></div><button id="phone-sweep" type="button">Check phone app updates now</button><div id="phone-sweep-changes" class="repo-list"></div>
       <div class="details"><strong>Selected app</strong><small id="repo-selected-label">Select a GitHub repository above to inspect it.</small></div>
+
+      <details class="github-connect" open>
+        <summary>Goals, unfinished work & autonomous checks</summary>
+        <p>Suggested gaps become explicit tasks. Automated checks can inspect repositories and goals; source edits, deployments and device changes require your approval.</p>
+        <form id="new-task-form" class="stack"><label>Task title<input id="new-task-title" required placeholder="What needs doing next?"></label><label>Notes<textarea id="new-task-description" rows="2"></textarea></label><label>Project<input id="new-task-project" placeholder="owner/repo (optional)"></label><button type="submit">Add task</button></form>
+        <div class="actions"><button id="task-refresh" type="button">Refresh tasks</button><button id="task-audit" type="button">Find missing work</button><button id="task-sweep" type="button">Run safe sweep now</button><button id="task-gates" type="button">Record future Gate alignment</button></div>
+        <label class="check"><input id="task-auto" type="checkbox" checked> Allow read-only daily goal and repository checks when Android permits</label>
+        <p id="task-automation-status" class="muted">Background execution depends on Android scheduling and runtime availability.</p>
+        <div id="task-list" class="repo-list"></div>
+      </details>
       <section id="repo-detail" class="repo-detail" hidden>
         <div class="service-head">
           <h2 id="repo-name">Repository</h2>
@@ -117,6 +128,7 @@
           <label>Release acceptance criteria<textarea id="context-release" rows="2" placeholder="What must be proven before shipping?"></textarea></label>
           <label>Android package ID (only if known)<input id="context-android-package" placeholder="e.g. app.synthai.android"></label>
           <p class="muted">Run is offered only when that exact package is confirmed installed on this phone.</p>
+          <label>Category — classify only when known<select id="context-category"><option value="unclassified">Unclassified</option><option value="computer">Computers</option><option value="app">Apps</option><option value="game">Games</option><option value="dimension">Dimensions</option><option value="tool">Tools / IDEs</option><option value="service">Services</option><option value="other">Other</option></select></label>
           <label>App decision<select id="context-decision"><option value="active">Active</option><option value="ship-candidate">Ship candidate — review evidence</option><option value="paused">Paused</option><option value="retired">Retired / drop it</option></select></label>
           <label>Milestones (one per line: goal | todo/doing/blocked/verified | evidence)<textarea id="context-milestones" rows="5" placeholder="Installable APK | todo |&#10;Android hands connect | verified | Device test receipt #…"></textarea></label>
           <div class="details"><strong id="context-progress">Progress unassessed</strong><small id="context-goal-status">Only verified milestones with evidence count as complete.</small></div>
@@ -127,6 +139,16 @@
         <h3>Latest builds</h3><div id="repo-runs" class="repo-list"></div>
         <div id="repo-execute" class="details"><strong>Executable preview</strong><small>No installed app mapping yet. An APK artifact is a downloadable build, not a running app.</small></div>
         <h3>Available downloads</h3><div id="repo-artifacts" class="repo-list"></div>
+        <details class="github-connect">
+          <summary>Edit this app's source (separate GitHub branch)</summary>
+          <p>No hidden overwrites. Choose an exact tracked source path, inspect the current contents, edit and confirm a revision. The original branch remains unchanged.</p>
+          <label>File path in this repository<input id="edit-source-path" placeholder="client/src/components/example.tsx"></label>
+          <button id="edit-source-open" type="button">Open actual source</button>
+          <label>Source editor<textarea id="edit-source-text" rows="13" spellcheck="false" placeholder="Load a verified source before editing"></textarea></label>
+          <small id="edit-source-sha"></small>
+          <button id="edit-source-save" type="button">Commit revision on new branch</button>
+          <p id="edit-source-status" class="muted">Use SYNTHAI CONTINUITY here, SynthAi 2's IDE or the Acode plugin. All share this repository and its receipt history.</p>
+        </details>
         <form id="repo-build-form" class="stack">
           <h3>Build a new version on GitHub</h3>
           <label>Select existing GitHub Actions workflow<select id="repo-workflow" required></select></label>
