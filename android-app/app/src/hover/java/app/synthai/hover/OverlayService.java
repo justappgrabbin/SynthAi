@@ -32,32 +32,29 @@ import android.widget.TextView;
  * Floating Synthia planet + expandable panel. Ported from Synthia 5.8 android-host
  * (com.synthia.sovereign.OverlayService) with:
  *  - runtime URL 127.0.0.1:4183 (hover face port),
- *  - no dark background: transparent panel + transparent WebView, and a light-theme CSS
- *    override injected at page load (5.8's own ui/ files are not edited).
+ *  - fully opaque violet panel and WebView for readable content over Android apps;
+ *    original planet bubble stays floating and the existing Hands bridge remains intact.
  */
 public final class OverlayService extends Service {
     private static volatile OverlayService instance;
     private static final String RUNTIME_URL = HoverPorts.RUNTIME_URL;
 
     /**
-     * Injected into Synthia 5.8's front screen. Hides the dimming/blurring .veil and swaps
-     * the ~95% opaque dark .workspace gradient for a light translucent glass.
+     * The Hover panel was deliberately made transparent in an earlier experiment.
+     * Restore a solid cosmic violet substrate so text/buttons stay legible on any app.
      */
-    static final String LIGHT_CSS =
-            "html,body{background:transparent!important}"
-            + ".veil{display:none!important;background:transparent!important;"
-            + "backdrop-filter:none!important;-webkit-backdrop-filter:none!important}"
-            + ".workspace{background:linear-gradient(160deg,rgba(255,255,255,.34),rgba(236,226,255,.26))!important;"
-            + "backdrop-filter:blur(10px) saturate(1.1);-webkit-backdrop-filter:blur(10px) saturate(1.1);"
-            + "box-shadow:0 12px 40px rgba(60,20,120,.18)!important;"
-            // 5.8's text is light-on-dark; a soft shadow keeps it legible on the light glass.
-            + "text-shadow:0 1px 2px rgba(20,6,40,.6)}";
+    static final String SOLID_CSS =
+            "html,body{background:#110d21!important;color:#f4efff!important}"
+            + ".veil{display:none!important}"
+            + ".workspace{background:linear-gradient(155deg,#282044,#171229)!important;"
+            + "backdrop-filter:none!important;-webkit-backdrop-filter:none!important;"
+            + "box-shadow:0 12px 40px rgba(11,7,23,.6)!important}";
 
     static final String INJECT_JS =
-            "(function(){try{var id='synthai-hover-light';var s=document.getElementById(id);"
+            "(function(){try{var id='synthai-hover-solid';var s=document.getElementById(id);"
             + "if(!s){s=document.createElement('style');s.id=id;"
             + "(document.head||document.documentElement).appendChild(s);}"
-            + "s.textContent=" + jsString(LIGHT_CSS) + ";return 'ok';}catch(e){return 'err:'+e;}})()";
+            + "s.textContent=" + jsString(SOLID_CSS) + ";return 'ok';}catch(e){return 'err:'+e;}})()";
 
     private WindowManager windowManager;
     private ImageButton bubble;
@@ -166,18 +163,18 @@ public final class OverlayService extends Service {
     private void createPanel() {
         panel = new LinearLayout(this);
         panel.setOrientation(LinearLayout.VERTICAL);
-        // No dark backdrop: 5.8 shipped 0xEE090613 here.
-        panel.setBackgroundColor(Color.TRANSPARENT);
+        // The expanded Hover panel must be opaque; only the floating orb is transparent.
+        panel.setBackgroundColor(0xFF110D21);
         panel.setVisibility(View.GONE);
 
         LinearLayout bar = new LinearLayout(this);
         bar.setOrientation(LinearLayout.HORIZONTAL);
         bar.setPadding(dp(10), dp(4), dp(6), dp(4));
-        bar.setBackgroundColor(0x40FFFFFF);
+        bar.setBackgroundColor(0xFF292041);
 
         TextView title = new TextView(this);
         title.setText("Synthia");
-        title.setTextColor(0xFF3A1D66);
+        title.setTextColor(0xFFF0E9FF);
         title.setTextSize(16);
         bar.addView(title, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
 
@@ -205,7 +202,7 @@ public final class OverlayService extends Service {
         panelWebView = new WebView(this);
         voice = new HoverVoice(this);
         panelWebView.addJavascriptInterface(voice, "SynthiaVoice");
-        panelWebView.setBackgroundColor(Color.TRANSPARENT);
+        panelWebView.setBackgroundColor(0xFF110D21);
         WebSettings settings = panelWebView.getSettings();
         panelWebView.setFocusableInTouchMode(true);
         settings.setJavaScriptEnabled(true);
@@ -227,13 +224,13 @@ public final class OverlayService extends Service {
 
             @Override
             public void onPageCommitVisible(WebView view, String url) {
-                injectLightTheme(view);
+                injectSolidTheme(view);
             }
 
             @Override
             public void onPageFinished(WebView view, String url) {
                 pageReady = !pageFailed;
-                injectLightTheme(view);
+                injectSolidTheme(view);
             }
         });
         panelWebView.setWebChromeClient(new WebChromeClient() {
@@ -279,7 +276,7 @@ public final class OverlayService extends Service {
         windowManager.addView(panel, panelParams);
     }
 
-    private static void injectLightTheme(WebView view) {
+    private static void injectSolidTheme(WebView view) {
         if (view == null) return;
         view.evaluateJavascript(INJECT_JS, null);
     }
