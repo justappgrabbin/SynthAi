@@ -6,6 +6,7 @@ import { createRepoHub } from './repo-hub.mjs';
 import { createProjectContexts } from './project-context.mjs';
 import { createArtifactLibrary } from './artifact-library.mjs';
 import { createConversationLearning } from './conversation-learning.mjs';
+import { AndroidHandBridge } from '../solo/android-hand-adapter.mjs';
 
 const TOOL_DEFS = [
   { name: 'continuity_status', description: 'Read the current Synthia/GPT continuity position and true runtime type.', inputSchema: { type: 'object', properties: {} }, annotations: { readOnlyHint: true } },
@@ -84,6 +85,7 @@ export async function createCompanionBridge({ persistenceDir }) {
   const contexts = createProjectContexts({ ledger });
   const library = await createArtifactLibrary({ ledger });
   const learning = createConversationLearning({ ledger, library });
+  const phone = new AndroidHandBridge();
 
   async function handle(request, url) {
     if (!url.pathname.startsWith('/api/companion/') && url.pathname !== '/mcp') return null;
@@ -155,6 +157,44 @@ export async function createCompanionBridge({ persistenceDir }) {
     }
 
 
+
+
+    // No dependency on the Synthia organism: Android app execution remains
+    // usable when her chat stack is offline.
+    if (url.pathname === '/api/companion/apps' && request.method === 'GET') {
+      const status=await phone.status();
+      if (!status.reachable) return {code:503,data:{ok:false,error:'Android native bridge is unreachable',status}};
+      const apps=await phone.apps();
+      return {code:200,data:{ok:true,bridge:status,apps:Array.isArray(apps.apps)?apps.apps:[]}};
+    }
+    if (url.pathname === '/api/companion/apps/launch' && request.method === 'POST') {
+      const data=await payload(request);
+      const name=String(data.packageName||'').trim();
+      if (!/^[a-zA-Z0-9_]+(?:\.[a-zA-Z0-9_]+)+$/.test(name)) throw new Error('Valid installed Android package name required');
+      const installed=await phone.apps();
+      if (!Array.isArray(installed.apps) || !installed.apps.some(app=>app.packageName===name)) {
+        return {code:409,data:{ok:false,error:'App is not confirmed installed and launchable on this Android device'}};
+      }
+      const result=await phone.openApp(name);
+      if (result.accepted!==true || result.ok===false) {
+        return {code:409,data:{ok:false,error:'Android did not accept app launch',result}};
+      }
+      await ledger.append({type:'receipt',actor:'android-hands',
+        ref:name,content:JSON.stringify({action:'launch-installed-android-app',packageName:name,accepted:true,source:'native-bridge'})});
+      return {code:200,data:{ok:true,launched:true,packageName:name,bridge:result}};
+    }
+    // Real execution of standalone HTML (scripts run in a sandboxed iframe).
+    // ZIP and APK inputs NEVER automatically execute on import.
+    if (url.pathname === '/api/companion/library/preview' && request.method === 'GET') {
+      const item=await library.read(url.searchParams.get('address'));
+      if (item.record.kind!=='web' || !/\.html?$/i.test(item.record.name)) {
+        return {code:415,data:{ok:false,error:'Only standalone HTML can currently be run in the isolated browser preview. APKs need installation; ZIPs need verified assembly.'}};
+      }
+      if (item.record.size > 1024*1024) {
+        return {code:413,data:{ok:false,error:'Standalone HTML preview limit is 1 MB'}};
+      }
+      return {code:200,htmlFile:item};
+    }
 
     if (url.pathname === '/api/companion/learn/status' && request.method === 'GET') {
       return { code: 200, data: { ok:true, learning: learning.stats(), reviews: learning.list() } };
