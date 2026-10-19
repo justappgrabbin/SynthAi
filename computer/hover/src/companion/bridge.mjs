@@ -173,6 +173,17 @@ export async function createCompanionBridge({ persistenceDir }) {
 
     // No dependency on the Synthia organism: Android app execution remains
     // usable when her chat stack is offline.
+    if (url.pathname === '/api/companion/phone/inventory' && request.method === 'GET') {
+      return {code:200,data:await phone.request('/inventory/status')};
+    }
+    if (url.pathname === '/api/companion/phone/sweep' && request.method === 'POST') {
+      const report=await phone.request('/inventory/scan',{method:'POST',body:{}});
+      await ledger.append({type:'receipt',actor:'android-inventory',ref:'device-apps',
+        content:JSON.stringify({checkedAt:report.checkedAt,baseline:report.baseline,
+          count:report.count,added:report.added?.length||0,updated:report.updated?.length||0,
+          removed:report.removed?.length||0})});
+      return {code:200,data:report};
+    }
     if (url.pathname === '/api/companion/apps' && request.method === 'GET') {
       const status=await phone.status();
       if (!status.reachable) return {code:503,data:{ok:false,error:'Android native bridge is unreachable',status}};
@@ -221,7 +232,8 @@ export async function createCompanionBridge({ persistenceDir }) {
       return {code:200,data:{ok:true,...await tasks.audit({create:true})}};
     }
     if (url.pathname === '/api/companion/tasks/sweep' && request.method === 'POST') {
-      return {code:200,data:{ok:true,...await tasks.sweep({force:true})}};
+      const input=await payload(request);
+      return {code:200,data:{ok:true,...await tasks.sweep({force:input.force===true})}};
     }
     if (url.pathname === '/api/companion/tasks/auto' && request.method === 'POST') {
       return {code:200,data:{ok:true,automation:await tasks.setAuto(await payload(request))}};
