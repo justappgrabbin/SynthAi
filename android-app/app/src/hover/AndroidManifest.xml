@@ -36,6 +36,10 @@
             </intent-filter>
         </activity>
 
+        <activity android:name="app.synthai.hover.ContinuityFilePickerActivity"
+            android:exported="false"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+
         <!-- Selected-text and Android Shares bridge; user confirmation mandatory. -->
         <activity
             android:name="app.synthai.hover.ContinuityShareActivity"
