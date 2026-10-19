@@ -54,6 +54,7 @@
       <p id="upload-progress" class="muted" role="status">Your uploads stay private on this device until you explicitly share them.</p>
       <div class="actions"><button id="library-refresh" type="button">Refresh library</button><button id="library-starred" type="button">Show starred</button><button id="open-prism-from-library" type="button">Open Prism Keys</button></div>
       <div id="artifact-items" class="repo-list"><p class="muted">Files from your phone appear here after you choose them.</p></div>
+      <div id="artifact-preview-box" hidden><div class="details"><strong id="artifact-preview-title">Live HTML preview</strong><small>Runs imported standalone HTML in a restricted sandbox; it does not install an APK or unpack a ZIP.</small></div><iframe id="artifact-preview-frame" title="Executable imported HTML" sandbox="allow-scripts" style="width:100%;min-height:460px;border-radius:12px;border:1px solid #6c5c8f;background:white"></iframe><button id="artifact-preview-close" type="button">Close preview</button></div>
     </section>
 
     <section class="page" id="page-tools" aria-label="Tools">
@@ -91,6 +92,7 @@
       <label class="repo-label" for="repo-page">Repository page</label>
       <select id="repo-page"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option></select>
       <div id="repo-browser" class="repo-browser" aria-live="polite"><p class="muted">Connect GitHub first to browse your projects.</p></div>
+      <div class="details"><strong>Installed-app updates</strong><small id="phone-sweep-status">Android will check the launchable apps visible to SYNTHAI CONTINUITY, approximately daily.</small></div><button id="phone-sweep" type="button">Check phone app updates now</button><div id="phone-sweep-changes" class="repo-list"></div>
       <div class="details"><strong>Selected app</strong><small id="repo-selected-label">Select a GitHub repository above to inspect it.</small></div>
       <section id="repo-detail" class="repo-detail" hidden>
         <div class="service-head">
@@ -113,6 +115,8 @@
           <label>Next concrete task<textarea id="context-next" rows="2"></textarea></label>
           <label>Other context<textarea id="context-notes" rows="2"></textarea></label>
           <label>Release acceptance criteria<textarea id="context-release" rows="2" placeholder="What must be proven before shipping?"></textarea></label>
+          <label>Android package ID (only if known)<input id="context-android-package" placeholder="e.g. app.synthai.android"></label>
+          <p class="muted">Run is offered only when that exact package is confirmed installed on this phone.</p>
           <label>App decision<select id="context-decision"><option value="active">Active</option><option value="ship-candidate">Ship candidate — review evidence</option><option value="paused">Paused</option><option value="retired">Retired / drop it</option></select></label>
           <label>Milestones (one per line: goal | todo/doing/blocked/verified | evidence)<textarea id="context-milestones" rows="5" placeholder="Installable APK | todo |&#10;Android hands connect | verified | Device test receipt #…"></textarea></label>
           <div class="details"><strong id="context-progress">Progress unassessed</strong><small id="context-goal-status">Only verified milestones with evidence count as complete.</small></div>
@@ -121,6 +125,7 @@
         </form>
         <h3>Latest commits</h3><div id="repo-commits" class="repo-list"></div>
         <h3>Latest builds</h3><div id="repo-runs" class="repo-list"></div>
+        <div id="repo-execute" class="details"><strong>Executable preview</strong><small>No installed app mapping yet. An APK artifact is a downloadable build, not a running app.</small></div>
         <h3>Available downloads</h3><div id="repo-artifacts" class="repo-list"></div>
         <form id="repo-build-form" class="stack">
           <h3>Build a new version on GitHub</h3>
