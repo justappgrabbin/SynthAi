@@ -9,7 +9,7 @@ function validateRepository(value) {
   }
   return value;
 }
-const keys = ['purpose', 'whatExists', 'whatWorks', 'whatIsMissing', 'nextTask', 'notes', 'releaseCriteria'];
+const keys = ['purpose', 'whatExists', 'whatWorks', 'whatIsMissing', 'nextTask', 'notes', 'releaseCriteria', 'androidPackageName'];
 const statuses = new Set(['todo','doing','blocked','verified']);
 const decisions = new Set(['active','ship-candidate','paused','retired']);
 function validateMilestones(raw) {
@@ -68,6 +68,7 @@ export function createProjectContexts({ ledger }) {
     next.milestones = validateMilestones(input?.milestones === undefined ? (current?.milestones || []) : input.milestones);
     next.decision = input?.decision === undefined ? (current?.decision || 'active') : String(input.decision);
     if (!decisions.has(next.decision)) throw new Error('Invalid project decision');
+    if (next.androidPackageName && !/^[a-zA-Z0-9_]+(?:\.[a-zA-Z0-9_]+)+$/.test(next.androidPackageName)) throw new Error('Android package must be a valid installed app identifier');
     if (!next.purpose.trim()) throw new Error('Every repository must have a purpose before saving a new context');
     const event = await ledger.append({ actor: 'human', type: 'project_context', ref: repository, content: JSON.stringify(next) });
     return { ...next, progress: progressOf(next), receipt: { seq: event.seq, hash: event.hash, timestamp: event.timestamp } };
