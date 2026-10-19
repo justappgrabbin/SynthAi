@@ -1,5 +1,6 @@
 import { readFile, writeFile, rename } from 'node:fs/promises';
 import { join } from 'node:path';
+import { randomUUID } from 'node:crypto';
 
 function requireRepo(value) {
   if (typeof value !== 'string' || !/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/.test(value) || value.includes('..')) throw new Error('Invalid repository name');
@@ -166,5 +167,48 @@ export async function createRepoHub({ ledger, github, token }) {
     const name = String(found.name || 'artifact').replace(/[^A-Za-z0-9._-]/g, '_').slice(0, 90) + '.zip';
     return { stream: response.body, filename: name, maxBytes: 150 * 1024 * 1024, size: found.size_in_bytes };
   }
-  return Object.freeze({ list, selected, select, inspect, refresh, dispatch, download });
+
+  function sourcePath(value) {
+    if(typeof value!=='string'||value.length>220||!value.trim()||value.startsWith('/')||
+        value.split('/').some(x=>!x||x==='.'||x==='..')||
+        !/^[a-zA-Z0-9_.+@/ -]+$/.test(value))throw Error('Choose a valid repository source file path');
+    return value;
+  }
+  async function source({repository,path}={}) {
+    const {state}=mustWatch(repository);
+    const name=sourcePath(path);
+    const route='/repos/'+repository+'/contents/'+name.split('/').map(encodeURIComponent).join('/')+
+       '?ref='+encodeURIComponent(state.branch);
+    const result=await github('GET',route);
+    if(result.type!=='file'||result.size>256000||result.encoding!=='base64')throw Error('Only text sources up to 256KB are editable here. Open larger files in Acode.');
+    const raw=Buffer.from(String(result.content).replace(/\s/g,''),'base64');
+    const value=new TextDecoder('utf-8',{fatal:true}).decode(raw);
+    if(value.includes('\u0000'))throw Error('Binary source cannot be edited as UTF-8 text');
+    return {repository,path:name,branch:state.branch,sha:result.sha,content:value,bytes:raw.byteLength,
+      sourceUrl:safelyLink(result.html_url)};
+  }
+  async function commitEdit({repository,path,expectedSha,content,message}={}) {
+    const {state}=mustWatch(repository);
+    path=sourcePath(path);
+    if(typeof content!=='string'||content.length>256000||content.includes('\u0000'))throw Error('Only UTF-8 source under 256KB can be saved');
+    if(typeof expectedSha!=='string'||!/^[a-f0-9]{40}$/.test(expectedSha))throw Error('Expected exact original Git blob SHA');
+    const previous=await source({repository,path});
+    if(previous.sha!==expectedSha)throw Error('Source changed since opening. Reload to avoid overwriting another edit.');
+    const head=await github('GET','/repos/'+repository+'/commits/'+encodeURIComponent(state.branch));
+    if(!head.sha)throw Error('Cannot resolve source commit');
+    const updateBranch='continuity/'+Date.now()+'-'+randomUUID().slice(0,8);
+    await github('POST','/repos/'+repository+'/git/refs',{ref:'refs/heads/'+updateBranch,sha:head.sha});
+    const route='/repos/'+repository+'/contents/'+path.split('/').map(encodeURIComponent).join('/');
+    const result=await github('PUT',route,{message:shorten(message||'SYNTHAI CONTINUITY proposed source revision',170),
+      content:Buffer.from(content,'utf8').toString('base64'),
+      sha:previous.sha,branch:updateBranch});
+    await ledger.append({type:'receipt',actor:'human',ref:repository,
+      content:JSON.stringify({action:'source-edit-new-branch',repository,path,sourceBranch:state.branch,
+        updateBranch,originalSha:previous.sha,updatedSha:result.content?.sha,commit:result.commit?.sha})});
+    return {ok:true,repository,path,branch:updateBranch,originalSha:previous.sha,
+      updatedSha:result.content?.sha,commit:result.commit?.sha,
+      compareUrl:'https://github.com/'+repository+'/compare/'+encodeURIComponent(state.branch)+'...'+updateBranch,
+      note:'Changes are committed only to a new branch. No merges, releases or installations performed.'};
+  }
+  return Object.freeze({ list, selected, select, inspect, refresh, dispatch, download, source, commitEdit });
 }
