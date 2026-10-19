@@ -122,6 +122,12 @@ public final class LocalBridgeServer {
                         .put("runtimeUrl", HoverPorts.RUNTIME_URL));
             }
 
+            if ("GET".equals(method) && "/inventory/status".equals(path)) {
+                return ok(DeviceInventorySweep.report(context));
+            }
+            if ("POST".equals(method) && "/inventory/scan".equals(path)) {
+                return ok(DeviceInventorySweep.scan(context));
+            }
             if ("GET".equals(method) && "/store-status".equals(path)) {
                 return ok(storeStatus());
             }
