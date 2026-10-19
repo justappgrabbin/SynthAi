@@ -86,6 +86,20 @@ export async function startSynthiaFrontScreen({
       // The focused GPT/Synthia companion is now the phone's primary UI.
       // Original Hover interfaces remain recoverable at /index.html and legacy routes.
       const companionResponse = await companion.handle(request, url);
+
+      if (companionResponse?.htmlFile) {
+        const {path} = companionResponse.htmlFile;
+        const bytes = await readFile(path);
+        response.writeHead(200, {
+          'content-type':'text/html; charset=utf-8',
+          'content-security-policy':"sandbox allow-scripts; default-src 'none'; base-uri 'none'; form-action 'none'; connect-src 'none'; img-src data: blob:; style-src 'unsafe-inline'; script-src 'unsafe-inline'",
+          'x-content-type-options':'nosniff',
+          'cache-control':'no-store',
+          'content-length':bytes.length,
+        });
+        response.end(bytes);
+        return;
+      }
       if (companionResponse?.localFile) {
         const { record, path } = companionResponse.localFile;
         const filename = String(record.name || 'artifact.bin').replace(/[\r\n"\\/]/g,'_').slice(0,180);
