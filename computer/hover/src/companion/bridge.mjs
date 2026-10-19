@@ -12,6 +12,15 @@ const TOOL_DEFS = [
   { name: 'continuity_read', description: 'Read verified append-only handoff records. Nothing is inferred or invented.', inputSchema: { type: 'object', properties: { after: { type: 'integer', minimum: 0 }, limit: { type: 'integer', minimum: 1, maximum: 200 } } }, annotations: { readOnlyHint: true } },
   { name: 'continuity_note', description: 'Write a durable checkpoint, decision, receipt or next-step handoff for Cynthia and ChatGPT.', inputSchema: { type: 'object', properties: { content: { type: 'string' }, type: { type: 'string', enum: ['note', 'checkpoint', 'receipt', 'decision', 'handoff'] }, ref: { type: 'string' } }, required: ['content'] } },
   { name: 'continuity_propose', description: 'Queue an action for review on the phone. Does not run shell commands or control the device.', inputSchema: { type: 'object', properties: { description: { type: 'string' }, suggestedCommand: { type: 'string' } }, required: ['description'] } },
+  { name: 'artifact_list', description: 'Read the files and ZIPs that were actually imported into the local addressed library.', inputSchema: { type: 'object', properties: { project: { type: 'string' } } }, annotations: { readOnlyHint: true } },
+  { name: 'artifact_build_manifest', description: 'List human-approved addressed files selected for a project build. This does not compile or install an APK.', inputSchema: { type: 'object', properties: { project: { type: 'string' } }, required: ['project'] }, annotations: { readOnlyHint: true } },
+  { name: 'project_list', description: 'Show stored project purpose, goals, milestones and verified progress.', inputSchema: { type: 'object', properties: {} }, annotations: { readOnlyHint: true } },
+  { name: 'project_read', description: 'Read the verified purpose and goals of one repository.', inputSchema: { type: 'object', properties: { repository: { type: 'string' } }, required: ['repository'] }, annotations: { readOnlyHint: true } },
+  { name: 'repo_watched', description: 'List which GitHub repositories SYNTHAI CONTINUITY has been explicitly told to watch.', inputSchema: { type: 'object', properties: {} }, annotations: { readOnlyHint: true } },
+  { name: 'repo_inspect', description: 'Inspect source commits, GitHub Actions runs and available artifact downloads for a selected repository.', inputSchema: { type: 'object', properties: { repository: { type: 'string' } }, required: ['repository'] }, annotations: { readOnlyHint: true } },
+  { name: 'repo_refresh', description: 'Refresh user-selected GitHub repository heads and record actual changes to the continuity ledger.', inputSchema: { type: 'object', properties: {} } },
+  { name: 'learning_status', description: 'Get evidence-grounded learning statistics from imported conversations, receipts and explicit feedback.', inputSchema: { type: 'object', properties: {} }, annotations: { readOnlyHint: true } },
+  { name: 'conversation_review', description: 'Analyze supplied conversation text into cited requests, decisions, blockers and unverified solution proposals.', inputSchema: { type: 'object', properties: { content: { type: 'string' }, name: { type: 'string' } }, required: ['content'] } },
 ];
 
 async function payload(request) {
@@ -105,6 +114,15 @@ export async function createCompanionBridge({ persistenceDir }) {
           else if (name === 'continuity_read') result = { events: ledger.read({ after: args.after || 0, limit: Math.min(args.limit || 100, 200) }) };
           else if (name === 'continuity_note') result = await ledger.append({ type: args.type || 'handoff', actor: 'gpt', content: args.content, ref: args.ref });
           else if (name === 'continuity_propose') result = await ledger.append({ type: 'proposal', actor: 'gpt', content: JSON.stringify({ description: args.description, suggestedCommand: args.suggestedCommand || null, requiresLocalApproval: true }) });
+          else if (name === 'artifact_list') result = { artifacts: library.list({ project: args.project || undefined }) };
+          else if (name === 'artifact_build_manifest') result = library.buildManifest(args.project);
+          else if (name === 'project_list') result = { projects: contexts.all() };
+          else if (name === 'project_read') result = { project: contexts.one(args.repository) };
+          else if (name === 'repo_watched') result = { repositories: repos.selected() };
+          else if (name === 'repo_inspect') result = await repos.inspect(args.repository);
+          else if (name === 'repo_refresh') result = await repos.refresh();
+          else if (name === 'learning_status') result = learning.stats();
+          else if (name === 'conversation_review') result = await learning.reviewText({ content: args.content, name: args.name || 'GPT shared conversation' });
           else return { code: 200, data: mcpError(rpc.id, -32601, 'Unknown continuity tool') };
           return { code: 200, data: mcp(rpc.id, mcpText(result)) };
         } catch (error) {
