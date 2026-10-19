@@ -5,6 +5,7 @@ import { createGitHubContinuityBridge } from './github-bridge.mjs';
 import { createRepoHub } from './repo-hub.mjs';
 import { createProjectContexts } from './project-context.mjs';
 import { createArtifactLibrary } from './artifact-library.mjs';
+import { createConversationLearning } from './conversation-learning.mjs';
 
 const TOOL_DEFS = [
   { name: 'continuity_status', description: 'Read the current Synthia/GPT continuity position and true runtime type.', inputSchema: { type: 'object', properties: {} }, annotations: { readOnlyHint: true } },
@@ -73,6 +74,7 @@ export async function createCompanionBridge({ persistenceDir }) {
   const repos = await createRepoHub({ ledger, github: github.request, token: github.accessToken });
   const contexts = createProjectContexts({ ledger });
   const library = await createArtifactLibrary({ ledger });
+  const learning = createConversationLearning({ ledger, library });
 
   async function handle(request, url) {
     if (!url.pathname.startsWith('/api/companion/') && url.pathname !== '/mcp') return null;
@@ -134,6 +136,20 @@ export async function createCompanionBridge({ persistenceDir }) {
       return { code: 200, data: { ...result, realExecution: true, runtime: terminalStatus() } };
     }
 
+
+
+    if (url.pathname === '/api/companion/learn/status' && request.method === 'GET') {
+      return { code: 200, data: { ok:true, learning: learning.stats(), reviews: learning.list() } };
+    }
+    if (url.pathname === '/api/companion/learn/text' && request.method === 'POST') {
+      return { code: 200, data: { ok:true, review: await learning.reviewText(await payload(request)) } };
+    }
+    if (url.pathname === '/api/companion/learn/artifact' && request.method === 'POST') {
+      return { code: 200, data: { ok:true, review: await learning.reviewArtifact(await payload(request)) } };
+    }
+    if (url.pathname === '/api/companion/learn/feedback' && request.method === 'POST') {
+      return { code: 200, data: { ok:true, feedback: await learning.feedback(await payload(request)) } };
+    }
 
     if (url.pathname === '/api/companion/library' && request.method === 'GET') {
       return {code:200,data:{ok:true,items:library.list({project:url.searchParams.get('project')||undefined})}};
