@@ -30,11 +30,11 @@ const TOOL_DEFS = [
   { name: 'conversation_review', description: 'Analyze supplied conversation text into cited requests, decisions, blockers and unverified solution proposals.', inputSchema: { type: 'object', properties: { content: { type: 'string' }, name: { type: 'string' } }, required: ['content'] } },
 ];
 
-async function payload(request) {
+async function payload(request, maxBytes = 32000) {
   let data = '';
   for await (const chunk of request) {
     data += chunk;
-    if (Buffer.byteLength(data) > 32000) throw new Error('Request body exceeds 32 KiB');
+    if (Buffer.byteLength(data) > maxBytes) throw new Error('Request body exceeds '+maxBytes+' bytes');
   }
   return data ? JSON.parse(data) : {};
 }
@@ -246,7 +246,7 @@ export async function createCompanionBridge({ persistenceDir }) {
       return { code: 200, data: { ok:true, learning: learning.stats(), reviews: learning.list() } };
     }
     if (url.pathname === '/api/companion/learn/text' && request.method === 'POST') {
-      return { code: 200, data: { ok:true, review: await learning.reviewText(await payload(request)) } };
+      return { code: 200, data: { ok:true, review: await learning.reviewText(await payload(request, 2100000)) } };
     }
     if (url.pathname === '/api/companion/learn/artifact' && request.method === 'POST') {
       return { code: 200, data: { ok:true, review: await learning.reviewArtifact(await payload(request)) } };
@@ -305,7 +305,7 @@ export async function createCompanionBridge({ persistenceDir }) {
       })}};
     }
     if (url.pathname === '/api/companion/repos/edit' && request.method === 'POST') {
-      return {code:201,data:{ok:true,...await repos.commitEdit(await payload(request))}};
+      return {code:201,data:{ok:true,...await repos.commitEdit(await payload(request, 300000))}};
     }
     if (url.pathname === '/api/companion/repos/dispatch' && request.method === 'POST') {
       return { code: 202, data: { ok: true, ...await repos.dispatch(await payload(request)) } };
