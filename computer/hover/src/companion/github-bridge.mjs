@@ -109,5 +109,5 @@ export async function createGitHubContinuityBridge({ ledger }) {
     return { received, skipped };
   }
 
-  return Object.freeze({ configure, status, push, pull });
+  return Object.freeze({ configure, status, push, pull, request: github, accessToken: () => config?.token || null });
 }
