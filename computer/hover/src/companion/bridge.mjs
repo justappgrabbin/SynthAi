@@ -4,6 +4,7 @@ import { createContinuityLedger } from './continuity.mjs';
 import { createGitHubContinuityBridge } from './github-bridge.mjs';
 import { createRepoHub } from './repo-hub.mjs';
 import { createProjectContexts } from './project-context.mjs';
+import { createArtifactLibrary } from './artifact-library.mjs';
 
 const TOOL_DEFS = [
   { name: 'continuity_status', description: 'Read the current Synthia/GPT continuity position and true runtime type.', inputSchema: { type: 'object', properties: {} }, annotations: { readOnlyHint: true } },
@@ -71,6 +72,7 @@ export async function createCompanionBridge({ persistenceDir }) {
   const github = await createGitHubContinuityBridge({ ledger });
   const repos = await createRepoHub({ ledger, github: github.request, token: github.accessToken });
   const contexts = createProjectContexts({ ledger });
+  const library = await createArtifactLibrary({ ledger });
 
   async function handle(request, url) {
     if (!url.pathname.startsWith('/api/companion/') && url.pathname !== '/mcp') return null;
@@ -130,6 +132,32 @@ export async function createCompanionBridge({ persistenceDir }) {
         stderrSha256: createHash('sha256').update(result.stderr).digest('hex'),
       }) });
       return { code: 200, data: { ...result, realExecution: true, runtime: terminalStatus() } };
+    }
+
+
+    if (url.pathname === '/api/companion/library' && request.method === 'GET') {
+      return {code:200,data:{ok:true,items:library.list({project:url.searchParams.get('project')||undefined})}};
+    }
+    if (url.pathname === '/api/companion/library/start' && request.method === 'POST') {
+      return {code:201,data:{ok:true,...await library.begin(await payload(request))}};
+    }
+    if (url.pathname === '/api/companion/library/chunk' && request.method === 'POST') {
+      // Raw binary. The upload is admitted only after SHA-256 identity is computed.
+      return {code:200,data:{ok:true,...await library.chunk(url.searchParams.get('uploadId'),request)}};
+    }
+    if (url.pathname === '/api/companion/library/complete' && request.method === 'POST') {
+      const data=await payload(request);
+      return {code:201,data:{ok:true,artifact:await library.finish(data.uploadId)}};
+    }
+    if (url.pathname === '/api/companion/library/update' && request.method === 'POST') {
+      return {code:200,data:{ok:true,artifact:await library.update(await payload(request))}};
+    }
+    if (url.pathname === '/api/companion/library/manifest' && request.method === 'GET') {
+      return {code:200,data:{ok:true,manifest:library.buildManifest(url.searchParams.get('project'))}};
+    }
+    if (url.pathname === '/api/companion/library/download' && request.method === 'GET') {
+      const item=await library.read(url.searchParams.get('address'));
+      return {code:200,localFile:item};
     }
 
     if (url.pathname === '/api/companion/repos' && request.method === 'GET') {
