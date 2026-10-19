@@ -22,6 +22,8 @@ const TOOL_DEFS = [
   { name: 'repo_inspect', description: 'Inspect source commits, GitHub Actions runs and available artifact downloads for a selected repository.', inputSchema: { type: 'object', properties: { repository: { type: 'string' } }, required: ['repository'] }, annotations: { readOnlyHint: true } },
   { name: 'repo_refresh', description: 'Refresh user-selected GitHub repository heads and record actual changes to the continuity ledger.', inputSchema: { type: 'object', properties: {} } },
   { name: 'learning_status', description: 'Get evidence-grounded learning statistics from imported conversations, receipts and explicit feedback.', inputSchema: { type: 'object', properties: {} }, annotations: { readOnlyHint: true } },
+  { name:'repo_source_read',description:'Fetch a verified UTF-8 source and SHA from a watched repository.',inputSchema:{type:'object',properties:{repository:{type:'string'},path:{type:'string'}},required:['repository','path']},annotations:{readOnlyHint:true}},
+  { name:'repo_source_propose_edit',description:'Commit an explicitly approved source revision on a NEW GitHub branch, preserving main. Does not merge or deploy.',inputSchema:{type:'object',properties:{repository:{type:'string'},path:{type:'string'},expectedSha:{type:'string'},content:{type:'string'},message:{type:'string'}},required:['repository','path','expectedSha','content']}},
   { name: 'task_list', description: 'Inspect the persistent proposed, blocked and review tasks for all selected projects.', inputSchema: {type:'object',properties:{repository:{type:'string'}}},annotations:{readOnlyHint:true}},
   { name: 'task_add', description: 'Record a proposed project task for review; no code is run.', inputSchema: {type:'object',properties:{title:{type:'string'},description:{type:'string'},repository:{type:'string'}},required:['title']}},
   { name: 'project_gap_audit', description: 'Compare goal records and selected parts with verified evidence and add unresolved tasks; no edits or installations.', inputSchema: {type:'object',properties:{}}},
@@ -133,6 +135,8 @@ export async function createCompanionBridge({ persistenceDir }) {
           else if (name === 'task_list') result = {tasks:tasks.list({repository:args.repository||undefined})};
           else if (name === 'task_add') result = await tasks.add({title:args.title,description:args.description,repository:args.repository,source:'gpt'});
           else if (name === 'project_gap_audit') result = await tasks.audit({create:true});
+          else if (name === 'repo_source_read') result = await repos.source(args);
+          else if (name === 'repo_source_propose_edit') result = await repos.commitEdit(args);
           else return { code: 200, data: mcpError(rpc.id, -32601, 'Unknown continuity tool') };
           return { code: 200, data: mcp(rpc.id, mcpText(result)) };
         } catch (error) {
@@ -282,6 +286,14 @@ export async function createCompanionBridge({ persistenceDir }) {
     }
     if (url.pathname === '/api/companion/repos/context' && request.method === 'POST') {
       return { code: 201, data: { ok: true, context: await contexts.save(await payload(request)) } };
+    }
+    if (url.pathname === '/api/companion/repos/source' && request.method === 'GET') {
+      return {code:200,data:{ok:true,source:await repos.source({
+        repository:url.searchParams.get('repository'),path:url.searchParams.get('path'),
+      })}};
+    }
+    if (url.pathname === '/api/companion/repos/edit' && request.method === 'POST') {
+      return {code:201,data:{ok:true,...await repos.commitEdit(await payload(request))}};
     }
     if (url.pathname === '/api/companion/repos/dispatch' && request.method === 'POST') {
       return { code: 202, data: { ok: true, ...await repos.dispatch(await payload(request)) } };
