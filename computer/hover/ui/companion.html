@@ -21,7 +21,7 @@
   </section>
 
   <main id="workspace">
-    <section class="page visible" id="page-chat" aria-label="Workspace">
+    <section class="page" id="page-chat" aria-label="Workspace">
       <div class="intro"><p class="eyebrow">THE SAME PLANE</p><h1>One home for every app.</h1><p>Your service screen for Synthia and GPT: keep project context, review changes, preview builds and continue work with receipts.</p></div>
       <div id="chat-messages" class="messages" aria-live="polite"><div class="message system">The workspace is here. Synthia will answer from her existing runtime when it is available; nothing is simulated.</div></div>
       <form id="chat-form" class="composer"><textarea id="chat-input" rows="2" placeholder="Tell Synthia what to do or ask what is wired…" required></textarea><div class="composer-actions"><button id="mic" type="button" class="secondary">🎙 Speak</button><button id="say-last" type="button" class="secondary">Listen</button><button id="send-chat" type="submit">Send →</button></div></form>
@@ -42,6 +42,44 @@
       <div id="hands-apps" class="apps"><p class="muted">Open this surface to read installed applications.</p></div>
     </section>
 
+
+    <section class="page visible" id="page-library" aria-label="Your artifact library">
+      <div class="intro"><p class="eyebrow">FILE IN → ADDRESSED LIBRARY</p><h1>Drop your files here.</h1><p>Import completed work, ZIPs, APKs, documents, source, and exported conversations. Originals are content-addressed and preserved; nothing gets executed on import.</p></div>
+      <form id="upload-form" class="stack">
+        <label class="upload-zone" for="upload-files"><strong>＋ Choose files or ZIPs from phone</strong><span>Pick one or several files — up to 200 MB each</span></label>
+        <input id="upload-files" type="file" multiple aria-label="Choose phone files">
+        <label>Where does this belong? <select id="upload-project"><option value="">Unassigned inbox — decide later</option></select></label>
+        <button type="submit">Import originals and assign addresses</button>
+      </form>
+      <p id="upload-progress" class="muted" role="status">Your uploads stay private on this device until you explicitly share them.</p>
+      <div class="actions"><button id="library-refresh" type="button">Refresh library</button><button id="library-starred" type="button">Show starred</button><button id="open-prism-from-library" type="button">Open Prism Keys</button></div>
+      <div id="artifact-items" class="repo-list"><p class="muted">Files from your phone appear here after you choose them.</p></div>
+    </section>
+
+    <section class="page" id="page-tools" aria-label="Tools">
+      <div class="intro"><p class="eyebrow">TOOLS</p><h1>Work with what already exists.</h1><p>Prism typing, a real local Linux shell, Android hands, and conversation review.</p></div>
+      <div class="tool-tiles">
+        <button type="button" data-go-page="prism">🌈 Prism Keys — Send to Continuity</button>
+        <button type="button" data-go-page="terminal">⌘ Real Linux Terminal</button>
+        <button type="button" data-go-page="hands">◇ Android Hands</button>
+        <button type="button" data-go-page="learn">◎ Review conversations</button>
+      </div>
+    </section>
+
+    <section class="page" id="page-prism" aria-label="Prism Keys">
+      <div class="intro"><p class="eyebrow">YOUR EXISTING KEYBOARD</p><h1>Prism Keys</h1><p>This preserves your Prism HTML keyboard and adds an explicit Send to Continuity action. To share selected text from other apps, choose Android's Share → SYNTHAI CONTINUITY.</p></div>
+      <div class="actions"><button type="button" data-go-page="tools">← Back to Tools</button></div>
+      <iframe src="/prism-keys.html" id="prism-frame" title="Prism Keys" style="display:block;width:100%;height:min(72dvh,760px);min-height:500px;border:1px solid #665780;border-radius:14px;background:#14121f"></iframe>
+    </section>
+
+    <section class="page" id="page-learn" aria-label="Conversation review">
+      <div class="intro"><p class="eyebrow">LEARNING WITH RECEIPTS</p><h1>Review our conversations.</h1><p>Import an actual transcript or paste one. SYNTHAI CONTINUITY identifies grounded requests, decisions, known blockers, and solution candidates for your approval.</p></div>
+      <form id="review-form" class="stack"><label for="review-text">Paste actual conversation text</label><textarea id="review-text" rows="5" placeholder="Paste your conversation here…"></textarea><button type="submit">Analyze shared conversation</button></form>
+      <label for="review-artifact">Previously imported transcript</label><select id="review-artifact"><option value="">Choose an addressed .txt, .md, or .json file</option></select>
+      <div class="actions"><button id="review-from-library" type="button">Review selected transcript</button><button id="review-status" type="button">Evidence summary</button><button type="button" data-go-page="tools">← Back to tools</button></div>
+      <p id="review-summary" class="muted">Nothing reviewed yet.</p>
+      <div id="review-results" class="repo-list"></div>
+    </section>
 
     <section class="page" id="page-services" aria-label="Services and repositories">
       <div class="intro"><p class="eyebrow">SYNTHAI SERVICES</p><h1>Choose your apps.</h1><p>Connect GitHub once in Continuity, then select which repositories this hub watches. Every app gets a purpose record, source commits, build receipts and direct links.</p></div>
@@ -105,10 +143,10 @@
   </main>
 
   <nav class="bottom" aria-label="Primary">
-    <button class="active" type="button" data-page="chat"><span>✧</span>Workspace</button>
-    <button type="button" data-page="terminal"><span>⌘</span>Terminal</button>
-    <button type="button" data-page="hands"><span>◇</span>Hands</button>
-    <button type="button" data-page="services"><span>▦</span>Services</button>
+    <button class="active" type="button" data-page="library"><span>⬆</span>Library</button>
+    <button type="button" data-page="services"><span>▦</span>Projects</button>
+    <button type="button" data-page="chat"><span>✧</span>Cynthia</button>
+    <button type="button" data-page="tools"><span>⌘</span>Tools</button>
     <button type="button" data-page="continuity"><span>◷</span>Continuity</button>
   </nav>
 </div>
