@@ -62,13 +62,30 @@ export async function restoreArtifactAndMountRegistries(runtime) {
   }
 
   const mounts = state.get('mounts', {});
+  // A shared app ID cannot silently refer to different source artifacts.
+  // Keep every ambiguous persisted record intact for explicit reconciliation.
+  const claims = new Map();
+  for (const mount of Object.values(mounts && typeof mounts === 'object' ? mounts : {})) {
+    if (!mount || typeof mount.appId !== 'string' || !mount.appId) continue;
+    if (!claims.has(mount.appId)) claims.set(mount.appId, new Set());
+    claims.get(mount.appId).add(mount.artifactId);
+  }
   for (const [mountId, mount] of Object.entries(mounts && typeof mounts === 'object' ? mounts : {})) {
     if (!mount || mount.mountId !== mountId || typeof mount.appId !== 'string' || !mount.appId ||
         !artifacts.has(mount.artifactId) || !shells.has(mount.shell)) {
       skip('mount', mountId, 'invalid mount, artifact missing, or shell unavailable');
       continue;
     }
-    if (!apps.has(mount.appId)) {
+    if (claims.get(mount.appId)?.size > 1) {
+      skip('mount', mountId, 'conflicting persisted mounts claim one app ID with different artifacts');
+      continue;
+    }
+    const registered = apps.get(mount.appId);
+    if (registered && (registered.kind !== 'artifact-app' || registered.artifactId !== mount.artifactId)) {
+      skip('mount', mountId, 'existing app registration has a different artifact identity');
+      continue;
+    }
+    if (!registered) {
       apps.register(mount.appId, { kind: 'artifact-app', artifactId: mount.artifactId });
     }
     shellManager.mounted.set(mountId, structuredClone(mount));
