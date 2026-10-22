@@ -1,5 +1,6 @@
 import { EventBus, MemoryPersistence, StateStore, Registry } from './core/kernel.mjs';
 import { VirtualFileSystem, ArtifactIntake } from './runtime/storage.mjs';
+import { restoreArtifactAndMountRegistries } from './runtime/registry-recovery.mjs';
 import { AutomataEngine, ProcessFabric, BackendBroker } from './runtime/execution.mjs';
 import { CapabilityGraph, MorphEngine, CultivationEngine, PolicyEngine } from './runtime/experience.mjs';
 import { ShellManager, MutationDispatcher } from './runtime/shells.mjs';
@@ -63,6 +64,7 @@ export class ComputerRuntime {
     if (!this.shells.has('hover-field')) this.shells.register('hover-field', { name: 'Hover Field Shell', kind: 'morph-field' });
     registerCanonicalMicros(this.micros);
     registerSystemAdapters(this);
+    this.registryRecovery = await restoreArtifactAndMountRegistries(this);
 
     this.policy.register('xynthai:age-boundary', ({ ageConfirmed = false } = {}) =>
       ageConfirmed ? { allow: true } : { allow: false, reason: 'XynthAI requires an explicit 18+ age confirmation.' }
