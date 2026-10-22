@@ -81,3 +81,63 @@ test('ambiguous legacy VFS files are retained without arbitrary app registration
   assert.equal(second.vfs.list('/artifacts/').length, 2);
   assert.ok(second.registryRecovery.skipped.some(x => x.id === 'artifact-ambiguous'));
 });
+
+
+test('restart refuses contradictory persisted mounts without changing their source records', async () => {
+  const persistence = new MemoryPersistence();
+  const boot = () => new ComputerRuntime({ persistence, namespace: 'registry-conflicting-mounts' }).boot();
+  const first = await boot();
+  const a = await first.intake.ingest({ name: 'a.js', text: 'A' });
+  const b = await first.intake.ingest({ name: 'b.js', text: 'B' });
+  const one = { mountId: 'mount-conflict-a', appId: 'same-app', shell: 'workspace', artifactId: a.id };
+  const two = { mountId: 'mount-conflict-b', appId: 'same-app', shell: 'workspace', artifactId: b.id };
+  await first.state.set('mounts.mount-conflict-a', one);
+  await first.state.set('mounts.mount-conflict-b', two);
+  const second = await boot();
+  assert.equal(second.apps.get('same-app'), null);
+  assert.equal(second.registryRecovery.mounts, 0);
+  assert.deepEqual(second.state.get('mounts.mount-conflict-a'), one);
+  assert.deepEqual(second.state.get('mounts.mount-conflict-b'), two);
+  assert.equal(second.registryRecovery.skipped.filter(x => x.kind === 'mount').length, 2);
+  assert.equal(second.vfs.read(a.path).content, 'A');
+  assert.equal(second.vfs.read(b.path).content, 'B');
+});
+
+test('live mount refuses app ID reused for a different artifact, preserving prior mount', async () => {
+  const computer = await new ComputerRuntime({ namespace: 'live-mount-conflict' }).boot();
+  const a = await computer.intake.ingest({ name: 'first.js', text: 'FIRST' });
+  const b = await computer.intake.ingest({ name: 'second.js', text: 'SECOND' });
+  const first = await computer.mountApplication('shared-app', { artifactId: a.id });
+  const saved = computer.state.get('mounts');
+  await assert.rejects(computer.mountApplication('shared-app', { artifactId: b.id }), /mount identity conflict/);
+  assert.equal(computer.apps.get('shared-app').artifactId, a.id);
+  assert.deepEqual(computer.state.get('mounts'), saved);
+  assert.equal(computer.snapshot().mounted.length, 1);
+  assert.equal(computer.snapshot().mounted[0].mountId, first.mountId);
+  assert.equal(computer.vfs.read(b.path).content, 'SECOND');
+});
+
+test('compatible multiple mounts survive restart and retain the same artifact identity', async () => {
+  const persistence = new MemoryPersistence();
+  const boot = () => new ComputerRuntime({ persistence, namespace: 'compatible-multiple-mounts' }).boot();
+  const first = await boot();
+  const artifact = await first.intake.ingest({ name: 'same.app.js', text: 'SAME' });
+  const a = await first.mountApplication('compatible-app', { artifactId: artifact.id });
+  const b = await first.mountApplication('compatible-app', { artifactId: artifact.id });
+  assert.notEqual(a.mountId, b.mountId);
+  const second = await boot();
+  assert.equal(second.registryRecovery.mounts, 2);
+  assert.equal(second.apps.get('compatible-app').artifactId, artifact.id);
+  assert.equal(second.snapshot().mounted.filter(x => x.appId === 'compatible-app').length, 2);
+  assert.equal(second.vfs.read(artifact.path).content, 'SAME');
+});
+
+test('live mount cannot replace an existing non-artifact application identity', async () => {
+  const computer = await new ComputerRuntime({ namespace: 'non-artifact-app' }).boot();
+  const artifact = await computer.intake.ingest({ name: 'intruder.js', text: 'NOPE' });
+  computer.apps.register('reserved-app', { kind: 'system-app' });
+  await assert.rejects(computer.mountApplication('reserved-app', { artifactId: artifact.id }), /mount identity conflict/);
+  assert.equal(computer.apps.get('reserved-app').kind, 'system-app');
+  assert.equal(computer.snapshot().mounted.length, 0);
+  assert.deepEqual(computer.state.get('mounts', {}), {});
+});
