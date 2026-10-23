@@ -20,6 +20,30 @@ const computer = await new ComputerRuntime({
 const conversation = new ConversationExecution(computer);
 const files = new FileAdmission(computer, conversation.execution);
 
+// Import names are allocated before the first asynchronous write. This prevents
+// an upload with the same filename from replacing an earlier user's original.
+const activeImportPaths = new Set();
+function reserveImportPath(originalName) {
+  const dot = originalName.lastIndexOf('.');
+  const stem = dot > 0 ? originalName.slice(0, dot) : originalName;
+  const extension = dot > 0 ? originalName.slice(dot) : '';
+  for (let copy = 1; copy <= 10000; copy++) {
+    const name = copy === 1 ? originalName : `${stem} (${copy})${extension}`;
+    const path = `/home/user/Imports/${name}`;
+    const members = name.toLowerCase().endsWith('.zip')
+      ? `/home/user/Imports/${name.slice(0, -4)}/` : null;
+    if (activeImportPaths.has(path) || computer.vfs.read(path)) continue;
+    if (members && (activeImportPaths.has(members) || computer.vfs.list(members).length)) continue;
+    activeImportPaths.add(path);
+    if (members) activeImportPaths.add(members);
+    return { name, path, members, release() {
+      activeImportPaths.delete(path);
+      if (members) activeImportPaths.delete(members);
+    } };
+  }
+  throw new RangeError('Import name collision limit reached.');
+}
+
 async function ingestUpload({ name, base64 }) {
   if (typeof name !== 'string' || !name || typeof base64 !== 'string' || base64.length > 8000000) throw new TypeError('A named file of at most 6 MB is required.');
   const safeName = name.split(/[\\/]/).at(-1).replace(/[^\w. -]/g, '_');
@@ -34,17 +58,22 @@ async function ingestUpload({ name, base64 }) {
     const record = await files.write(path, text === null ? buffer.toString('base64') : text, source, text === null ? 'base64' : 'utf8');
     return { path: record.path, address: record.meta.address, addressKey: record.meta.addressKey, digest: record.meta.digest, encoding: record.meta.encoding, size: buffer.length, dna: record.meta.dna };
   };
-  const archive = await save(`/home/user/Imports/${safeName}`, bytes, 'file-import');
-  if (!safeName.toLowerCase().endsWith('.zip')) {
-    await files.mirrorImported([archive]);
-    return { items: [archive] };
+  const reservation = reserveImportPath(safeName);
+  try {
+    const archive = await save(reservation.path, bytes, 'file-import');
+    if (!reservation.members) {
+      await files.mirrorImported([archive]);
+      return { items: [archive] };
+    }
+    const items = [archive];
+    for (const { name: entry, content } of readZipMembers(bytes)) {
+      items.push(await save(`${reservation.members}${entry}`, content, `archive:${archive.addressKey}`));
+    }
+    await files.mirrorImported(items);
+    return { items };
+  } finally {
+    reservation.release();
   }
-  const items = [archive];
-  for (const { name: entry, content } of readZipMembers(bytes)) {
-    items.push(await save(`/home/user/Imports/${safeName.slice(0, -4)}/${entry}`, content, `archive:${archive.addressKey}`));
-  }
-  await files.mirrorImported(items);
-  return { items };
 }
 
 const mime = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg', '.webp': 'image/webp', '.ico': 'image/x-icon' };
