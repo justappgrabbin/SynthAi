@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#10091c">
+<meta name="description" content="SYNTH AI: explore your design, research scientific parallels, test ideas, and discover meaningful connections.">
+<meta property="og:title" content="SYNTH AI — #ItsAlive">
+<meta property="og:description" content="Your design is a starting point. Calculate, investigate, experiment and connect.">
+<title>SYNTH AI — #ItsAlive</title>
+<style>
+:root{color-scheme:dark;--ink:#f8f1ff;--muted:#c1b4d5;--line:#51446b;--mint:#a5fbe2;--purple:#c79aff}
+*{box-sizing:border-box}
+body{margin:0;background:#0d0918;color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",sans-serif;line-height:1.6}
+body:before{content:"";position:fixed;z-index:-1;inset:0;pointer-events:none;background:radial-gradient(ellipse at 72% 11%,#52316b66,transparent 54%),radial-gradient(ellipse at 5% 45%,#18605a55,transparent 46%)}
+a{color:inherit}a:focus-visible,button:focus-visible{outline:3px solid #ffe2a4;outline-offset:4px}
+.wrap{max-width:1000px;width:calc(100% - 36px);margin:auto}
+nav{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:20px 0;border-bottom:1px solid var(--line)}
+.brand{font-size:1.17rem;font-weight:850;letter-spacing:.13em;text-decoration:none}
+.brand span{color:var(--mint);padding-right:7px}
+nav button{border:1px solid var(--line);border-radius:25px;background:#251b39;color:#f3e9ff;padding:10px 15px;font:inherit}
+.hero{display:grid;grid-template-columns:1fr 0.8fr;align-items:center;gap:30px;padding:75px 0 65px}
+.kicker{font-size:.79rem;font-weight:800;letter-spacing:.18em;color:var(--mint);text-transform:uppercase}
+h1{font-size:clamp(3.4rem,8vw,6rem);letter-spacing:-.068em;line-height:1.02;margin:18px 0}
+h1 em{font-style:normal;background:linear-gradient(100deg,#ffb6df,#aa93fd,#8cecd5);-webkit-background-clip:text;background-clip:text;color:transparent}
+.lead{font-size:1.12rem;color:#e1d6f0;max-width:630px}
+.actions{display:flex;flex-wrap:wrap;gap:12px;margin:27px 0 14px}
+.button{display:inline-block;font:700 1rem system-ui;text-align:center;text-decoration:none;border:1px solid #a09abc;border-radius:15px;padding:15px 23px;min-height:54px;cursor:pointer;background:#251b39;color:#fff}
+.button.primary{background:linear-gradient(110deg,#dbabff,#aca0ff);border:0;color:#1b1032}
+.fine{color:var(--muted);font-size:.88rem}
+.symbol{width:min(100%,380px);height:auto;filter:drop-shadow(0 0 35px #976bc750)}
+h2{font-size:clamp(1.9rem,4vw,2.9rem);letter-spacing:-.05em;line-height:1.12}
+.intro{color:var(--muted);max-width:750px}
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:13px;margin:25px 0 60px}
+.card{padding:23px;border:1px solid var(--line);border-radius:21px;background:#211a34b0}
+.card h3{margin:5px 0 8px}.card p{color:var(--muted);margin:0;font-size:.93rem}
+.card .glyph{font-size:1.65rem;color:var(--mint)}
+.end{border:1px solid #855e9b;border-radius:26px;padding:36px;margin:10px 0 50px;background:linear-gradient(120deg,#46305d8c,#193e3f8c);text-align:center}
+.end p{color:#e7d9ee}
+footer{padding:20px 0 45px;border-top:1px solid var(--line);font-size:.8rem;color:var(--muted)}
+#notice{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:#39274a;padding:12px 17px;border-radius:15px;border:1px solid #b09bd7;max-width:min(95vw,520px)}
+#notice[hidden]{display:none}
+@media(max-width:780px){.hero{grid-template-columns:1fr;padding-top:35px}.symbol{grid-row:1;width:min(65vw,260px);margin:auto}.cards{grid-template-columns:1fr}.hero .button{flex:1 1 100%}}
+</style>
+</head>
+<body>
+<header class="wrap"><nav aria-label="Main"><a class="brand" href="#"><span>✳</span>SYNTH AI</a><button type="button" data-share>↗ Share invitation</button></nav></header>
+<main class="wrap">
+<section class="hero" aria-labelledby="title">
+<div>
+<div class="kicker" id="releaseStatus">#ItsAlive · Public launch in development</div>
+<h1 id="title">Your design.<br><em>Your universe.</em></h1>
+<p class="lead">Meet SYNTH AI, a personal discovery computer designed to calculate your charts, investigate scientific parallels, test ideas against experience, and find people, places, and tools that support your goals.</p>
+<div class="actions"><a class="button primary" id="install" href="#discover">Discover SYNTH AI ↗</a><button class="button" type="button" data-share>Share with someone ↗</button></div>
+<p class="fine" id="installStatus">When the app is published, the main button will lead directly to its real Google Play listing. No third-party APK download.</p>
+</div>
+<svg class="symbol" viewBox="0 0 360 360" role="img" aria-label="Five colorful orbital trajectories centered on one point" fill="none" xmlns="http://www.w3.org/2000/svg">
+<circle cx="180" cy="180" r="149" stroke="#c8b1f5" stroke-opacity=".4" stroke-dasharray="3 8"/>
+<ellipse cx="180" cy="180" rx="150" ry="56" stroke="#a5fbe2" stroke-width="2" transform="rotate(44 180 180)"/>
+<ellipse cx="180" cy="180" rx="150" ry="56" stroke="#daa9fa" stroke-width="2" transform="rotate(-44 180 180)"/>
+<ellipse cx="180" cy="180" rx="140" ry="73" stroke="#f9b4e2" transform="rotate(90 180 180)"/>
+<circle cx="180" cy="180" r="51" fill="#9f65d0" fill-opacity=".22"/>
+<circle cx="180" cy="180" r="30" fill="#e3bcff"/>
+<circle cx="180" cy="180" r="14" fill="#251735"/>
+<circle cx="75" cy="75" r="7" fill="#ffb9e9"/><circle cx="290" cy="266" r="8" fill="#8ff7d9"/><circle cx="175" cy="40" r="6" fill="#f4dba1"/>
+</svg>
+</section>
+<section id="discover">
+<div class="kicker">A PERSON IS MORE THAN ONE CHART</div>
+<h2>Explore. Investigate. Test. Connect.</h2>
+<p class="intro">SYNTH AI's developing architecture uses astrology, Human Design, source-aware research, an experimental learning system, and an opt-in mesh. Calculations, interpretations, hypotheses and observed outcomes remain distinguishable.</p>
+<div class="cards">
+<article class="card"><div class="glyph" aria-hidden="true">☉</div><h3>Personal coordinates</h3><p>Planetary positions, gates, lines, colors, tones, bases and the many ways they may be interpreted.</p></article>
+<article class="card"><div class="glyph" aria-hidden="true">⌬</div><h3>Scientific parallels</h3><p>Investigate connections across mathematics, language, biology, cognition and systems theory. Read the sources and examine the evidence.</p></article>
+<article class="card"><div class="glyph" aria-hidden="true">✧</div><h3>Your own experiments</h3><p>Test ideas, record observations, and update confidence from experience rather than assuming every interpretation is true.</p></article>
+<article class="card"><div class="glyph" aria-hidden="true">◇</div><h3>Knowledge library</h3><p>Keep research documents, charts, tools, and provenance in one continuing personal workspace.</p></article>
+<article class="card"><div class="glyph" aria-hidden="true">∞</div><h3>Discovery mesh</h3><p>Find potential collaborators, opportunities, resources and places, with permission before sharing personal data.</p></article>
+<article class="card"><div class="glyph" aria-hidden="true">✳</div><h3>Personal computer</h3><p>A local-first Android computer with actual tools and independently executing engines, not just a chat window.</p></article>
+</div>
+</section>
+<section class="end">
+<div class="kicker">AN INVITATION, NOT AN AUTOMATIC CONNECTION</div>
+<h2>The next step is your choice.</h2>
+<p>Share this page with someone you think might be interested. Installing and connecting always require that person's approval.</p>
+<div class="actions" style="justify-content:center"><a class="button primary" id="installBottom" href="#discover">Explore the vision ↗</a><button class="button" type="button" data-share>↗ Share invitation</button></div>
+</section>
+</main>
+<footer class="wrap">SYNTH AI · #ItsAlive · In development. This page does not access birth data, genetic information, or private files. It does not claim a Google Play release before one exists.</footer>
+<div id="notice" role="status" aria-live="polite" hidden></div>
+<script>
+"use strict";
+// Switch to published:true ONLY after the actual Play listing and package ID exist.
+const RELEASE={published:false,packageId:null};
+const packageValid=typeof RELEASE.packageId==="string"&&/^[A-Za-z][A-Za-z0-9_]*(\.[A-Za-z][A-Za-z0-9_]*)+$/.test(RELEASE.packageId);
+const validCode=/^[A-Za-z0-9_-]{1,48}$/;
+const incoming=new URL(location.href).searchParams.get("via");
+const invitation=incoming&&validCode.test(incoming)?incoming:null;
+const live=RELEASE.published===true&&packageValid;
+if(live){
+ const play=new URL("https://play.google.com/store/apps/details");
+ play.searchParams.set("id",RELEASE.packageId);
+ if(invitation)play.searchParams.set("referrer",new URLSearchParams({utm_source:"synth_share",invitation}).toString());
+ for(const id of ["install","installBottom"]){const a=document.getElementById(id);a.href=play.href;a.textContent="Install via Google Play ↗";}
+ document.getElementById("installStatus").textContent="Google Play will ask you to confirm installation. Your chart and connections are configured after opening the app.";
+ document.getElementById("releaseStatus").textContent="#ItsAlive · Official Google Play release";
+}
+const notice=document.getElementById("notice");let timer;
+function status(message){notice.textContent=message;notice.hidden=false;clearTimeout(timer);timer=setTimeout(()=>notice.hidden=true,4500);}
+async function share(){
+ if(location.protocol!=="https:"){status("A public invitation link will be available once this page is hosted over HTTPS.");return;}
+ const url=new URL(location.href);url.hash="";url.search="";if(invitation)url.searchParams.set("via",invitation);
+ const data={title:"SYNTH AI — #ItsAlive",text:"Discover SYNTH AI",url:url.href};
+ if(navigator.share){try{await navigator.share(data);return;}catch(e){if(e.name==="AbortError")return;}}
+ try{await navigator.clipboard.writeText(url.href);status("Invitation link copied!");}catch{status("Copy this link: "+url.href);}
+}
+for(const b of document.querySelectorAll("[data-share]"))b.addEventListener("click",share);
+</script>
+</body>
+</html>

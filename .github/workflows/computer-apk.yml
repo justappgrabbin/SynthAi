@@ -1,6 +1,8 @@
 name: Synthia Computer Android checkpoint
 on:
   workflow_dispatch:
+  pull_request:
+    paths: ['computer/**', '.github/workflows/computer-apk.yml']
   push:
     branches: [reassembly/computer-2026-09-29]
     paths: ['computer/**', '.github/workflows/computer-apk.yml']
@@ -23,9 +25,10 @@ jobs:
       - uses: android-actions/setup-android@v4
       - uses: gradle/actions/setup-gradle@v4
         with:
-          gradle-version: '8.7'
-      - run: sdkmanager 'platforms;android-35' 'ndk;27.0.12077973' 'cmake;3.22.1'
+          gradle-version: '8.13'
+      - run: sdkmanager 'platforms;android-36' 'ndk;27.0.12077973' 'cmake;3.22.1'
       - run: npm --prefix computer/shell/kimi-linux ci && npm --prefix computer run build && npm --prefix computer run test:reassembly
+      - run: node --test computer/installation/landing.test.mjs
       - run: python computer/android/prepare-assets.py
       - name: Stage Node 18 mobile runtime
         run: |
