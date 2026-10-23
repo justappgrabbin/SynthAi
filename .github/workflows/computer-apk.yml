@@ -28,6 +28,7 @@ jobs:
           gradle-version: '8.13'
       - run: sdkmanager 'platforms;android-36' 'ndk;27.0.12077973' 'cmake;3.22.1'
       - run: npm --prefix computer/shell/kimi-linux ci && npm --prefix computer run build && npm --prefix computer run test:reassembly
+      - run: node --test computer/installation/landing.test.mjs
       - run: python computer/android/prepare-assets.py
       - name: Stage Node 18 mobile runtime
         run: |
