@@ -14,5 +14,8 @@ android {
     externalNativeBuild { cmake { path 'CMakeLists.txt' } }
     sourceSets { main { jniLibs.srcDirs 'libnode/bin' } }
     buildTypes { release { minifyEnabled false } }
-    dependencies { implementation 'com.android.installreferrer:installreferrer:2.2' }
+}
+
+dependencies {
+    implementation 'com.android.installreferrer:installreferrer:2.2'
 }
