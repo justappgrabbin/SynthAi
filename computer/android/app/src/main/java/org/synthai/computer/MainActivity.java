@@ -50,6 +50,8 @@ public final class MainActivity extends Activity {
         status.setPadding(24, 40, 24, 24);
         root.addView(status);
         setContentView(root);
+        // Installation referral is optional: it must never block the local Computer.
+        PlayInvitation.checkOnFirstLaunch(this);
         synchronized (MainActivity.class) {
             if (!nodeStarted) {
                 nodeStarted = true;
