@@ -37,6 +37,7 @@ function render({ url = 'https://synth.example/?via=ABC123', live = false } = {}
 
 test('the prelaunch landing page never claims an install link exists', () => {
   const { element } = render();
+  assert.match(html, /id="install" href="#discover"/);
   assert.equal(element('install').href, '');
   assert.equal(element('installBottom').href, '');
   assert.match(html, /Public launch in development/);
@@ -67,6 +68,6 @@ test('page offers sharing and distinguishes research from proven outcomes', () =
   assert.match(html, /data-share/);
   assert.match(html, /scientific parallels/i);
   assert.match(html, /test ideas/i);
-  assert.match(html, /never/i.test(html) ? /personal data/ : /personal data/);
+  assert.match(html, /personal data/i);
   assert.match(html, /@media\(max-width:780px\)/);
 });
