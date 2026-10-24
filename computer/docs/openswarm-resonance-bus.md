@@ -11,6 +11,15 @@ Reference: https://github.com/openswarm-os/openswarm (MIT; Copyright 2026 OpenSw
 - Agents need private tokens and bus:write permission to publish. Agents cannot authorize execution themselves.
 - Max active matches per signal: 26. Active signal buffer: bounded/TTL. Threshold adjustments require caller-attested verified outcomes and evidence.
 
+## Android host integration
+
+The existing on-device Node HTTP host packages this module in computer-assets.zip. It exposes two deliberately non-executable local routes:
+
+- GET /api/resonance — lazily discover declared capabilities from the existing donor Synthia swarm and show the current resonance registry.
+- POST /api/resonance/propose — JSON { "text": "compile android" }, return ranked candidate capabilities without running any of them.
+
+The donor's real process/capability manifests are discovered dynamically. An approved dispatch in trusted Computer code calls AutomataEngineGateway.execute for that capability, which delegates to the existing donor swarm scheduler. These endpoints do not provide execution privileges; loopback HTTP is not an authentication boundary.
+
 ## Embedding integrity
 
 OpenSwarm uses Sentence-BERT 384-dimensional learned embeddings. No Sentence-BERT or Ollama has been installed here. The phone-local initial matcher uses 384-dimensional lexical feature hashing (unigrams/bigrams) and cosine similarity. It recognizes lexical overlap, NOT semantic synonyms. A real on-device neural embedder can later be injected through the embedder option; embeddingSpace IDs isolate incompatible vector spaces. Numeric vectors may also be supplied explicitly.
@@ -27,7 +36,7 @@ The ownerApproved argument is a local trusted-caller assertion, NOT a real authe
 
 ## Not shipped or verified here
 
-This is a scoped code integration, not a ready phone install. No cloud LLM, Python, Docker, Redis, Ollama, Web browser agent, or auto-installed model. Original state space, four primitives, existing mesh and self-cultivation code remain in place. No durable neural bus state, OS-level sandbox, production audit proof, Android build, or phone acceptance is claimed.
+This is a scoped code integration, not a ready phone install. No cloud LLM, Python, Docker, Redis, Ollama, Web browser agent, or auto-installed model. Original state space, four primitives, existing mesh and self-cultivation code remain in place. No durable neural bus state, OS-level sandbox, production audit proof, Android build, front-end resonance panel, or phone acceptance is claimed.
 
 ## Next verification steps
 
