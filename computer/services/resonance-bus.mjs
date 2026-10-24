@@ -138,9 +138,10 @@ export class ResonanceBus {
     const ttlMs = signal.ttlMs ?? 60_000;
     if (!finite(ttlMs) || ttlMs <= 0 || ttlMs > 3_600_000) throw new RangeError('Invalid signal TTL');
     const at = this.clock();
-    const correlationId = signal.correlationId ?? 'corr-' + (++this.#sequence);
+    const sequence = ++this.#sequence;
+    const correlationId = signal.correlationId ?? 'corr-' + sequence;
     const event = {
-      id: 'signal-' + this.#sequence + '-' + at,
+      id: 'signal-' + sequence + '-' + at,
       source, type, domain: signal.domain ?? null, text: signal.text ?? '',
       address: signal.address ?? null, correlationId, embeddingSpace,
       at, expiresAt: at + ttlMs, vectors,
