@@ -15,11 +15,13 @@ import { AutomataEngineGateway } from './services/automata-engine.mjs';
 import { WorldEngineGateway } from './services/world-engine.mjs';
 import { PentaEphemerisService } from './services/penta-ephemeris.mjs';
 import { ExperimentLoop } from './services/experiment-loop.mjs';
+import { ResonanceBus } from './services/resonance-bus.mjs';
 
 export class ComputerRuntime {
   constructor({ persistence = new MemoryPersistence(), namespace = 'synthai-computer', github = null, eventLogPath = null } = {}) {
     this.eventLogPath = eventLogPath;
     this.bus = new EventBus();
+    this.resonance = new ResonanceBus({ bus: this.bus });
     this.state = new StateStore({ bus: this.bus, persistence, namespace });
     const registry = kind => new Registry({ kind, bus: this.bus });
 
@@ -110,6 +112,8 @@ export class ComputerRuntime {
     // Acceptance-7: experiment loop (donor HypothesisRegistry, wrap-only).
     this.experiments = new ExperimentLoop({ bus: this.bus });
     this.services.register('experiment-loop', { provider: this.experiments, contract: 'runExperiment' });
+    this.services.register('resonance-bus', { provider: this.resonance, contract: 'publishOwner/registerAgent/snapshot' });
+    if (!this.capabilityRegistry.has('resonance-routing')) this.capabilities.register('resonance-routing', { providers: ['computer'] });
     for (const id of ['resolve_address', 'resolve_state', 'emit_event', 'query_capability', 'automata_activation']) {
       if (!this.capabilityRegistry.has(id)) this.capabilities.register(id, { providers: ['back-up-', 'computer'] });
     }
@@ -128,6 +132,35 @@ export class ComputerRuntime {
   resolveState(entity, event, context) { return this.stateResolver.resolveState(entity, event, context); }
   emitEvent(event) { return this.eventEmitter.emitEvent(event); }
   executeOnSwarm(capability, input, ctx) { return this.automataGateway.execute(capability, input, ctx); }
+  /**
+   * Owners may dispatch resonant signals; execution additionally requires
+   * execute=true AND ownerApproved=true. Untrusted mounted applications do
+   * not receive this privileged method in their mount contract.
+   */
+  publishResonanceSignal(signal, options = {}) {
+    return this.resonance.publishOwner(signal, options);
+  }
+
+  /**
+   * Connect an EXISTING executable automaton to resonance-based discovery.
+   * This reuses AutomataEngine.run (and its state/audit events); no fake
+   * handler or replacement swarm runtime is created.
+   */
+  async registerResonantAutomaton({ id, missionText, vectors, threshold = 0.6,
+                                    domain = null, embeddingSpace = this.resonance.embeddingSpace } = {}) {
+    if (!this.automataRegistry.has(id)) throw new Error('Automaton must be registered before resonance: ' + id);
+    const agentId = 'resonant:' + id;
+    const receipt = await this.resonance.registerAgent({
+      id: agentId, missionText, vectors, threshold, domain, embeddingSpace,
+      permissions: ['bus:subscribe', 'bus:execute'],
+      handle: (signal) => this.automata.run(id, { text: signal.text, address: signal.address,
+        correlationId: signal.correlationId, domain: signal.domain },
+      { origin: 'resonance-bus', score: signal.score }),
+    });
+    this.agents.register(agentId, { role: 'resonant-automaton', automatonId: id, domain });
+    return { id: agentId, token: receipt.token };
+  }
+
   worldEvent(event) { return this.worldGateway.process(event); }
   observeWorld() { return this.worldGateway.snapshot(); }
   groupPenta(members) { return this.pentaEphemeris.groupPenta(members); }
@@ -177,6 +210,7 @@ export class ComputerRuntime {
       projects: this.projects.list(),
       backends: this.backendsRegistry.list().map(({ id, status }) => ({ id, status })),
       capabilities: this.capabilityRegistry.list(),
+      resonance: this.resonance.snapshot(),
       mounted: this.shellManager.listMounted()
     };
   }
