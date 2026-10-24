@@ -98,6 +98,22 @@ const server = createServer(async (req, res) => {
         const swarm = await computer.automataGateway.snapshot();
         return json(res, 200, { ready: true, computer: 'SynthAI Computer', swarmProcesses: swarm.processCount, files: computer.vfs.list('/').length });
       }
+      // Read-only resonance discovery + proposal path for the real local
+      // Android Computer. Deliberately NO execution endpoint here: loopback
+      // HTTP is not equivalent to verified owner authorization.
+      if (req.method === 'GET' && url.pathname === '/api/resonance') {
+        const discovery = await computer.discoverResonantSwarmCapabilities();
+        return json(res, 200, { discovery, resonance: computer.resonance.snapshot() });
+      }
+      if (req.method === 'POST' && url.pathname === '/api/resonance/propose') {
+        const request = await body(req);
+        if (typeof request?.text !== 'string' || !request.text.trim() || request.text.length > 4000)
+          throw new TypeError('A nonempty text request (max 4000 characters) is required.');
+        await computer.discoverResonantSwarmCapabilities();
+        return json(res, 200, await computer.publishResonanceSignal({
+          type: 'request', text: request.text, domain: request.domain ?? null,
+        }));
+      }
       if (req.method === 'GET' && url.pathname === '/api/history') return json(res, 200, conversation.history());
       if (req.method === 'POST' && url.pathname === '/api/chat') return json(res, 200, await conversation.talk((await body(req)).text));
       if (req.method === 'GET' && url.pathname === '/api/filesystem') return json(res, 200, computer.state.get('computer.desktop.filesystem', null));
