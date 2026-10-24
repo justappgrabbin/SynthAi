@@ -1,0 +1,23 @@
+name: SYNTH AI resonance bus Node tests
+on:
+  pull_request:
+    paths:
+      - 'computer/ComputerRuntime.mjs'
+      - 'computer/services/resonance-bus.mjs'
+      - 'computer/tests/resonance-bus.test.mjs'
+      - '.github/workflows/resonance-bus-tests.yml'
+  workflow_dispatch:
+
+jobs:
+  resonance-bus:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Run resonance bus integration tests
+        run: node --test computer/tests/resonance-bus.test.mjs
