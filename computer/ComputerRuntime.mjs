@@ -161,6 +161,42 @@ export class ComputerRuntime {
     return { id: agentId, token: receipt.token };
   }
 
+  /**
+   * Discover executable capabilities from the EXISTING Synthia donor swarm.
+   * Each capability advertises a mission to the resonance layer; actual task
+   * assignment still happens in the donor's own capability-aware scheduler.
+   * This is lazy, idempotent, and never runs a worker merely by discovering it.
+   */
+  async discoverResonantSwarmCapabilities({ limit = 128, threshold = 0.6 } = {}) {
+    if (!Number.isInteger(limit) || limit < 1 || limit > 512) throw new RangeError('Invalid capability discovery limit');
+    const live = await this.automataGateway.snapshot();
+    const all = [...new Set((live.workers ?? [])
+      .flatMap(worker => Array.isArray(worker.capabilities) ? worker.capabilities : [])
+      .filter(cap => typeof cap === 'string' && cap.trim()))].sort();
+    const existing = new Set(this.resonance.snapshot().agents.map(agent => agent.id));
+    const registered = [];
+    for (const capability of all.slice(0, limit)) {
+      const id = 'swarm-capability:' + capability;
+      if (existing.has(id)) continue;
+      await this.resonance.registerAgent({
+        id, missionText: capability.replace(/[._/-]/g, ' '), threshold,
+        permissions: ['bus:subscribe', 'bus:execute'],
+        handle: async signal => {
+          const result = await this.automataGateway.execute(capability,
+            { text: signal.text, address: signal.address, domain: signal.domain },
+            { taskId: signal.signalId, meta: { origin: 'resonance-bus', correlationId: signal.correlationId } });
+          if (result.status !== 'complete') throw new Error('Swarm execution ' + result.status + ': ' + (result.error ?? result.reason ?? 'no completed result'));
+          return result;
+        },
+      });
+      if (!this.agents.has(id)) this.agents.register(id, { role: 'swarm-capability', capability });
+      registered.push(id);
+    }
+    const summary = { available: all.length, registered, capped: Math.max(0, all.length - limit) };
+    this.bus.emit('resonance:discovered', summary);
+    return summary;
+  }
+
   worldEvent(event) { return this.worldGateway.process(event); }
   observeWorld() { return this.worldGateway.snapshot(); }
   groupPenta(members) { return this.pentaEphemeris.groupPenta(members); }
