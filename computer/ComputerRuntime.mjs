@@ -15,11 +15,13 @@ import { AutomataEngineGateway } from './services/automata-engine.mjs';
 import { WorldEngineGateway } from './services/world-engine.mjs';
 import { PentaEphemerisService } from './services/penta-ephemeris.mjs';
 import { ExperimentLoop } from './services/experiment-loop.mjs';
+import { ResonanceBus } from './services/resonance-bus.mjs';
 
 export class ComputerRuntime {
   constructor({ persistence = new MemoryPersistence(), namespace = 'synthai-computer', github = null, eventLogPath = null } = {}) {
     this.eventLogPath = eventLogPath;
     this.bus = new EventBus();
+    this.resonance = new ResonanceBus({ bus: this.bus });
     this.state = new StateStore({ bus: this.bus, persistence, namespace });
     const registry = kind => new Registry({ kind, bus: this.bus });
 
@@ -110,6 +112,8 @@ export class ComputerRuntime {
     // Acceptance-7: experiment loop (donor HypothesisRegistry, wrap-only).
     this.experiments = new ExperimentLoop({ bus: this.bus });
     this.services.register('experiment-loop', { provider: this.experiments, contract: 'runExperiment' });
+    this.services.register('resonance-bus', { provider: this.resonance, contract: 'publishOwner/registerAgent/snapshot' });
+    if (!this.capabilityRegistry.has('resonance-routing')) this.capabilities.register('resonance-routing', { providers: ['computer'] });
     for (const id of ['resolve_address', 'resolve_state', 'emit_event', 'query_capability', 'automata_activation']) {
       if (!this.capabilityRegistry.has(id)) this.capabilities.register(id, { providers: ['back-up-', 'computer'] });
     }
@@ -128,6 +132,71 @@ export class ComputerRuntime {
   resolveState(entity, event, context) { return this.stateResolver.resolveState(entity, event, context); }
   emitEvent(event) { return this.eventEmitter.emitEvent(event); }
   executeOnSwarm(capability, input, ctx) { return this.automataGateway.execute(capability, input, ctx); }
+  /**
+   * Owners may dispatch resonant signals; execution additionally requires
+   * execute=true AND ownerApproved=true. Untrusted mounted applications do
+   * not receive this privileged method in their mount contract.
+   */
+  publishResonanceSignal(signal, options = {}) {
+    return this.resonance.publishOwner(signal, options);
+  }
+
+  /**
+   * Connect an EXISTING executable automaton to resonance-based discovery.
+   * This reuses AutomataEngine.run (and its state/audit events); no fake
+   * handler or replacement swarm runtime is created.
+   */
+  async registerResonantAutomaton({ id, missionText, vectors, threshold = 0.6,
+                                    domain = null, embeddingSpace = this.resonance.embeddingSpace } = {}) {
+    if (!this.automataRegistry.has(id)) throw new Error('Automaton must be registered before resonance: ' + id);
+    const agentId = 'resonant:' + id;
+    const receipt = await this.resonance.registerAgent({
+      id: agentId, missionText, vectors, threshold, domain, embeddingSpace,
+      permissions: ['bus:subscribe', 'bus:execute'],
+      handle: (signal) => this.automata.run(id, { text: signal.text, address: signal.address,
+        correlationId: signal.correlationId, domain: signal.domain },
+      { origin: 'resonance-bus', score: signal.score }),
+    });
+    this.agents.register(agentId, { role: 'resonant-automaton', automatonId: id, domain });
+    return { id: agentId, token: receipt.token };
+  }
+
+  /**
+   * Discover executable capabilities from the EXISTING Synthia donor swarm.
+   * Each capability advertises a mission to the resonance layer; actual task
+   * assignment still happens in the donor's own capability-aware scheduler.
+   * This is lazy, idempotent, and never runs a worker merely by discovering it.
+   */
+  async discoverResonantSwarmCapabilities({ limit = 128, threshold = 0.6 } = {}) {
+    if (!Number.isInteger(limit) || limit < 1 || limit > 512) throw new RangeError('Invalid capability discovery limit');
+    const live = await this.automataGateway.snapshot();
+    const all = [...new Set((live.workers ?? [])
+      .flatMap(worker => Array.isArray(worker.capabilities) ? worker.capabilities : [])
+      .filter(cap => typeof cap === 'string' && cap.trim()))].sort();
+    const existing = new Set(this.resonance.snapshot().agents.map(agent => agent.id));
+    const registered = [];
+    for (const capability of all.slice(0, limit)) {
+      const id = 'swarm-capability:' + capability;
+      if (existing.has(id)) continue;
+      await this.resonance.registerAgent({
+        id, missionText: capability.replace(/[._/-]/g, ' '), threshold,
+        permissions: ['bus:subscribe', 'bus:execute'],
+        handle: async signal => {
+          const result = await this.automataGateway.execute(capability,
+            { text: signal.text, address: signal.address, domain: signal.domain },
+            { taskId: signal.signalId, meta: { origin: 'resonance-bus', correlationId: signal.correlationId } });
+          if (result.status !== 'complete') throw new Error('Swarm execution ' + result.status + ': ' + (result.error ?? result.reason ?? 'no completed result'));
+          return result;
+        },
+      });
+      if (!this.agents.has(id)) this.agents.register(id, { role: 'swarm-capability', capability });
+      registered.push(id);
+    }
+    const summary = { available: all.length, registered, capped: Math.max(0, all.length - limit) };
+    this.bus.emit('resonance:discovered', summary);
+    return summary;
+  }
+
   worldEvent(event) { return this.worldGateway.process(event); }
   observeWorld() { return this.worldGateway.snapshot(); }
   groupPenta(members) { return this.pentaEphemeris.groupPenta(members); }
@@ -177,6 +246,7 @@ export class ComputerRuntime {
       projects: this.projects.list(),
       backends: this.backendsRegistry.list().map(({ id, status }) => ({ id, status })),
       capabilities: this.capabilityRegistry.list(),
+      resonance: this.resonance.snapshot(),
       mounted: this.shellManager.listMounted()
     };
   }
