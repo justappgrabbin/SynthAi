@@ -86,3 +86,28 @@ test('ComputerRuntime executes an existing automaton only after owner-approved r
   assert.equal(count, 1);
   assert.equal(c.snapshot().resonance.agents[0].id, 'resonant:real-compiler');
 });
+
+
+test('Computer lazily discovers the existing donor swarm capabilities without auto-execution', async () => {
+  const computer = await new ComputerRuntime().boot();
+  let executions = 0;
+  computer.automataGateway.snapshot = async () => ({
+    workers: [{ id: 'donor:worker1', capabilities: ['compile.android', 'read.address'] }],
+  });
+  computer.automataGateway.execute = async (capability, input) => {
+    executions++;
+    return { status: 'complete', capability, input };
+  };
+  const first = await computer.discoverResonantSwarmCapabilities();
+  assert.equal(first.available, 2);
+  assert.equal(first.registered.length, 2);
+  assert.equal((await computer.discoverResonantSwarmCapabilities()).registered.length, 0);
+  const probe = await computer.publishResonanceSignal({ text: 'compile android', type: 'request' });
+  assert.equal(probe.matched[0].id, 'swarm-capability:compile.android');
+  assert.equal(executions, 0);
+  const approval = await computer.publishResonanceSignal({ text: 'compile android', type: 'request' },
+    { execute: true, ownerApproved: true });
+  assert.equal(approval.executions[0].status, 'completed');
+  assert.equal(approval.executions[0].output.capability, 'compile.android');
+  assert.equal(executions, 1);
+});
