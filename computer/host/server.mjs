@@ -44,6 +44,26 @@ function reserveImportPath(originalName) {
   throw new RangeError('Import name collision limit reached.');
 }
 
+// Execution requests without an existing address are new admissions, not editor saves.
+// Reserve a unique Documents path before any asynchronous write so concurrent
+// requests cannot replace an earlier source under the same user-facing name.
+const activeExecutionPaths = new Set();
+function reserveExecutionPath(originalName) {
+  const safeName = String(originalName ?? 'artifact').split(/[\\/]/).at(-1).replace(/[^\w. -]/g, '_');
+  if (!safeName || safeName === '.' || safeName === '..') throw new TypeError('Invalid execution artifact name.');
+  const dot = safeName.lastIndexOf('.');
+  const stem = dot > 0 ? safeName.slice(0, dot) : safeName;
+  const extension = dot > 0 ? safeName.slice(dot) : '';
+  for (let copy = 1; copy <= 10000; copy++) {
+    const name = copy === 1 ? safeName : `${stem} (${copy})${extension}`;
+    const path = `/home/user/Documents/${name}`;
+    if (activeExecutionPaths.has(path) || computer.vfs.read(path)) continue;
+    activeExecutionPaths.add(path);
+    return { path, release() { activeExecutionPaths.delete(path); } };
+  }
+  throw new RangeError('Execution artifact name collision limit reached.');
+}
+
 async function ingestUpload({ name, base64 }) {
   if (typeof name !== 'string' || !name || typeof base64 !== 'string' || base64.length > 8000000) throw new TypeError('A named file of at most 6 MB is required.');
   const safeName = name.split(/[\\/]/).at(-1).replace(/[^\w. -]/g, '_');
@@ -120,9 +140,15 @@ const server = createServer(async (req, res) => {
       }
       if (req.method === 'POST' && url.pathname === '/api/execute') {
         const request = await body(req);
-        const admitted = request.addressKey
-          ? files.resolve(request.addressKey).find((entry) => entry.path === request.path) ?? files.resolve(request.addressKey)[0]
-          : await files.write(`/home/user/Documents/${String(request.name ?? 'artifact').replaceAll('/', '_')}`, request.content, 'execution-intake');
+        let admitted;
+        if (request.addressKey) {
+          const matches = files.resolve(request.addressKey);
+          admitted = request.path ? matches.find((entry) => entry.path === request.path) : matches[0];
+        } else {
+          const reservation = reserveExecutionPath(request.name);
+          try { admitted = await files.write(reservation.path, request.content, 'execution-intake'); }
+          finally { reservation.release(); }
+        }
         if (!admitted) throw new TypeError('No artifact found at that state-space address.');
         const artifact = await files.activate(admitted.meta.addressKey, admitted.path);
         if (artifact.meta.encoding === 'base64') throw new TypeError('Binary artifacts cannot be executed as text.');
