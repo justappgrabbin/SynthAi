@@ -18,6 +18,7 @@ import { ExperimentLoop } from './services/experiment-loop.mjs';
 import { ResonanceBus } from './services/resonance-bus.mjs';
 import { SynthiaResident } from './services/synthia-resident.mjs';
 import { DonorEventIntegration } from './services/donor-event-integration.mjs';
+import { GroundedDialogue } from './services/grounded-dialogue.mjs';
 
 export class ComputerRuntime {
   constructor({ persistence = new MemoryPersistence(), namespace = 'synthai-computer', github = null, eventLogPath = null } = {}) {
@@ -78,6 +79,7 @@ export class ComputerRuntime {
     // Resident is new; all three Klein language engines below are unchanged donor imports.
     this.synthia = await new SynthiaResident({ state: this.state, bus: this.bus }).boot();
     this.donorIntegration = new DonorEventIntegration(this);
+    this.groundedDialogue = new GroundedDialogue(this);
 
     this.policy.register('xynthai:age-boundary', ({ ageConfirmed = false } = {}) =>
       ageConfirmed ? { allow: true } : { allow: false, reason: 'XynthAI requires an explicit 18+ age confirmation.' }
@@ -120,6 +122,7 @@ export class ComputerRuntime {
     this.services.register('resonance-bus', { provider: this.resonance, contract: 'publishOwner/registerAgent/snapshot' });
     this.services.register('synthia-resident', { provider: this.synthia, contract: 'observe/recordReply/teach/runTool/graph' });
     this.services.register('kimi-donor-evidence', { provider: this.donorIntegration, contract: 'receive/events/status' });
+    this.services.register('grounded-dialogue', { provider: this.groundedDialogue, contract: 'respond' });
     if (!this.agents.has('synthia-resident')) this.agents.register('synthia-resident', { role: 'local-reasoning-resident', model: 'online-neural+Klein-dual-graph' });
     if (!this.capabilityRegistry.has('synthia-context')) this.capabilities.register('synthia-context', { providers: ['computer:synthia-resident'] });
     if (!this.capabilityRegistry.has('resonance-routing')) this.capabilities.register('resonance-routing', { providers: ['computer'] });
