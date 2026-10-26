@@ -159,10 +159,10 @@ export function mountPlayableWorld(root = document) {
     status.textContent = form + ' · ' + player.position.x.toFixed(1) + ', ' + player.position.z.toFixed(1) + ' · ' + (near ? 'Near ' + near.name : 'Explore the habitat');
     canvas.style.setProperty('--form-accent', FORM_COLORS[state.formIndex]);
   }
-  function save() {
+  function save(quiet = false) {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(recordSnapshot(world, state.formIndex, state.companion, state.following)));
-      receipt.textContent = 'Saved locally on this device.';
+      if (!quiet) receipt.textContent = 'Saved locally on this device.';
       return true;
     } catch (error) { receipt.textContent = 'Could not save locally: ' + error.message; return false; }
   }
@@ -186,7 +186,7 @@ export function mountPlayableWorld(root = document) {
   button('btn-form', () => { state.formIndex = nextForm(state.formIndex); updateUi(); receipt.textContent = 'Avatar form changed to ' + FORM_NAMES[state.formIndex] + '.'; save(); });
   button('btn-companion', () => { state.companion = !state.companion; updateUi(); save(); });
   button('btn-follow', () => { state.following = !state.following; updateUi(); save(); });
-  button('btn-save', save);
+  button('btn-save', () => save());
   button('btn-interact', interact);
   button('btn-morph-prop', morphObject);
   button('btn-reset', () => {
@@ -219,6 +219,7 @@ export function mountPlayableWorld(root = document) {
   });
   function frame(timestamp) {
     if (!running) return;
+    if (!visible || document.hidden) { previousTime = 0; raf = requestAnimationFrame(frame); return; }
     const dt = previousTime ? Math.min(.05, Math.max(0, (timestamp - previousTime) / 1000)) : 0;
     previousTime = timestamp;
     const keys = { left: state.keys.has('left'), right: state.keys.has('right'), up: state.keys.has('up'), down: state.keys.has('down') };
@@ -240,15 +241,15 @@ export function mountPlayableWorld(root = document) {
       paintCompanion(time);
     }
     if (timestamp - lastInfo > 320) { updateUi(); lastInfo = timestamp; }
-    if (timestamp - lastSave > 15000) { save(); lastSave = timestamp; }
+    if (timestamp - lastSave > 15000) { save(true); lastSave = timestamp; }
     raf = requestAnimationFrame(frame);
   }
   if ('IntersectionObserver' in window) {
     const observer = new IntersectionObserver(entries => { visible = entries.some(entry => entry.isIntersecting); }, { threshold: 0 });
     observer.observe(canvas);
   }
-  document.addEventListener('visibilitychange', () => { if (document.hidden) { state.keys.clear(); save(); previousTime = 0; } });
-  window.addEventListener('pagehide', save);
+  document.addEventListener('visibilitychange', () => { if (document.hidden) { state.keys.clear(); save(true); previousTime = 0; } });
+  window.addEventListener('pagehide', () => save(true));
   updateUi();
   raf = requestAnimationFrame(frame);
   return { world, state, save, refresh: updateUi, morphObject, interact, dispose() { running = false; cancelAnimationFrame(raf); resizeObserver?.disconnect(); window.removeEventListener('resize', resize); document.removeEventListener('keydown', keyDown); document.removeEventListener('keyup', keyUp); } };
