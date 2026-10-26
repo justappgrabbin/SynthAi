@@ -29,6 +29,7 @@ export default function ModelMaker() {
   const [ownerToken, setOwnerToken] = useState('');
   const [analysis, setAnalysis] = useState<Data | null>(null);
   const [generated, setGenerated] = useState<Data | null>(null);
+  const [memory, setMemory] = useState<Data | null>(null);
   const [notice, setNotice] = useState('');
   const [busy, setBusy] = useState(false);
 
@@ -54,6 +55,18 @@ export default function ModelMaker() {
         setGenerated(null);
         if (saved.model) setStatus(saved.model);
       }
+    } catch (error) {
+      setNotice(error instanceof Error ? error.message : String(error));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function recall() {
+    setBusy(true);
+    setNotice('');
+    try {
+      setMemory(await request('/remember?q=' + encodeURIComponent(prompt), undefined, ownerToken));
     } catch (error) {
       setNotice(error instanceof Error ? error.message : String(error));
     } finally {
@@ -146,6 +159,14 @@ export default function ModelMaker() {
                 disabled={busy || !answer.trim() || !ownerToken} onClick={() => void execute('approve')}>Approve & learn</button>
               <button style={btn} disabled={busy || !answer.trim() || !ownerToken}
                 onClick={() => void execute('reject')}>Reject example</button>
+              <button style={btn} disabled={busy || !ownerToken}
+                onClick={() => void recall()}>Recall saved memory</button>
+            </div>
+            {memory && <div className="rounded-xl p-3 mt-3" style={{ background: 'var(--bg-titlebar)' }}>
+              <strong style={{ fontSize: 13 }}>Persistent source-attributed memory</strong>
+              <pre className="whitespace-pre-wrap break-words mt-2" style={{ fontSize: 11 }}>
+                {JSON.stringify(memory, null, 2)}
+              </pre>
             </div>
           </div>
         </section>
