@@ -1,5 +1,6 @@
 
-[gd_scene load_steps=5 format=3]
+[gd_scene load_steps=6 format=3]
+[ext_resource type="Script" path="res://Scripts/Visual/WorldPresentation.gd" id=4]
 
 [ext_resource type="Script" path="res://Scripts/Systems/World.gd" id=1]
 [ext_resource type="PackedScene" path="res://Scenes/Agents/Cynthia.tscn" id=2]
@@ -26,3 +27,6 @@ mesh = SubResource( 1 )
 [node name="Props" type="Node3D" parent="."]
 
 [node name="Cynthia" parent="." instance=ExtResource( 2 )]
+
+[node name="WorldPresentation" type="Node3D" parent="."]
+script = ExtResource( 4 )
