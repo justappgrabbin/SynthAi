@@ -25,4 +25,9 @@ jobs:
         with:
           node-version: '20'
       - name: Run local Synthia / Computer acceptance tests
-        run: node --test computer/tests/synthia-resident.test.mjs computer/tests/kimi-donor-evidence.test.mjs computer/tests/grounded-dialogue.test.mjs computer/tests/runtime.test.mjs computer/tests/reassembly-ingest-e2e.test.mjs
+        run: node --test computer/tests/synthia-resident.test.mjs computer/tests/kimi-donor-evidence.test.mjs computer/tests/grounded-dialogue.test.mjs computer/tests/local-language-learner.test.mjs computer/tests/runtime.test.mjs computer/tests/reassembly-ingest-e2e.test.mjs
+
+      - name: Install desktop build dependencies
+        run: npm --prefix computer/shell/kimi-linux ci --no-audit --no-fund
+      - name: Typecheck and bundle real Computer desktop
+        run: npm --prefix computer/shell/kimi-linux run build
