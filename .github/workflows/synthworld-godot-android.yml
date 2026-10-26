@@ -46,7 +46,10 @@ jobs:
           # Never overwrite the user's separately signed installed app.
           sed -i 's/com\.synthworld\.app/com.synthworld.rigpreview/g' "$PROJECT/export_presets.cfg"
           mkdir -p dist
-          godot --headless --path "$PROJECT" --export-debug 'Android' "$GITHUB_WORKSPACE/dist/SynthWorld-rigpreview-debug.apk"
+          # The CI container stores Android templates and SDK settings under /root,
+          # while GitHub Actions sets HOME=/github/home for its job runner.
+          test -f /root/.local/share/godot/export_templates/4.6.3.stable/android_debug.apk
+          HOME=/root godot --headless --path "$PROJECT" --export-debug 'Android' "$GITHUB_WORKSPACE/dist/SynthWorld-rigpreview-debug.apk"
           test -s dist/SynthWorld-rigpreview-debug.apk
           unzip -t dist/SynthWorld-rigpreview-debug.apk | tail -n 2
       - name: Upload phone-installable preview APK (procedural rig only)
