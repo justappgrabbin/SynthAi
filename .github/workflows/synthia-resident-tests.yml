@@ -25,3 +25,5 @@ jobs:
           node-version: '20'
       - name: Run local Synthia / Computer acceptance tests
         run: node --test computer/tests/synthia-resident.test.mjs computer/tests/runtime.test.mjs computer/tests/reassembly-ingest-e2e.test.mjs computer/tests/living-world.test.mjs
+      - name: Build Kimi Computer shell with Living World
+        run: npm --prefix computer/shell/kimi-linux ci && npm --prefix computer/shell/kimi-linux run build
