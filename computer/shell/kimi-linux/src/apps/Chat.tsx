@@ -323,7 +323,7 @@ export default function Chat() {
                         </span>
                       )}
                       {!isSent && msg.turnId && (
-                        <button onClick={() => { setTeachingTurnId(msg.turnId!); setCorrectionText(msg.content); setLearningStatus(''); }}
+                        <button onClick={() => { setTeachingTurnId(msg.turnId!); setCorrectionText(''); setLearningStatus(''); }}
                           style={{ alignSelf:'flex-start', fontSize:11, color:'var(--accent-primary)', paddingTop:5 }}>
                           Improve reply
                         </button>
@@ -345,7 +345,7 @@ export default function Chat() {
           <div className="px-3 py-2 flex flex-col gap-2" style={{ background:'var(--bg-titlebar)',borderTop:'1px solid var(--border-default)' }}>
             <div style={{fontSize:12,color:'var(--text-primary)'}}>Teach from your correction · not automatic learning</div>
             <textarea value={correctionText} onChange={e => setCorrectionText(e.target.value)}
-              maxLength={1600} rows={3} aria-label="Corrected Synthia response"
+              maxLength={1600} rows={3} aria-label="Corrected Synthia response" placeholder="Write the better answer you want Synthia to learn"
               style={{background:'var(--bg-input)',color:'var(--text-primary)',border:'1px solid var(--border-default)',padding:8,borderRadius:8}} />
             <div className="flex gap-2">
               <button onClick={teachResponse} disabled={savingCorrection || correctionText.trim().length < 4}
