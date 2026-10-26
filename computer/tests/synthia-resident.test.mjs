@@ -80,3 +80,25 @@ test('existing Morph Chat produces grounded text through the installed resident'
   assert.equal(response.resident.toolEvidence.diseminer, 'executed');
   assert.ok(computer.synthia.graph().semanticSpacetime.edges.some(e => e.type === 'responds-to'));
 });
+
+
+test('Hello Synthia is received by the actual Computer resident and answered through the real donor', async () => {
+  const { ConversationExecution } = await import('../services/conversation-execution.mjs');
+  const computer = await new ComputerRuntime().boot();
+  const conversation = new ConversationExecution(computer);
+  const hello = 'Hello Synthia. I would like to talk with you.';
+  const response = await conversation.talk(hello);
+  assert.equal(response.input, hello);
+  assert.equal(typeof response.text, 'string');
+  assert.ok(response.text.trim().length > 0);
+  assert.ok(response.resident?.readingId?.startsWith('utterance:'));
+  assert.ok(response.resident?.id?.startsWith('response:'));
+  console.log('SYNTHIA_VERIFIED_HELLO', JSON.stringify({
+    input: response.input,
+    reply: response.text,
+    provider: response.provider,
+    readingId: response.resident.readingId,
+    replyReceipt: response.resident.id,
+    evidence: response.resident.toolEvidence,
+  }));
+});
