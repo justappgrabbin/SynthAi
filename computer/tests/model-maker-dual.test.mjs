@@ -64,6 +64,10 @@ test('owner-approved training grows language patterns and memory persists across
   assert.equal(model.status().examples, 3);
   assert.equal(model.status().retainedRecords, 4);
   assert.equal(resident.inference.examples, 4);
+  const recalled = model.memory.recall('preserve original files');
+  assert.equal(recalled.total, 4);
+  assert.ok(recalled.records.some(item => item.accepted && item.response.includes('copy')));
+  assert.ok(recalled.records.every(item => item.epistemic === 'owner-training-example'));
   assert.equal((await model.language.generate('How can I preserve my original files?')).ready, true);
 });
 
