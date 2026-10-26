@@ -14,6 +14,8 @@ interface Message {
   content: string;
   timestamp: number;
   type: 'text';
+  provider?: string;
+  answerKind?: string;
 }
 
 interface Conversation {
@@ -95,10 +97,10 @@ export default function Chat() {
     fetch('/api/history').then(async (response) => {
       if (!response.ok) throw new Error(`History unavailable (${response.status})`);
       return response.json();
-    }).then((items: { id: string; at: string; input: string; text: string }[]) => {
+    }).then((items: { id: string; at: string; input: string; text: string; provider?: string; answerKind?: string }[]) => {
       const messages: Message[] = items.flatMap((item) => [
         { id: `${item.id}-user`, senderId: 'user', content: item.input, timestamp: Date.parse(item.at), type: 'text' as const },
-        { id: `${item.id}-bot`, senderId: 'bot', content: item.text, timestamp: Date.parse(item.at), type: 'text' as const },
+        { id: `${item.id}-bot`, senderId: 'bot', content: item.text, timestamp: Date.parse(item.at), type: 'text' as const, provider: item.provider, answerKind: item.answerKind },
       ]);
       setConversations([{ ...createInitialConversations()[0], messages }]);
     }).catch((error) => {
@@ -124,7 +126,7 @@ export default function Chat() {
       const res = await fetch('/api/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ text }) });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || `Chat failed (${res.status})`);
-      const reply: Message = { id: data.id, senderId: 'bot', content: data.text, timestamp: Date.parse(data.at), type: 'text' };
+      const reply: Message = { id: data.id, senderId: 'bot', content: data.text, timestamp: Date.parse(data.at), type: 'text', provider: data.provider, answerKind: data.answerKind };
       setConversations((prev) => prev.map((c) => c.id === activeConvId ? { ...c, messages: [...c.messages, reply] } : c));
     } catch (error) {
       const failure: Message = { id: crypto.randomUUID(), senderId: 'bot', content: `The local conversation path failed: ${String(error)}`, timestamp: Date.now(), type: 'text' };
@@ -292,6 +294,11 @@ export default function Chat() {
                       >
                         {msg.content}
                       </div>
+                      {!isSent && msg.provider && (
+                        <span style={{ color: 'var(--text-secondary)', fontSize: '10px', marginTop: 4 }} title={msg.provider}>
+                          {msg.answerKind === 'legacy-pattern-realization' ? 'Pattern-based language · not an LLM' : 'Computer evidence · ' + (msg.answerKind ?? 'observation')}
+                        </span>
+                      )}
                       <span className={`mt-0.5 ${isSent ? 'text-right' : 'text-left'}`} style={{ fontSize: '10px', color: 'var(--text-disabled)', opacity: 0.7 }}>
                         {formatTime(msg.timestamp)}
                       </span>
