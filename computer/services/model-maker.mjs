@@ -56,6 +56,7 @@ export class DualInterfaceModel {
       generate: (text, options) => this.generate(text, options),
       teach: example => this.teach(example),
     });
+    this.memory = Object.freeze({ recall: (query, options) => this.recall(query, options) });
   }
   #increment(table, context, next, weight = 1) {
     if (!table.has(context)) table.set(context, new Map());
@@ -92,6 +93,18 @@ export class DualInterfaceModel {
       semanticTools: ['autoling', 'diseminer'], examples: this.examples,
       revisions: this.revision, retainedRecords: this.records.length,
       distinctContexts: this.transitions.size, persistent: true };
+  }
+  recall(query, { limit = 5 } = {}) {
+    if (typeof query !== 'string' || query.length > 12000) throw new TypeError('Bounded recall query required');
+    const take = Math.min(20, Math.max(1, Math.trunc(limit)));
+    const results = this.records
+      .map(r => ({ entry: r, similarity: overlap(query, r.prompt) }))
+      .filter(x => query.trim() === '' || x.similarity > 0)
+      .sort((a, b) => b.similarity - a.similarity || b.entry.id.localeCompare(a.entry.id))
+      .slice(0, take)
+      .map(x => ({ ...safeCopy(x.entry), similarity: x.similarity }));
+    return { modelId: this.id, revision: this.revision, total: this.records.length,
+      provenance: 'owner-training-ledger', records: results };
   }
   async read(text, { reading = null } = {}) {
     if (typeof text !== 'string' || !text.trim() || text.length > 12000)
