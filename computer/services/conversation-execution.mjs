@@ -21,6 +21,10 @@ export class ConversationExecution {
     if (!text) throw new TypeError('A message is required.');
     if (text.length > 12000) throw new RangeError('Message exceeds 12,000 characters.');
 
+    // Synthia's two graphs read the same situated message before any reply.
+    // The semantic side stores speaker reports as reports, not verified facts.
+    const residentReading = await this.computer.synthia.observe(text);
+
     // The original Morph Chat invokes AutoLing + DISEMINER through its tool
     // bridge, resolves the semantic mesh, then realizes readable language.
     const donor = await this.computer.automataGateway.talk(text);
@@ -49,13 +53,20 @@ export class ConversationExecution {
     };
     const history = this.computer.state.get('computer.chat.history', []);
     await this.computer.state.set('computer.chat.history', [...history, item].slice(-120), { source: 'conversation' });
+    const residentReceipt = await this.computer.synthia.recordReply(residentReading, {
+      text: responseText, provider: donor.assistant?.provider ?? 'local-morph',
+    });
     const event = await this.computer.emitEvent({
       actor_id: 'user:local', actor_type: 'user', target_id: 'synthia', event_type: 'message',
       input: text, event_address: item.address, provider: 'donor:morph-chat+execution-spine',
       result: { text: item.text, focus: item.focus, intent: item.intent, learningRecord: item.learningRecord },
       result_status: 'success', observable_effect: 'readable reply and persistent conversation record',
     });
-    return { ...item, eventId: event.event_id };
+    return { ...item, eventId: event.event_id,
+      resident: { id: residentReceipt.id, readingId: residentReading.id,
+        learnedInference: residentReading.intent.chosen,
+        provisionalClaims: residentReading.candidateClaims.length,
+        toolEvidence: residentReading.toolEvidence } };
   }
 
   history() { return this.computer.state.get('computer.chat.history', []); }

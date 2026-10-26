@@ -1,0 +1,26 @@
+name: Synthia resident Node acceptance
+on:
+  push:
+    branches:
+      - integration/synthia-resident-dual-graph-20261025
+    paths:
+      - 'computer/**'
+      - '.github/workflows/synthia-resident-tests.yml'
+  pull_request:
+    paths:
+      - 'computer/**'
+      - '.github/workflows/synthia-resident-tests.yml'
+  workflow_dispatch:
+jobs:
+  resident:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Run local Synthia / Computer acceptance tests
+        run: node --test computer/tests/synthia-resident.test.mjs computer/tests/runtime.test.mjs computer/tests/reassembly-ingest-e2e.test.mjs

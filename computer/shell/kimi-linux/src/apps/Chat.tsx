@@ -14,6 +14,8 @@ interface Message {
   content: string;
   timestamp: number;
   type: 'text';
+  source?: string;
+  residentReceipt?: string;
 }
 
 interface Conversation {
@@ -50,7 +52,7 @@ const EmojiPicker = memo(function EmojiPicker({ onSelect, onClose }: { onSelect:
 
 // The original Kimi layout is retained. The Computer owns the conversation.
 const createInitialConversations = (): Conversation[] => [
-  { id: 'bot', name: 'Synthia', avatar: 'bot', status: 'online', isBot: true, messages: [] },
+  { id: 'bot', name: 'Synthia', avatar: 'bot', status: 'offline', isBot: true, messages: [] },
 ];
 
 // ---- Typing Indicator ----
@@ -87,6 +89,31 @@ export default function Chat() {
   const [isTyping, setIsTyping] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [showNewChat, setShowNewChat] = useState(false);
+  const [residentStatus, setResidentStatus] = useState<'checking' | 'connected' | 'unavailable'>('checking');
+  const [residentDetails, setResidentDetails] = useState<{ graphs: string[]; trainingExamples: number } | null>(null);
+
+  // Never mark Synthia online unless the resident itself answers the health check.
+  const verifyResident = useCallback(async () => {
+    setResidentStatus('checking');
+    try {
+      const response = await fetch('/api/synthia/status', { cache: 'no-store' });
+      if (!response.ok) throw new Error('Synthia resident not reachable');
+      const data = await response.json();
+      if (data?.id !== 'synthia-resident' || data?.role !== 'computer-resident' ||
+          !Array.isArray(data?.graphs) || !data.graphs.includes('klein-semantic-spacetime')) {
+        throw new Error('Unexpected resident identity');
+      }
+      setResidentDetails({ graphs: data.graphs, trainingExamples: Number(data.trainingExamples) || 0 });
+      setResidentStatus('connected');
+      setConversations((prev) => prev.map((c) => c.id === 'bot' ? { ...c, status: 'online' } : c));
+    } catch {
+      setResidentDetails(null);
+      setResidentStatus('unavailable');
+      setConversations((prev) => prev.map((c) => c.id === 'bot' ? { ...c, status: 'offline' } : c));
+    }
+  }, []);
+
+  useEffect(() => { void verifyResident(); }, [verifyResident]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const activeConv = conversations.find((c) => c.id === activeConvId) || conversations[0];
@@ -100,9 +127,9 @@ export default function Chat() {
         { id: `${item.id}-user`, senderId: 'user', content: item.input, timestamp: Date.parse(item.at), type: 'text' as const },
         { id: `${item.id}-bot`, senderId: 'bot', content: item.text, timestamp: Date.parse(item.at), type: 'text' as const },
       ]);
-      setConversations([{ ...createInitialConversations()[0], messages }]);
+      setConversations((prev) => [{ ...prev[0], messages }]);
     }).catch((error) => {
-      setConversations([{ ...createInitialConversations()[0], messages: [
+      setConversations((prev) => [{ ...prev[0], messages: [
         { id: 'connection-error', senderId: 'bot', content: String(error), timestamp: Date.now(), type: 'text' },
       ] }]);
     });
@@ -115,7 +142,7 @@ export default function Chat() {
 
   const sendMessage = useCallback(async () => {
     const text = inputText.trim();
-    if (!text || isTyping) return;
+    if (!text || isTyping || residentStatus !== 'connected') return;
     const newMessage: Message = { id: crypto.randomUUID(), senderId: 'user', content: text, timestamp: Date.now(), type: 'text' };
     setConversations((prev) => prev.map((c) => c.id === activeConvId ? { ...c, messages: [...c.messages, newMessage] } : c));
     setInputText('');
@@ -124,13 +151,20 @@ export default function Chat() {
       const res = await fetch('/api/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ text }) });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || `Chat failed (${res.status})`);
-      const reply: Message = { id: data.id, senderId: 'bot', content: data.text, timestamp: Date.parse(data.at), type: 'text' };
+      if (!data?.resident?.readingId || !data?.resident?.id) {
+        throw new Error('Computer replied without a verified Synthia resident receipt.');
+      }
+      const source = data.provider === 'local-morph'
+        ? (data.intent === 'greeting' ? 'Prewritten greeting from local Morph provider' : 'Rule-based reply from local Morph provider')
+        : `Reply provider: ${String(data.provider ?? 'unidentified')}`;
+      const reply: Message = { id: data.id, senderId: 'bot', content: data.text,
+        timestamp: Date.parse(data.at), type: 'text', source, residentReceipt: data.resident.readingId };
       setConversations((prev) => prev.map((c) => c.id === activeConvId ? { ...c, messages: [...c.messages, reply] } : c));
     } catch (error) {
       const failure: Message = { id: crypto.randomUUID(), senderId: 'bot', content: `The local conversation path failed: ${String(error)}`, timestamp: Date.now(), type: 'text' };
       setConversations((prev) => prev.map((c) => c.id === activeConvId ? { ...c, messages: [...c.messages, failure] } : c));
     } finally { setIsTyping(false); }
-  }, [inputText, activeConvId, isTyping]);
+  }, [inputText, activeConvId, isTyping, residentStatus]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
@@ -257,11 +291,22 @@ export default function Chat() {
               <div className="flex items-center gap-1">
                 <Circle size={8} fill={activeConv.status === 'online' ? 'var(--accent-success)' : activeConv.status === 'away' ? 'var(--accent-warning)' : 'var(--text-disabled)'} style={{ color: 'transparent' }} />
                 <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>
-                  {activeConv.status === 'online' ? 'Online' : activeConv.status === 'away' ? 'Away' : 'Offline'}
+                  {residentStatus === 'connected' ? 'Resident connected' : residentStatus === 'checking' ? 'Checking resident…' : 'Resident unavailable'}
                 </span>
               </div>
             </div>
           </div>
+        </div>
+
+        {/* Status is verified against Synthia Resident; replies are authored by Morph/Klein. */}
+        <div role="status" className="flex items-center justify-between gap-2 px-4 py-2 text-xs" style={{ borderBottom: '1px solid var(--border-subtle)', color: 'var(--text-secondary)' }}>
+          <span>
+            {residentStatus === 'connected' && residentDetails
+              ? `Resident verified · ${residentDetails.graphs.length} graphs · ${residentDetails.trainingExamples} supervised examples · Replies: Morph rules (greetings are prewritten)`
+              : residentStatus === 'checking' ? 'Verifying Synthia in this Computer…'
+              : 'Synthia is unavailable. No simulated reply will be shown.'}
+          </span>
+          <button type="button" onClick={() => void verifyResident()} style={{ color: 'var(--accent-primary)', flexShrink: 0 }}>Check</button>
         </div>
 
         {/* Messages */}
@@ -292,6 +337,11 @@ export default function Chat() {
                       >
                         {msg.content}
                       </div>
+                      {!isSent && msg.source && (
+                        <span style={{ color: 'var(--text-secondary)', fontSize: '10px', marginTop: 4 }}>
+                          {msg.source}{msg.residentReceipt ? ` · Resident observed: ${msg.residentReceipt}` : ''}
+                        </span>
+                      )}
                       <span className={`mt-0.5 ${isSent ? 'text-right' : 'text-left'}`} style={{ fontSize: '10px', color: 'var(--text-disabled)', opacity: 0.7 }}>
                         {formatTime(msg.timestamp)}
                       </span>
@@ -315,6 +365,7 @@ export default function Chat() {
             <Smile size={18} style={{ color: 'var(--text-secondary)' }} />
           </button>
           {showEmoji && <EmojiPicker onSelect={addEmoji} onClose={() => setShowEmoji(false)} />}
+          {activeConv.messages.length === 0 && <button type="button" onClick={() => setInputText('Hello Synthia. I would like to talk with you.')} disabled={residentStatus !== 'connected'} style={{ fontSize: 12, color: 'var(--accent-primary)', opacity: residentStatus === 'connected' ? 1 : 0.5 }}>Say hello</button>}
           <input
             type="text"
             value={inputText}
@@ -329,7 +380,7 @@ export default function Chat() {
           />
           <button
             onClick={sendMessage}
-            disabled={!inputText.trim()}
+            disabled={!inputText.trim() || isTyping || residentStatus !== 'connected'}
             className="flex items-center justify-center rounded-full transition-all hover:opacity-90"
             style={{
               width: 36, height: 36,
