@@ -40,10 +40,12 @@ export class ConversationExecution {
     const grounded = this.computer.groundedDialogue.respond(text, {
       currentReadingId: residentReading.id,
     });
-    const responseText = grounded?.text ?? donor.text;
-    const answerKind = grounded?.kind ?? 'legacy-pattern-realization';
-    const replyProvider = grounded?.provider ?? 'donor:legacy-morph-patterns';
-    const evidence = grounded?.evidence ?? [];
+    const trained = grounded ? null : this.computer.languageLearner.infer(text);
+    const selected = grounded ?? trained;
+    const responseText = selected?.text ?? donor.text;
+    const answerKind = selected?.kind ?? 'legacy-pattern-realization';
+    const replyProvider = selected?.provider ?? 'donor:legacy-morph-patterns';
+    const evidence = selected?.evidence ?? [];
     const item = {
       id: crypto.randomUUID(), at: new Date().toISOString(), input: text,
       text: responseText, address: donor.runtime?.address ?? null,
@@ -75,6 +77,19 @@ export class ConversationExecution {
   }
 
   history() { return this.computer.state.get('computer.chat.history', []); }
+
+  /** Explicit local reply correction: trains token transitions, not verified facts. */
+  async teachLanguage({ turnId, answer } = {}) {
+    const result = await this.computer.languageLearner.teach({ turnId, answer });
+    await this.computer.emitEvent({
+      actor_id:'user:local', actor_type:'user', target_id:'synthia-resident',
+      event_type:'observation', provider:'computer:local-sequence-learner',
+      input:{turnId}, result:{model:result.model.model, trainedExamples:result.model.trainedExamples},
+      result_status:'success', observable_effect:'explicit reply correction stored as local training example',
+      evidence:{type:'user-submitted-correction', factsVerified:false},
+    });
+    return result;
+  }
 
   async executeArtifact({ name, type, content }) {
     if (!name || typeof content !== 'string') throw new TypeError('Artifact name and text content are required.');
