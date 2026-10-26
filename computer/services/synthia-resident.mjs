@@ -1,3 +1,4 @@
+import { ModelMaker } from './model-maker.mjs';
 /**
  * Synthia Resident: an online neural-inference graph beside the existing
  * Klein / Semantic Spacetime graph. NOT a language model.
@@ -146,6 +147,8 @@ export class SynthiaResident {
     this.diseminer = new DiseminerEngine();
     this.autonovel = new AutonovelAutomaton();
     this.inference = new NeuralInferenceGraph();
+    this.modelMaker = new ModelMaker({ state: this.state, resident: this });
+    this.languageModel = this.modelMaker.create({ id: 'synthia-language' });
     this.spacetime = new SemanticSpacetimeGraph();
     this.workspace = { episodes: [], feedback: [], observations: [] };
     this.started = false;
@@ -238,7 +241,8 @@ export class SynthiaResident {
     return { id: 'synthia-resident', role: 'computer-resident', model: 'small-online-neural-graph',
       llm: false, graphs: ['learned-inference', 'klein-semantic-spacetime'],
       tools: ['autoling', 'diseminer', 'autonovel'],
-      trainingExamples: this.inference.examples };
+      trainingExamples: this.inference.examples,
+      modelMaker: this.languageModel.status() };
   }
 }
 export default SynthiaResident;
