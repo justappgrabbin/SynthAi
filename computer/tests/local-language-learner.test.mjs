@@ -59,7 +59,7 @@ test('unapproved arbitrary user utterances cannot automatically train answer out
   };
   try {
     const computer=await new ComputerRuntime(config).boot();
-    await computer.synthia.observe('A book's secret machinery is actually a comet.');
+    await computer.synthia.observe("A book's secret machinery is actually a comet.");
     assert.equal(computer.languageLearner.status().trainedExamples,0);
     assert.equal(computer.languageLearner.infer('Explain the comet machinery'),null);
   } finally { await rm(config.eventLogPath,{force:true}); }
