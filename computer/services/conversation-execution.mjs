@@ -34,31 +34,38 @@ export class ConversationExecution {
     // The execution-spine donor owns a separate address-first learning/contact
     // loop. Its result is consumed as evidence, not substituted for the answer.
     const learned = await this.execution.chat(text);
-    let responseText = donor.text;
-    const imported = this.computer.vfs.list('/home/user/Imports/');
-    if (/\b(what|which|show|list)\b/i.test(text) && /\b(files?|imports?|uploaded)\b/i.test(text)) {
-      responseText = imported.length
-        ? `I have ${imported.length} imported file${imported.length === 1 ? '' : 's'} addressed in this computer:\n${imported.slice(-30).map((file) => `• ${file.path.replace('/home/user/Imports/', '')} — ${file.meta.address.dimension}, Gate ${file.meta.address.gate}`).join('\n')}`
-        : 'There are no imported files yet. Open Import and choose a file or ZIP.';
-    }
+    // A measured Computer capability or attributed source wins over an authored
+    // Morph Chat realization. The fallback remains accessible, but is explicitly
+    // labeled as pattern-based: linguistic processing is NOT an LLM.
+    const grounded = this.computer.groundedDialogue.respond(text, {
+      currentReadingId: residentReading.id,
+    });
+    const trained = grounded ? null : this.computer.languageLearner.infer(text);
+    const selected = grounded ?? trained;
+    const responseText = selected?.text ?? donor.text;
+    const answerKind = selected?.kind ?? 'legacy-pattern-realization';
+    const replyProvider = selected?.provider ?? 'donor:legacy-morph-patterns';
+    const evidence = selected?.evidence ?? [];
     const item = {
       id: crypto.randomUUID(), at: new Date().toISOString(), input: text,
       text: responseText, address: donor.runtime?.address ?? null,
       focus: donor.conversation.semantic.focus,
       intent: donor.conversation.semantic.intent,
       dimension: donor.conversation.semantic.dimension,
-      linguisticGrounded: true,
-      provider: donor.assistant?.provider ?? 'local-morph',
+      // A successful parser is not proof of grounded factual claims.
+      linguisticGrounded: Boolean(donor.conversation.semantic.linguisticGrounded),
+      answerKind, evidence, evidenceVerified: false, llm: false,
+      provider: replyProvider,
       learningRecord: learned.recordId,
     };
     const history = this.computer.state.get('computer.chat.history', []);
     await this.computer.state.set('computer.chat.history', [...history, item].slice(-120), { source: 'conversation' });
     const residentReceipt = await this.computer.synthia.recordReply(residentReading, {
-      text: responseText, provider: donor.assistant?.provider ?? 'local-morph',
+      text: responseText, provider: replyProvider,
     });
     const event = await this.computer.emitEvent({
       actor_id: 'user:local', actor_type: 'user', target_id: 'synthia', event_type: 'message',
-      input: text, event_address: item.address, provider: 'donor:morph-chat+execution-spine',
+      input: text, event_address: item.address, provider: replyProvider,
       result: { text: item.text, focus: item.focus, intent: item.intent, learningRecord: item.learningRecord },
       result_status: 'success', observable_effect: 'readable reply and persistent conversation record',
     });
@@ -70,6 +77,19 @@ export class ConversationExecution {
   }
 
   history() { return this.computer.state.get('computer.chat.history', []); }
+
+  /** Explicit local reply correction: trains token transitions, not verified facts. */
+  async teachLanguage({ turnId, answer } = {}) {
+    const result = await this.computer.languageLearner.teach({ turnId, answer });
+    await this.computer.emitEvent({
+      actor_id:'user:local', actor_type:'user', target_id:'synthia-resident',
+      event_type:'observation', provider:'computer:local-sequence-learner',
+      input:{turnId}, result:{model:result.model.model, trainedExamples:result.model.trainedExamples},
+      result_status:'success', observable_effect:'explicit reply correction stored as local training example',
+      evidence:{type:'user-submitted-correction', factsVerified:false},
+    });
+    return result;
+  }
 
   async executeArtifact({ name, type, content }) {
     if (!name || typeof content !== 'string') throw new TypeError('Artifact name and text content are required.');
