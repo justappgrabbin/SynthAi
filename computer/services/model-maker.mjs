@@ -63,13 +63,17 @@ export class DualInterfaceModel {
     const counts = table.get(context);
     counts.set(next, (counts.get(next) ?? 0) + weight);
   }
+  activeRecords() {
+    const latest = new Map();
+    for (const r of this.records) latest.set(key([r.prompt, r.response]), r);
+    return [...latest.values()].filter(r => r.accepted);
+  }
   #rebuild() {
     this.transitions.clear();
     this.starts.clear();
     this.capabilityStarts.clear();
     let pairs = 0;
-    for (const r of this.records.slice(-MAX_RECORDS)) {
-      if (!r.accepted) continue;
+    for (const r of this.activeRecords().slice(-MAX_RECORDS)) {
       const out = tokens(r.response).slice(0, MAX_RESPONSE_TOKENS);
       if (!out.length) continue;
       const first = out[0];
@@ -85,7 +89,7 @@ export class DualInterfaceModel {
       }
     }
   }
-  get examples() { return this.records.filter(r => r.accepted).length; }
+  get examples() { return this.activeRecords().length; }
   status() {
     return { id: this.id, type: 'dual-interface-language-model',
       pretrained: false, llm: false, languageArchitecture: 'learned conditional 2-gram + 3-gram decoder',
@@ -152,7 +156,7 @@ export class DualInterfaceModel {
   async generate(text, { reading = null, maxTokens = 72 } = {}) {
     const semantic = await this.read(text, { reading });
     const learnedCapability = semantic.inference?.chosen?.label ?? null;
-    const matching = this.records.slice(-MAX_RECORDS).filter(r => r.accepted)
+    const matching = this.activeRecords().slice(-MAX_RECORDS)
       .map(r => ({ r, relevance: overlap(text, r.prompt),
         neuralMatch: learnedCapability != null && r.capability === learnedCapability }))
       .sort((a, b) => b.relevance - a.relevance);
