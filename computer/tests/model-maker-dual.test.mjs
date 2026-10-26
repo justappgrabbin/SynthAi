@@ -71,6 +71,18 @@ test('owner-approved training grows language patterns and memory persists across
   assert.equal((await model.language.generate('How can I preserve my original files?')).ready, true);
 });
 
+test('a correction supersedes an earlier approved sample without deleting its history', async () => {
+  const state = persistence();
+  const resident = await new SynthiaResident({ state }).boot();
+  const model = resident.languageModel;
+  await model.language.teach({ prompt: 'Explain the vault', response: 'The vault stores originals.', accepted: true });
+  await model.language.teach({ prompt: 'Explain the vault', response: 'The vault stores originals.', accepted: false });
+  assert.equal(model.status().examples, 0);
+  assert.equal(model.memory.recall('vault').total, 2);
+  assert.equal(model.memory.recall('vault').records.some(item => item.accepted), true);
+  assert.equal((await model.language.generate('Explain the vault')).ready, false);
+});
+
 test('active Computer mounts Model Maker without claiming the model is pretrained', async () => {
   const computer = await new ComputerRuntime().boot();
   assert.equal(computer.synthia.languageModel.status().pretrained, false);
