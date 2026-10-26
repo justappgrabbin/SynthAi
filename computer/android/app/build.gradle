@@ -13,5 +13,8 @@ android {
     }
     externalNativeBuild { cmake { path 'CMakeLists.txt' } }
     sourceSets { main { jniLibs.srcDirs 'libnode/bin' } }
-    buildTypes { release { minifyEnabled false } }
+    buildTypes {
+      debug { applicationIdSuffix '.repair'; versionNameSuffix '-repair' }
+      release { minifyEnabled false }
+    }
 }
