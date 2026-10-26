@@ -7,6 +7,8 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.view.View;
+import android.webkit.RenderProcessGoneDetail;
+import android.util.Log;
 import android.view.WindowInsets;
 import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
@@ -24,7 +26,8 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 public final class MainActivity extends Activity {
-    static { System.loadLibrary("computer-node"); System.loadLibrary("node"); }
+    private static final String LOG_TAG = "SynthiaComputer";
+    private static volatile String startupFailure = null;
     private static final String ORIGIN = "http://127.0.0.1:8765";
     private static boolean nodeStarted = false;
     private final Handler handler = new Handler(Looper.getMainLooper());
@@ -61,6 +64,11 @@ public final class MainActivity extends Activity {
 
     private void startComputer() {
         try {
+            // Load in dependency order *inside* the guarded startup path. A missing
+            // or incompatible native library must show an error, not kill the UI
+            // during MainActivity class initialization.
+            System.loadLibrary("node");
+            System.loadLibrary("computer-node");
             android.content.pm.PackageInfo packageInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
             File runtime = new File(getFilesDir(), "runtime-" + packageInfo.versionCode + "-" + packageInfo.lastUpdateTime);
             File entry = new File(runtime, "mobile-entry.mjs");
@@ -73,9 +81,16 @@ public final class MainActivity extends Activity {
             File data = new File(getFilesDir(), "computer-data");
             if (!data.exists() && !data.mkdirs()) throw new IllegalStateException("Cannot create computer data directory");
             int exit = startNode(new String[]{"node", entry.getAbsolutePath(), data.getAbsolutePath()});
-            handler.post(() -> status.setText("Computer service exited: " + exit));
-        } catch (Exception error) {
-            handler.post(() -> status.setText("Computer startup failed: " + error));
+            startupFailure = "Computer service exited with code " + exit + ". Close and reopen the app to retry.";
+            Log.e(LOG_TAG, startupFailure);
+            handler.post(() -> showComputerError(startupFailure));
+        } catch (Throwable error) {
+            // LinkageError (e.g. incompatible ABI/page size) is NOT an Exception.
+            // Android previously loaded these libraries in a static initializer,
+            // where this error could terminate the Activity immediately.
+            startupFailure = "Computer startup failed: " + error;
+            Log.e(LOG_TAG, startupFailure, error);
+            handler.post(() -> showComputerError(startupFailure));
         }
     }
 
@@ -102,7 +117,7 @@ public final class MainActivity extends Activity {
     }
 
     private void waitForComputer(int attempt) {
-        if (isFinishing() || browser != null) return;
+        if (isFinishing() || browser != null || startupFailure != null) return;
         new Thread(() -> {
             boolean ready = false;
             try {
@@ -114,11 +129,23 @@ public final class MainActivity extends Activity {
             } catch (Exception ignored) { }
             final boolean available = ready;
             handler.post(() -> {
-                if (available) openDesktop();
+                if (startupFailure != null) showComputerError(startupFailure);
+                else if (available) openDesktop();
                 else if (attempt < 60) handler.postDelayed(() -> waitForComputer(attempt + 1), 500);
                 else status.setText("The local computer did not start. Restart Synthia to retry.");
             });
         }, "computer-health-check").start();
+    }
+
+    private void showComputerError(String message) {
+        if (root == null) return;
+        if (browser != null) {
+            root.removeView(browser);
+            browser.destroy();
+            browser = null;
+        }
+        if (status.getParent() == null) root.addView(status);
+        status.setText(message);
     }
 
     private void openDesktop() {
@@ -129,6 +156,12 @@ public final class MainActivity extends Activity {
         browser.getSettings().setDomStorageEnabled(true);
         browser.getSettings().setAllowFileAccess(false);
         browser.setWebViewClient(new WebViewClient() {
+            @Override public boolean onRenderProcessGone(WebView view, RenderProcessGoneDetail detail) {
+                String problem = "Android WebView stopped (" + (detail.didCrash() ? "crashed" : "killed by system") + "). Close and reopen Synthia to retry.";
+                Log.e(LOG_TAG, problem);
+                handler.post(() -> showComputerError(problem));
+                return true;
+            }
             @Override public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
                 Uri uri = request.getUrl();
                 return !("http".equals(uri.getScheme()) && "127.0.0.1".equals(uri.getHost()) && uri.getPort() == 8765);
