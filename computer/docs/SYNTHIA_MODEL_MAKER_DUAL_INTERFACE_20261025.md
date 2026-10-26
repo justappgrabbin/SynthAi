@@ -20,6 +20,7 @@ The launcher's Model Maker app provides Understand and Speak & Learn panels. Eve
 GET /api/synthia/model gives sanitized model status.
 POST /api/synthia/model/semantic with {"text":"..."} calls canonical semantic tools.
 POST /api/synthia/model/generate with {"text":"..."} generates from owner-trained language data or returns NOT READY.
+GET /api/synthia/model/remember?q=... retrieves the full source-attributed training ledger, owner token required. Corrections supersede previous approvals for inference without deleting prior records.
 POST /api/synthia/model/teach with {"prompt":"...","response":"...","accepted":true,"capability":"language-response"} requires X-Synthia-Owner-Token matching SYNTHIA_OWNER_TOKEN environment variable, length at least 32. No token means no public teaching.
 
 Example on a trusted local computer (keep the printed token private):
