@@ -167,7 +167,7 @@ export default function ModelMaker() {
               <pre className="whitespace-pre-wrap break-words mt-2" style={{ fontSize: 11 }}>
                 {JSON.stringify(memory, null, 2)}
               </pre>
-            </div>
+            </div>}
           </div>
         </section>
       )}
