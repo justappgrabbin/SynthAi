@@ -136,6 +136,13 @@ const server = createServer(async (req, res) => {
         const request = await body(req);
         return json(res, 200, await computer.synthia.languageModel.language.generate(request.text));
       }
+      // Private training memory is available only to the owner, never through status.
+      if (req.method === 'GET' && url.pathname === '/api/synthia/model/remember') {
+        if (!ownerApproved(req)) return json(res, 403, { error: 'Owner memory authorization required.' });
+        return json(res, 200, computer.synthia.languageModel.memory.recall(
+          url.searchParams.get('q') ?? '', { limit: Number(url.searchParams.get('limit') ?? 5) }));
+      }
+
       if (req.method === 'POST' && url.pathname === '/api/synthia/model/teach') {
         if (!ownerApproved(req)) return json(res, 403, { error: 'Owner training authorization required and must be configured locally.' });
         const request = await body(req);
