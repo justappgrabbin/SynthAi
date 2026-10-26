@@ -7,6 +7,7 @@ var skeleton: Skeleton3D
 var avatar: Node3D
 var _time: float = 0.0
 var _skin: String = "violet"
+var imported_skin_rig: bool = false
 var _overlay: StandardMaterial3D
 const PALETTES := {
     "violet": Color(0.67, 0.35, 0.99, 0.19),
@@ -23,7 +24,9 @@ func _ready() -> void:
             if avatar != null:
                 add_child(avatar)
                 skeleton = _find_skeleton(avatar)
+                imported_skin_rig = skeleton != null
     if skeleton == null:
+        imported_skin_rig = false
         if avatar != null:
             avatar.queue_free()
         _build_skeletal_fallback()
@@ -34,7 +37,7 @@ func _ready() -> void:
     if construction != null:
         construction.visible = false
     apply_skin(_skin)
-    print("SYNTHWORLD_RIG_READY=", skeleton != null, " asset=", avatar != null)
+    print("SYNTHWORLD_RIG_READY=", skeleton != null, " donor_imported=", imported_skin_rig)
 func _find_skeleton(node: Node) -> Skeleton3D:
     if node is Skeleton3D:
         return node as Skeleton3D
