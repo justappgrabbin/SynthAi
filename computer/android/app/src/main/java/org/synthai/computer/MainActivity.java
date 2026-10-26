@@ -25,7 +25,7 @@ import java.util.zip.ZipInputStream;
 
 public final class MainActivity extends Activity {
     static { System.loadLibrary("computer-node"); System.loadLibrary("node"); }
-    private static final String ORIGIN = "http://127.0.0.1:8765";
+    private static final String ORIGIN = "http://127.0.0.1:6969";
     private static boolean nodeStarted = false;
     private final Handler handler = new Handler(Looper.getMainLooper());
     private FrameLayout root;
@@ -131,7 +131,7 @@ public final class MainActivity extends Activity {
         browser.setWebViewClient(new WebViewClient() {
             @Override public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
                 Uri uri = request.getUrl();
-                return !("http".equals(uri.getScheme()) && "127.0.0.1".equals(uri.getHost()) && uri.getPort() == 8765);
+                return !("http".equals(uri.getScheme()) && "127.0.0.1".equals(uri.getHost()) && uri.getPort() == 6969);
             }
         });
         browser.setWebChromeClient(new WebChromeClient() {
