@@ -14,6 +14,8 @@ interface Message {
   content: string;
   timestamp: number;
   type: 'text';
+  source?: string;
+  residentReceipt?: string;
 }
 
 interface Conversation {
@@ -152,7 +154,11 @@ export default function Chat() {
       if (!data?.resident?.readingId || !data?.resident?.id) {
         throw new Error('Computer replied without a verified Synthia resident receipt.');
       }
-      const reply: Message = { id: data.id, senderId: 'bot', content: data.text, timestamp: Date.parse(data.at), type: 'text' };
+      const source = data.provider === 'local-morph'
+        ? (data.intent === 'greeting' ? 'Prewritten greeting from local Morph provider' : 'Rule-based reply from local Morph provider')
+        : `Reply provider: ${String(data.provider ?? 'unidentified')}`;
+      const reply: Message = { id: data.id, senderId: 'bot', content: data.text,
+        timestamp: Date.parse(data.at), type: 'text', source, residentReceipt: data.resident.readingId };
       setConversations((prev) => prev.map((c) => c.id === activeConvId ? { ...c, messages: [...c.messages, reply] } : c));
     } catch (error) {
       const failure: Message = { id: crypto.randomUUID(), senderId: 'bot', content: `The local conversation path failed: ${String(error)}`, timestamp: Date.now(), type: 'text' };
@@ -296,7 +302,7 @@ export default function Chat() {
         <div role="status" className="flex items-center justify-between gap-2 px-4 py-2 text-xs" style={{ borderBottom: '1px solid var(--border-subtle)', color: 'var(--text-secondary)' }}>
           <span>
             {residentStatus === 'connected' && residentDetails
-              ? `Resident verified · ${residentDetails.graphs.length} graphs · ${residentDetails.trainingExamples} supervised examples · Replies: local Morph/Klein engine`
+              ? `Resident verified · ${residentDetails.graphs.length} graphs · ${residentDetails.trainingExamples} supervised examples · Replies: Morph rules (greetings are prewritten)`
               : residentStatus === 'checking' ? 'Verifying Synthia in this Computer…'
               : 'Synthia is unavailable. No simulated reply will be shown.'}
           </span>
@@ -331,6 +337,11 @@ export default function Chat() {
                       >
                         {msg.content}
                       </div>
+                      {!isSent && msg.source && (
+                        <span style={{ color: 'var(--text-secondary)', fontSize: '10px', marginTop: 4 }}>
+                          {msg.source}{msg.residentReceipt ? ` · Resident observed: ${msg.residentReceipt}` : ''}
+                        </span>
+                      )}
                       <span className={`mt-0.5 ${isSent ? 'text-right' : 'text-left'}`} style={{ fontSize: '10px', color: 'var(--text-disabled)', opacity: 0.7 }}>
                         {formatTime(msg.timestamp)}
                       </span>
