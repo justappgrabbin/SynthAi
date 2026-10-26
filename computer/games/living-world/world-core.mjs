@@ -4,6 +4,17 @@ export const W=18,H=14,VERSION=1;
 export const THEMES=['Grove','Starlight','Ember'];
 export const FORMS=['Human','Fox','Gnome','Robot','Orb','Cat'];
 export const ACTIONS=['Eat','Rest','Play','Socialize','Create','Wash'];
+export const BUILDABLES=[
+ {kind:'Snack stand',icon:'🍱',action:'Eat',cost:12},
+ {kind:'Rest nest',icon:'🏕️',action:'Rest',cost:12},
+ {kind:'Playhouse',icon:'🎲',action:'Play',cost:12},
+ {kind:'Meditation bench',icon:'🪑',action:'Rest',cost:12},
+ {kind:'Workshop',icon:'🔧',action:'Create',cost:12},
+ {kind:'Spa',icon:'🛁',action:'Wash',cost:12}
+];
+export const FORM_SKILLS={Human:'Social bonding +6',Fox:'Play +10; fast travel',Gnome:'Creative work +12',Robot:'Creative work +6; fast travel',Orb:'Rest +12',Cat:'Rest +8; play +5'};
+const BONUSES={Human:{Socialize:6},Fox:{Play:10},Gnome:{Create:12},Robot:{Create:6},Orb:{Rest:12},Cat:{Rest:8,Play:5}};
+const REALM_BONUSES={Grove:{Create:3},Starlight:{Play:4},Ember:{Socialize:4}};
 export const OBJECTS=[
  {id:'kitchen',kind:'Kitchen',x:4,y:4,icon:'🍲',action:'Eat',label:'Kitchen'},
  {id:'bed',kind:'Bed',x:2,y:3,icon:'🛏️',action:'Rest',label:'Dream nook'},
@@ -34,9 +45,17 @@ function route(start,finish){
  return out.reverse();
 }
 function newAgent(id,name,color,form,x,y){return{id,name,color,form,x,y,level:1,xp:0,needs:{Eat:72,Rest:80,Play:68,Socialize:70,Wash:75},relationships:{},memories:[],goal:null,command:null,activity:'Exploring',path:[],progress:0,autonomy:true}}
-export function createWorld(seed=121){const s={version:VERSION,seed,day:1,tick:30,theme:'Grove',paused:false,speed:1,nextId:5,agents:STARTERS.map((a,i)=>newAgent(i+1,...a)),objects:OBJECTS.map(o=>({...o})),events:[],community:0,festivalDay:0,selectedId:1};note(s,'A new world wakes up. Every agent has needs, choices, and memories.');return s}
+export function createWorld(seed=121){const s={version:VERSION,seed,day:1,tick:30,theme:'Grove',paused:false,speed:1,nextId:5,nextObjectId:100,sparks:12,agents:STARTERS.map((a,i)=>newAgent(i+1,...a)),objects:OBJECTS.map(o=>({...o})),events:[],community:0,festivalDay:0,selectedId:1};note(s,'A new world wakes up. Every agent has needs, choices, and memories.');return s}
 function note(s,text){s.events.unshift({day:s.day,tick:s.tick,text});s.events=s.events.slice(0,45)}
-export function validateWorld(w){if(!w||w.version!==VERSION||!Array.isArray(w.agents)||!Array.isArray(w.objects)||typeof w.seed!=='number')throw new Error('Invalid Living World save');if(w.agents.length>20||w.objects.length>100)throw new Error('Save exceeds world limits');return w}
+export function validateWorld(w){if(!w||w.version!==VERSION||!Array.isArray(w.agents)||!Array.isArray(w.objects)||typeof w.seed!=='number')throw new Error('Invalid Living World save');if(w.agents.length>20||w.objects.length>100)throw new Error('Save exceeds world limits');w.sparks??=12;w.nextObjectId??=100;return w}
+export function buildObject(s,kind,x,y){
+ const template=BUILDABLES.find(b=>b.kind===kind);if(!template)throw new Error('Unknown building');
+ x=Math.floor(x);y=Math.floor(y);if(!Number.isFinite(x)||!Number.isFinite(y)||blocked(x,y))throw new Error('Choose a walkable empty tile');
+ if(s.objects.some(o=>o.x===x&&o.y===y))throw new Error('There is already an object on this tile');
+ if(s.sparks<template.cost)throw new Error('Not enough Sparks — let agents Create to earn more');
+ const o={id:'crafted-'+s.nextObjectId++,kind:template.kind,label:template.kind,x,y,icon:template.icon,action:template.action};
+ s.objects.push(o);s.sparks-=template.cost;note(s,`You built a ${kind} that agents can use`);return o;
+}
 export function addAgent(s,name,form='Human',color='#a78bfa'){
  if(s.agents.length>=12)throw new Error('The world holds up to 12 agents');
  let label=String(name||'').trim().slice(0,24);if(!label)throw new Error('Give your agent a name');if(!FORMS.includes(form))throw new Error('Unknown form');
@@ -63,9 +82,10 @@ function decide(s,a){const priority=[...ACTIONS].filter(x=>x!=='Socialize'||s.ag
 }
 function complete(s,a){const g=a.goal;if(!g)return;
  if(g.action==='Move'){a.activity='Arrived';a.goal=null;a.command=null;return}
- const n=a.needs;const amount=g.action==='Rest'?32:g.action==='Eat'?30:g.action==='Wash'?31:g.action==='Play'?28:g.action==='Socialize'?25:18;
+ const n=a.needs;const base=g.action==='Rest'?32:g.action==='Eat'?30:g.action==='Wash'?31:g.action==='Play'?28:g.action==='Socialize'?25:18;
+ const bonus=(BONUSES[a.form]?.[g.action]||0)+(REALM_BONUSES[s.theme]?.[g.action]||0),amount=base+bonus;
  n[g.action]=cap(n[g.action]+amount);
- if(g.action==='Create'){n.Play=cap(n.Play+8);a.xp+=8}else a.xp+=4;
+ if(g.action==='Create'){n.Play=cap(n.Play+8);a.xp+=8;s.sparks=cap(s.sparks+Math.ceil(4+bonus/3),0,999)}else a.xp+=4;
  if(g.action==='Socialize'){
   const b=s.agents.find(b=>b.id===g.id);if(b){a.relationships[b.id]=cap((a.relationships[b.id]||0)+9);b.relationships[a.id]=cap((b.relationships[a.id]||0)+9);b.needs.Socialize=cap(b.needs.Socialize+10);
    addMemory(b,`Spent time with ${a.name} (+bond)`,s.day,s.tick);s.community+=2;
@@ -87,7 +107,7 @@ export function step(s){validateWorld(s);if(s.paused)return s;
   if(a.path.length&&(!a.path.at(-1)||a.path.at(-1).x!==a.goal.x||a.path.at(-1).y!==a.goal.y))a.path=route(a,a.goal);
   const arrived = a.goal.action==='Move' ? (a.x===a.goal.x&&a.y===a.goal.y) : near(a,a.goal);
   if(!arrived){
-   const next=a.path.shift();if(next&&!blocked(next.x,next.y)){a.x=next.x;a.y=next.y;a.activity='Walking'}else a.path=route(a,a.goal);
+   const pace=a.form==='Fox'||a.form==='Robot'?2:1;for(let p=0;p<pace;p++){const next=a.path.shift();if(next&&!blocked(next.x,next.y)){a.x=next.x;a.y=next.y;a.activity='Walking'}else {a.path=route(a,a.goal);break}if(a.x===a.goal.x&&a.y===a.goal.y)break}
   }else{
    a.progress++;a.activity=a.goal.action==='Move'?'Arriving':a.goal.action;
    if(a.progress>=3)complete(s,a);
