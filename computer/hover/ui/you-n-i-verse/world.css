@@ -1,1 +1,49 @@
 *{box-sizing:border-box}body{margin:0;background:#100b19;color:#fff0f7;font:15px/1.6 system-ui,sans-serif}button,a{font:inherit}button{cursor:pointer;color:inherit;background:transparent;border:1px solid #ffffff40;border-radius:8px;padding:10px 17px}button:hover{background:#e056a926}button:disabled{opacity:.45;cursor:default}a{color:inherit}header{height:88px;padding:15px 5vw;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #ba866e50}.brand{text-decoration:none;letter-spacing:.24em;font-size:22px;color:#edd2a6}.brand span{display:block;font-size:9px;letter-spacing:.32em;color:#bba2ba}.stage{position:relative;min-height:760px;height:calc(100vh - 88px);overflow:hidden}.guide{position:absolute;height:100%;width:100%;object-fit:cover;object-position:center 33%}.shade{position:absolute;inset:0;background:linear-gradient(90deg,#130a20e8,transparent 65%),linear-gradient(0deg,#100b19,transparent 65%)}.intro{position:absolute;left:6vw;top:8%;max-width:480px}.eyebrow{font-size:10px;letter-spacing:.22em;color:#eec49a}h1{font-weight:400;font-family:Georgia,serif;font-size:clamp(40px,5vw,72px);line-height:1.1;margin:18px 0}h2{font-weight:400;font-size:25px;line-height:1.3}.intro p:not(.eyebrow){max-width:300px;color:#e1cbdf}.scene{position:absolute;left:6vw;bottom:6%;width:440px;max-width:88vw;background:#180f27bf;backdrop-filter:blur(18px);padding:25px;border:1px solid #dfa88750;border-radius:14px}.scene h2{margin:10px 0}.scene p{color:#c8b6cf}.modes{display:flex;gap:7px;margin:20px 0}.modes button{flex:1;padding:8px 4px;font-size:13px}.active{background:#b9428860;border-color:#ec80bd}.primary{width:100%;background:linear-gradient(100deg,#b43581,#702366);border-color:#ee81bd80}#receipt{font-size:11px;margin-bottom:0}.below{max-width:1150px;margin:auto;padding:25px}.dimensions{display:flex;justify-content:space-around;gap:15px;flex-wrap:wrap;color:#dda6d5;border-bottom:1px solid #ffffff20;padding:20px 0 35px}.cards{display:grid;grid-template-columns:1fr 1fr;gap:25px;padding:32px 0}.cards article{padding:25px;background:#1e142a;border:1px solid #c890ab30;border-radius:12px}.cards p{color:#bda9c6}details{border:1px solid #ffffff20;padding:16px;border-radius:10px}details img{display:block;width:100%;margin-top:20px}footer{padding:30px;text-align:center;font-size:12px;color:#ab92b2}.waves{height:35px;display:flex;gap:5px;align-items:center}.waves i{width:3px;height:6px;background:#ff87d1;border-radius:4px}.speaking i{animation:wave .65s ease-in-out infinite alternate}.speaking i:nth-child(3n){animation-delay:.2s}.speaking i:nth-child(2n){animation-delay:.4s}@keyframes wave{to{height:30px}}@media(max-width:650px){header{height:76px}.brand{font-size:16px}.stage{min-height:850px;height:100svh}.guide{object-position:58% center}.shade{background:linear-gradient(0deg,#100b19 4%,#130a2080 50%,#130a2030)}.intro{top:4%;left:6vw}.intro h1{font-size:43px;text-shadow:0 2px 20px #000}.scene{bottom:3%}.cards{grid-template-columns:1fr}}@media(prefers-reduced-motion:reduce){.speaking i{animation:none}}
+
+/* Playable character viewport — uses the existing simulation, not reference artwork. */
+.stage{height:clamp(430px,calc(100dvh - 88px),760px);min-height:0;background:#090819;border-bottom:1px solid #e2a4ff42;touch-action:pan-y}
+#play-world{display:block;width:100%;height:100%;touch-action:manipulation;outline:none;--form-accent:#f0a8d7}
+#play-world:focus-visible{outline:2px solid var(--form-accent);outline-offset:-3px}
+.play-top{position:absolute;top:12px;left:12px;right:12px;pointer-events:none;display:flex;align-items:flex-start;gap:8px;justify-content:space-between}
+.play-top strong{background:#110b26d9;border:1px solid #c378f570;box-shadow:0 0 20px #6e35aa33;border-radius:12px;padding:7px 11px;color:#f4d7ff;font-size:12px}
+.play-top small{max-width:min(55%,360px);padding:8px;border-radius:10px;background:#130d27d9;color:#cbb4e0;font-size:11px;text-align:right;line-height:1.4}
+.play-controls{position:absolute;left:12px;right:12px;bottom:49px;display:flex;align-items:flex-end;justify-content:space-between;gap:12px;pointer-events:none}
+.play-controls button{pointer-events:auto;background:#170e2ce8;border:1px solid #d7a6fa80;color:#fff5ff;border-radius:12px;min-height:43px;font-size:12px;backdrop-filter:blur(9px);box-shadow:0 5px 18px #0006;touch-action:none;user-select:none;-webkit-user-select:none}
+.play-controls button:active{background:#6e3288cf}
+.play-controls button:focus-visible{outline:2px solid #60e6d7;outline-offset:2px}
+.play-dpad{display:grid;grid-template-columns:repeat(3,42px);grid-template-rows:repeat(3,42px);gap:3px}
+.play-dpad button{font-size:21px;min-height:42px;padding:0}
+.go-up{grid-column:2;grid-row:1}.go-left{grid-column:1;grid-row:2}.go-right{grid-column:3;grid-row:2}.go-down{grid-column:2;grid-row:3}
+.play-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;max-width:400px}
+.play-actions button{padding:7px 8px;min-width:0}
+.play-actions button:disabled{opacity:.4}
+.play-receipt{position:absolute;bottom:0;left:0;right:0;font-size:11px;line-height:1.3;margin:0;padding:10px 15px;background:#100a21eb;color:#d7c2ed;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.scene-panel{max-width:1100px;margin:auto;padding:26px 25px;border-bottom:1px solid #ffffff20}
+.scene-panel h1{font-size:clamp(24px,4vw,40px);margin:8px 0}
+.scene-panel h2{font-size:20px;margin:10px 0}
+.scene-panel p{color:#d2bfdc}
+.scene-panel .modes{max-width:460px}
+.scene-panel .primary{max-width:460px}
+.scene-panel #receipt{font-size:12px;min-height:2em}
+#btn-reset{margin-left:8px;color:#f1bacb;border-color:#a35c7966}
+#refs img{max-width:100%;object-fit:contain}
+@media(max-width:650px){
+  header{height:65px;padding:9px 14px}
+  .brand{font-size:15px;letter-spacing:.12em}
+  .brand span{font-size:8px;letter-spacing:.17em}
+  .stage{height:calc(100dvh - 65px);min-height:440px}
+  .play-top{top:8px;left:8px;right:8px}
+  .play-top small{font-size:9px;max-width:62%}
+  .play-top strong{font-size:11px}
+  .play-controls{bottom:46px;left:6px;right:6px;gap:4px}
+  .play-dpad{grid-template-columns:repeat(3,42px);grid-template-rows:repeat(3,42px);gap:2px}
+  .play-actions{max-width:195px;grid-template-columns:1fr;gap:4px}
+  .play-actions button{font-size:10px;min-height:35px;padding:4px 8px;text-align:left}
+  .play-receipt{font-size:10px}
+  .scene-panel{padding:22px 16px}
+  .scene-panel h1{font-size:26px}
+  .below{padding:16px}
+  .cards{grid-template-columns:1fr}
+  #btn-reset{display:block;margin:12px 0 0}
+}
+@media(prefers-reduced-motion:reduce){.play-controls *{transition:none}}
