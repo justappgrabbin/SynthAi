@@ -16,6 +16,7 @@ interface Message {
   type: 'text';
   provider?: string;
   answerKind?: string;
+  turnId?: string;
 }
 
 interface Conversation {
@@ -89,6 +90,10 @@ export default function Chat() {
   const [isTyping, setIsTyping] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [showNewChat, setShowNewChat] = useState(false);
+  const [teachingTurnId, setTeachingTurnId] = useState<string | null>(null);
+  const [correctionText, setCorrectionText] = useState('');
+  const [learningStatus, setLearningStatus] = useState('');
+  const [savingCorrection, setSavingCorrection] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const activeConv = conversations.find((c) => c.id === activeConvId) || conversations[0];
@@ -100,7 +105,7 @@ export default function Chat() {
     }).then((items: { id: string; at: string; input: string; text: string; provider?: string; answerKind?: string }[]) => {
       const messages: Message[] = items.flatMap((item) => [
         { id: `${item.id}-user`, senderId: 'user', content: item.input, timestamp: Date.parse(item.at), type: 'text' as const },
-        { id: `${item.id}-bot`, senderId: 'bot', content: item.text, timestamp: Date.parse(item.at), type: 'text' as const, provider: item.provider, answerKind: item.answerKind },
+        { id: `${item.id}-bot`, senderId: 'bot', content: item.text, timestamp: Date.parse(item.at), type: 'text' as const, provider: item.provider, answerKind: item.answerKind, turnId: item.id },
       ]);
       setConversations([{ ...createInitialConversations()[0], messages }]);
     }).catch((error) => {
@@ -126,13 +131,31 @@ export default function Chat() {
       const res = await fetch('/api/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ text }) });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || `Chat failed (${res.status})`);
-      const reply: Message = { id: data.id, senderId: 'bot', content: data.text, timestamp: Date.parse(data.at), type: 'text', provider: data.provider, answerKind: data.answerKind };
+      const reply: Message = { id: data.id, senderId: 'bot', content: data.text, timestamp: Date.parse(data.at), type: 'text', provider: data.provider, answerKind: data.answerKind, turnId: data.id };
       setConversations((prev) => prev.map((c) => c.id === activeConvId ? { ...c, messages: [...c.messages, reply] } : c));
     } catch (error) {
       const failure: Message = { id: crypto.randomUUID(), senderId: 'bot', content: `The local conversation path failed: ${String(error)}`, timestamp: Date.now(), type: 'text' };
       setConversations((prev) => prev.map((c) => c.id === activeConvId ? { ...c, messages: [...c.messages, failure] } : c));
     } finally { setIsTyping(false); }
   }, [inputText, activeConvId, isTyping]);
+
+  const teachResponse = async () => {
+    if (!teachingTurnId || correctionText.trim().length < 4 || savingCorrection) return;
+    setSavingCorrection(true);
+    setLearningStatus('');
+    try {
+      const result = await fetch('/api/synthia/teach-language', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ turnId: teachingTurnId, answer: correctionText.trim() }),
+      });
+      const data = await result.json();
+      if (!result.ok) throw new Error(data.error || 'Language correction failed');
+      setLearningStatus('Saved example ' + data.model.trainedExamples + '. This teaches a local token model, not an LLM.');
+      setTeachingTurnId(null);
+      setCorrectionText('');
+    } catch (err) { setLearningStatus('Correction failed: ' + String(err)); }
+    finally { setSavingCorrection(false); }
+  };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
@@ -259,7 +282,7 @@ export default function Chat() {
               <div className="flex items-center gap-1">
                 <Circle size={8} fill={activeConv.status === 'online' ? 'var(--accent-success)' : activeConv.status === 'away' ? 'var(--accent-warning)' : 'var(--text-disabled)'} style={{ color: 'transparent' }} />
                 <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>
-                  {activeConv.status === 'online' ? 'Online' : activeConv.status === 'away' ? 'Away' : 'Offline'}
+                  {activeConv.status === 'online' ? 'Local Computer · no pretrained LLM' : activeConv.status === 'away' ? 'Away' : 'Offline'}
                 </span>
               </div>
             </div>
@@ -296,8 +319,14 @@ export default function Chat() {
                       </div>
                       {!isSent && msg.provider && (
                         <span style={{ color: 'var(--text-secondary)', fontSize: '10px', marginTop: 4 }} title={msg.provider}>
-                          {msg.answerKind === 'legacy-pattern-realization' ? 'Pattern-based language · not an LLM' : 'Computer evidence · ' + (msg.answerKind ?? 'observation')}
+                          {msg.answerKind === 'legacy-pattern-realization' ? 'Pattern-based language · not an LLM' : msg.answerKind === 'human-trained-sequence' ? 'Locally learned tokens · not an LLM' : 'Computer evidence · ' + (msg.answerKind ?? 'observation')}
                         </span>
+                      )}
+                      {!isSent && msg.turnId && (
+                        <button onClick={() => { setTeachingTurnId(msg.turnId!); setCorrectionText(msg.content); setLearningStatus(''); }}
+                          style={{ alignSelf:'flex-start', fontSize:11, color:'var(--accent-primary)', paddingTop:5 }}>
+                          Improve reply
+                        </button>
                       )}
                       <span className={`mt-0.5 ${isSent ? 'text-right' : 'text-left'}`} style={{ fontSize: '10px', color: 'var(--text-disabled)', opacity: 0.7 }}>
                         {formatTime(msg.timestamp)}
@@ -312,6 +341,23 @@ export default function Chat() {
           <div ref={messagesEndRef} />
         </div>
 
+        {teachingTurnId && (
+          <div className="px-3 py-2 flex flex-col gap-2" style={{ background:'var(--bg-titlebar)',borderTop:'1px solid var(--border-default)' }}>
+            <div style={{fontSize:12,color:'var(--text-primary)'}}>Teach from your correction · not automatic learning</div>
+            <textarea value={correctionText} onChange={e => setCorrectionText(e.target.value)}
+              maxLength={1600} rows={3} aria-label="Corrected Synthia response"
+              style={{background:'var(--bg-input)',color:'var(--text-primary)',border:'1px solid var(--border-default)',padding:8,borderRadius:8}} />
+            <div className="flex gap-2">
+              <button onClick={teachResponse} disabled={savingCorrection || correctionText.trim().length < 4}
+                style={{background:'var(--accent-primary)',color:'white',padding:'6px 12px',borderRadius:8}}>
+                {savingCorrection ? 'Saving…' : 'Save training example'}
+              </button>
+              <button onClick={() => { setTeachingTurnId(null); setCorrectionText(''); }}
+                style={{color:'var(--text-secondary)',padding:'6px 10px'}}>Cancel</button>
+            </div>
+          </div>
+        )}
+        {learningStatus && <div role="status" style={{padding:'4px 12px',fontSize:11,color:'var(--text-secondary)'}}>{learningStatus}</div>}
         {/* Input Area */}
         <div className="flex items-center gap-2 px-3 py-2 shrink-0 relative" style={{ borderTop: '1px solid var(--border-subtle)', background: 'var(--bg-titlebar)' }}>
           <button
