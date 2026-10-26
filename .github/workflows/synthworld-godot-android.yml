@@ -1,0 +1,64 @@
+name: SynthWorld Godot Android verification
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - 'synthworld/native-rigged-morph-20261025'
+    paths:
+      - 'computer/native/synthworld/**'
+      - '.github/workflows/synthworld-godot-android.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  godot-android:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    container:
+      image: barichello/godot-ci:4.6.3
+    env:
+      PROJECT: computer/native/synthworld/game
+    steps:
+      - uses: actions/checkout@v4
+      - name: Report engine and provenance
+        shell: bash
+        run: |
+          godot --version
+          echo 'Testing native Godot SynthWorld, not the Capacitor or Hover UI.'
+          echo 'Donor GLBs are not in this public APK; their license is unverified.'
+      - name: Import and parse native project
+        shell: bash
+        run: |
+          set -o pipefail
+          godot --headless --path "$PROJECT" --editor --import --quit 2>&1 | tee /tmp/synthworld-import.log
+          if grep -E 'SCRIPT ERROR|Parse Error|ERROR:.*Failed to load' /tmp/synthworld-import.log; then exit 1; fi
+      - name: Execute original world action tests
+        shell: bash
+        run: godot --headless --path "$PROJECT" --script res://tests/execution_test.gd
+      - name: Execute skeleton and camera acceptance tests
+        shell: bash
+        run: godot --headless --path "$PROJECT" --script res://tests/visual_acceptance_test.gd
+      - name: Export isolated Android preview (different package ID)
+        shell: bash
+        run: |
+          # Never overwrite the user's separately signed installed app.
+          sed -i 's/com\.synthworld\.app/com.synthworld.rigpreview/g' "$PROJECT/export_presets.cfg"
+          mkdir -p dist
+          godot --headless --path "$PROJECT" --export-debug 'Android' "$GITHUB_WORKSPACE/dist/SynthWorld-rigpreview-debug.apk"
+          test -s dist/SynthWorld-rigpreview-debug.apk
+          unzip -t dist/SynthWorld-rigpreview-debug.apk | tail -n 2
+      - name: Upload phone-installable preview APK (procedural rig only)
+        uses: actions/upload-artifact@v4
+        with:
+          name: SynthWorld-Godot-Android-RigPreview
+          path: dist/SynthWorld-rigpreview-debug.apk
+          if-no-files-found: error
+          retention-days: 14
+      - name: Upload native Godot source for local donor asset import
+        uses: actions/upload-artifact@v4
+        with:
+          name: SynthWorld-Godot-Source
+          path: computer/native/synthworld/game/
+          retention-days: 14
