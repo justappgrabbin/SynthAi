@@ -1,4 +1,5 @@
 import { createServer } from 'node:http';
+import { timingSafeEqual } from 'node:crypto';
 import { readFile, stat, mkdir } from 'node:fs/promises';
 import { join, resolve, extname, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -12,6 +13,15 @@ const root = resolve(fileURLToPath(new URL('../shell/kimi-linux/dist/', import.m
 const dataDir = resolve(process.env.SYNTHIA_DATA_DIR ?? fileURLToPath(new URL('../runtime/data/local-computer/', import.meta.url)));
 const port = Number(process.env.SYNTHIA_PORT ?? 8765);
 const host = '127.0.0.1';
+// Owner-mediated teaching is disabled unless a long local token is configured.
+const ownerToken = process.env.SYNTHIA_OWNER_TOKEN ?? '';
+function ownerApproved(req) {
+  const candidate = req.headers['x-synthia-owner-token'];
+  if (ownerToken.length < 32 || typeof candidate !== 'string') return false;
+  const supplied = Buffer.from(candidate, 'utf8');
+  const expected = Buffer.from(ownerToken, 'utf8');
+  return supplied.length === expected.length && timingSafeEqual(supplied, expected);
+}
 await mkdir(dataDir, { recursive: true });
 const computer = await new ComputerRuntime({
   persistence: new JsonFilePersistence(join(dataDir, 'state.json')),
@@ -114,6 +124,35 @@ const server = createServer(async (req, res) => {
           type: 'request', text: request.text, domain: request.domain ?? null,
         }));
       }
+      // Explicit dual model interfaces: semantic tools, learned language, and
+      // owner-authorized supervised learning. No execution permissions granted.
+      if (req.method === 'GET' && url.pathname === '/api/synthia/model')
+        return json(res, 200, computer.synthia.languageModel.status());
+      if (req.method === 'POST' && url.pathname === '/api/synthia/model/semantic') {
+        const request = await body(req);
+        return json(res, 200, await computer.synthia.languageModel.semantic.read(request.text));
+      }
+      if (req.method === 'POST' && url.pathname === '/api/synthia/model/generate') {
+        const request = await body(req);
+        return json(res, 200, await computer.synthia.languageModel.language.generate(request.text));
+      }
+      // Private training memory is available only to the owner, never through status.
+      if (req.method === 'GET' && url.pathname === '/api/synthia/model/remember') {
+        if (!ownerApproved(req)) return json(res, 403, { error: 'Owner memory authorization required.' });
+        return json(res, 200, computer.synthia.languageModel.memory.recall(
+          url.searchParams.get('q') ?? '', { limit: Number(url.searchParams.get('limit') ?? 5) }));
+      }
+
+      if (req.method === 'POST' && url.pathname === '/api/synthia/model/teach') {
+        if (!ownerApproved(req)) return json(res, 403, { error: 'Owner training authorization required and must be configured locally.' });
+        const request = await body(req);
+        if (typeof request.accepted !== 'boolean') throw new TypeError('Explicit approved or rejected feedback required.');
+        return json(res, 200, await computer.synthia.languageModel.language.teach({
+          prompt: request.prompt, response: request.response, accepted: request.accepted,
+          capability: request.capability ?? 'language-response', source: 'authenticated-local-owner',
+        }));
+      }
+
       // Non-sensitive resident health; learning graph and user utterances stay private.
       if (req.method === 'GET' && url.pathname === '/api/synthia/status')
         return json(res, 200, computer.synthia.status());

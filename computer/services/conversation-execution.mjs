@@ -24,6 +24,12 @@ export class ConversationExecution {
     // Synthia's two graphs read the same situated message before any reply.
     // The semantic side stores speaker reports as reports, not verified facts.
     const residentReading = await this.computer.synthia.observe(text);
+    // The trainable Model Maker receives the same grounded reading before
+    // language generation. Cold/untrusted responses never replace Morph Chat.
+    const modelCandidate = await this.computer.synthia.languageModel.generate(text, { reading: residentReading });
+    const modelSelected = modelCandidate.ready &&
+      modelCandidate.model.examples >= 12 && modelCandidate.relevance >= 0.55 &&
+      modelCandidate.text.length >= 16;
 
     // The original Morph Chat invokes AutoLing + DISEMINER through its tool
     // bridge, resolves the semantic mesh, then realizes readable language.
@@ -34,7 +40,8 @@ export class ConversationExecution {
     // The execution-spine donor owns a separate address-first learning/contact
     // loop. Its result is consumed as evidence, not substituted for the answer.
     const learned = await this.execution.chat(text);
-    let responseText = donor.text;
+    let responseText = modelSelected ? modelCandidate.text : donor.text;
+    const responseProvider = modelSelected ? 'synthia:model-maker-dual' : (donor.assistant?.provider ?? 'local-morph');
     const imported = this.computer.vfs.list('/home/user/Imports/');
     if (/\b(what|which|show|list)\b/i.test(text) && /\b(files?|imports?|uploaded)\b/i.test(text)) {
       responseText = imported.length
@@ -48,13 +55,15 @@ export class ConversationExecution {
       intent: donor.conversation.semantic.intent,
       dimension: donor.conversation.semantic.dimension,
       linguisticGrounded: true,
-      provider: donor.assistant?.provider ?? 'local-morph',
+      provider: responseProvider,
       learningRecord: learned.recordId,
+      modelMaker: { selected: modelSelected, examples: modelCandidate.model.examples,
+        reason: modelSelected ? 'approved-trained-and-relevant' : (modelCandidate.reason ?? 'quality-gate') },
     };
     const history = this.computer.state.get('computer.chat.history', []);
     await this.computer.state.set('computer.chat.history', [...history, item].slice(-120), { source: 'conversation' });
     const residentReceipt = await this.computer.synthia.recordReply(residentReading, {
-      text: responseText, provider: donor.assistant?.provider ?? 'local-morph',
+      text: responseText, provider: responseProvider,
     });
     const event = await this.computer.emitEvent({
       actor_id: 'user:local', actor_type: 'user', target_id: 'synthia', event_type: 'message',
