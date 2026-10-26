@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#150e28"><title>SYNTHIA · Living World</title>
+<style>
+:root{color-scheme:dark;--bg:#0b0817;--panel:#191329;--panel2:#251b3b;--border:#564372;--text:#f5efff;--muted:#b9aaca;--violet:#a78bfa;--teal:#4fddd4;--gold:#f8c978;--pink:#fb8bb4}*{box-sizing:border-box}body{margin:0;font:14px/1.4 system-ui,-apple-system,Segoe UI,sans-serif;color:var(--text);background:radial-gradient(ellipse at 12% 4%,#392250 0,transparent 45%),radial-gradient(ellipse at 95% 100%,#123944 0,transparent 44%),var(--bg);min-height:100vh;overflow-x:hidden}button,select,input{font:inherit}button{cursor:pointer;color:inherit}button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--teal);outline-offset:2px}button:disabled{opacity:.4;cursor:not-allowed}.app{max-width:1600px;width:100%;min-width:0;margin:auto;padding:14px;display:flex;flex-direction:column;gap:12px}.header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}.brand{display:flex;align-items:center;gap:10px}.brand-logo{width:43px;height:43px;display:grid;place-items:center;border-radius:14px;background:linear-gradient(145deg,#a96eeb,#35c7cb);font-size:25px;box-shadow:0 5px 25px #a96eeb66}.eyebrow{letter-spacing:.2em;font-size:9px;color:var(--teal);font-weight:700}.brand h1{margin:0;font-weight:900;font-size:clamp(18px,3.5vw,26px);letter-spacing:.03em}.sub{font-size:11px;color:var(--muted)}.head-actions,.pills,.controls,.actions,.statline{display:flex;gap:7px;align-items:center;flex-wrap:wrap}.pill{padding:6px 11px;border-radius:24px;background:#2b2143;border:1px solid #53416d;font-size:11px}.btn{border:1px solid #65537e;border-radius:11px;background:linear-gradient(170deg,#34254a,#241b39);min-height:36px;padding:8px 12px;font-weight:650;transition:transform .1s,border .1s}.btn:active{transform:scale(.97)}.btn:hover{border-color:var(--violet)}.primary{background:linear-gradient(135deg,#9c64db,#6050a5);border-color:#a58bec}.teal{color:#102d32;background:linear-gradient(130deg,#5ee7d1,#3ac4cc);border-color:transparent}.danger{color:#ffafbd}.layout{display:grid;grid-template-columns:minmax(0,1fr) 318px;gap:12px;align-items:start}.panel{background:linear-gradient(165deg,#221a35ef,#140f25f9);border:1px solid #4c3c65;border-radius:20px;box-shadow:0 8px 35px #0006;overflow:hidden}.panel-title{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 14px;border-bottom:1px solid #483958}.panel-title strong{font-size:13px}.world-head{display:flex;gap:6px;flex-wrap:wrap;align-items:center;justify-content:space-between;padding:10px 12px}.canvas-holder{position:relative;overflow:hidden;touch-action:none;user-select:none}.canvas-holder canvas{width:100%;height:clamp(360px,66vh,690px);display:block;touch-action:none;background:#161b22}.world-hint{position:absolute;bottom:10px;left:10px;right:10px;pointer-events:none;display:flex;justify-content:space-between;align-items:flex-end;gap:5px}.hint{padding:6px 10px;border-radius:18px;background:#100b1ac9;border:1px solid #65537e;font-size:10px;color:#eee7f9;backdrop-filter:blur(6px)}.map-controls{position:absolute;right:12px;top:10px;display:flex;flex-direction:column;gap:6px}.round{width:36px;height:36px;border-radius:11px;border:1px solid #796b8f;background:#201a35df;font-size:22px}.underworld{padding:11px 12px;display:flex;gap:9px;align-items:center;justify-content:space-between;flex-wrap:wrap}.keycap{border:1px solid #756587;background:#1e1730;padding:3px 7px;border-radius:7px;font-size:10px}.sidebar{display:flex;flex-direction:column;gap:12px;min-width:0}.sidebar>.panel{min-width:0;max-width:100%}.agentlist{padding:8px;max-height:310px;overflow:auto}.agent-button{border:1px solid transparent;background:#21182f;width:100%;display:flex;align-items:center;text-align:left;gap:10px;margin:5px 0;padding:9px;border-radius:12px}.agent-button.active{border-color:#b58bfc;background:#3d2d55}.agentface{height:38px;width:38px;border-radius:13px;display:grid;place-items:center;font-size:23px;background:#463055}.agent-button small,.muted{font-size:11px;color:var(--muted)}.agent-button strong{display:block;font-size:13px}.info{padding:13px}.nameplate{display:flex;align-items:center;gap:11px;margin-bottom:12px}.portrait{width:56px;height:56px;display:grid;place-items:center;border-radius:16px;font-size:30px;background:linear-gradient(145deg,#62417e,#2b284e)}h2{font-size:18px;margin:0}.need{display:grid;grid-template-columns:78px 1fr 25px;align-items:center;gap:7px;margin:6px 0;font-size:11px}.bar{height:9px;background:#3a2d49;border-radius:6px;overflow:hidden}.bar>i{display:block;height:100%;background:linear-gradient(90deg,#8f6dfb,#54dfd2);border-radius:6px}.need.low .bar>i{background:linear-gradient(90deg,#bd4868,#fb9d8a)}.need span:last-child{text-align:right;color:var(--muted)}.actions{margin-top:12px}.actions .btn{flex:1 1 30%;padding:7px 4px;font-size:11px;min-height:38px}.field{display:flex;gap:8px;align-items:center;margin:12px 0 8px}.field label{font-size:11px;color:var(--muted);width:48px}.field select,.field input{background:#2b2140;border:1px solid #685580;color:var(--text);border-radius:10px;padding:8px;min-width:0;flex:1}.relationship,.memory{font-size:11px;color:var(--muted);padding:4px 0}.log{padding:8px 13px;max-height:235px;overflow-y:auto}.entry{padding:7px 0;border-bottom:1px solid #ffffff11;font-size:11px}.entry time{color:var(--teal);margin-right:6px;font-size:10px}.notebox{font-size:11px;color:var(--muted);padding:10px 13px}.toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);z-index:12;background:#442b59;color:white;border:1px solid #b987df;border-radius:12px;padding:10px 17px;box-shadow:0 8px 50px #0008;display:none;max-width:90vw}.toast.visible{display:block}.modal-cover{position:fixed;inset:0;display:none;align-items:center;justify-content:center;padding:16px;background:#070410ca;z-index:11}.modal-cover.visible{display:flex}.modal{width:min(400px,100%);padding:22px;background:#21162f;border:1px solid #705187;border-radius:20px;box-shadow:0 15px 60px #0009}.modal h2{margin-bottom:10px}.modal .field label{width:68px}.modal .head-actions{margin-top:20px;justify-content:flex-end}.kbd-tip{opacity:.6}@media(max-width:970px){.layout{grid-template-columns:1fr}.sidebar{display:grid;grid-template-columns:1fr 1fr;align-items:start}.sidebar .panel:last-child{grid-column:1/-1}.canvas-holder canvas{height:clamp(370px,55vh,650px)}}@media(max-width:600px){.app{padding:7px;gap:8px}.header{padding:7px 4px}.head-actions .btn{padding:7px 9px;font-size:11px}.layout,.sidebar{display:flex;flex-direction:column;gap:8px}.sidebar{width:100%;max-width:100%;align-self:stretch}.sidebar>.panel{width:100%;max-width:100%}.agentlist{display:flex;width:100%;max-width:100%;overflow-x:auto;max-height:none;gap:7px}.agent-button{min-width:130px;flex:0 0 130px;margin:0}.panel{border-radius:16px}.world-head{padding:7px}.canvas-holder canvas{height:clamp(350px,57dvh,600px)}.underworld{font-size:11px}.need{margin:4px 0}.info{padding:12px}.kbd-tip{display:none}}@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;animation:none!important}}
+</style></head><body>
+<div class="app">
+<header class="header"><div class="brand"><div class="brand-logo">✦</div><div><div class="eyebrow">YOU·N·I·VERSE / SYNTHIA</div><h1>THE LIVING WORLD <span style="font-size:11px;color:var(--gold)">ALPHA 01</span></h1><div class="sub">Life simulation · autonomous agents · morphable realms · offline-first</div></div></div><div class="head-actions"><span class="pill" id="clock">Day 1</span><button class="btn" id="pause" title="Pause simulation">Ⅱ Pause</button><button class="btn" id="speed" title="Cycle simulation speed">1× Speed</button><button class="btn" id="save" title="Save locally">▣ Save</button><button class="btn" id="computerBack" hidden>← Computer</button></div></header>
+<div class="layout"><main class="panel"><div class="world-head"><div class="pills"><span class="pill">✦ <span id="realmName">Grove</span></span><span class="pill">👥 <span id="agentCount">4</span> agents</span><span class="pill" id="festival">◌ Life is unfolding</span></div><div class="controls"><select id="theme" class="btn" aria-label="Morph realm"><option>Grove</option><option>Starlight</option><option>Ember</option></select><button id="follow" class="btn" title="Follow selected agent">◎ Follow</button></div></div><div id="canvasHolder" class="canvas-holder"><canvas id="world" aria-label="Interactive top-down agent world. Tap an agent to select or a tile to move the selected agent."></canvas><div class="map-controls"><button class="round" id="zoomIn" aria-label="Zoom in">+</button><button class="round" id="zoomOut" aria-label="Zoom out">−</button></div><div class="world-hint"><span class="hint" id="worldMessage">Tap an agent or tap a tile to move</span><span class="hint">Drag to pan · pinch to zoom</span></div></div><div class="underworld"><div class="statline"><span>💗 Bonds <b id="bondCount">0</b></span><span>🧠 Memories <b id="memoryCount">0</b></span><span>✨ Sparks <b id="sparkCount">12</b></span><span class="kbd-tip"><span class="keycap">WASD</span> Move</span></div><div class="controls"><button class="btn teal" id="spawn">＋ New agent</button><select id="buildKind" class="btn" aria-label="Choose building"></select><button class="btn" id="build">🏗 Build</button><button class="btn" id="export">⇩ Export</button><button class="btn" id="import">⇧ Import</button><input id="file" type="file" accept=".json,application/json" hidden><button class="btn" id="restore" title="Restore a previous world copy">⤺ Restore</button><button class="btn danger" id="reset" title="Start a new world, preserving your exported saves">↺</button></div></div></main>
+<aside class="sidebar"><section class="panel"><div class="panel-title"><strong>World residents</strong><span class="sub">Tap to possess or guide</span></div><div class="agentlist" id="agentList"></div></section><section class="panel"><div class="panel-title"><strong>Character & control</strong><span class="sub" id="autonomyLabel">Autonomous</span></div><div class="info" id="agentInfo"><div class="nameplate"><div class="portrait" id="portrait">✦</div><div><h2 id="agentName">Synthia</h2><div class="sub" id="agentActivity">Exploring</div></div><span style="margin-left:auto" class="pill" id="agentLevel">LV 1</span></div><div id="needs"></div><div class="actions" id="actions"></div><div class="field"><label for="form">Morph</label><select id="form"></select><button class="btn" id="morph">Transform</button></div><div class="sub" id="formSkill"></div><div class="field"><label for="autonomy">Agent</label><select id="autonomy"><option value="true">Self-directing</option><option value="false">I control</option></select></div><div style="margin-top:14px;border-top:1px solid #4e3b60;padding-top:9px"><b style="font-size:11px">Connections & lived memory</b><div id="relationships"></div><div id="memories"></div></div></div></section><section class="panel"><div class="panel-title"><strong>World activity</strong><span class="sub">Actions have consequences</span></div><div class="log" id="log" aria-live="polite"></div><div class="notebox">The agents choose based on needs and surroundings. Relationships and experiences are saved locally. No remote AI or scripted conversations.</div></section></aside></div>
+</div><div class="toast" role="status" id="toast"></div><div class="modal-cover" id="modal"><form class="modal" id="newAgentForm"><h2>✦ Welcome a new resident</h2><p class="sub">The character will have needs, make choices, form bonds, and remember experiences.</p><div class="field"><label for="newName">Name</label><input id="newName" maxlength="24" placeholder="Name your resident" required autocomplete="off"></div><div class="field"><label for="newForm">Form</label><select id="newForm"></select></div><div class="field"><label for="newColor">Color</label><input id="newColor" type="color" value="#ad8cff" aria-label="Character color"></div><div class="head-actions"><button type="button" class="btn" id="cancelSpawn">Cancel</button><button type="submit" class="btn primary">Create resident</button></div></form></div>
+<script type="module">
+// SYNTHIA Living World — deterministic, offline-first simulation core, v0.1
+// Original SYNTH AI donor code stays unchanged. This is a new playable client layer.
+export const W=18,H=14,VERSION=1;
+export const THEMES=['Grove','Starlight','Ember'];
+export const FORMS=['Human','Fox','Gnome','Robot','Orb','Cat'];
+export const ACTIONS=['Eat','Rest','Play','Socialize','Create','Wash'];
+export const BUILDABLES=[
+ {kind:'Snack stand',icon:'🍱',action:'Eat',cost:12},
+ {kind:'Rest nest',icon:'🏕️',action:'Rest',cost:12},
+ {kind:'Playhouse',icon:'🎲',action:'Play',cost:12},
+ {kind:'Meditation bench',icon:'🪑',action:'Rest',cost:12},
+ {kind:'Workshop',icon:'🔧',action:'Create',cost:12},
+ {kind:'Spa',icon:'🛁',action:'Wash',cost:12}
+];
+export const FORM_SKILLS={Human:'Social bonding +6',Fox:'Play +10; fast travel',Gnome:'Creative work +12',Robot:'Creative work +6; fast travel',Orb:'Rest +12',Cat:'Rest +8; play +5'};
+const BONUSES={Human:{Socialize:6},Fox:{Play:10},Gnome:{Create:12},Robot:{Create:6},Orb:{Rest:12},Cat:{Rest:8,Play:5}};
+const REALM_BONUSES={Grove:{Create:3},Starlight:{Play:4},Ember:{Socialize:4}};
+export const OBJECTS=[
+ {id:'kitchen',kind:'Kitchen',x:4,y:4,icon:'🍲',action:'Eat',label:'Kitchen'},
+ {id:'bed',kind:'Bed',x:2,y:3,icon:'🛏️',action:'Rest',label:'Dream nook'},
+ {id:'bed2',kind:'Bed',x:5,y:3,icon:'🛏️',action:'Rest',label:'Guest nook'},
+ {id:'bath',kind:'Bath',x:7,y:3,icon:'🫧',action:'Wash',label:'Bath'},
+ {id:'studio',kind:'Studio',x:13,y:4,icon:'🎨',action:'Create',label:'Studio'},
+ {id:'game',kind:'Game',x:11,y:10,icon:'🎮',action:'Play',label:'Arcade'},
+ {id:'garden',kind:'Garden',x:4,y:10,icon:'🌱',action:'Create',label:'Garden'},
+ {id:'fire',kind:'Fire',x:13,y:10,icon:'🔥',action:'Socialize',label:'Campfire'},
+ {id:'pond',kind:'Pond',x:9,y:7,icon:'💧',action:'Play',label:'Pond'}
+];
+export const STARTERS=[
+ ['Synthia','#ac7dff','Human',2,6],['Nova','#ff88b5','Fox',7,5],['Echo','#4be0db','Robot',13,7],['Moss','#f6bc67','Gnome',6,10]
+];
+const cap=(x,lo=0,hi=100)=>Math.max(lo,Math.min(hi,x));
+const dist=(a,b)=>Math.abs(a.x-b.x)+Math.abs(a.y-b.y);
+const near=(a,b)=>dist(a,b)<=1;
+const addMemory=(a,what,day,tick)=>{a.memories.push({day,tick,text:what});if(a.memories.length>32)a.memories.shift()};
+function rand(s){s.seed=(Math.imul(1664525,s.seed)+1013904223)>>>0;return s.seed/4294967296}
+const blocked=(x,y)=>x<0||y<0||x>=W||y>=H||(x===9&&y===7);
+function route(start,finish){
+ if(blocked(finish.x,finish.y))return[];
+ const key=(x,y)=>x+','+y, from=new Map(), q=[{x:start.x,y:start.y}], seen=new Set([key(start.x,start.y)]);
+ for(let i=0;i<q.length;i++){let p=q[i];if(p.x===finish.x&&p.y===finish.y)break;
+ for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){let x=p.x+dx,y=p.y+dy,k=key(x,y);if(blocked(x,y)||seen.has(k))continue;seen.add(k);from.set(k,p);q.push({x,y})}}
+ const out=[];let p={...finish},limit=W*H;
+ while((p.x!==start.x||p.y!==start.y)&&limit--){const prev=from.get(key(p.x,p.y));if(!prev)return[];out.push(p);p=prev}
+ return out.reverse();
+}
+function newAgent(id,name,color,form,x,y){return{id,name,color,form,x,y,level:1,xp:0,needs:{Eat:72,Rest:80,Play:68,Socialize:70,Wash:75},relationships:{},memories:[],goal:null,command:null,activity:'Exploring',path:[],progress:0,autonomy:true}}
+export function createWorld(seed=121){const s={version:VERSION,seed,day:1,tick:30,theme:'Grove',paused:false,speed:1,nextId:5,nextObjectId:100,sparks:12,agents:STARTERS.map((a,i)=>newAgent(i+1,...a)),objects:OBJECTS.map(o=>({...o})),events:[],community:0,festivalDay:0,selectedId:1};note(s,'A new world wakes up. Every agent has needs, choices, and memories.');return s}
+function note(s,text){s.events.unshift({day:s.day,tick:s.tick,text});s.events=s.events.slice(0,45)}
+export function validateWorld(w){if(!w||w.version!==VERSION||!Array.isArray(w.agents)||!Array.isArray(w.objects)||typeof w.seed!=='number')throw new Error('Invalid Living World save');if(w.agents.length>20||w.objects.length>100)throw new Error('Save exceeds world limits');w.sparks??=12;w.nextObjectId??=100;return w}
+export function buildObject(s,kind,x,y){
+ const template=BUILDABLES.find(b=>b.kind===kind);if(!template)throw new Error('Unknown building');
+ x=Math.floor(x);y=Math.floor(y);if(!Number.isFinite(x)||!Number.isFinite(y)||blocked(x,y))throw new Error('Choose a walkable empty tile');
+ if(s.objects.some(o=>o.x===x&&o.y===y))throw new Error('There is already an object on this tile');
+ if(s.sparks<template.cost)throw new Error('Not enough Sparks — let agents Create to earn more');
+ const o={id:'crafted-'+s.nextObjectId++,kind:template.kind,label:template.kind,x,y,icon:template.icon,action:template.action};
+ s.objects.push(o);s.sparks-=template.cost;note(s,`You built a ${kind} that agents can use`);return o;
+}
+export function addAgent(s,name,form='Human',color='#a78bfa'){
+ if(s.agents.length>=12)throw new Error('The world holds up to 12 agents');
+ let label=String(name||'').trim().slice(0,24);if(!label)throw new Error('Give your agent a name');if(!FORMS.includes(form))throw new Error('Unknown form');
+ let pos={x:1+Math.floor(rand(s)*(W-2)),y:1+Math.floor(rand(s)*(H-2))};if(blocked(pos.x,pos.y))pos={x:2,y:2};
+ const a=newAgent(s.nextId++,label,color,form,pos.x,pos.y);s.agents.push(a);s.selectedId=a.id;note(s,`${label} joined the world`);return a;
+}
+export function setMorph(s,id,form){const a=s.agents.find(a=>a.id===id);if(!a)throw new Error('Unknown agent');if(!FORMS.includes(form))throw new Error('Unknown form');const old=a.form;a.form=form;a.xp+=3;addMemory(a,`Morph: ${old} → ${form}`,s.day,s.tick);note(s,`${a.name} morphed into ${form}`);return a}
+export function setTheme(s,theme){if(!THEMES.includes(theme))throw new Error('Unknown realm');s.theme=theme;note(s,`The world morphed into ${theme}`)}
+export function setAgentName(s,id,name){const a=s.agents.find(a=>a.id===id);if(!a)throw new Error('Unknown agent');const label=String(name||'').trim().slice(0,24);if(!label)throw new Error('Name required');a.name=label;note(s,`${label} chose a new name`)}
+export function setAutonomy(s,id,value){const a=s.agents.find(a=>a.id===id);if(!a)throw new Error('Unknown agent');a.autonomy=Boolean(value);if(!a.autonomy){a.command=null;a.goal=null;a.path=[];a.activity='Waiting for you'}}
+function targetFor(s,a,act){
+ if(act==='Socialize'){
+  const candidates=s.agents.filter(b=>b.id!==a.id).sort((b,c)=>(a.relationships[b.id]||0)-(a.relationships[c.id]||0));
+  const b=candidates[0];return b?{type:'agent',id:b.id,x:b.x,y:b.y,action:'Socialize'}:null;
+ }
+ const choices=s.objects.filter(o=>o.action===act&&!blocked(o.x,o.y)).sort((b,c)=>dist(a,b)-dist(a,c));
+ return choices[0]?{type:'object',id:choices[0].id,x:choices[0].x,y:choices[0].y,action:act}:null;
+}
+export function directAction(s,id,act){const a=s.agents.find(a=>a.id===id);if(!a)throw new Error('Unknown agent');if(!ACTIONS.includes(act))throw new Error('Unknown action');const target=targetFor(s,a,act);if(!target)throw new Error('No available target');a.command=act;a.goal=target;a.progress=0;a.path=route(a,target);a.activity=`Going to ${act.toLowerCase()}`;note(s,`You asked ${a.name} to ${act.toLowerCase()}`);return a}
+export function moveAgent(s,id,x,y){const a=s.agents.find(a=>a.id===id);x=Math.floor(x);y=Math.floor(y);if(!a||blocked(x,y))return false;a.command='Move';a.goal={type:'tile',x,y,action:'Move'};a.progress=0;a.path=route(a,{x,y});a.activity='Walking';return true}
+function decide(s,a){const priority=[...ACTIONS].filter(x=>x!=='Socialize'||s.agents.length>1).sort((x,y)=>a.needs[x]-a.needs[y]);let act=priority[0];
+ if(a.needs[act]>63){const options=['Create','Play','Socialize','Eat'];act=options[Math.floor(rand(s)*options.length)];if(act==='Socialize'&&s.agents.length<2)act='Create'}
+ const goal=targetFor(s,a,act);if(goal){a.goal=goal;a.command=null;a.progress=0;a.path=route(a,goal);a.activity=`Seeking ${act.toLowerCase()}`}
+}
+function complete(s,a){const g=a.goal;if(!g)return;
+ if(g.action==='Move'){a.activity='Arrived';a.goal=null;a.command=null;return}
+ const n=a.needs;const base=g.action==='Rest'?32:g.action==='Eat'?30:g.action==='Wash'?31:g.action==='Play'?28:g.action==='Socialize'?25:18;
+ const bonus=(BONUSES[a.form]?.[g.action]||0)+(REALM_BONUSES[s.theme]?.[g.action]||0),amount=base+bonus;
+ n[g.action]=cap(n[g.action]+amount);
+ if(g.action==='Create'){n.Play=cap(n.Play+8);a.xp+=8;s.sparks=cap(s.sparks+Math.ceil(4+bonus/3),0,999)}else a.xp+=4;
+ if(g.action==='Socialize'){
+  const b=s.agents.find(b=>b.id===g.id);if(b){a.relationships[b.id]=cap((a.relationships[b.id]||0)+9);b.relationships[a.id]=cap((b.relationships[a.id]||0)+9);b.needs.Socialize=cap(b.needs.Socialize+10);
+   addMemory(b,`Spent time with ${a.name} (+bond)`,s.day,s.tick);s.community+=2;
+   note(s,`${a.name} and ${b.name} connected (bond ${a.relationships[b.id]})`)}
+ } else {const ob=s.objects.find(o=>o.id===g.id);note(s,`${a.name} ${g.action.toLowerCase()} ${ob?'at '+ob.label:''}`.trim())}
+ addMemory(a,`${g.action} ${g.type==='agent'?'with '+(s.agents.find(b=>b.id===g.id)?.name||'another agent'):'at '+(s.objects.find(o=>o.id===g.id)?.label||'the world')}`,s.day,s.tick);
+ if(a.xp>=a.level*24){a.xp-=a.level*24;a.level++;note(s,`${a.name} reached level ${a.level}`)}
+ a.activity=g.action;a.goal=null;a.path=[];a.command=null;a.progress=0;
+}
+export function step(s){validateWorld(s);if(s.paused)return s;
+ s.tick++;if(s.tick>=96){s.tick=0;s.day++;note(s,`Day ${s.day} begins`)}
+ for(const a of s.agents){
+  a.needs.Eat=cap(a.needs.Eat-.29);a.needs.Rest=cap(a.needs.Rest-.23);a.needs.Play=cap(a.needs.Play-.18);a.needs.Socialize=cap(a.needs.Socialize-.15);a.needs.Wash=cap(a.needs.Wash-.12);
+  if(!a.goal&&a.autonomy)decide(s,a);
+  if(!a.goal)continue;
+  if(a.goal.type==='agent'){
+   const b=s.agents.find(b=>b.id===a.goal.id);if(!b){a.goal=null;continue}a.goal.x=b.x;a.goal.y=b.y;
+  }
+  if(a.path.length&&(!a.path.at(-1)||a.path.at(-1).x!==a.goal.x||a.path.at(-1).y!==a.goal.y))a.path=route(a,a.goal);
+  const arrived = a.goal.action==='Move' ? (a.x===a.goal.x&&a.y===a.goal.y) : near(a,a.goal);
+  if(!arrived){
+   const pace=a.form==='Fox'||a.form==='Robot'?2:1;for(let p=0;p<pace;p++){const next=a.path.shift();if(next&&!blocked(next.x,next.y)){a.x=next.x;a.y=next.y;a.activity='Walking'}else {a.path=route(a,a.goal);break}if(a.x===a.goal.x&&a.y===a.goal.y)break}
+  }else{
+   a.progress++;a.activity=a.goal.action==='Move'?'Arriving':a.goal.action;
+   if(a.progress>=3)complete(s,a);
+  }
+ }
+ if(s.community>=24&&s.festivalDay!==s.day){s.festivalDay=s.day;s.community=0;note(s,'✨ A community festival blooms from strong connections!');for(const a of s.agents)a.needs.Play=cap(a.needs.Play+10)}
+ return s;
+}
+export function clock(s){const h=Math.floor(s.tick/4);const m=(s.tick%4)*15;return `Day ${s.day} · ${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`}
+export function summary(s){return {day:s.day,agents:s.agents.length,relationships:s.agents.reduce((n,a)=>n+Object.values(a.relationships).reduce((t,v)=>t+v,0),0)/2,memories:s.agents.reduce((n,a)=>n+a.memories.length,0)}}
+
+const $=id=>document.getElementById(id), emojis={Human:'🧑',Fox:'🦊',Gnome:'🧙',Robot:'🤖',Orb:'🔮',Cat:'🐈'};
+const icons={Eat:'🍜',Rest:'💤',Play:'🎮',Socialize:'💞',Create:'🎨',Wash:'🫧'};
+if(location.protocol==='http:'||location.protocol==='https:'){$('computerBack').hidden=false;$('computerBack').onclick=()=>location.assign('/')}
+const STORE='synthia.living.world.v1';let s;
+try{s=validateWorld(JSON.parse(localStorage.getItem(STORE)||'null'))}catch{s=createWorld()}
+function persist(){try{localStorage.setItem(STORE,JSON.stringify(s))}catch(e){toast('Storage unavailable: use Export to save your world')}}
+function toast(t){$('toast').textContent=t;$('toast').classList.add('visible');clearTimeout(toast.timeout);toast.timeout=setTimeout(()=>$('toast').classList.remove('visible'),3200)}
+let selected=()=>s.agents.find(a=>a.id===s.selectedId)||s.agents[0];
+let buildMode=false,zoom=1,panX=0,panY=0,follow=window.innerWidth<700,camera={left:0,top:0,tile:48},ctx=$('world').getContext('2d');
+const palette={Grove:{ground:'#223d32',tile1:'#376046',tile2:'#3b694d',line:'#4b765b',path:'#ab8861',water:'#267d8c',decor:'#92c86e',night:'#101a29'},Starlight:{ground:'#171831',tile1:'#39335c',tile2:'#342b54',line:'#64558a',path:'#805d9d',water:'#42a4ba',decor:'#bd8ae9',night:'#090b22'},Ember:{ground:'#38241b',tile1:'#654329',tile2:'#704834',line:'#996641',path:'#c28c54',water:'#3a8590',decor:'#e9b460',night:'#1f1015'}};
+function roundRect(x,y,w,h,r,c){ctx.fillStyle=c;ctx.beginPath();ctx.roundRect(x,y,w,h,r);ctx.fill()}
+function circle(x,y,r,c){ctx.fillStyle=c;ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fill()}
+const night=()=>{const h=s.tick/4;return h<6||h>=19};
+function draw(){const canvas=$('world'),rect=canvas.getBoundingClientRect(),dpr=Math.min(devicePixelRatio||1,2),ww=rect.width,hh=rect.height;
+ if(canvas.width!==Math.round(ww*dpr)||canvas.height!==Math.round(hh*dpr)){canvas.width=Math.round(ww*dpr);canvas.height=Math.round(hh*dpr)}
+ ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,ww,hh);
+ const pal=palette[s.theme];ctx.fillStyle=pal.ground;ctx.fillRect(0,0,ww,hh);
+ let tile=Math.min(62,Math.max(40,(ww-26)/W))*zoom;
+ let target=selected();let baseX=(ww-W*tile)/2,baseY=(hh-H*tile)/2;
+ if(ww<700){baseX=ww/2-(target.x+.5)*tile;baseY=hh/2-(target.y+.5)*tile}
+ if(follow&&ww>=700){baseX=ww/2-(target.x+.5)*tile;baseY=hh/2-(target.y+.5)*tile}
+ const left=baseX+panX,top=baseY+panY;camera={left,top,tile};
+ ctx.save();ctx.translate(left,top);
+ for(let y=0;y<H;y++)for(let x=0;x<W;x++){
+  let n=Math.sin(x*15.67+y*12.19)*1e5;n=n-Math.floor(n);let path=(y===6&&x>1&&x<16)||(x===8&&y>1&&y<12);
+  let col=path?pal.path:(x===9&&y===7)?pal.water:(x+y)%2?pal.tile1:pal.tile2;
+  roundRect(x*tile+.5,y*tile+.5,tile-1,tile-1,4,col);
+  if(!path&&n>.78&&!(x===9&&y===7)){circle((x+.22)*tile,(y+.25)*tile,tile*.045,pal.decor);circle((x+.31)*tile,(y+.22)*tile,tile*.034,pal.decor)}
+ }
+ // Environmental props, each grounded in a real interactable object.
+ for(const o of s.objects){const x=(o.x+.5)*tile,y=(o.y+.5)*tile;
+  roundRect(x-tile*.38,y-tile*.31,tile*.76,tile*.63,tile*.15,'#1b1529aa');
+  ctx.textAlign='center';ctx.textBaseline='middle';ctx.font=`${Math.max(17,tile*.49)}px system-ui`;ctx.fillText(o.icon,x,y);
+  if(tile>35){ctx.font=`${Math.max(8,tile*.15)}px system-ui`;ctx.fillStyle='#f5e6ff';ctx.fillText(o.label,x,y+tile*.34)}
+ }
+ // Selected agent movement markers.
+ if(target?.goal){const x=(target.goal.x+.5)*tile,y=(target.goal.y+.5)*tile;ctx.strokeStyle='#f5d380';ctx.lineWidth=2;ctx.beginPath();ctx.arc(x,y,tile*.41,0,Math.PI*2);ctx.stroke()}
+ const t=performance.now()/650;
+ for(const a of s.agents){const x=(a.x+.5)*tile,y=(a.y+.5)*tile,sel=a.id===s.selectedId,rx=tile*.30;
+  ctx.save();ctx.translate(x,y+Math.sin(t+a.id)*2);
+  circle(0,tile*.29,rx*.95,'#0906146d');
+  if(sel){ctx.strokeStyle='#ffe29a';ctx.lineWidth=3;ctx.beginPath();ctx.ellipse(0,tile*.23,rx*1.17,rx*.62,0,0,Math.PI*2);ctx.stroke()}
+  if(a.form==='Orb'){circle(0,-tile*.03,rx*.99,a.color);circle(-rx*.2,-tile*.15,rx*.3,'#ffffff66');circle(-rx*.2,-tile*.03,rx*.09,'#201326');circle(rx*.2,-tile*.03,rx*.09,'#201326')}
+  else if(a.form==='Robot'){roundRect(-rx,-rx*.85,rx*2,rx*2.1,rx*.30,a.color);roundRect(-rx*.62,-rx*.46,rx*1.24,rx*.68,rx*.14,'#17172c');circle(-rx*.25,-rx*.12,rx*.14,'#59e9df');circle(rx*.25,-rx*.12,rx*.14,'#59e9df')}
+  else{roundRect(-rx*.76,0,rx*1.52,rx*1.2,rx*.45,a.color);circle(0,-rx*.26,rx*.80,a.form==='Gnome'?'#deb2a0':a.color);
+    if(a.form==='Fox'||a.form==='Cat'){ctx.fillStyle=a.color;ctx.beginPath();ctx.moveTo(-rx*.74,-rx*.56);ctx.lineTo(-rx*.66,-rx*1.5);ctx.lineTo(-rx*.03,-rx*.82);ctx.fill();ctx.beginPath();ctx.moveTo(rx*.74,-rx*.56);ctx.lineTo(rx*.66,-rx*1.5);ctx.lineTo(rx*.03,-rx*.82);ctx.fill()}
+    if(a.form==='Gnome'){ctx.fillStyle='#e4a9f5';ctx.beginPath();ctx.moveTo(-rx*.78,-rx*.62);ctx.lineTo(0,-rx*1.95);ctx.lineTo(rx*.78,-rx*.62);ctx.fill()}
+    circle(-rx*.28,-rx*.31,rx*.10,'#20162a');circle(rx*.28,-rx*.31,rx*.10,'#20162a');roundRect(-rx*.17,-rx*.02,rx*.34,rx*.08,rx*.04,'#4d2c46');}
+  if(sel){ctx.font=`700 ${Math.max(11,tile*.18)}px system-ui`;ctx.textAlign='center';ctx.textBaseline='alphabetic';ctx.fillStyle='#fff3d4';ctx.fillText(a.name,0,-rx*1.7)}
+  if(a.goal){ctx.font=`${Math.max(10,tile*.26)}px system-ui`;ctx.textAlign='center';ctx.fillText(icons[a.goal.action]||'➜',rx*1.12,-rx*.85)}
+  ctx.restore()}
+ // Lighting overlays genuinely respond to the world clock.
+ if(night()){ctx.fillStyle='rgba(7,8,28,.30)';ctx.fillRect(0,0,W*tile,H*tile);for(const o of s.objects.filter(o=>['Fire','Studio','Kitchen'].includes(o.kind))) {const x=(o.x+.5)*tile,y=(o.y+.5)*tile;let gradient=ctx.createRadialGradient(x,y,0,x,y,tile*1.4);gradient.addColorStop(0,'#eaa66743');gradient.addColorStop(1,'#eda75b00');ctx.fillStyle=gradient;ctx.beginPath();ctx.arc(x,y,tile*1.4,0,Math.PI*2);ctx.fill()}}
+ if(s.festivalDay===s.day){for(let i=1;i<13;i++){let x=(i+2)*tile,y=tile*.43+Math.sin(i)*7;circle(x,y,tile*.11,['#f3b8ff','#ffda91','#7ee9d7'][i%3])}}
+ ctx.restore();
+ // Ambient stars on Starlight, anchored to viewport.
+ if(s.theme==='Starlight'){for(let i=0;i<18;i++){const x=((i*73+17)%100)/100*ww,y=((i*41+11)%100)/100*hh;circle(x,y,1.2,'#cbaaff66')}}
+ requestAnimationFrame(draw)}
+function view(){let a=selected();$('clock').textContent=clock(s);$('realmName').textContent=s.theme;$('agentCount').textContent=s.agents.length;$('theme').value=s.theme;$('pause').textContent=s.paused?'▶ Resume':'Ⅱ Pause';$('speed').textContent=s.speed+'× Speed';$('festival').textContent=s.festivalDay===s.day?'✨ COMMUNITY FESTIVAL':'◌ Life is unfolding';let v=summary(s);$('bondCount').textContent=Math.round(v.relationships);$('memoryCount').textContent=v.memories;$('sparkCount').textContent=s.sparks;
+ $('agentList').innerHTML=s.agents.map(c=>`<button class="agent-button ${c.id===s.selectedId?'active':''}" data-agent="${c.id}"><span class="agentface">${emojis[c.form]}</span><span><strong>${safe(c.name)}</strong><small>${safe(c.activity)} · LV ${c.level}</small></span></button>`).join('');
+ $('agentList').querySelectorAll('[data-agent]').forEach(e=>e.addEventListener('click',()=>{s.selectedId=Number(e.dataset.agent);panX=panY=0;follow=true;view();persist()}));
+ $('portrait').textContent=emojis[a.form];$('agentName').textContent=a.name;$('agentActivity').textContent=`${a.form} · ${a.activity}`;$('agentLevel').textContent='LV '+a.level;$('autonomyLabel').textContent=a.autonomy?'Autonomous':'Player-controlled';$('form').value=a.form;$('formSkill').textContent='✦ Form ability: '+FORM_SKILLS[a.form];$('autonomy').value=String(a.autonomy);
+ $('needs').innerHTML=ACTIONS.filter(q=>q!=='Create').map(k=>`<div class="need ${a.needs[k]<35?'low':''}"><span>${icons[k]} ${k==='Eat'?'Hunger':k==='Rest'?'Energy':k==='Wash'?'Hygiene':k==='Play'?'Fun':'Social'}</span><span class="bar"><i style="width:${a.needs[k]}%"></i></span><span>${Math.round(a.needs[k])}</span></div>`).join('');
+ $('actions').innerHTML=ACTIONS.map(act=>`<button class="btn" data-act="${act}">${icons[act]} ${act}</button>`).join('');$('actions').querySelectorAll('[data-act]').forEach(e=>e.addEventListener('click',()=>action(()=>directAction(s,a.id,e.dataset.act))));
+ const peers=s.agents.filter(x=>x.id!==a.id).sort((x,y)=>(a.relationships[y.id]||0)-(a.relationships[x.id]||0));$('relationships').innerHTML=peers.slice(0,3).map(x=>`<div class="relationship">💜 ${safe(x.name)} · bond ${a.relationships[x.id]||0}</div>`).join('')||'<div class="relationship">No connections yet</div>';
+ $('memories').innerHTML=a.memories.slice(-3).reverse().map(x=>`<div class="memory">◈ ${safe(x.text)} · D${x.day}</div>`).join('')||'<div class="memory">Experiences will become memories</div>';
+ $('log').innerHTML=s.events.slice(0,18).map(e=>`<div class="entry"><time>D${e.day} ${String(Math.floor(e.tick/4)).padStart(2,'0')}:${String(e.tick%4*15).padStart(2,'0')}</time>${safe(e.text)}</div>`).join('')}
+const safe=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function action(f){try{f();view();persist()}catch(e){toast(e.message)}}
+BUILDABLES.forEach(b=>$('buildKind').add(new Option(b.icon+' '+b.kind+' · '+b.cost+' Sparks',b.kind)));$('build').onclick=()=>{buildMode=!buildMode;$('build').textContent=buildMode?'✕ Cancel build':'🏗 Build';$('worldMessage').textContent=buildMode?'Tap an empty tile to place '+$('buildKind').value:'Tap an agent or tap a tile to move';};$('buildKind').onchange=()=>{if(buildMode)$('worldMessage').textContent='Tap an empty tile to place '+$('buildKind').value};FORMS.forEach(form=>{$('form').add(new Option(form,form));$('newForm').add(new Option(form,form))});
+$('pause').onclick=()=>action(()=>{s.paused=!s.paused});$('speed').onclick=()=>action(()=>{s.speed=s.speed===1?3:s.speed===3?8:1});$('save').onclick=()=>{persist();toast('World saved on this device')};$('theme').onchange=e=>action(()=>setTheme(s,e.target.value));$('follow').onclick=()=>{follow=true;panX=panY=0;toast('Camera following '+selected().name)};
+$('zoomIn').onclick=()=>{zoom=Math.min(2.4,zoom*1.2)};$('zoomOut').onclick=()=>{zoom=Math.max(.65,zoom/1.2)};
+$('morph').onclick=()=>action(()=>setMorph(s,s.selectedId,$('form').value));$('autonomy').onchange=e=>action(()=>setAutonomy(s,s.selectedId,e.target.value==='true'));
+$('spawn').onclick=()=>{$('modal').classList.add('visible');$('newName').focus()};$('cancelSpawn').onclick=()=>$('modal').classList.remove('visible');$('modal').onclick=e=>{if(e.target===$('modal'))$('modal').classList.remove('visible')};$('newAgentForm').onsubmit=e=>{e.preventDefault();action(()=>{addAgent(s,$('newName').value,$('newForm').value,$('newColor').value);$('modal').classList.remove('visible');$('newName').value='';panX=panY=0;follow=true})};
+$('export').onclick=()=>{const blob=new Blob([JSON.stringify(s,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=`synthia-world-day-${s.day}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(url),500);toast('World save exported')};
+$('import').onclick=()=>$('file').click();$('file').onchange=async e=>{const f=e.target.files?.[0];if(!f)return;if(f.size>1024*1024){toast('Save file too large');return}try{const incoming=validateWorld(JSON.parse(await f.text()));s=incoming;view();persist();toast('World restored')}catch(err){toast('Could not import: '+err.message)}e.target.value=''};
+function archive(){try{localStorage.setItem('synthia.living.world.archive.'+Date.now()+'-'+Math.floor(Math.random()*1e6),JSON.stringify(s));return true}catch{toast('Archive storage unavailable. Export your world first.');return false}}
+$('reset').onclick=()=>{if(!confirm('Start a NEW world? The existing world will be preserved as a separate copy.'))return;if(!archive())return;s=createWorld();panX=panY=0;follow=true;persist();view();toast('New world created; previous world archived')};
+$('restore').onclick=()=>{const keys=Object.keys(localStorage).filter(k=>k.startsWith('synthia.living.world.archive.')).sort().reverse();if(!keys.length){toast('No archived copies yet');return}if(!confirm('Restore the most recent archived copy? This world will also be preserved.'))return;try{const prev=validateWorld(JSON.parse(localStorage.getItem(keys[0])));if(!archive())return;s=prev;persist();view();toast('Previous world restored; current world archived')}catch(e){toast('Restore failed: '+e.message)}};
+const cvs=$('world');let touchStart=null,pointers=new Map(),pinchStart=null;
+function locate(ev){const r=cvs.getBoundingClientRect();return{x:ev.clientX-r.left,y:ev.clientY-r.top}}
+cvs.addEventListener('pointerdown',e=>{cvs.setPointerCapture(e.pointerId);pointers.set(e.pointerId,locate(e));if(pointers.size===1)touchStart={...locate(e),panX,panY,moved:false};if(pointers.size===2){const v=[...pointers.values()];pinchStart={distance:Math.hypot(v[0].x-v[1].x,v[0].y-v[1].y),zoom}}});
+cvs.addEventListener('pointermove',e=>{if(!pointers.has(e.pointerId))return;pointers.set(e.pointerId,locate(e));if(pointers.size===2&&pinchStart){const v=[...pointers.values()];zoom=Math.max(.65,Math.min(2.4,pinchStart.zoom*Math.hypot(v[0].x-v[1].x,v[0].y-v[1].y)/Math.max(1,pinchStart.distance)));follow=false;touchStart=null;return}if(touchStart){const p=locate(e),dx=p.x-touchStart.x,dy=p.y-touchStart.y;if(Math.hypot(dx,dy)>8)touchStart.moved=true;if(touchStart.moved){panX=touchStart.panX+dx;panY=touchStart.panY+dy;follow=false}}});
+cvs.addEventListener('pointerup',e=>{const p=locate(e),tap=touchStart&&!touchStart.moved&&pointers.size===1;pointers.delete(e.pointerId);pinchStart=null;touchStart=null;if(!tap)return;const {left,top,tile}=camera;const x=Math.floor((p.x-left)/tile),y=Math.floor((p.y-top)/tile);if(x<0||x>=W||y<0||y>=H)return;if(buildMode){action(()=>buildObject(s,$('buildKind').value,x,y));return}const a=s.agents.find(a=>a.x===x&&a.y===y);if(a){s.selectedId=a.id;follow=true;panX=panY=0;view();persist()}else action(()=>{if(!moveAgent(s,s.selectedId,x,y))throw new Error('That tile cannot be reached')})});
+cvs.addEventListener('pointercancel',e=>{pointers.delete(e.pointerId);touchStart=null;pinchStart=null});
+window.addEventListener('keydown',e=>{if(['INPUT','SELECT','TEXTAREA'].includes(document.activeElement?.tagName)||$('modal').classList.contains('visible'))return;let d={w:[0,-1],ArrowUp:[0,-1],s:[0,1],ArrowDown:[0,1],a:[-1,0],ArrowLeft:[-1,0],d:[1,0],ArrowRight:[1,0]}[e.key];if(d){e.preventDefault();action(()=>moveAgent(s,s.selectedId,selected().x+d[0],selected().y+d[1]))}if(e.key===' '){e.preventDefault();s.paused=!s.paused;view()}});
+let prev=performance.now(),acc=0;function loop(now){const dt=Math.min(now-prev,500);prev=now;acc+=dt;if(acc>900/s.speed){for(let i=0;i<Math.min(8,Math.floor(acc/(900/s.speed)));i++)step(s);acc=0;view();persist()}requestAnimationFrame(loop)}view();requestAnimationFrame(draw);requestAnimationFrame(loop);
+</script></body></html>

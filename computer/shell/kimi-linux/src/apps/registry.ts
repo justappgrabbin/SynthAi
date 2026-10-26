@@ -1,6 +1,7 @@
 import type { AppDefinition } from '@/types';
 
 export const APP_REGISTRY: AppDefinition[] = [
+  { id: 'livingworld', name: 'Living World', icon: 'Gamepad2', category: 'Games', description: 'Autonomous morphing agent life simulation — works offline', defaultSize: { width: 920, height: 700 }, minSize: { width: 320, height: 420 } },
   { id: 'filemanager', name: 'File Manager', icon: 'Folder', category: 'System', description: 'Browse and manage files', defaultSize: { width: 800, height: 550 }, minSize: { width: 320, height: 240 } },
   { id: 'ingest', name: 'Import', icon: 'FileUp', category: 'System', description: 'Import and address files or ZIP archives', defaultSize: { width: 850, height: 580 }, minSize: { width: 380, height: 300 } },
   { id: 'texteditor', name: 'Text Editor', icon: 'FileText', category: 'System', description: 'Edit local text files', defaultSize: { width: 640, height: 480 }, minSize: { width: 320, height: 240 } },
@@ -9,4 +10,4 @@ export const APP_REGISTRY: AppDefinition[] = [
 ];
 export const getAppById = (id: string): AppDefinition | undefined => APP_REGISTRY.find((a) => a.id === id);
 export const getAppsByCategory = (category: string): AppDefinition[] => APP_REGISTRY.filter((a) => a.category === category);
-export const getDefaultDockApps = (): string[] => ['filemanager','ingest','chat','codeeditor','texteditor'];
+export const getDefaultDockApps = (): string[] => ['livingworld','filemanager','ingest','chat','codeeditor','texteditor'];
