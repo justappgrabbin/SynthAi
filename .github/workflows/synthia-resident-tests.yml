@@ -25,3 +25,5 @@ jobs:
           node-version: '20'
       - name: Run local Synthia / Computer acceptance tests
         run: node --test computer/tests/model-maker-dual.test.mjs computer/tests/synthia-resident.test.mjs computer/tests/runtime.test.mjs computer/tests/reassembly-ingest-e2e.test.mjs
+      - name: Build real Computer desktop and typecheck Model Maker app
+        run: npm --prefix computer/shell/kimi-linux ci && npm --prefix computer/shell/kimi-linux run build
