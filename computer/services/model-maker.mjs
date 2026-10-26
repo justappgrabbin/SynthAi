@@ -44,10 +44,12 @@ export class DualInterfaceModel {
     Object.assign(this, { id, state, resident });
     this.storageKey = 'computer.synthia.models.' + id + '.v1';
     const saved = state.get(this.storageKey, null);
-    this.records = Array.isArray(saved?.records) ? saved.records.slice(-MAX_RECORDS) : [];
+    // The owner record ledger is append-only; only the active decoder window is bounded.
+    this.records = Array.isArray(saved?.records) ? saved.records : [];
     this.revision = saved?.revision ?? 0;
     this.transitions = new Map();
     this.starts = new Map();
+    this.capabilityStarts = new Map();
     this.#rebuild();
     this.semantic = Object.freeze({ read: (text, options) => this.read(text, options) });
     this.language = Object.freeze({
@@ -63,13 +65,15 @@ export class DualInterfaceModel {
   #rebuild() {
     this.transitions.clear();
     this.starts.clear();
+    this.capabilityStarts.clear();
     let pairs = 0;
-    for (const r of this.records) {
+    for (const r of this.records.slice(-MAX_RECORDS)) {
       if (!r.accepted) continue;
       const out = tokens(r.response).slice(0, MAX_RESPONSE_TOKENS);
       if (!out.length) continue;
       const first = out[0];
       for (const w of new Set(words(r.prompt))) this.#increment(this.starts, w, first);
+      this.#increment(this.capabilityStarts, r.capability, first);
       let p2 = START, p1 = START;
       for (const w of [...out, END]) {
         this.#increment(this.transitions, key([p2, p1]), w);
@@ -126,7 +130,6 @@ export class DualInterfaceModel {
       capability, source, epistemic: 'owner-training-example',
       learnedAt: new Date().toISOString() };
     this.records.push(entry);
-    this.records = this.records.slice(-MAX_RECORDS);
     this.revision++;
     this.#rebuild();
     await this.state.set(this.storageKey, { version: 1, revision: this.revision,
@@ -135,8 +138,10 @@ export class DualInterfaceModel {
   }
   async generate(text, { reading = null, maxTokens = 72 } = {}) {
     const semantic = await this.read(text, { reading });
-    const matching = this.records.filter(r => r.accepted)
-      .map(r => ({ r, relevance: overlap(text, r.prompt) }))
+    const learnedCapability = semantic.inference?.chosen?.label ?? null;
+    const matching = this.records.slice(-MAX_RECORDS).filter(r => r.accepted)
+      .map(r => ({ r, relevance: overlap(text, r.prompt),
+        neuralMatch: learnedCapability != null && r.capability === learnedCapability }))
       .sort((a, b) => b.relevance - a.relevance);
     if (!matching.length || matching[0].relevance === 0 || this.examples < 3)
       return { ready: false, reason: 'insufficient-approved-relevant-language-examples',
@@ -150,6 +155,10 @@ export class DualInterfaceModel {
       for (const [t, count] of this.starts.get(w) ?? [])
         starts.set(t, (starts.get(t) ?? 0) + count);
     }
+    // The neural task head alters the decoder distribution; it does not
+    // fabricate factual meaning or grant a capability execution permission.
+    if (learnedCapability) for (const [t, count] of this.capabilityStarts.get(learnedCapability) ?? [])
+      starts.set(t, (starts.get(t) ?? 0) + 2 * count);
     if (!starts.size) return { ready: false, reason: 'no-conditioned-decode-start',
       semantic, model: this.status(), text: null };
     const choose = (distribution, salt) => {
@@ -175,7 +184,8 @@ export class DualInterfaceModel {
     const output = render(result);
     return { ready: Boolean(output), text: output || null, semantic,
       model: this.status(), relevantExampleId: best.r.id,
-      relevance: best.relevance, generatedBy: 'learned-conditional-decoder',
+      relevance: best.relevance, neuralCapability: learnedCapability,
+      generatedBy: 'learned-conditional-decoder',
       provider: 'synthia:model-maker-dual' };
   }
 }
