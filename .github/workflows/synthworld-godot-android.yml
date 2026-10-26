@@ -1,0 +1,113 @@
+name: SynthWorld Godot Android verification
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - 'synthworld/native-rigged-morph-20261025'
+    paths:
+      - 'computer/native/synthworld/**'
+      - '.github/workflows/synthworld-godot-android.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  godot-android:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    container:
+      image: barichello/godot-ci:4.6.3
+    env:
+      PROJECT: computer/native/synthworld/game
+    steps:
+      - uses: actions/checkout@v4
+      - name: Report engine and provenance
+        shell: bash
+        run: |
+          godot --version
+          echo 'Testing native Godot SynthWorld, not the Capacitor or Hover UI.'
+          echo 'Donor GLBs are not in this public APK; their license is unverified.'
+      - name: Import and parse native project
+        shell: bash
+        run: |
+          set -o pipefail
+          godot --headless --path "$PROJECT" --editor --import --quit 2>&1 | tee /tmp/synthworld-import.log
+          if grep -E 'SCRIPT ERROR|Parse Error|ERROR:.*Failed to load' /tmp/synthworld-import.log; then exit 1; fi
+      - name: Execute original world action tests
+        shell: bash
+        run: godot --headless --path "$PROJECT" --script res://tests/execution_test.gd
+      - name: Execute skeleton and camera acceptance tests
+        shell: bash
+        run: godot --headless --path "$PROJECT" --script res://tests/visual_acceptance_test.gd
+      - name: Export isolated Android preview (different package ID)
+        shell: bash
+        run: |
+          # Never overwrite the user's separately signed installed app.
+          sed -i 's/com\.synthworld\.app/com.synthworld.rigpreview/g' "$PROJECT/export_presets.cfg"
+          mkdir -p dist
+          # The CI container stores Android templates and SDK settings under /root,
+          # while GitHub Actions sets HOME=/github/home for its job runner.
+          test -f /root/.local/share/godot/export_templates/4.6.3.stable/android_debug.apk
+          HOME=/root godot --headless --path "$PROJECT" --export-debug 'Android' "$GITHUB_WORKSPACE/dist/SynthWorld-rigpreview-debug.apk"
+          test -s dist/SynthWorld-rigpreview-debug.apk
+          unzip -t dist/SynthWorld-rigpreview-debug.apk | tail -n 2
+      - name: Upload phone-installable preview APK (procedural rig only)
+        uses: actions/upload-artifact@v4
+        with:
+          name: SynthWorld-Godot-Android-RigPreview
+          path: dist/SynthWorld-rigpreview-debug.apk
+          if-no-files-found: error
+          retention-days: 14
+      - name: Export x86_64 Android emulator test APK
+        shell: bash
+        run: |
+          sed -i 's/architectures\/armeabi-v7a=true/architectures\/armeabi-v7a=false/g' "$PROJECT/export_presets.cfg"
+          sed -i 's/architectures\/arm64-v8a=true/architectures\/arm64-v8a=false/g' "$PROJECT/export_presets.cfg"
+          sed -i 's/architectures\/x86_64=false/architectures\/x86_64=true/g' "$PROJECT/export_presets.cfg"
+          HOME=/root godot --headless --path "$PROJECT" --export-debug 'Android' "$GITHUB_WORKSPACE/dist/SynthWorld-emulator-x86_64.apk"
+          test -s dist/SynthWorld-emulator-x86_64.apk
+      - name: Upload emulator-only APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: SynthWorld-Android-EmulatorOnly
+          path: dist/SynthWorld-emulator-x86_64.apk
+          if-no-files-found: error
+          retention-days: 7
+      - name: Upload native Godot source for local donor asset import
+        uses: actions/upload-artifact@v4
+        with:
+          name: SynthWorld-Godot-Source
+          path: computer/native/synthworld/game/
+          retention-days: 14
+
+  android-emulator-launch:
+    needs: godot-android
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: SynthWorld-Android-EmulatorOnly
+          path: emulator
+      - name: Boot Android emulator and launch real native Godot world
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 35
+          arch: x86_64
+          target: google_apis
+          profile: pixel_4
+          emulator-options: -no-window -gpu swiftshader_indirect -no-audio -no-boot-anim -camera-back none -camera-front none
+          script: |
+            set -e
+            adb install emulator/SynthWorld-emulator-x86_64.apk
+            adb shell pm list packages | grep -F 'com.synthworld.rigpreview'
+            adb logcat -c
+            adb shell monkey -p com.synthworld.rigpreview 1
+            sleep 12
+            adb shell input tap 250 400 || true
+            sleep 10
+            adb logcat -d > /tmp/synthworld-emulator-logcat.txt
+            grep -F 'SYNTHWORLD_WORLD_READY=true' /tmp/synthworld-emulator-logcat.txt
+            grep -F 'SYNTHWORLD_PRESENTATION_READY=true' /tmp/synthworld-emulator-logcat.txt
+            if grep -Ei 'FATAL EXCEPTION|SIGSEGV|Fatal signal' /tmp/synthworld-emulator-logcat.txt; then exit 1; fi
