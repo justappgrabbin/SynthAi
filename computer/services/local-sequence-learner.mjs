@@ -51,6 +51,8 @@ export class LocalSequenceLearner {
     const turn=history.find(x=>x.id===turnId);
     if (!turn || !validText(turn.input,1,12000))
       throw new TypeError('Cannot train without an existing chat turn.');
+    if (answer.trim() === String(turn.text ?? '').trim())
+      throw new TypeError('Provide a different correction; existing model output cannot teach itself.');
     const examples=this.examples().filter(x=>x.turnId!==turnId);
     const next=[...examples,{turnId,query:turn.input,answer:answer.trim(),source:'explicit-correction',at:new Date().toISOString()}].slice(-MAX_EXAMPLES);
     await this.state.set(KEY,next,{source:'synthia-explicit-language-correction'});
