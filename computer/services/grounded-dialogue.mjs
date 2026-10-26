@@ -60,7 +60,7 @@ export class GroundedDialogue {
     }
     if (has('files','file','imports','imported','uploaded','uploads')) {
       const items = this.computer.vfs.list('/home/user/Imports/');
-      const terms = TERMS(query).filter(x => !['file','files','imports','imported','uploaded','uploads'].includes(x));
+      const terms = TERMS(query).filter(x => !['file','files','imports','imported','uploaded','uploads','list','show','all','current','names'].includes(x));
       const hits = terms.length ? items.filter(item => relevant(item.path, terms) > 0) : items;
       if (!hits.length) return make(terms.length
         ? 'No imported file name matches those terms in this Computer.'
