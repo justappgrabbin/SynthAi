@@ -409,7 +409,7 @@ jobs:
           if-no-files-found: error
 
       - name: Publish verified APK update channel
-        if: ${{ (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) && env.SYNTHAI_KEYSTORE != '' && !startsWith(github.ref_name, 'hover/repair-') }}
+        if: ${{ github.ref == 'refs/heads/main' && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) && env.SYNTHAI_KEYSTORE != '' && !startsWith(github.ref_name, 'hover/repair-') }}
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
