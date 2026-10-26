@@ -4,6 +4,7 @@ on:
     branches:
       - integration/synthia-resident-dual-graph-20261025
       - integration/evidence-linked-kimi-donors-20261025
+      - integration/synthia-real-dialogue-20261026
     paths:
       - 'computer/**'
       - '.github/workflows/synthia-resident-tests.yml'
@@ -24,4 +25,4 @@ jobs:
         with:
           node-version: '20'
       - name: Run local Synthia / Computer acceptance tests
-        run: node --test computer/tests/synthia-resident.test.mjs computer/tests/kimi-donor-evidence.test.mjs computer/tests/runtime.test.mjs computer/tests/reassembly-ingest-e2e.test.mjs
+        run: node --test computer/tests/synthia-resident.test.mjs computer/tests/kimi-donor-evidence.test.mjs computer/tests/grounded-dialogue.test.mjs computer/tests/runtime.test.mjs computer/tests/reassembly-ingest-e2e.test.mjs
