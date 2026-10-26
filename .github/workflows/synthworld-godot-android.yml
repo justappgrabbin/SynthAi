@@ -59,9 +59,55 @@ jobs:
           path: dist/SynthWorld-rigpreview-debug.apk
           if-no-files-found: error
           retention-days: 14
+      - name: Export x86_64 Android emulator test APK
+        shell: bash
+        run: |
+          sed -i 's/architectures\/armeabi-v7a=true/architectures\/armeabi-v7a=false/g' "$PROJECT/export_presets.cfg"
+          sed -i 's/architectures\/arm64-v8a=true/architectures\/arm64-v8a=false/g' "$PROJECT/export_presets.cfg"
+          sed -i 's/architectures\/x86_64=false/architectures\/x86_64=true/g' "$PROJECT/export_presets.cfg"
+          HOME=/root godot --headless --path "$PROJECT" --export-debug 'Android' "$GITHUB_WORKSPACE/dist/SynthWorld-emulator-x86_64.apk"
+          test -s dist/SynthWorld-emulator-x86_64.apk
+      - name: Upload emulator-only APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: SynthWorld-Android-EmulatorOnly
+          path: dist/SynthWorld-emulator-x86_64.apk
+          if-no-files-found: error
+          retention-days: 7
       - name: Upload native Godot source for local donor asset import
         uses: actions/upload-artifact@v4
         with:
           name: SynthWorld-Godot-Source
           path: computer/native/synthworld/game/
           retention-days: 14
+
+  android-emulator-launch:
+    needs: godot-android
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: SynthWorld-Android-EmulatorOnly
+          path: emulator
+      - name: Boot Android emulator and launch real native Godot world
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 35
+          arch: x86_64
+          target: google_apis
+          profile: pixel_4
+          emulator-options: -no-window -gpu swiftshader_indirect -no-audio -no-boot-anim -camera-back none -camera-front none
+          script: |
+            set -e
+            adb install emulator/SynthWorld-emulator-x86_64.apk
+            adb shell pm list packages | grep -F 'com.synthworld.rigpreview'
+            adb logcat -c
+            adb shell monkey -p com.synthworld.rigpreview 1
+            sleep 12
+            adb shell input tap 250 400 || true
+            sleep 10
+            adb logcat -d > /tmp/synthworld-emulator-logcat.txt
+            grep -F 'SYNTHWORLD_WORLD_READY=true' /tmp/synthworld-emulator-logcat.txt
+            grep -F 'SYNTHWORLD_PRESENTATION_READY=true' /tmp/synthworld-emulator-logcat.txt
+            if grep -Ei 'FATAL EXCEPTION|SIGSEGV|Fatal signal' /tmp/synthworld-emulator-logcat.txt; then exit 1; fi
