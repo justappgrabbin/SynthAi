@@ -74,7 +74,9 @@ jobs:
           node --test --test-concurrency=1 computer/hover/test/22-phone-contact.test.mjs computer/hover/test/09-front-screen.test.mjs computer/hover/test/11-birth-mirror-runtime.test.mjs computer/hover/test/20-hover-task-worker.test.mjs
           npm install --prefix /tmp/hover-ui-test playwright@1.58.2
           /tmp/hover-ui-test/node_modules/.bin/playwright install --with-deps chromium
+          node --test --test-concurrency=1 computer/hover/test/23-playable-hover-world.test.mjs
           node .github/scripts/hover-ui-smoke.mjs
+          node .github/scripts/hover-world-ui-smoke.mjs
 
       - name: Verify real Resonance onboarding and returning-profile sign-in
         run: node .github/scripts/resonance-entry-smoke.mjs
