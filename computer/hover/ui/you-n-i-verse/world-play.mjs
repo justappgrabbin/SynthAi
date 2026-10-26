@@ -172,7 +172,7 @@ export function mountPlayableWorld(root = document) {
     world.select(near.id);
     world.interactPlayer();
     receipt.textContent = world.worldLedger.at(-1)?.text || 'Interaction recorded.';
-    updateUi(); save(); return true;
+    updateUi(); save(true); return true;
   }
   function morphObject() {
     const near = nearestReachable(world);
@@ -180,12 +180,12 @@ export function mountPlayableWorld(root = document) {
     world.select(near.id);
     const changed = world.morphSelected('transform');
     receipt.textContent = changed ? 'Morph applied to ' + near.name + '; world event recorded.' : 'This object cannot be morphed.';
-    updateUi(); save(); return changed;
+    updateUi(); save(true); return changed;
   }
   const button = (id, task) => read(id)?.addEventListener('click', task);
-  button('btn-form', () => { state.formIndex = nextForm(state.formIndex); updateUi(); receipt.textContent = 'Avatar form changed to ' + FORM_NAMES[state.formIndex] + '.'; save(); });
-  button('btn-companion', () => { state.companion = !state.companion; updateUi(); save(); });
-  button('btn-follow', () => { state.following = !state.following; updateUi(); save(); });
+  button('btn-form', () => { state.formIndex = nextForm(state.formIndex); updateUi(); receipt.textContent = 'Avatar form changed to ' + FORM_NAMES[state.formIndex] + '.'; save(true); });
+  button('btn-companion', () => { state.companion = !state.companion; updateUi(); save(true); });
+  button('btn-follow', () => { state.following = !state.following; updateUi(); save(true); });
   button('btn-save', () => save());
   button('btn-interact', interact);
   button('btn-morph-prop', morphObject);
