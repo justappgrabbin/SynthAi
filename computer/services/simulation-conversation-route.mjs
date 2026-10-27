@@ -8,7 +8,7 @@ export function parseDiffusionRequest(text) {
   if (!polymer || !/\b(simulat(?:e|ion)|calculat(?:e|ion)|diffus(?:ion|ivity))\b/i.test(text))
     return null;
   const mass = text.match(/(\d+(?:\.\d+)?)\s*g\s*\/\s*mol\b/i);
-  const temp = text.match(/\b(?:at|temp(?:erature)?\s*(?:of|=|:)?\s*)(-?\d+(?:\.\d+)?)\s*(?:°\s*|degrees?\s*)?c\b/i);
+  const temp = text.match(/\b(?:at\s*|temp(?:erature)?\s*(?:of|=|:)?\s*)(-?\d+(?:\.\d+)?)\s*(?:°\s*|degrees?\s*)?c\b/i);
   if (!mass || !temp) return { status: 'incomplete', polymer,
     guidance: 'For a synthetic calculation, specify both values: "simulate PP 100 g/mol at 23 C".' };
   const massGMol = Number(mass[1]);
