@@ -13,7 +13,9 @@ const worker = fileURLToPath(new URL('./model-inference-worker.py', import.meta.
 export class ModelIntegrationGateway {
   constructor({ env = process.env, python = null, timeoutMs = 120000, bus = null,
                 state = null } = {}) {
-    this.env = env;
+    this.env = {...env};
+    const lastModelDir = state?.get('models.trainedModelDir', null);
+    if(lastModelDir) this.env.SYNTHIA_MODELMAKER_DIR=lastModelDir;
     this.python = python ?? env.SYNTHIA_PYTHON ?? 'python3';
     this.timeoutMs = timeoutMs;
     this.bus = bus;
@@ -23,6 +25,12 @@ export class ModelIntegrationGateway {
   args(backend, operation) {
     if (!['trident','modelmaker'].includes(backend))
       throw new TypeError('Unknown backend');
+    if(operation==='train'){
+      if(backend!=='modelmaker')throw new TypeError('Only original Modelmaker trains through this interface');
+      return [fileURLToPath(new URL('./model-training-worker.py',import.meta.url)),
+        this.env.SYNTHIA_MODELMAKER_TRAIN_SOURCE||'',
+        this.env.SYNTHIA_TRAINED_MODELS_DIR||''];
+    }
     if (!['status','generate'].includes(operation))
       throw new TypeError('Unknown model operation');
     const args = [worker,'--backend',backend,'--operation',operation];
@@ -75,6 +83,29 @@ export class ModelIntegrationGateway {
     return {trident,modelmaker,service:'owner-local-model-inference',
       trident_address_onnx:'separate-authority-not-substituted',
       inference_can_be_claimed_only_after_real_generate:true};
+  }
+
+  async trainModelmaker({name='synthia-seed',corpus,epochs=1,architecture={}}={}){
+    if(!this.env.SYNTHIA_MODELMAKER_TRAIN_SOURCE||!this.env.SYNTHIA_TRAINED_MODELS_DIR)
+      throw new Error('Configure existing Modelmaker source and local output directory before training');
+    if(typeof corpus!=='string'||corpus.trim().length<200||corpus.length>750000)
+      throw new TypeError('A real training corpus of 200-750000 characters is required');
+    // External user data is sent only to the original local trainer process.
+    // It is not recorded in inference receipts or uploaded to Hugging Face.
+    const output=await this.call('modelmaker','train',{name,corpus,epochs,architecture});
+    if(!output?.trained||!output?.ready_for_inference||!output.model_dir)
+      throw new Error('Original Modelmaker did not confirm an exported model');
+    this.env.SYNTHIA_MODELMAKER_DIR=output.model_dir;
+    const receipt={backend:'modelmaker',trainer:'original-owner-modelmaker',
+      trained:true,modelDir:output.model_dir,epochs,at:new Date().toISOString()};
+    if(this.state){
+      await this.state.set('models.trainedModelDir',output.model_dir,{source:'modelmaker-integration'});
+      const history=this.state.get('models.trainingReceipts',[]);
+      await this.state.set('models.trainingReceipts',[...history,receipt].slice(-20),
+        {source:'modelmaker-integration'});
+    }
+    this.bus?.emit('model:training-completed',receipt);
+    return receipt;
   }
 
   async generate({text,backend='trident',head=null,maxNewTokens=24,temperature=0.8}={}) {
