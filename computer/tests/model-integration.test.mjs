@@ -42,7 +42,7 @@ test('Generative Address adapter preserves Klein/Morph boundaries and stores rea
      let raw='';for await(const chunk of req)raw+=chunk;
      const data=JSON.parse(raw);seen.push(data);
      res.writeHead(200,{'content-type':'application/json'});
-     return res.end(JSON.stringify({processingMode:data.mode,transportTest:true}));
+     return res.end(JSON.stringify({processingMode:data.mode,utterance:'original '+data.mode+' fixture reply',transportTest:true,morphology:data.mode==='morph'?{policy:'fixture-morph'}:undefined}));
    }
    res.writeHead(404);res.end();
  });
