@@ -81,6 +81,14 @@
  <p class="subtle">This panel uses the local SYNTH AI Computer when opened at its own URL. The hosted website cannot read private files or execute a local model by itself.</p>
  <div class="line"><button class="button muted" id="checkModels">Check Computer / weights</button>
  <a class="button muted" href="http://127.0.0.1:8765/workspace.html" target="_blank" rel="noopener">Open local Computer Workspace</a></div>
+ <h3>Install a real TRIDENT checkpoint</h3>
+ <p class="subtle">Choose the <code>.pt</code> weights file from the trained checkpoint bundle. The local Computer verifies it with the original TRIDENT model before using it; source Python remains separately configured.</p>
+ <div class="line">
+  <label class="button muted importlabel" for="tridentCheckpointFile">Choose .pt weights</label>
+  <input id="tridentCheckpointFile" type="file" accept=".pt,.pth" hidden>
+  <button class="button" id="installTridentWeights" type="button">Verify and install weights</button>
+ </div>
+ <p class="note" id="checkpointInstallStatus">No checkpoint selected.</p>
  <h3>Import the selected source into Computer</h3>
  <p class="subtle">The browser archive remains unchanged. A selected text file can also be admitted into Computer with a checksum and state-space address, where Model Maker can train on it.</p>
  <div class="line"><button class="button" id="admitSource">Send selected source to Computer</button></div>
