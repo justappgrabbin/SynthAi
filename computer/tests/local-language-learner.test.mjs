@@ -21,7 +21,7 @@ test('explicitly corrected reply trains a real conditional local token model and
     assert.equal(first.languageLearner.status().trainedExamples, 0);
     assert.equal(first.languageLearner.infer('Invent an original space opera'), null);
     const original = await chat.talk('Invent an original space opera');
-    assert.equal(original.answerKind, 'legacy-pattern-realization');
+    assert.equal(original.answerKind, 'conversation-model-unavailable');
 
     await assert.rejects(() => chat.teachLanguage({
       turnId:'unrecognized-id', answer:'In space we dance',
