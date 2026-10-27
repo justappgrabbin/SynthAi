@@ -151,5 +151,7 @@ export function makeSafePreview(files, entry) {
     return '<script'+(a+' '+b).replace(/\s+integrity=["'][^"']*["']/ig,'')+'>'+js.replace(/<\/script/gi,'<\\/script')+'</script>';
   });
   const policy='<meta http-equiv="Content-Security-Policy" content="default-src \'none\'; script-src \'unsafe-inline\' blob:; style-src \'unsafe-inline\'; img-src data: blob:; font-src data: blob:; connect-src \'none\'; form-action \'none\'; base-uri \'none\'">';
-  return html.replace(/<head([^>]*)>/i,'<head$1>'+policy);
+  if (/<head(?:\s[^>]*)?>/i.test(html)) return html.replace(/<head([^>]*)>/i,'<head$1>'+policy);
+  if (/<html(?:\s[^>]*)?>/i.test(html)) return html.replace(/<html([^>]*)>/i,'<html$1><head>'+policy+'</head>');
+  return '<head>'+policy+'</head>'+html;
 }
