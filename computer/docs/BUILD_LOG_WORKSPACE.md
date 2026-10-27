@@ -81,3 +81,12 @@ Source repository: justappgrabbin/SynthAi. All work is additive on a branch base
 - Verification executed locally: Node imported and executed real owner-original Klein tool classes; headless Chromium displayed the full HTML, imported a deflate-compressed ZIP, rejected a binary entry, retrieved source-attributed passages, extracted/completed a task, compared two dimensional addresses, computed an ATO analogy 11:12::13:14, recognized an AutoLing rule, and returned DISEMINER neighbors; **all browser assertions passed with zero page JavaScript errors**.
 - Browser storage on physical Android not yet tested; app visibly warns when storage is blocked and allows backup download. Hosted HTTPS app intended to support persistent browser storage.
 - Git branch `integration/fielddesk-usable-app-20261027`; keep separate from concurrent TRIDENT and protected-weights PRs. Next task: verify fresh mobile-device user interaction and, only then, wire explicit data exchange through existing Computer services without changing its original resident or weights.
+
+### FieldDesk post-release verification receipts
+- Hosted standalone app: https://synthia-fielddesk.vercel.app/ — new separate Vercel project id `prj_35SIIqk7GA2pPJSOvc2xcTO5g9Iv`, deployment id `dpl_AbHdCfYamFxFc1SNiryStJT4GR4m` READY. Vercel reported a first-deployment production alias for the NEW project only (original Computer production untouched).
+- Independent live website retrieval returned HTTP **200**, expected HTML title and functional UI text.
+- Independent real hosted-browser interaction: clicked **Load example** (library counted 1 source), clicked **Ask files**, entered **What does AutoLing do?**, clicked **Search evidence** and observed exact matching AutoLing passage, correct source attribution, `Offline ready` and local save status.
+- GitHub PR: https://github.com/justappgrabbin/SynthAi/pull/71 (draft, based on original archive-functional-mount integration branch).
+- **CI verified green** at commit `d0d17bdc234dea1303e77689e8c971fc85175152`: FieldDesk original Klein/node acceptance workflow run `40595187329` SUCCESS; existing Synthia resident workflow run `40595187620` SUCCESS. Earlier CI failure (test syntax escaping, not app runtime) corrected and rerun passed.
+- Owner Drive copy: https://drive.google.com/file/d/1OFvrraRz8s-MQkpiMxEcoQ4FbJ5REeRj/view?usp=drivesdk
+- Remaining unverified: physical Android handset interaction; full native TRIDENT inference; direct backplane/state sharing with Computer. All explicitly out of this release's acceptance scope.
