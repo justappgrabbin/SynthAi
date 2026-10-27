@@ -5,6 +5,7 @@ import { CapabilityGraph, MorphEngine, CultivationEngine, PolicyEngine } from '.
 import { ShellManager, MutationDispatcher } from './runtime/shells.mjs';
 import { ProjectWorkspace } from './runtime/projects.mjs';
 import { GitHubWorkspaceAdapter } from './adapters/GitHubWorkspaceAdapter.mjs';
+import { NanobotAgentAdapter } from './adapters/NanobotAgentAdapter.mjs';
 import { registerCanonicalMicros } from './micros/MicroRegistry.mjs';
 import { registerSystemAdapters } from './adapters/SystemAdapters.mjs';
 import { AddressService } from './services/address-service.mjs';
@@ -19,7 +20,7 @@ import { ResonanceBus } from './services/resonance-bus.mjs';
 import { SynthiaResident } from './services/synthia-resident.mjs';
 
 export class ComputerRuntime {
-  constructor({ persistence = new MemoryPersistence(), namespace = 'synthai-computer', github = null, eventLogPath = null } = {}) {
+  constructor({ persistence = new MemoryPersistence(), namespace = 'synthai-computer', github = null, nanobot = null, eventLogPath = null } = {}) {
     this.eventLogPath = eventLogPath;
     this.bus = new EventBus();
     this.resonance = new ResonanceBus({ bus: this.bus });
@@ -54,6 +55,7 @@ export class ComputerRuntime {
     this.projects = new ProjectWorkspace({ bus: this.bus, state: this.state, vfs: this.vfs, backends: this.backends });
 
     if (github) this.configureGitHub(github);
+    if (nanobot) this.configureNanobot(nanobot);
   }
 
   configureGitHub(config = {}) {
@@ -66,6 +68,27 @@ export class ComputerRuntime {
     }, { replace: true });
     this.bus.emit('github:configured', { baseUrl: adapter.baseUrl, tokenConfigured: Boolean(adapter.token) });
     return adapter;
+  }
+
+  /**
+   * An optional external agent backend. Local nanobot is not a replacement
+   * for the Synthia resident. Do not expose delegation to an untrusted caller.
+   */
+  configureNanobot(config = {}) {
+    const adapter = config instanceof NanobotAgentAdapter ? config : new NanobotAgentAdapter(config);
+    this.backends.register('nanobot-agent', adapter, { replace: true });
+    this.capabilities.register('nanobot-agent-delegation', {
+      providers: ['nanobot-agent'],
+      requires: ['explicit-owner-approval'],
+      description: 'Delegate a single approved turn to a locally running nanobot agent.'
+    }, { replace: true });
+    this.bus.emit('nanobot:configured', { endpoint: adapter.baseUrl });
+    return adapter;
+  }
+
+  async delegateToNanobot({ message, sessionId, ownerApproved = false } = {}) {
+    return this.backends.request('nanobot-agent',
+      { action: 'chat', message, sessionId, ownerApproved });
   }
 
   async boot() {
