@@ -1,10 +1,12 @@
 import { SynthiaSystem } from '../engines/unified-execution-spine/src/synthia-system.mjs';
+import { LocalConversationModel } from './local-conversation-model.mjs';
 const serializable = (value) => JSON.parse(JSON.stringify(value, (_key, item) => typeof item === 'function' ? undefined : item));
 
 /** Connects the existing Computer state to the two original donor engines. */
 export class ConversationExecution {
   constructor(computer) {
     this.computer = computer;
+    this.localModel = new LocalConversationModel();
     this.execution = new SynthiaSystem({
       executionPipelineStore: {
         load: async () => computer.state.get('computer.execution.pipeline', null),
@@ -40,12 +42,17 @@ export class ConversationExecution {
     const grounded = this.computer.groundedDialogue.respond(text, {
       currentReadingId: residentReading.id,
     });
-    const trained = grounded ? null : this.computer.languageLearner.infer(text);
-    const selected = grounded ?? trained;
-    const responseText = selected?.text ?? donor.text;
-    const answerKind = selected?.kind ?? 'legacy-pattern-realization';
-    const replyProvider = selected?.provider ?? 'donor:legacy-morph-patterns';
-    const evidence = selected?.evidence ?? [];
+    // Keep grounded Computer evidence authoritative. Everything else is answered
+    // by a genuine local language model; do not pass off legacy token/pattern
+    // realization as conversational intelligence.
+    const generated = grounded ? null : await this.localModel.reply({
+      input: text, history: this.history(), reading: residentReading,
+    });
+    const selected = grounded ?? generated;
+    const responseText = selected.text;
+    const answerKind = selected.kind;
+    const replyProvider = selected.provider;
+    const evidence = selected.evidence ?? [];
     const item = {
       id: crypto.randomUUID(), at: new Date().toISOString(), input: text,
       text: responseText, address: donor.runtime?.address ?? null,
@@ -54,7 +61,7 @@ export class ConversationExecution {
       dimension: donor.conversation.semantic.dimension,
       // A successful parser is not proof of grounded factual claims.
       linguisticGrounded: Boolean(donor.conversation.semantic.linguisticGrounded),
-      answerKind, evidence, evidenceVerified: false, llm: false,
+      answerKind, evidence, evidenceVerified: false, llm: selected.llm === true,
       provider: replyProvider,
       learningRecord: learned.recordId,
     };
@@ -77,6 +84,8 @@ export class ConversationExecution {
   }
 
   history() { return this.computer.state.get('computer.chat.history', []); }
+
+  async modelStatus() { return this.localModel.available(); }
 
   /** Explicit local reply correction: trains token transitions, not verified facts. */
   async teachLanguage({ turnId, answer } = {}) {
