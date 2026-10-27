@@ -43,6 +43,36 @@ def status(backend, source, checkpoint, model_dir):
     }
 
 
+
+def trident_verify(source, checkpoint):
+    if not source or not source.is_file() or not checkpoint or not checkpoint.is_file():
+        raise RuntimeError("TRIDENT verification requires original model.py and a checkpoint")
+    import hashlib
+    import torch
+    spec = importlib.util.spec_from_file_location("synthia_trident_verify", source)
+    if spec is None or spec.loader is None:
+        raise RuntimeError("Cannot import original TRIDENT architecture")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    model = module.Trident()
+    weights = torch.load(str(checkpoint), map_location="cpu", weights_only=True)
+    model.load_state_dict(weights, strict=True)
+    model.eval()
+    with torch.inference_mode():
+        ids = torch.tensor([[76, 97, 110, 103, 117, 97, 103, 101]], dtype=torch.long)
+        for name in model.cfg.heads:
+            scores = model(ids, head=name)
+            if scores.shape != (1, len(ids[0]), model.cfg.vocab_size) or not torch.isfinite(scores).all():
+                raise RuntimeError("TRIDENT verification produced invalid output for head " + name)
+    checksum = hashlib.sha256(checkpoint.read_bytes()).hexdigest()
+    return {
+        "backend": "trident", "weights_loaded": True, "checkpoint_sha256": checksum,
+        "checkpoint_bytes": checkpoint.stat().st_size, "architecture_source": str(source),
+        "trainable_parameters": model.param_count(), "verified_specialist_heads": model.cfg.heads,
+        "finite_logits": True, "inference_ready": True,
+    }
+
+
 def trident_generate(source, checkpoint, query):
     if not source or not source.is_file() or not checkpoint or not checkpoint.is_file():
         raise RuntimeError("TRIDENT requires original model.py and existing trained checkpoint")
@@ -108,7 +138,7 @@ def modelmaker_generate(model_dir, query):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--backend", choices=("trident", "modelmaker"), required=True)
-    parser.add_argument("--operation", choices=("status", "generate"), required=True)
+    parser.add_argument("--operation", choices=("status", "verify", "generate"), required=True)
     parser.add_argument("--source", default="")
     parser.add_argument("--checkpoint", default="")
     parser.add_argument("--model-dir", default="")
@@ -119,6 +149,10 @@ def main():
     try:
         if args.operation == "status":
             result = status(args.backend, source, checkpoint, model_dir)
+        elif args.operation == "verify":
+            if args.backend != "trident":
+                raise ValueError("Only original TRIDENT checkpoint verification is supported")
+            result = trident_verify(source, checkpoint)
         else:
             payload = json.loads(sys.stdin.readline())
             prompt = payload.get("prompt")
