@@ -12,6 +12,18 @@ const root = resolve(fileURLToPath(new URL('../shell/kimi-linux/dist/', import.m
 const dataDir = resolve(process.env.SYNTHIA_DATA_DIR ?? fileURLToPath(new URL('../runtime/data/local-computer/', import.meta.url)));
 const port = Number(process.env.SYNTHIA_PORT ?? 8765);
 const host = '127.0.0.1';
+// WebView and the resident Node service share a loopback origin. Reject foreign
+// Host/Origin and cross-site Fetch Metadata before any API or file operation.
+// This is a browser/DNS-rebinding boundary, not authentication for other local apps.
+const allowedAuthorities = new Set([`127.0.0.1:${port}`, `localhost:${port}`]);
+const allowedOrigins = new Set([...allowedAuthorities].map(authority => `http://${authority}`));
+function isLocalRequest(req) {
+  const origin = req.headers.origin;
+  const fetchSite = req.headers['sec-fetch-site'];
+  return allowedAuthorities.has(req.headers.host)
+    && (origin === undefined || allowedOrigins.has(origin))
+    && (fetchSite === undefined || fetchSite === 'same-origin' || fetchSite === 'none');
+}
 await mkdir(dataDir, { recursive: true });
 const computer = await new ComputerRuntime({
   persistence: new JsonFilePersistence(join(dataDir, 'state.json')),
@@ -112,6 +124,7 @@ async function body(req) {
 
 const server = createServer(async (req, res) => {
   try {
+    if (!isLocalRequest(req)) return json(res, 403, { error: 'Computer requests must use its local origin.' });
     const url = new URL(req.url ?? '/', `http://${host}:${port}`);
     if (url.pathname.startsWith('/api/')) {
       if (req.method === 'GET' && url.pathname === '/api/status') {
