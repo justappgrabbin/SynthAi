@@ -7,6 +7,7 @@ import { JsonFilePersistence } from '../runtime/json-file-persistence.mjs';
 import { ConversationExecution } from '../services/conversation-execution.mjs';
 import { FileAdmission } from '../services/file-admission.mjs';
 import { readZipMembers } from './zip-members.mjs';
+import { ModelIntegrationGateway } from '../services/model-integration-gateway.mjs';
 
 const root = resolve(fileURLToPath(new URL('../shell/kimi-linux/dist/', import.meta.url)));
 const dataDir = resolve(process.env.SYNTHIA_DATA_DIR ?? fileURLToPath(new URL('../runtime/data/local-computer/', import.meta.url)));
@@ -19,6 +20,7 @@ const computer = await new ComputerRuntime({
 }).boot();
 const conversation = new ConversationExecution(computer);
 const files = new FileAdmission(computer, conversation.execution);
+const modelGateway = new ModelIntegrationGateway({bus:computer.bus,state:computer.state});
 
 // Import names are allocated before the first asynchronous write. This prevents
 // an upload with the same filename from replacing an earlier user's original.
@@ -113,6 +115,33 @@ const server = createServer(async (req, res) => {
         return json(res, 200, await computer.publishResonanceSignal({
           type: 'request', text: request.text, domain: request.domain ?? null,
         }));
+      }
+
+      // Explicit local model inference; no fake text or fallback to template chat.
+      // Model weights/source are admin-configured and never accepted from HTTP args.
+      if (req.method === 'GET' && url.pathname === '/api/models/status')
+        return json(res, 200, await modelGateway.status());
+      if (req.method === 'POST' && url.pathname === '/api/models/generate') {
+        const args = await body(req);
+        const prompt = args?.text;
+        if (typeof prompt !== 'string' || !prompt.trim() || prompt.length > 4096)
+          throw new TypeError('Expected nonempty prompt up to 4096 characters');
+        const backend = args.backend ?? 'trident';
+        if (!['trident', 'modelmaker'].includes(backend))
+          throw new TypeError('Unknown model backend');
+        // The existing Synthia resident grounds this prompt using the original
+        // AutoLing, DISEMINER and semantic-spacetime tools.
+        const reading = await computer.synthia.observe(prompt,
+          {actor:'user:local',context:{scope:'model-inference'}});
+        const receipt = await modelGateway.generate({
+          text:prompt, backend, head:args.head ?? null,
+          maxNewTokens:args.maxNewTokens ?? 24, temperature:args.temperature ?? 0.8
+        });
+        const response = await computer.synthia.recordReply(reading,{
+          text:receipt.output,provider:'original-'+backend+'-checkpoint'
+        });
+        return json(res,200,{...receipt,readingId:reading.id,responseId:response.id,
+          linguistic:reading.toolEvidence,grounding:'original-synthia-resident'});
       }
       // Non-sensitive resident health; learning graph and user utterances stay private.
       if (req.method === 'GET' && url.pathname === '/api/synthia/status')
