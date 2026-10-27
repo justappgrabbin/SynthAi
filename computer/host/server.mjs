@@ -8,6 +8,7 @@ import { ConversationExecution } from '../services/conversation-execution.mjs';
 import { FileAdmission } from '../services/file-admission.mjs';
 import { readZipMembers } from './zip-members.mjs';
 import { ModelIntegrationGateway } from '../services/model-integration-gateway.mjs';
+import { GenerativeAddressGateway } from '../services/generative-address-gateway.mjs';
 
 const root = resolve(fileURLToPath(new URL('../shell/kimi-linux/dist/', import.meta.url)));
 const dataDir = resolve(process.env.SYNTHIA_DATA_DIR ?? fileURLToPath(new URL('../runtime/data/local-computer/', import.meta.url)));
@@ -21,6 +22,7 @@ const computer = await new ComputerRuntime({
 const conversation = new ConversationExecution(computer);
 const files = new FileAdmission(computer, conversation.execution);
 const modelGateway = new ModelIntegrationGateway({bus:computer.bus,state:computer.state});
+const addressGateway = new GenerativeAddressGateway({bus:computer.bus,state:computer.state});
 
 // Import names are allocated before the first asynchronous write. This prevents
 // an upload with the same filename from replacing an earlier user's original.
@@ -115,6 +117,24 @@ const server = createServer(async (req, res) => {
         return json(res, 200, await computer.publishResonanceSignal({
           type: 'request', text: request.text, domain: request.domain ?? null,
         }));
+      }
+
+
+      // Functional extension into the ORIGINAL Generative Address assembly.
+      // Communication mode remains on the existing Computer endpoint.
+      if (req.method === 'GET' && url.pathname === '/api/generative-address/status')
+        return json(res,200,await addressGateway.status());
+      if (req.method === 'POST' && url.pathname === '/api/chat/forms') {
+        const request = await body(req);
+        const mode = request.mode ?? 'communication';
+        if (mode === 'communication')
+          return json(res,200,{mode,provider:'existing-computer-morph-chat',
+             result:await conversation.talk(request.text)});
+        const result=await addressGateway.chat({
+          text:request.text,mode,context:request.context ?? {},
+          addresses:request.addresses ?? null
+        });
+        return json(res,200,result);
       }
 
       // Explicit local model inference; no fake text or fallback to template chat.
