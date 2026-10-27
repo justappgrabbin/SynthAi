@@ -35,6 +35,7 @@ export class ConversationExecution {
     // The execution-spine donor owns a separate address-first learning/contact
     // loop. Its result is consumed as evidence, not substituted for the answer.
     const learned = await this.execution.chat(text);
+    const kleinGrounding = this.computer.klein.ground({ reading: residentReading, donorText: donor.text });
     let responseText = donor.text;
     let provider = donor.assistant?.provider ?? 'local-morph';
     let modelFailure = null;
@@ -63,7 +64,7 @@ export class ConversationExecution {
       } else if (this.computer.languageModel?.status().configured) {
         try {
           const completion = await this.computer.languageModel.generate({
-            text, context: String(donor.text ?? '').slice(0, 1200),
+            text, context: kleinGrounding.text,
           });
           responseText = completion.text;
           provider = completion.provider;
@@ -85,6 +86,7 @@ export class ConversationExecution {
       provider,
       model: { configured: this.computer.languageModel?.status().configured ?? false,
         used: modelUsed, fallbackReason: modelFailure },
+      klein: { ...kleinGrounding.evidence, passedToModel: modelUsed },
       simulation,
       learningRecord: learned.recordId,
     };
@@ -98,7 +100,9 @@ export class ConversationExecution {
       input: text, event_address: item.address, provider,
       result: { text: item.text, focus: item.focus, intent: item.intent,
         learningRecord: item.learningRecord, simulation: item.simulation,
-        languageModelUsed: modelUsed, modelFallback: Boolean(modelFailure) },
+        languageModelUsed: modelUsed, modelFallback: Boolean(modelFailure),
+        kleinEvidence: { provider: kleinGrounding.evidence.provider,
+          tools: kleinGrounding.evidence.executed, passedToModel: modelUsed } },
       result_status: 'success', observable_effect: 'readable reply and persistent conversation record',
     });
     return { ...item, eventId: event.event_id,
