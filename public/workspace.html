@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#100d1f">
+<title>SYNTH AI | Engineering Workspace</title>
+<link rel="stylesheet" href="/workspace.css">
+</head>
+<body>
+<header class="top"><a class="home-link" href="/"><span class="logo">S</span><span>SYNTH AI <small>Engineering Workspace</small></span></a><span class="status" id="storageState">Local workspace</span></header>
+<main>
+<section class="intro">
+  <div><small class="kicker">PLAN 001 · OCTOBER 27, 2026</small><h1>Build once. Verify every step.</h1><p>Import existing app source, preview what really runs, and keep accomplishments tied to evidence. Your files stay on this device unless you explicitly publish them.</p></div>
+  <a class="button muted" href="/">Open Computer</a>
+</section>
+<div class="stats">
+ <div class="stat"><small>Goals verified</small><strong id="statGoals">0 / 0</strong></div>
+ <div class="stat"><small>Progress</small><strong id="statProgress">0%</strong></div>
+ <div class="stat"><small>Active project</small><strong id="statProject">None</strong></div>
+</div>
+<nav class="tabs" aria-label="Workspace sections">
+  <button class="tab active" data-tab="library" aria-selected="true">01 Files &amp; Preview</button>
+  <button class="tab" data-tab="goals" aria-selected="false">02 Goal Board</button>
+  <button class="tab" data-tab="plan" aria-selected="false">03 Language Plan</button>
+</nav>
+<section id="library" class="tabview active">
+ <div class="columns">
+  <article class="panel">
+    <div class="heading"><div><small>ARTIFACT INTAKE</small><h2>Open your existing app</h2></div></div>
+    <p class="subtle">Choose HTML, text source files, or ZIP archives. ZIP files are inspected rather than executed. Compiled APKs and React/Vite source projects require a build before a browser preview.</p>
+    <label class="drop" for="fileInput"><strong>+ Choose files or ZIPs</strong><span>Supported: .html, .css, .js, .json, .md, .zip and source text</span></label>
+    <input id="fileInput" type="file" accept=".zip,.html,.htm,.js,.mjs,.css,.json,.md,.txt,.ts,.tsx,.jsx,.py,.yaml,.yml,.xml,.csv,.svg" multiple hidden>
+    <div class="line"><button id="importFiles" class="button" type="button">Import selected files</button><button id="clearSelection" class="button muted" type="button">Clear active view</button></div>
+    <p id="importStatus" class="note" role="status">No files selected.</p>
+    <div class="projectlist" id="projectList"><span class="subtle">Imports will appear here.</span></div>
+    <h3>Archive contents</h3><div id="fileTree" class="filetree"><span class="subtle">Choose a project to see files.</span></div>
+  </article>
+  <article class="panel">
+    <div class="heading"><div><small>ISOLATED BROWSER OUTPUT</small><h2>App preview</h2></div><span class="chip" id="previewState">No app</span></div>
+    <p class="subtle">Only HTML apps run here. The iframe has a separate origin, no network connections, and no access to your saved files. Imported scripts may not support module bundling.</p>
+    <iframe id="appPreview" title="Sandboxed application preview" sandbox="allow-scripts" referrerpolicy="no-referrer"></iframe>
+    <div class="line"><label class="url-label" for="appUrl">Already hosted app URL<input id="appUrl" type="url" placeholder="https://your-app.example" inputmode="url"></label><button id="openAppUrl" class="button muted" type="button">Open live app</button></div>
+    <p class="note" id="previewNote">Upload an HTML app or enter an HTTPS URL to open the deployed version in a new tab.</p>
+  </article>
+ </div>
+ <article class="panel sources"><div class="heading"><div><small>IMPORTED REFERENCES · SOURCE INVENTORY</small><h2>Seven original Drive archives</h2></div></div><p class="subtle">These are preserved references, not automatically installed code. Their contents are inventoried for the language-model plan.</p><div class="sourcegrid" id="sources"></div></article>
+</section>
+<section id="goals" class="tabview">
+ <article class="panel"><div class="heading"><div><small>VERSIONED PLAN</small><h2>Accomplishment board</h2></div><span class="chip">PLAN-001</span></div>
+ <p class="subtle">Done requires a short verification note. Statuses save on this device; export a backup to carry your board to another device or commit it to GitHub.</p>
+ <div class="progress"><div id="progressBar"></div></div><div id="goalList" class="goallist"></div>
+ <div class="line"><button id="exportBoard" class="button" type="button">Export goal backup</button><label class="button muted importlabel" for="importBoard">Import goal backup</label><input id="importBoard" type="file" accept=".json" hidden></div>
+ <h3>Add accomplishment</h3><form id="addGoalForm" class="addgoal"><label>Goal<input id="newGoalTitle" maxlength="240" placeholder="Name the milestone" required></label><button class="button" type="submit">Add goal</button></form>
+ <p id="goalMessage" class="note" role="status"></p></article>
+</section>
+<section id="plan" class="tabview">
+ <article class="panel"><div class="heading"><div><small>FIRST ENGINEERING MILESTONE</small><h2>PLAN 001 — Synthia Language Model</h2></div><span class="chip">Specification</span></div>
+ <p>The first necessary piece is a language system that generates meaningful text from context rather than only selecting stored patterns. Reuse the resident's trainable task selector and the existing AutoLing, DISEMINER, AutoNovel and Semantic Spacetime components; inspect the new donor ZIPs before deciding what to adopt.</p>
+ <div class="stages"><div><strong>1. Donor audit</strong><p>Confirm implemented behavior, dependencies, licenses, and test evidence for each submitted language/model archive.</p></div><div><strong>2. Input contract</strong><p>Utterance → observer, context, relationships, evidence and intent → structured semantic representation with provenance.</p></div><div><strong>3. Language generation</strong><p>Use a verified inference backend (local small generative model or trained transformer), with AutoLing and Klein morphology as structured guidance rather than a falsely labeled LLM.</p></div><div><strong>4. Feedback and memory</strong><p>Record training examples, version checkpoints, corrections, accepted replies, and owner-approved changes separately from source files.</p></div><div><strong>5. Acceptance test</strong><p>Verify new unseen prompts, grounded replies, factual uncertainty, consistency over turns, offline inference, restart recovery, and actual response provenance.</p></div></div>
+ <p class="note"><strong>Release gate:</strong> Do not mark the language model complete until it can generate non-template replies on unseen prompts and passes repeatable evaluation. Foundry remains read-only.</p>
+ <a class="button muted" href="https://github.com/justappgrabbin/SynthAi">Read original Computer repository</a>
+ </article>
+</section>
+</main>
+<script type="module" src="/workspace.mjs"></script>
+</body></html>
