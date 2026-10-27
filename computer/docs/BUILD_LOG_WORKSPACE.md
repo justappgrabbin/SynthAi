@@ -69,3 +69,15 @@ Source repository: justappgrabbin/SynthAi. All work is additive on a branch base
 - Goal board now marks actual versioned, CI-backed source mounts, Klein/Morph connections and HTTPS publish as completed. No trained language model or Android device validation is claimed.
 - Resolved first CI failure: missing torch on runner was reported correctly but test assertion was too narrow; original Morph produced >500KB response. Worker now checks checkpoint before dependency import, and bounded Morph response is consumed and summarized for receipts. Rerun CI succeeded.
 - Remaining: obtain an actual trained text model/checkpoint, install training dependencies, execute a user-corpus training-to-generation cycle, verify Android/browser GUI and owner ChatGPT MCP connection. See computer/docs/INTEGRATION_002_ACTUAL_MODELS.md.
+
+
+## 2026-10-27 — FieldDesk 1.0.0: usable application delivered
+
+- New tested **single-file** offline browser application: `public/fielddesk.html` (about 278 KB); navigation linked from `public/index.html`. Original Computer and Foundry unchanged.
+- Independent Vercel `synthia-fielddesk` project deployed (READY; this was the new project's first deployment). Existing SynthAI production project not altered.
+- Owner source: `SYNTHIA-v0.3-Klein-Body-Language-Integrated.zip` / original `donors/ato-core/src/`, 33 owner-original ATO modules embedded unchanged except import-specifier repackaging for standalone usage. Source SHA256 manifest shipped in downloadable artifact.
+- Real working user workflow: import .md/.txt/.json/code and compressed ZIPs (up to 144 MiB input, 120 indexed sources, bounded extraction); cite/verbatim search passages; DISEMINER distributional neighbors; AutoLing grammar recognition and teach rules; address comparison via `StateSpaceAssociationResolver`; original IChing Boolean analogy; review TODOs and track completed work; local IndexedDB or localStorage save; export JSON backup and Markdown task list.
+- Explicit limit: no TRIDENT PyTorch inference claimed in the offline HTML; no semantic resident/shared Computer storage integration claimed. Not a full Synthia Computer replacement. Original Foundry remains read-only.
+- Verification executed locally: Node imported and executed real owner-original Klein tool classes; headless Chromium displayed the full HTML, imported a deflate-compressed ZIP, rejected a binary entry, retrieved source-attributed passages, extracted/completed a task, compared two dimensional addresses, computed an ATO analogy 11:12::13:14, recognized an AutoLing rule, and returned DISEMINER neighbors; **all browser assertions passed with zero page JavaScript errors**.
+- Browser storage on physical Android not yet tested; app visibly warns when storage is blocked and allows backup download. Hosted HTTPS app intended to support persistent browser storage.
+- Git branch `integration/fielddesk-usable-app-20261027`; keep separate from concurrent TRIDENT and protected-weights PRs. Next task: verify fresh mobile-device user interaction and, only then, wire explicit data exchange through existing Computer services without changing its original resident or weights.
