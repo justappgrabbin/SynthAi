@@ -94,9 +94,16 @@ export default function Chat() {
   const [correctionText, setCorrectionText] = useState('');
   const [learningStatus, setLearningStatus] = useState('');
   const [savingCorrection, setSavingCorrection] = useState(false);
+  const [conversationStatus, setConversationStatus] = useState('Checking local conversation model…');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const activeConv = conversations.find((c) => c.id === activeConvId) || conversations[0];
+
+  useEffect(() => {
+    fetch('/api/synthia/conversation-status').then(r => r.json()).then(data => {
+      setConversationStatus(data.ready ? 'Local conversation · ' + data.model : 'Conversational model not connected');
+    }).catch(() => setConversationStatus('Computer conversation status unavailable'));
+  }, []);
 
   useEffect(() => {
     fetch('/api/history').then(async (response) => {
@@ -282,7 +289,7 @@ export default function Chat() {
               <div className="flex items-center gap-1">
                 <Circle size={8} fill={activeConv.status === 'online' ? 'var(--accent-success)' : activeConv.status === 'away' ? 'var(--accent-warning)' : 'var(--text-disabled)'} style={{ color: 'transparent' }} />
                 <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>
-                  {activeConv.status === 'online' ? 'Local Computer · no pretrained LLM' : activeConv.status === 'away' ? 'Away' : 'Offline'}
+                  {activeConv.status === 'online' ? conversationStatus : activeConv.status === 'away' ? 'Away' : 'Offline'}
                 </span>
               </div>
             </div>
@@ -319,7 +326,7 @@ export default function Chat() {
                       </div>
                       {!isSent && msg.provider && (
                         <span style={{ color: 'var(--text-secondary)', fontSize: '10px', marginTop: 4 }} title={msg.provider}>
-                          {msg.answerKind === 'legacy-pattern-realization' ? 'Pattern-based language · not an LLM' : msg.answerKind === 'human-trained-sequence' ? 'Locally learned tokens · not an LLM' : 'Computer evidence · ' + (msg.answerKind ?? 'observation')}
+                          {msg.answerKind === 'local-generative-dialogue' ? 'On-device/local model · ' + msg.provider : msg.answerKind === 'conversation-model-unavailable' ? 'Local conversation model unavailable' : msg.answerKind === 'human-trained-sequence' ? 'Locally learned tokens · not an LLM' : msg.answerKind === 'legacy-pattern-realization' ? 'Pattern-based language · not an LLM' : 'Computer evidence · ' + (msg.answerKind ?? 'observation')}
                         </span>
                       )}
                       {!isSent && msg.turnId && (
