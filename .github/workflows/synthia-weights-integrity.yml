@@ -1,0 +1,30 @@
+name: Synthia saved weights integrity
+
+on:
+  push:
+    branches:
+      - integration/synthia-weights-integrity-20261027
+  pull_request:
+    paths:
+      - 'computer/services/synthia-resident.mjs'
+      - 'computer/services/synthia-weight-guard.mjs'
+      - 'computer/tests/synthia-weight-integrity.test.mjs'
+      - '.github/workflows/synthia-weights-integrity.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate-saved-weights:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Test non-destructive saved weight validation
+        run: node --test computer/tests/synthia-weight-integrity.test.mjs computer/tests/klein-tool-bridge.test.mjs computer/tests/synthia-resident.test.mjs

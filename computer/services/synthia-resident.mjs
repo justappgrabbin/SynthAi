@@ -9,6 +9,7 @@
 import { AutolingEngine } from '../engines/unified-execution-spine/src/pure-synthia/automata/tools/tool-14-autoling.js';
 import { DiseminerEngine } from '../engines/unified-execution-spine/src/pure-synthia/automata/tools/tool-15-diseminer.js';
 import { AutonovelAutomaton } from '../engines/unified-execution-spine/src/pure-synthia/automata/tools/tool-07-autonovel.js';
+import { validateSavedSynthiaInference } from './synthia-weight-guard.mjs';
 
 const STORAGE_KEY = 'computer.synthia.resident.v1';
 const FEATURES = 96;
@@ -154,6 +155,14 @@ export class SynthiaResident {
     if (this.started) return this;
     const saved = this.state.get(STORAGE_KEY, null);
     if (saved) {
+      // Reject an incompatible/corrupt checkpoint *before* installing defaults
+      // or saving new observations. Never silently overwrite special weights.
+      try {
+        validateSavedSynthiaInference(saved.inference);
+      } catch (error) {
+        this.bus?.emit('synthia:weights-rejected', { reason: 'invalid-saved-inference', recoverFromBackup: true });
+        throw error;
+      }
       this.inference = new NeuralInferenceGraph(saved.inference);
       this.spacetime = new SemanticSpacetimeGraph(saved.spacetime);
       this.workspace = saved.workspace ?? this.workspace;
