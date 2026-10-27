@@ -9,10 +9,6 @@ on:
       - 'computer/services/model-*'
       - 'computer/services/generative-address-gateway.mjs'
       - 'computer/host/server.mjs'
-      - 'computer/tests/model-integration.test.mjs'
-      - 'computer/services/model-*'
-      - 'computer/services/generative-address-gateway.mjs'
-      - 'computer/host/server.mjs'
       - 'computer/build-web.mjs'
       - 'public/workspace.mjs'
       - 'public/workspace.html'
@@ -21,6 +17,10 @@ on:
     paths:
       - 'computer/services/browser-archive-connector.mjs'
       - 'computer/tests/archive-integration.test.mjs'
+      - 'computer/services/model-*'
+      - 'computer/services/generative-address-gateway.mjs'
+      - 'computer/tests/model-integration.test.mjs'
+      - 'computer/host/server.mjs'
       - 'computer/build-web.mjs'
       - 'public/workspace.mjs'
       - 'public/workspace.html'
@@ -53,7 +53,7 @@ jobs:
           node --check computer/services/model-integration-gateway.mjs
           node --check computer/services/generative-address-gateway.mjs
           node --check computer/host/server.mjs
-          python -m py_compile computer/services/model-inference-worker.py
+          python -m py_compile computer/services/model-inference-worker.py computer/services/model-training-worker.py
       - name: Real Computer source mounts and original Klein engines
         run: node --test computer/tests/archive-integration.test.mjs
       - name: Model and original Morph/Klein acceptance
