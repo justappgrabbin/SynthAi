@@ -6,7 +6,9 @@
  */
 import { spawn } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { resolve } from 'node:path';
+import { resolve, join } from 'node:path';
+import { createHash } from 'node:crypto';
+import { mkdir, writeFile, readFile, unlink } from 'node:fs/promises';
 
 const worker = fileURLToPath(new URL('./model-inference-worker.py', import.meta.url));
 
@@ -16,6 +18,9 @@ export class ModelIntegrationGateway {
     this.env = {...env};
     const lastModelDir = state?.get('models.trainedModelDir', null);
     if(lastModelDir) this.env.SYNTHIA_MODELMAKER_DIR=lastModelDir;
+    const lastTrident = state?.get('models.tridentCheckpoint', null);
+    if(lastTrident && !this.env.SYNTHIA_TRIDENT_CHECKPOINT)
+      this.env.SYNTHIA_TRIDENT_CHECKPOINT=lastTrident;
     this.python = python ?? env.SYNTHIA_PYTHON ?? 'python3';
     this.timeoutMs = timeoutMs;
     this.bus = bus;
@@ -25,13 +30,14 @@ export class ModelIntegrationGateway {
   args(backend, operation) {
     if (!['trident','modelmaker'].includes(backend))
       throw new TypeError('Unknown backend');
+    if(operation==='verify' && backend !== 'trident') throw new TypeError('Only original TRIDENT verification supported');
     if(operation==='train'){
       if(backend!=='modelmaker')throw new TypeError('Only original Modelmaker trains through this interface');
       return [fileURLToPath(new URL('./model-training-worker.py',import.meta.url)),
         this.env.SYNTHIA_MODELMAKER_TRAIN_SOURCE||'',
         this.env.SYNTHIA_TRAINED_MODELS_DIR||''];
     }
-    if (!['status','generate'].includes(operation))
+    if (!['status','verify','generate'].includes(operation))
       throw new TypeError('Unknown model operation');
     const args = [worker,'--backend',backend,'--operation',operation];
     if (backend === 'trident') {
@@ -83,6 +89,65 @@ export class ModelIntegrationGateway {
     return {trident,modelmaker,service:'owner-local-model-inference',
       trident_address_onnx:'separate-authority-not-substituted',
       inference_can_be_claimed_only_after_real_generate:true};
+  }
+
+  async importTridentCheckpoint({base64}={}){
+    // Import only weights, never runnable Python source. Source selection belongs
+    // exclusively to the local Computer operator's configured original model.
+    if(!this.env.SYNTHIA_TRIDENT_MODEL_SOURCE)
+      throw new Error('Configure the original TRIDENT model.py before importing weights');
+    if(!this.env.SYNTHIA_TRAINED_MODELS_DIR)
+      throw new Error('Configure a private model storage directory');
+    if(typeof base64!=='string'||base64.length>28_000_000 ||
+       !/^[A-Za-z0-9+/]+={0,2}$/.test(base64))
+      throw new TypeError('Expected bounded standard-base64 PyTorch checkpoint');
+    const raw=Buffer.from(base64,'base64');
+    if(raw.length<100_000||raw.length>20*1024*1024)
+      throw new RangeError('Checkpoint must be 100 KB to 20 MB');
+    if(raw.toString('base64')!==base64)
+      throw new TypeError('Malformed checkpoint encoding');
+    const sha256=createHash('sha256').update(raw).digest('hex');
+    const store=resolve(this.env.SYNTHIA_TRAINED_MODELS_DIR);
+    await mkdir(store,{recursive:true,mode:0o700});
+    const target=join(store,'trident-'+sha256.slice(0,24)+'.pt');
+    let created=false;
+    try{
+      await writeFile(target,raw,{flag:'wx',mode:0o600});
+      created=true;
+    }catch(error){
+      if(error?.code!=='EEXIST')throw error;
+      const existing=await readFile(target);
+      if(createHash('sha256').update(existing).digest('hex')!==sha256)
+        throw new Error('An existing checkpoint does not match the imported hash');
+    }
+    try{
+      const checker=new ModelIntegrationGateway({
+        env:{...this.env,SYNTHIA_TRIDENT_CHECKPOINT:target},
+        python:this.python,timeoutMs:this.timeoutMs
+      });
+      const verification=await checker.call('trident','verify');
+      if(!verification?.weights_loaded||!verification.finite_logits||
+         verification.checkpoint_sha256!==sha256)
+        throw new Error('The original model rejected the checkpoint');
+      this.env.SYNTHIA_TRIDENT_CHECKPOINT=target;
+      const receipt={
+        backend:'trident',sha256,bytes:raw.length,checkpoint:target,
+        verifiedHeads:verification.verified_specialist_heads,
+        trainableParameters:verification.trainable_parameters,
+        active:true,verified:true,at:new Date().toISOString()
+      };
+      if(this.state){
+        await this.state.set('models.tridentCheckpoint',target,{source:'owner-model-import'});
+        await this.state.set('models.lastCheckpointImport',{
+          sha256,bytes:raw.length,verified:true,at:receipt.at
+        },{source:'owner-model-import'});
+      }
+      this.bus?.emit('model:checkpoint-verified',{sha256,backend:'trident'});
+      return receipt;
+    }catch(error){
+      if(created)await unlink(target).catch(()=>{});
+      throw error;
+    }
   }
 
   async trainModelmaker({name='synthia-seed',corpus,epochs=1,architecture={}}={}){
