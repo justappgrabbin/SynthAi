@@ -23,4 +23,9 @@ jobs:
         with:
           node-version: '20'
       - name: Run local Synthia / Computer acceptance tests
-        run: node --test computer/tests/synthia-resident.test.mjs computer/tests/runtime.test.mjs computer/tests/reassembly-ingest-e2e.test.mjs computer/tests/generative-simulation-lab.test.mjs
+        run: node --test computer/tests/synthia-resident.test.mjs computer/tests/runtime.test.mjs computer/tests/reassembly-ingest-e2e.test.mjs computer/tests/generative-simulation-lab.test.mjs computer/tests/synthia-agent-model-routing.test.mjs
+
+      - name: Build existing Synthia phone/web chat interface
+        run: |
+          npm --prefix computer/shell/kimi-linux ci
+          npm --prefix computer/shell/kimi-linux run build
