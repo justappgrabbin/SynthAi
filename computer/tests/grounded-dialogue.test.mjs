@@ -88,3 +88,17 @@ test('file answers derive from live Computer VFS rather than guessed file names'
     assert.equal(present.evidence[0].path, file.path);
   } finally { await rm(config.eventLogPath, { force:true }); }
 });
+
+test('ordinary follow-up questions reach conversational generation, not keyword recall', async () => {
+  const options = computerOptions();
+  try {
+    const computer = await new ComputerRuntime(options).boot();
+    await computer.synthia.observe('In my perception hypothesis purple might be another observer\'s green.');
+    const question = 'How could purple and green express observer-dependent perception?';
+    const reading = await computer.synthia.observe(question);
+    assert.equal(computer.groundedDialogue.respond(question, {currentReadingId:reading.id}), null);
+    const recall = computer.groundedDialogue.respond('What did I say about purple and green?', {currentReadingId:reading.id});
+    assert.equal(recall.kind, 'speaker-recall');
+    assert.match(recall.text,/purple might be another observer/);
+  } finally { await rm(options.eventLogPath,{force:true}); }
+});
