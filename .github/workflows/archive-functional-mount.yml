@@ -1,0 +1,73 @@
+name: SYNTH AI source integration acceptance
+on:
+  push:
+    branches: [integration/archive-functional-mount-20261027]
+    paths:
+      - 'computer/services/browser-archive-connector.mjs'
+      - 'computer/tests/archive-integration.test.mjs'
+      - 'computer/tests/model-integration.test.mjs'
+      - 'computer/tests/workspace-local-computer.test.mjs'
+      - 'computer/services/model-*'
+      - 'computer/services/generative-address-gateway.mjs'
+      - 'computer/host/server.mjs'
+      - 'computer/build-web.mjs'
+      - 'public/workspace.mjs'
+      - 'public/workspace.html'
+      - '.github/workflows/archive-functional-mount.yml'
+  pull_request:
+    paths:
+      - 'computer/services/browser-archive-connector.mjs'
+      - 'computer/tests/archive-integration.test.mjs'
+      - 'computer/services/model-*'
+      - 'computer/services/generative-address-gateway.mjs'
+      - 'computer/tests/model-integration.test.mjs'
+      - 'computer/host/server.mjs'
+      - 'computer/build-web.mjs'
+      - 'public/workspace.mjs'
+      - 'public/workspace.html'
+  workflow_dispatch:
+jobs:
+  archive-bridge:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Checkout original Generative Address engine (read only)
+        uses: actions/checkout@v4
+        with:
+          repository: justappgrabbin/Generative-address-system
+          path: external/synthia-generative
+          sparse-checkout: Synthia-Generative-Address-Morphology-Integrated-v0.2.1-RUNNABLE
+          sparse-checkout-cone-mode: true
+      - name: Syntax
+        run: |
+          node --check public/workspace.mjs
+          node --check computer/services/browser-archive-connector.mjs
+          node --check computer/services/model-integration-gateway.mjs
+          node --check computer/services/generative-address-gateway.mjs
+          node --check computer/host/server.mjs
+          python -m py_compile computer/services/model-inference-worker.py computer/services/model-training-worker.py
+      - name: Real Computer source mounts and original Klein engines
+        run: node --test computer/tests/archive-integration.test.mjs
+      - name: Model and original Morph/Klein acceptance
+        env:
+          SYNTHIA_GENERATIVE_TEST_ROOT: ${{ github.workspace }}/external/synthia-generative/Synthia-Generative-Address-Morphology-Integrated-v0.2.1-RUNNABLE
+        run: node --test computer/tests/model-integration.test.mjs
+      - name: Build web with original resident and donor dependencies
+        run: |
+          node computer/build-web.mjs
+          test -f public/computer-runtime/services/synthia-resident.mjs
+          test -f public/computer-runtime/services/browser-archive-connector.mjs
+          test -f public/computer-runtime/engines/unified-execution-spine/src/pure-synthia/merged/tool-factory.js
+          test -f public/computer-runtime/engines/unified-execution-spine/src/pure-synthia/automata/tools/tool-14-autoling.js
+
+      - name: Local Computer HTTP end-to-end with real source admission
+        run: node --test computer/tests/workspace-local-computer.test.mjs

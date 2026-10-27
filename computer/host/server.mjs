@@ -7,8 +7,11 @@ import { JsonFilePersistence } from '../runtime/json-file-persistence.mjs';
 import { ConversationExecution } from '../services/conversation-execution.mjs';
 import { FileAdmission } from '../services/file-admission.mjs';
 import { readZipMembers } from './zip-members.mjs';
+import { ModelIntegrationGateway } from '../services/model-integration-gateway.mjs';
+import { GenerativeAddressGateway } from '../services/generative-address-gateway.mjs';
 
 const root = resolve(fileURLToPath(new URL('../shell/kimi-linux/dist/', import.meta.url)));
+const workspaceRoot = resolve(fileURLToPath(new URL('../../public/', import.meta.url)));
 const dataDir = resolve(process.env.SYNTHIA_DATA_DIR ?? fileURLToPath(new URL('../runtime/data/local-computer/', import.meta.url)));
 const port = Number(process.env.SYNTHIA_PORT ?? 8765);
 const host = '127.0.0.1';
@@ -19,6 +22,14 @@ const computer = await new ComputerRuntime({
 }).boot();
 const conversation = new ConversationExecution(computer);
 const files = new FileAdmission(computer, conversation.execution);
+const privateModelStore = process.env.SYNTHIA_TRAINED_MODELS_DIR ?? join(dataDir,'models');
+await mkdir(privateModelStore,{recursive:true,mode:0o700});
+const modelGateway = new ModelIntegrationGateway({
+  bus:computer.bus,state:computer.state,
+  env:{...process.env,SYNTHIA_TRAINED_MODELS_DIR:privateModelStore}
+});
+const addressGateway = new GenerativeAddressGateway({bus:computer.bus,state:computer.state});
+let modelTrainingBusy = false;
 
 // Import names are allocated before the first asynchronous write. This prevents
 // an upload with the same filename from replacing an earlier user's original.
@@ -81,11 +92,11 @@ const json = (res, status, value) => {
   res.writeHead(status, { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' });
   res.end(JSON.stringify(value));
 };
-async function body(req) {
+async function body(req, maxChars = 8500000) {
   let text = '';
   for await (const part of req) {
     text += part;
-    if (text.length > 8500000) throw new RangeError('Request is too large.');
+    if (text.length > maxChars) throw new RangeError('Request is too large.');
   }
   return JSON.parse(text);
 }
@@ -113,6 +124,77 @@ const server = createServer(async (req, res) => {
         return json(res, 200, await computer.publishResonanceSignal({
           type: 'request', text: request.text, domain: request.domain ?? null,
         }));
+      }
+
+
+      // Functional extension into the ORIGINAL Generative Address assembly.
+      // Communication mode remains on the existing Computer endpoint.
+      if (req.method === 'GET' && url.pathname === '/api/generative-address/status')
+        return json(res,200,await addressGateway.status());
+      if (req.method === 'POST' && url.pathname === '/api/chat/forms') {
+        const request = await body(req);
+        const mode = request.mode ?? 'communication';
+        if (mode === 'communication')
+          return json(res,200,{mode,provider:'existing-computer-morph-chat',
+             result:await conversation.talk(request.text)});
+        const result=await addressGateway.chat({
+          text:request.text,mode,context:request.context ?? {},
+          addresses:request.addresses ?? null
+        });
+        return json(res,200,result);
+      }
+
+      // Explicit local model inference; no fake text or fallback to template chat.
+      // Model weights/source are admin-configured and never accepted from HTTP args.
+      if (req.method === 'GET' && url.pathname === '/api/models/status')
+        return json(res, 200, await modelGateway.status());
+      if (req.method === 'POST' && url.pathname === '/api/models/import-checkpoint') {
+        const request=await body(req,28_000_000);
+        // Only PyTorch weights can be imported; uploaded source code is never
+        // interpreted or executed by the Computer.
+        return json(res,200,await modelGateway.importTridentCheckpoint({base64:request?.base64}));
+      }
+      if (req.method === 'POST' && url.pathname === '/api/models/train') {
+        if(modelTrainingBusy)return json(res,409,{error:'A local Modelmaker training job is already running'});
+        const input=await body(req);
+        if(typeof input?.sourcePath!=='string'||!input.sourcePath.startsWith('/home/user/Imports/'))
+          throw new TypeError('Select a previously imported owner source file');
+        const record=computer.vfs.read(input.sourcePath);
+        if(!record || record.meta?.encoding!=='utf8'||!record.meta?.addressKey)
+          throw new TypeError('Source file is not a verified UTF-8 import');
+        modelTrainingBusy=true;
+        try{
+          const admitted=await files.activate(record.meta.addressKey,record.path);
+          const receipt=await modelGateway.trainModelmaker({
+            name:input.name||'synthia-seed',
+            corpus:admitted.content,epochs:input.epochs??1,
+            architecture:input.architecture??{}
+          });
+          return json(res,200,{...receipt,sourceAddressKey:record.meta.addressKey,
+             sourceDigest:record.meta.digest,originalModelmaker:true});
+        }finally{modelTrainingBusy=false;}
+      }
+      if (req.method === 'POST' && url.pathname === '/api/models/generate') {
+        const args = await body(req);
+        const prompt = args?.text;
+        if (typeof prompt !== 'string' || !prompt.trim() || prompt.length > 4096)
+          throw new TypeError('Expected nonempty prompt up to 4096 characters');
+        const backend = args.backend ?? 'trident';
+        if (!['trident', 'modelmaker'].includes(backend))
+          throw new TypeError('Unknown model backend');
+        // The existing Synthia resident grounds this prompt using the original
+        // AutoLing, DISEMINER and semantic-spacetime tools.
+        const reading = await computer.synthia.observe(prompt,
+          {actor:'user:local',context:{scope:'model-inference'}});
+        const receipt = await modelGateway.generate({
+          text:prompt, backend, head:args.head ?? null,
+          maxNewTokens:args.maxNewTokens ?? 24, temperature:args.temperature ?? 0.8
+        });
+        const response = await computer.synthia.recordReply(reading,{
+          text:receipt.output,provider:'original-'+backend+'-checkpoint'
+        });
+        return json(res,200,{...receipt,readingId:reading.id,responseId:response.id,
+          linguistic:reading.toolEvidence,grounding:'original-synthia-resident'});
       }
       // Non-sensitive resident health; learning graph and user utterances stay private.
       if (req.method === 'GET' && url.pathname === '/api/synthia/status')
@@ -151,9 +233,14 @@ const server = createServer(async (req, res) => {
     }
     if (req.method !== 'GET' && req.method !== 'HEAD') return json(res, 405, { error: 'Method not allowed.' });
     const requested = decodeURIComponent(url.pathname === '/' ? '/index.html' : url.pathname);
-    const path = resolve(root, '.' + requested);
-    if (path !== root && !path.startsWith(root + sep)) return json(res, 403, { error: 'Invalid path.' });
-    const target = (await stat(path).catch(() => null))?.isFile() ? path : join(root, 'index.html');
+    const workspaceAsset = ['/workspace.html','/workspace.css','/workspace.mjs','/workspace-core.mjs'].includes(requested) || requested.startsWith('/computer-runtime/');
+    const selectedRoot = workspaceAsset ? workspaceRoot : root;
+    const path = resolve(selectedRoot, '.' + requested);
+    if (path !== selectedRoot && !path.startsWith(selectedRoot + sep)) return json(res, 403, { error: 'Invalid path.' });
+    const actual = await stat(path).catch(() => null);
+    if(workspaceAsset && !actual?.isFile())
+      return json(res,404,{error:'Workspace asset not built: run node computer/build-web.mjs'});
+    const target = actual?.isFile() ? path : join(root, 'index.html');
     const bytes = await readFile(target);
     res.writeHead(200, { 'Content-Type': mime[extname(target)] ?? 'application/octet-stream', 'X-Content-Type-Options': 'nosniff' });
     res.end(req.method === 'HEAD' ? undefined : bytes);

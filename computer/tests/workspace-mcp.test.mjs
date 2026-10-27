@@ -9,7 +9,7 @@ test('MCP announces only read-only public inspection capabilities',async()=>{
  const listed=await handleRpc({jsonrpc:'2.0',id:2,method:'tools/list',params:{}});
  assert.deepEqual(listed.result.tools.map(t=>t.name),['inspect_workspace','list_build_goals','check_website_http']);
  const goals=await executeTool('list_build_goals');
- assert.equal(goals.goals.length,9);
+ assert.equal(goals.goals.length,12);
  assert.equal(goals.goals[0].status,'done');
  const wrong=await handleRpc({jsonrpc:'2.0',id:3,method:'tools/call',params:{name:'delete_project'}});
  assert.equal(wrong.error.code,-32602);
