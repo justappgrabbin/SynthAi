@@ -20,10 +20,10 @@ test('paths reject traversal; retain nested source paths',()=>{
   assert.equal(safePath('/index.html'),'index.html');
 });
 test('goals persist only verified complete state',()=>{
-  const b=newBoard();assert.equal(progress(b).done,2);
+  const b=newBoard();assert.equal(progress(b).done,5);
   assert.throws(()=>updateGoal(b,'G03','done'),/verification note/);
   const updated=updateGoal(b,'G03','done','Browser acceptance receipt #1');
-  assert.equal(progress(updated).done,3);
+  assert.equal(progress(updated).done,6);
   assert.equal(b.goals.find(g=>g.id==='G03').status,'todo');
   assert.equal(validateBoard(updated).goals.length,b.goals.length);
   assert.throws(()=>validateBoard({...updated,goals:[{...updated.goals[0],evidence:''}]}),/Invalid goal/);
