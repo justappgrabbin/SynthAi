@@ -50,20 +50,22 @@ test('actual world state differs from unverified reports and never claims an act
   } finally { await rm(config.eventLogPath, { force:true }); }
 });
 
-test('chat uses grounded Computer evidence when available, legacy is visibly labeled otherwise', async () => {
+test('chat preserves grounded evidence and uses a real generative provider for unseen questions', async () => {
   const config = computerOptions();
   try {
     const computer = await new ComputerRuntime(config).boot();
     const chat = new ConversationExecution(computer);
+    chat.localModel = { available: async()=>({ready:true,model:'test'}), reply: async({input})=>({text:'I can explore: '+input,kind:'local-generative-dialogue',provider:'local:ollama:test',llm:true,evidence:[]}) };
     const status = await chat.talk('What is the status of the Synthia model?');
     assert.equal(status.provider, 'computer:grounded-dialogue');
     assert.equal(status.llm, false);
     assert.match(status.text, /pretrained large language model: no/);
     assert.equal(status.answerKind, 'runtime-observation');
     const other = await chat.talk('Invent an original space opera');
-    assert.equal(other.provider, 'donor:legacy-morph-patterns');
-    assert.equal(other.answerKind, 'legacy-pattern-realization');
-    assert.equal(other.llm, false);
+    assert.equal(other.provider, 'local:ollama:test');
+    assert.equal(other.answerKind, 'local-generative-dialogue');
+    assert.equal(other.llm, true);
+    assert.match(other.text, /Invent an original space opera/);
     assert.equal(other.evidenceVerified, false);
     assert.ok(other.text.length > 0);
     assert.equal(chat.history().length, 2);
