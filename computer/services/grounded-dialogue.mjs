@@ -108,13 +108,16 @@ export class GroundedDialogue {
       .map(n => ({ id:n.id, text:n.text, actor:n.actor, kind:'speaker-report', score:relevant(n.text,subject) }));
     const recalls = entries.filter(n => n.score >= (subject.length === 1 ? 1 : 0.5))
       .sort((a,b)=>b.score-a.score || b.id.localeCompare(a.id)).slice(0,3);
-    if (recalls.length && (has('remember','recall','earlier','said','talked','discussed') || isQuestion(query))) {
+    // A topical overlap is not a request for memory. Do not intercept a real
+    // conversational question unless the human explicitly asked for recall.
+    const recallRequested = has('remember','recall','earlier','said','say','told','tell','talked','discussed','mentioned','previously');
+    if (recalls.length && recallRequested) {
       const passages = recalls.map((r,i)=> (i+1) + '. ' + clip(r.text,300)).join('\n');
       return make('Previous user statements relevant to ' + subject.join(', ') +
         ' (attributed, not independently verified):\n' + passages,
         recalls.map(r=>({type:r.kind,id:r.id,verified:false})), 'speaker-recall');
     }
-    if (has('remember','recall','said','earlier','discussed')) {
+    if (recallRequested) {
       return make('I have no earlier user statement indexed for ' + subject.join(', ') +
         '. I will not invent a memory.');
     }
