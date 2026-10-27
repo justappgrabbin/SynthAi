@@ -1,0 +1,38 @@
+name: SYNTH AI Workspace Plan 001 acceptance
+on:
+  push:
+    branches:
+      - integration/workspace-plan-001-20261027
+    paths:
+      - 'public/workspace*'
+      - 'public/index.html'
+      - 'computer/plugins/workspace*'
+      - 'computer/tests/workspace*'
+      - 'api/mcp.mjs'
+      - '.github/workflows/workspace-plan-001.yml'
+  pull_request:
+    paths:
+      - 'public/workspace*'
+      - 'computer/plugins/workspace*'
+      - 'computer/tests/workspace*'
+      - 'api/mcp.mjs'
+  workflow_dispatch:
+jobs:
+  workspace:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Syntax checks
+        run: |
+          node --check public/workspace-core.mjs
+          node --check public/workspace.mjs
+          node --check computer/plugins/workspace-mcp-handler.mjs
+          node --check api/mcp.mjs
+      - name: Workspace security and MCP acceptance
+        run: node --test computer/tests/workspace-core.test.mjs computer/tests/workspace-mcp.test.mjs
+      - name: Static web staging
+        run: node computer/build-web.mjs
