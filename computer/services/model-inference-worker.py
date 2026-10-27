@@ -44,9 +44,9 @@ def status(backend, source, checkpoint, model_dir):
 
 
 def trident_generate(source, checkpoint, query):
-    import torch
     if not source or not source.is_file() or not checkpoint or not checkpoint.is_file():
         raise RuntimeError("TRIDENT requires original model.py and existing trained checkpoint")
+    import torch
     spec = importlib.util.spec_from_file_location("synthia_trident_original", source)
     if spec is None or spec.loader is None:
         raise RuntimeError("Cannot load configured TRIDENT architecture")
@@ -83,10 +83,10 @@ def trident_generate(source, checkpoint, query):
 
 
 def modelmaker_generate(model_dir, query):
-    import torch
-    from transformers import AutoModelForCausalLM, AutoTokenizer
     if not model_dir or not model_dir.is_dir():
         raise RuntimeError("Modelmaker requires an existing exported local model directory")
+    import torch
+    from transformers import AutoModelForCausalLM, AutoTokenizer
     tokenizer = AutoTokenizer.from_pretrained(str(model_dir), local_files_only=True,
                                                trust_remote_code=False)
     model = AutoModelForCausalLM.from_pretrained(str(model_dir),
