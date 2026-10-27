@@ -2,15 +2,15 @@ import {STORAGE_KEY,newBoard,validateBoard,updateGoal,progress,extractTextZip,pi
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const safe=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const sources=[
-['Paper-Mobile-Termux-Build (1).zip','Termux Android WebView build kit','1DUxiWa29FAnKPzgx6FGLozVPD_n4oepg'],
-['DaRk-LLM-main.zip','Offline desktop inference studio','1Ir4ji6cTmcHxg7ms1UvNmynVVsyjnMrh'],
-['Model-Weaver.zip','Model-building workbench','1mZiH4v0p_rF3S9Iwj-0hL1oTqZwdA5G_'],
-['Synthia-Computer-r22.4-source.zip','Original Computer source','1wTzwgzBfOiqrNY-xjl9IEspa0Cz7Om2R'],
-['USB-Uncensored-LLM-main.zip','Portable LLM launcher, upstream deprecated','17-1Sq2-aFX9_fPrxPVd3rMD7vVY9sDgu'],
-['transformer-builder-master.zip','Pre-alpha transformer library','1N4UqFlKHvsB_7uhNmRpqghsH6pZUi_sg'],
-['Neural Architecture Generator with 64 Primitive Functions.zip','Integrated Tool Factory source','10wmUqY10jlWXxkehEfFf8tOvbHTk90GB']
+['Paper-Mobile-Termux-Build (1).zip','Termux Android WebView build kit'],
+['DaRk-LLM-main.zip','Offline desktop inference studio'],
+['Model-Weaver.zip','Model-building workbench'],
+['Synthia-Computer-r22.4-source.zip','Original Computer source'],
+['USB-Uncensored-LLM-main.zip','Portable LLM launcher, upstream deprecated'],
+['transformer-builder-master.zip','Pre-alpha transformer library'],
+['Neural Architecture Generator with 64 Primitive Functions.zip','Integrated Tool Factory source']
 ];
-$('#sources').innerHTML=sources.map(([title,description,id])=>'<a class="source" target="_blank" rel="noopener noreferrer" href="https://drive.google.com/file/d/'+id+'/view"><strong>'+safe(title)+'</strong><small>'+safe(description)+'</small></a>').join('');
+$('#sources').innerHTML=sources.map(([title,description])=>'<div class="source"><strong>'+safe(title)+'</strong><small>'+safe(description)+'</small></div>').join('');
 $$('[data-tab]').forEach(b=>b.addEventListener('click',()=>{
  $$('[data-tab]').forEach(x=>{x.classList.toggle('active',x===b);x.setAttribute('aria-selected',String(x===b));});
  $$('.tabview').forEach(x=>x.classList.toggle('active',x.id===b.dataset.tab));
