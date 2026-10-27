@@ -34,6 +34,17 @@
     <p id="importStatus" class="note" role="status">No files selected.</p>
     <div class="projectlist" id="projectList"><span class="subtle">Imports will appear here.</span></div>
     <h3>Archive contents</h3><div id="fileTree" class="filetree"><span class="subtle">Choose a project to see files.</span></div>
+    <div class="source-execution">
+      <h3>Computer integration</h3>
+      <p class="subtle">Imported source is mounted to the Computer project VFS. Use Synthia's actual language engines on a selected source file; tools cannot automatically run unverified Python, Android, or LLM code.</p>
+      <p id="integrationState" role="status" class="note">Computer connector initializing.</p>
+      <div class="line">
+        <button type="button" id="installSource" class="button muted">Connect source</button>
+        <button type="button" id="analyzeSource" class="button">Analyze selected file</button>
+        <button type="button" id="tryTool" class="button muted">Run Klein tool</button>
+      </div>
+      <pre id="integrationResult" class="codeview" aria-live="polite">Choose a source file.</pre>
+    </div>
   </article>
   <article class="panel">
     <div class="heading"><div><small>ISOLATED BROWSER OUTPUT</small><h2>App preview</h2></div><span class="chip" id="previewState">No app</span></div>
