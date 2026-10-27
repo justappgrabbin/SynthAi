@@ -15,6 +15,7 @@ import { AutomataEngineGateway } from './services/automata-engine.mjs';
 import { WorldEngineGateway } from './services/world-engine.mjs';
 import { PentaEphemerisService } from './services/penta-ephemeris.mjs';
 import { ExperimentLoop } from './services/experiment-loop.mjs';
+import { GenerativeSimulationLab } from './services/generative-simulation-lab.mjs';
 import { ResonanceBus } from './services/resonance-bus.mjs';
 import { SynthiaResident } from './services/synthia-resident.mjs';
 
@@ -115,6 +116,10 @@ export class ComputerRuntime {
     // Acceptance-7: experiment loop (donor HypothesisRegistry, wrap-only).
     this.experiments = new ExperimentLoop({ bus: this.bus });
     this.services.register('experiment-loop', { provider: this.experiments, contract: 'runExperiment' });
+    // Language-First Computational Lab: bounded simulation bricks, separately classified evidence.
+    this.simulations = new GenerativeSimulationLab({ bus: this.bus });
+    this.services.register('generative-simulation-lab', { provider: this.simulations, contract: 'listKernels/run/grid/contrastivePairs' });
+    if (!this.capabilityRegistry.has('numerical-simulation')) this.capabilities.register('numerical-simulation', { providers: ['computer:generative-simulation-lab'] });
     this.services.register('resonance-bus', { provider: this.resonance, contract: 'publishOwner/registerAgent/snapshot' });
     this.services.register('synthia-resident', { provider: this.synthia, contract: 'observe/recordReply/teach/runTool/graph' });
     if (!this.agents.has('synthia-resident')) this.agents.register('synthia-resident', { role: 'local-reasoning-resident', model: 'online-neural+Klein-dual-graph' });
@@ -203,6 +208,8 @@ export class ComputerRuntime {
     return summary;
   }
 
+  simulate(kernelId, parameters) { return this.simulations.run(kernelId, parameters); }
+  listSimulationKernels() { return this.simulations.listKernels(); }
   worldEvent(event) { return this.worldGateway.process(event); }
   observeWorld() { return this.worldGateway.snapshot(); }
   groupPenta(members) { return this.pentaEphemeris.groupPenta(members); }
