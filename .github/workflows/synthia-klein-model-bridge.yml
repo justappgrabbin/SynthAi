@@ -1,0 +1,37 @@
+name: Synthia Klein model bridge acceptance
+
+on:
+  push:
+    branches:
+      - integration/synthia-klein-model-bridge-20261027
+    paths:
+      - 'computer/services/klein-tool-bridge.mjs'
+      - 'computer/services/conversation-execution.mjs'
+      - 'computer/ComputerRuntime.mjs'
+      - 'computer/tests/klein-tool-bridge.test.mjs'
+      - '.github/workflows/synthia-klein-model-bridge.yml'
+  pull_request:
+    paths:
+      - 'computer/services/klein-tool-bridge.mjs'
+      - 'computer/services/conversation-execution.mjs'
+      - 'computer/ComputerRuntime.mjs'
+      - 'computer/tests/klein-tool-bridge.test.mjs'
+      - '.github/workflows/synthia-klein-model-bridge.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  klein:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify Klein tools and full Synthia conversation
+        run: node --test computer/tests/klein-tool-bridge.test.mjs computer/tests/synthia-resident.test.mjs computer/tests/synthia-agent-model-routing.test.mjs
