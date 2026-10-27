@@ -7,10 +7,13 @@ export const GOALS = Object.freeze([
   { id:'G03', title:'Upload a project or ZIP on a phone', status:'todo', evidence:'', category:'Workspace' },
   { id:'G04', title:'Render a real uploaded HTML app in the isolated preview', status:'todo', evidence:'', category:'Workspace' },
   { id:'G05', title:'Verify goals survive refresh and export/import', status:'todo', evidence:'', category:'Workspace' },
-  { id:'G06', title:'Publish and test the website on a real HTTPS URL', status:'todo', evidence:'', category:'Deployment' },
+  { id:'G06', title:'Publish and test the website on a real HTTPS URL', status:'done', evidence:'Vercel deployment dpl_GyMFGBvCXrYJV1ZwtvS7sFnPbfpa READY; preview workspace and donor assets HTTP 200', category:'Deployment' },
   { id:'G07', title:'Connect and verify the read-only ChatGPT MCP bridge', status:'todo', evidence:'', category:'ChatGPT' },
   { id:'G08', title:'Approve and version Plan 001: language model', status:'todo', evidence:'', category:'Language Model' },
-  { id:'G09', title:'Demonstrate grounded generative language with evaluation', status:'todo', evidence:'', category:'Language Model' }
+  { id:'G09', title:'Demonstrate grounded generative language with evaluation', status:'todo', evidence:'', category:'Language Model' },
+  { id:'G10', title:'Mount actual source in Computer and execute canonical Klein engines', status:'done', evidence:'GitHub Actions 40526327177 passed archive source mount, tool execution, checksums and restart checks', category:'Integration' },
+  { id:'G11', title:'Execute original Generative Address Klein and Morph chat routes', status:'done', evidence:'GitHub Actions 40526327177 checked out original Generative Address repository; both distinct chat routes passed', category:'Integration' },
+  { id:'G12', title:'Train and run an original transformer with verified checkpoint and new prompts', status:'todo', evidence:'', category:'Language Model' }
 ]);
 
 const types = /\.(?:html?|css|mjs|js|json|md|txt|svg|ts|tsx|jsx|yaml|yml|xml|csv|py|toml|sh)$/i;
