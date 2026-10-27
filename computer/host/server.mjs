@@ -22,7 +22,12 @@ const computer = await new ComputerRuntime({
 }).boot();
 const conversation = new ConversationExecution(computer);
 const files = new FileAdmission(computer, conversation.execution);
-const modelGateway = new ModelIntegrationGateway({bus:computer.bus,state:computer.state});
+const privateModelStore = process.env.SYNTHIA_TRAINED_MODELS_DIR ?? join(dataDir,'models');
+await mkdir(privateModelStore,{recursive:true,mode:0o700});
+const modelGateway = new ModelIntegrationGateway({
+  bus:computer.bus,state:computer.state,
+  env:{...process.env,SYNTHIA_TRAINED_MODELS_DIR:privateModelStore}
+});
 const addressGateway = new GenerativeAddressGateway({bus:computer.bus,state:computer.state});
 let modelTrainingBusy = false;
 
@@ -87,11 +92,11 @@ const json = (res, status, value) => {
   res.writeHead(status, { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' });
   res.end(JSON.stringify(value));
 };
-async function body(req) {
+async function body(req, maxChars = 8500000) {
   let text = '';
   for await (const part of req) {
     text += part;
-    if (text.length > 8500000) throw new RangeError('Request is too large.');
+    if (text.length > maxChars) throw new RangeError('Request is too large.');
   }
   return JSON.parse(text);
 }
@@ -143,6 +148,12 @@ const server = createServer(async (req, res) => {
       // Model weights/source are admin-configured and never accepted from HTTP args.
       if (req.method === 'GET' && url.pathname === '/api/models/status')
         return json(res, 200, await modelGateway.status());
+      if (req.method === 'POST' && url.pathname === '/api/models/import-checkpoint') {
+        const request=await body(req,28_000_000);
+        // Only PyTorch weights can be imported; uploaded source code is never
+        // interpreted or executed by the Computer.
+        return json(res,200,await modelGateway.importTridentCheckpoint({base64:request?.base64}));
+      }
       if (req.method === 'POST' && url.pathname === '/api/models/train') {
         if(modelTrainingBusy)return json(res,409,{error:'A local Modelmaker training job is already running'});
         const input=await body(req);
