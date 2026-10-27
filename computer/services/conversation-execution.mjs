@@ -48,7 +48,11 @@ export class ConversationExecution {
     const generated = grounded ? null : await this.localModel.reply({
       input: text, history: this.history(), reading: residentReading,
     });
-    const selected = grounded ?? generated;
+    // Respect explicit earlier human corrections even while the local model is
+    // unavailable. Never fall through to an unapproved canned legacy reply.
+    const taught = !grounded && generated?.kind === 'conversation-model-unavailable'
+      ? this.computer.languageLearner.infer(text) : null;
+    const selected = grounded ?? taught ?? generated;
     const responseText = selected.text;
     const answerKind = selected.kind;
     const replyProvider = selected.provider;
