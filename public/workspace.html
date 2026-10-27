@@ -22,6 +22,7 @@
   <button class="tab active" data-tab="library" aria-selected="true">01 Files &amp; Preview</button>
   <button class="tab" data-tab="goals" aria-selected="false">02 Goal Board</button>
   <button class="tab" data-tab="plan" aria-selected="false">03 Language Plan</button>
+  <button class="tab" data-tab="model-lab" aria-selected="false">04 Model Lab</button>
 </nav>
 <section id="library" class="tabview active">
  <div class="columns">
@@ -71,6 +72,32 @@
  <p class="note"><strong>Release gate:</strong> Do not mark the language model complete until it can generate non-template replies on unseen prompts and passes repeatable evaluation. Foundry remains read-only.</p>
  <a class="button muted" href="https://github.com/justappgrabbin/SynthAi">Read original Computer repository</a>
  </article>
+</section>
+
+<section id="model-lab" class="tabview">
+ <div class="columns">
+ <article class="panel">
+ <div class="heading"><div><small>EXISTING COMPUTER · FUNCTIONAL ENGINES</small><h2>Run the real systems</h2></div><span class="chip" id="modelEngineState">Checking</span></div>
+ <p class="subtle">This panel uses the local SYNTH AI Computer when opened at its own URL. The hosted website cannot read private files or execute a local model by itself.</p>
+ <div class="line"><button class="button muted" id="checkModels">Check Computer / weights</button>
+ <a class="button muted" href="http://127.0.0.1:8765/workspace.html" target="_blank" rel="noopener">Open local Computer Workspace</a></div>
+ <h3>Import the selected source into Computer</h3>
+ <p class="subtle">The browser archive remains unchanged. A selected text file can also be admitted into Computer with a checksum and state-space address, where Model Maker can train on it.</p>
+ <div class="line"><button class="button" id="admitSource">Send selected source to Computer</button></div>
+ <p class="note" id="admitStatus">Choose a source file in Files &amp; Preview first.</p>
+ <h3>Original Model Maker</h3>
+ <label class="url-label">Local source address<input id="trainingSourcePath" placeholder="/home/user/Imports/corpus.txt" autocomplete="off"></label>
+ <div class="line"><label class="url-label">Model name<input id="trainModelName" value="synthia-seed" maxlength="48"></label><button class="button muted" id="trainModel">Train with original Model Maker</button></div>
+ <p class="note">Training requires an existing local Python Model Maker checkout and its dependencies. Real training can consume CPU and memory.</p>
+ </article>
+ <article class="panel">
+ <div class="heading"><div><small>REAL ENGINE RESPONSES ONLY</small><h2>Conversation and inference</h2></div></div>
+ <label class="url-label">Processing mode<select id="modelMode"><option value="communication">Computer Communication</option><option value="klein">Original Klein</option><option value="morph">Original Morph</option><option value="trident">TRIDENT transformer</option><option value="modelmaker">Model Maker transformer</option></select></label>
+ <label class="url-label">Message<input id="modelPrompt" maxlength="4000" value="What can we learn from language and context?"></label>
+ <button class="button" id="runModel">Run selected engine</button>
+ <pre id="modelOutput" class="codeview" aria-live="polite">Run Check Computer / weights first. Missing checkpoints and unavailable services will be reported rather than fabricated.</pre>
+ </article>
+ </div>
 </section>
 </main>
 <script type="module" src="/workspace.mjs"></script>
