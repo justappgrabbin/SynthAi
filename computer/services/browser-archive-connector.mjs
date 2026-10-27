@@ -121,7 +121,10 @@ export class BrowserArchiveConnector {
   if(typeof text!=='string'||await signature(text)!==entry.sha256)
     throw new Error('Source checksum mismatch — original file preserved');
   if(!['autoling','diseminer'].includes(engine))throw new Error('Unsupported analysis tool');
-  const reading=await this.synthia.observe(text.slice(0,12000),
+  // Only fingerprint/path metadata enters the resident persistence.
+  // Original source bytes remain exclusively in the IndexedDB source store.
+  const reading=await this.synthia.observe(
+    'Source inspection for '+path+' with checksum '+entry.sha256.slice(0,16),
     {actor:'source:'+archiveId,context:{scope:'owner-local-source',path}});
   const result=await this.synthia.runTool(engine,{text:text.slice(0,12000)});
   const receipt={id:'analysis-'+crypto.randomUUID(),archiveId,path,engine,sourceSha256:entry.sha256,
