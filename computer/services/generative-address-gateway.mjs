@@ -22,7 +22,7 @@ export class GenerativeAddressGateway {
       redirect:'error'
     });
     const raw=await response.text();
-    if(raw.length>500000)throw new Error('Generative Address result exceeds response limit');
+    if(raw.length>10000000)throw new Error('Generative Address result exceeds 10 MB response limit');
     let json;
     try{json=JSON.parse(raw)}catch{throw new Error('Generative Address returned non-JSON output')}
     if(!response.ok)throw new Error('Generative Address '+response.status+': '+(json.error||'request failed'));
@@ -48,8 +48,20 @@ export class GenerativeAddressGateway {
       body.addresses=addresses;
     }
     const result=await this.request('/api/chat',{method:'POST',body});
+    // The original engine returns deeply nested audit/mesh data (often >500KB).
+    // Consume its real result but keep only the observed public chat contract,
+    // preserving local state size and not implying we cloned its graph.
+    const output={
+      processingMode:result.processingMode,
+      utterance:typeof result.utterance==='string'?result.utterance.slice(0,12000):null,
+      recordId:result.recordId??null,
+      morphologyApplied:mode==='morph'&&!!result.morphology,
+      morphologyPolicy:result.morphology?.policy??null,
+    };
+    if(output.processingMode!==mode || !output.utterance)
+      throw new Error('Original engine did not confirm a complete '+mode+' chat result');
     const receipt={provider:'original-generative-address-system',
-      mode,from:this.origin,output:result,at:new Date().toISOString(),
+      mode,from:this.origin,output,at:new Date().toISOString(),
       addressedInput:addresses!==null,externalEngineConsumed:true};
     if(this.state){
       const history=this.state.get('models.generativeAddressReceipts',[]);
