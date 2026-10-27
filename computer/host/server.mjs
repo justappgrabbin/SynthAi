@@ -116,7 +116,10 @@ const server = createServer(async (req, res) => {
       }
       // Non-sensitive resident health; learning graph and user utterances stay private.
       if (req.method === 'GET' && url.pathname === '/api/synthia/status')
-        return json(res, 200, { ...computer.synthia.status(), localLanguage: computer.languageLearner.status(), groundedDialogue:true });
+        return json(res, 200, { ...computer.synthia.status(), localLanguage: computer.languageLearner.status(), groundedDialogue:true,
+          conversationModel: await conversation.modelStatus() });
+      if (req.method === 'GET' && url.pathname === '/api/synthia/conversation-status')
+        return json(res, 200, await conversation.modelStatus());
       if (req.method === 'POST' && url.pathname === '/api/synthia/teach-language') {
         // An explicit correction to a real stored turn trains LOCAL language only.
         // No external actions, permissions or factual verification are granted.
