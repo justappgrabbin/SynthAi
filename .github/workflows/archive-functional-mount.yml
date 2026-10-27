@@ -6,6 +6,7 @@ on:
       - 'computer/services/browser-archive-connector.mjs'
       - 'computer/tests/archive-integration.test.mjs'
       - 'computer/tests/model-integration.test.mjs'
+      - 'computer/tests/workspace-local-computer.test.mjs'
       - 'computer/services/model-*'
       - 'computer/services/generative-address-gateway.mjs'
       - 'computer/host/server.mjs'
@@ -67,3 +68,6 @@ jobs:
           test -f public/computer-runtime/services/browser-archive-connector.mjs
           test -f public/computer-runtime/engines/unified-execution-spine/src/pure-synthia/merged/tool-factory.js
           test -f public/computer-runtime/engines/unified-execution-spine/src/pure-synthia/automata/tools/tool-14-autoling.js
+
+      - name: Local Computer HTTP end-to-end with real source admission
+        run: node --test computer/tests/workspace-local-computer.test.mjs
