@@ -23,6 +23,7 @@ const conversation = new ConversationExecution(computer);
 const files = new FileAdmission(computer, conversation.execution);
 const modelGateway = new ModelIntegrationGateway({bus:computer.bus,state:computer.state});
 const addressGateway = new GenerativeAddressGateway({bus:computer.bus,state:computer.state});
+let modelTrainingBusy = false;
 
 // Import names are allocated before the first asynchronous write. This prevents
 // an upload with the same filename from replacing an earlier user's original.
@@ -141,6 +142,26 @@ const server = createServer(async (req, res) => {
       // Model weights/source are admin-configured and never accepted from HTTP args.
       if (req.method === 'GET' && url.pathname === '/api/models/status')
         return json(res, 200, await modelGateway.status());
+      if (req.method === 'POST' && url.pathname === '/api/models/train') {
+        if(modelTrainingBusy)return json(res,409,{error:'A local Modelmaker training job is already running'});
+        const input=await body(req);
+        if(typeof input?.sourcePath!=='string'||!input.sourcePath.startsWith('/home/user/Imports/'))
+          throw new TypeError('Select a previously imported owner source file');
+        const record=computer.vfs.read(input.sourcePath);
+        if(!record || record.meta?.encoding!=='utf8'||!record.meta?.addressKey)
+          throw new TypeError('Source file is not a verified UTF-8 import');
+        modelTrainingBusy=true;
+        try{
+          const admitted=await files.activate(record.meta.addressKey,record.path);
+          const receipt=await modelGateway.trainModelmaker({
+            name:input.name||'synthia-seed',
+            corpus:admitted.content,epochs:input.epochs??1,
+            architecture:input.architecture??{}
+          });
+          return json(res,200,{...receipt,sourceAddressKey:record.meta.addressKey,
+             sourceDigest:record.meta.digest,originalModelmaker:true});
+        }finally{modelTrainingBusy=false;}
+      }
       if (req.method === 'POST' && url.pathname === '/api/models/generate') {
         const args = await body(req);
         const prompt = args?.text;
