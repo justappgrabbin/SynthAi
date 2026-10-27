@@ -1,4 +1,5 @@
 import { SynthiaSystem } from '../engines/unified-execution-spine/src/synthia-system.mjs';
+import { parseDiffusionRequest, produceDiffusionAnswer } from './simulation-conversation-route.mjs';
 const serializable = (value) => JSON.parse(JSON.stringify(value, (_key, item) => typeof item === 'function' ? undefined : item));
 
 /** Connects the existing Computer state to the two original donor engines. */
@@ -35,11 +36,44 @@ export class ConversationExecution {
     // loop. Its result is consumed as evidence, not substituted for the answer.
     const learned = await this.execution.chat(text);
     let responseText = donor.text;
+    let provider = donor.assistant?.provider ?? 'local-morph';
+    let modelFailure = null;
+    let modelUsed = false;
+    let simulation = null;
     const imported = this.computer.vfs.list('/home/user/Imports/');
     if (/\b(what|which|show|list)\b/i.test(text) && /\b(files?|imports?|uploaded)\b/i.test(text)) {
       responseText = imported.length
         ? `I have ${imported.length} imported file${imported.length === 1 ? '' : 's'} addressed in this computer:\n${imported.slice(-30).map((file) => `• ${file.path.replace('/home/user/Imports/', '')} — ${file.meta.address.dimension}, Gate ${file.meta.address.gate}`).join('\n')}`
         : 'There are no imported files yet. Open Import and choose a file or ZIP.';
+    } else {
+      const request = parseDiffusionRequest(text);
+      if (request?.status === 'incomplete') {
+        responseText = request.guidance;
+        provider = 'computer:simulation-guidance';
+      } else if (request?.status === 'ready') {
+        try {
+          const answer = produceDiffusionAnswer(this.computer, request);
+          responseText = answer.text;
+          provider = answer.provider;
+          simulation = { kernel: answer.kernel, evidence: answer.evidence };
+        } catch (error) {
+          responseText = 'Simulation input was rejected: ' + String(error?.message ?? error);
+          provider = 'computer:simulation-validation';
+        }
+      } else if (this.computer.languageModel?.status().configured) {
+        try {
+          const completion = await this.computer.languageModel.generate({
+            text, context: String(donor.text ?? '').slice(0, 1200),
+          });
+          responseText = completion.text;
+          provider = completion.provider;
+          modelUsed = true;
+        } catch (error) {
+          // Existing donor remains available; an LLM outage never becomes a fake model reply.
+          modelFailure = String(error?.message ?? 'Model unavailable').slice(0, 160);
+          this.computer.bus.emit('synthia:language-model-fallback', { reason: 'endpoint-unavailable' });
+        }
+      }
     }
     const item = {
       id: crypto.randomUUID(), at: new Date().toISOString(), input: text,
@@ -48,18 +82,23 @@ export class ConversationExecution {
       intent: donor.conversation.semantic.intent,
       dimension: donor.conversation.semantic.dimension,
       linguisticGrounded: true,
-      provider: donor.assistant?.provider ?? 'local-morph',
+      provider,
+      model: { configured: this.computer.languageModel?.status().configured ?? false,
+        used: modelUsed, fallbackReason: modelFailure },
+      simulation,
       learningRecord: learned.recordId,
     };
     const history = this.computer.state.get('computer.chat.history', []);
     await this.computer.state.set('computer.chat.history', [...history, item].slice(-120), { source: 'conversation' });
     const residentReceipt = await this.computer.synthia.recordReply(residentReading, {
-      text: responseText, provider: donor.assistant?.provider ?? 'local-morph',
+      text: responseText, provider,
     });
     const event = await this.computer.emitEvent({
       actor_id: 'user:local', actor_type: 'user', target_id: 'synthia', event_type: 'message',
-      input: text, event_address: item.address, provider: 'donor:morph-chat+execution-spine',
-      result: { text: item.text, focus: item.focus, intent: item.intent, learningRecord: item.learningRecord },
+      input: text, event_address: item.address, provider,
+      result: { text: item.text, focus: item.focus, intent: item.intent,
+        learningRecord: item.learningRecord, simulation: item.simulation,
+        languageModelUsed: modelUsed, modelFallback: Boolean(modelFailure) },
       result_status: 'success', observable_effect: 'readable reply and persistent conversation record',
     });
     return { ...item, eventId: event.event_id,

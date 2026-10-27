@@ -90,7 +90,7 @@ export default function Chat() {
   const [searchQuery, setSearchQuery] = useState('');
   const [showNewChat, setShowNewChat] = useState(false);
   const [residentStatus, setResidentStatus] = useState<'checking' | 'connected' | 'unavailable'>('checking');
-  const [residentDetails, setResidentDetails] = useState<{ graphs: string[]; trainingExamples: number } | null>(null);
+  const [residentDetails, setResidentDetails] = useState<{ graphs: string[]; trainingExamples: number; languageModel?: { configured: boolean; model: string | null; locality: string; configError?: string | null }; simulationKernels?: { id: string; version: string }[] } | null>(null);
 
   // Never mark Synthia online unless the resident itself answers the health check.
   const verifyResident = useCallback(async () => {
@@ -103,7 +103,8 @@ export default function Chat() {
           !Array.isArray(data?.graphs) || !data.graphs.includes('klein-semantic-spacetime')) {
         throw new Error('Unexpected resident identity');
       }
-      setResidentDetails({ graphs: data.graphs, trainingExamples: Number(data.trainingExamples) || 0 });
+      setResidentDetails({ graphs: data.graphs, trainingExamples: Number(data.trainingExamples) || 0,
+        languageModel: data.languageModel, simulationKernels: data.simulationKernels });
       setResidentStatus('connected');
       setConversations((prev) => prev.map((c) => c.id === 'bot' ? { ...c, status: 'online' } : c));
     } catch {
@@ -154,9 +155,11 @@ export default function Chat() {
       if (!data?.resident?.readingId || !data?.resident?.id) {
         throw new Error('Computer replied without a verified Synthia resident receipt.');
       }
-      const source = data.provider === 'local-morph'
+      let source = data.provider === 'local-morph'
         ? (data.intent === 'greeting' ? 'Prewritten greeting from local Morph provider' : 'Rule-based reply from local Morph provider')
         : `Reply provider: ${String(data.provider ?? 'unidentified')}`;
+      if (data.model?.fallbackReason) source += ` · Model unavailable; local donor fallback (${String(data.model.fallbackReason)})`;
+      if (data.simulation?.evidence?.measured === false) source += ' · Synthetic model output, not measured';
       const reply: Message = { id: data.id, senderId: 'bot', content: data.text,
         timestamp: Date.parse(data.at), type: 'text', source, residentReceipt: data.resident.readingId };
       setConversations((prev) => prev.map((c) => c.id === activeConvId ? { ...c, messages: [...c.messages, reply] } : c));
@@ -302,7 +305,7 @@ export default function Chat() {
         <div role="status" className="flex items-center justify-between gap-2 px-4 py-2 text-xs" style={{ borderBottom: '1px solid var(--border-subtle)', color: 'var(--text-secondary)' }}>
           <span>
             {residentStatus === 'connected' && residentDetails
-              ? `Resident verified · ${residentDetails.graphs.length} graphs · ${residentDetails.trainingExamples} supervised examples · Replies: Morph rules (greetings are prewritten)`
+              ? `Resident verified · ${residentDetails.graphs.length} graphs · ${residentDetails.trainingExamples} supervised examples · ${residentDetails.languageModel?.configured ? `LLM configured: ${residentDetails.languageModel.model} (${residentDetails.languageModel.locality})` : 'No LLM configured; Morph rules'} · ${(residentDetails.simulationKernels ?? []).length} numerical kernel(s)`
               : residentStatus === 'checking' ? 'Verifying Synthia in this Computer…'
               : 'Synthia is unavailable. No simulated reply will be shown.'}
           </span>

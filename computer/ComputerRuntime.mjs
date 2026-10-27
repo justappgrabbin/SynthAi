@@ -16,6 +16,8 @@ import { WorldEngineGateway } from './services/world-engine.mjs';
 import { PentaEphemerisService } from './services/penta-ephemeris.mjs';
 import { ExperimentLoop } from './services/experiment-loop.mjs';
 import { GenerativeSimulationLab } from './services/generative-simulation-lab.mjs';
+import { SynthiaLanguageModel } from './services/synthia-language-model.mjs';
+import { AdaptiveGoalLoop } from './services/adaptive-goal-loop.mjs';
 import { ResonanceBus } from './services/resonance-bus.mjs';
 import { SynthiaResident } from './services/synthia-resident.mjs';
 
@@ -119,6 +121,20 @@ export class ComputerRuntime {
     // Language-First Computational Lab: bounded simulation bricks, separately classified evidence.
     this.simulations = new GenerativeSimulationLab({ bus: this.bus });
     this.services.register('generative-simulation-lab', { provider: this.simulations, contract: 'listKernels/run/grid/contrastivePairs' });
+    this.adaptiveGoals = new AdaptiveGoalLoop({ state: this.state, bus: this.bus });
+    this.services.register('adaptive-goal-loop', { provider: this.adaptiveGoals, contract: 'propose/recordFeedback(ownerApproved)/status' });
+    if (!this.capabilityRegistry.has('adaptive-planning')) this.capabilities.register('adaptive-planning', { providers: ['computer:adaptive-goal-loop'] });
+    try {
+      this.languageModel = new SynthiaLanguageModel();
+      this.languageModelConfigError = null;
+    } catch (error) {
+      this.languageModel = new SynthiaLanguageModel({ baseUrl: '', model: '' });
+      this.languageModelConfigError = 'Invalid model configuration; check SYNTHIA_LLM_* environment variables';
+      this.bus.emit('service:provider-failure', { provider: 'synthia-language-model', reason: 'invalid-configuration' });
+    }
+    this.services.register('synthia-language-model', { provider: this.languageModel, contract: 'status/generate' });
+    if (this.languageModel.status().configured && !this.capabilityRegistry.has('language-model'))
+      this.capabilities.register('language-model', { providers: ['computer:synthia-language-model'] });
     if (!this.capabilityRegistry.has('numerical-simulation')) this.capabilities.register('numerical-simulation', { providers: ['computer:generative-simulation-lab'] });
     this.services.register('resonance-bus', { provider: this.resonance, contract: 'publishOwner/registerAgent/snapshot' });
     this.services.register('synthia-resident', { provider: this.synthia, contract: 'observe/recordReply/teach/runTool/graph' });
@@ -208,6 +224,7 @@ export class ComputerRuntime {
     return summary;
   }
 
+  planAdaptiveAction(plan) { return this.adaptiveGoals.propose(plan); }
   simulate(kernelId, parameters) { return this.simulations.run(kernelId, parameters); }
   listSimulationKernels() { return this.simulations.listKernels(); }
   worldEvent(event) { return this.worldGateway.process(event); }
@@ -261,6 +278,8 @@ export class ComputerRuntime {
       capabilities: this.capabilityRegistry.list(),
       resonance: this.resonance.snapshot(),
       synthia: this.synthia?.status() ?? { status: 'not-booted' },
+      languageModel: this.languageModel?.status() ?? { configured: false },
+      adaptiveGoals: this.adaptiveGoals?.status() ?? { mode: 'not-booted' },
       mounted: this.shellManager.listMounted()
     };
   }
