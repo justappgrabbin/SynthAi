@@ -144,3 +144,79 @@ $('#tryTool').addEventListener('click',async()=>{
   $('#integrationResult').textContent=JSON.stringify(result,null,2);
  }catch(error){$('#integrationResult').textContent='Tool execution failed: '+error.message}
 });
+
+
+// Local Computer model lab. All actions are same-origin only. The hosted static
+// page has no server-side access to private browser imports or model weights.
+async function computerJson(path,payload){
+ const response=await fetch(path,{
+  ...(payload===undefined?{}:{method:'POST',headers:{'content-type':'application/json'},
+    body:JSON.stringify(payload)}),
+  redirect:'error',cache:'no-store'
+ });
+ const type=response.headers.get('content-type')||'';
+ if(!type.includes('application/json'))throw Error('Open this panel from the local Computer URL; hosted static preview has no model server');
+ const value=await response.json();
+ if(!response.ok)throw Error(value.error||'Computer endpoint returned '+response.status);
+ return value;
+}
+$('#checkModels').addEventListener('click',async()=>{
+ $('#modelEngineState').textContent='Checking';
+ try{
+  const [models,address]=await Promise.all([
+    computerJson('/api/models/status'),computerJson('/api/generative-address/status')
+  ]);
+  $('#modelEngineState').textContent='Computer connected';
+  $('#modelOutput').textContent=JSON.stringify({
+    trident:models.trident,modelmaker:models.modelmaker,
+    generativeAddress:{connected:address.connected,provider:address.provider,error:address.error??null}
+  },null,2);
+ }catch(error){
+   $('#modelEngineState').textContent='Local Computer unavailable';
+   $('#modelOutput').textContent=error.message;
+ }
+});
+$('#admitSource').addEventListener('click',async()=>{
+ if(!selectedSource){$('#admitStatus').textContent='Choose a text file from the Files panel first';return;}
+ if(selectedSource.size>700000){$('#admitStatus').textContent='Select a source under 700 KB for the first local model-training run';return;}
+ $('#admitSource').disabled=true;
+ try{
+   const bytes=new TextEncoder().encode(selectedSource.text);
+   let binary='';
+   for(let offset=0;offset<bytes.length;offset+=16000)
+     binary+=String.fromCharCode(...bytes.subarray(offset,offset+16000));
+   const name=selectedSource.path.split('/').at(-1);
+   const result=await computerJson('/api/ingest',{name,base64:btoa(binary)});
+   const first=result.items?.[0];
+   if(!first?.addressKey||!first.path)throw Error('Computer did not return a verified source address');
+   $('#trainingSourcePath').value=first.path;
+   $('#admitStatus').textContent='Computer admitted '+first.path+' · digest '+first.digest+' · '+first.addressKey;
+ }catch(error){$('#admitStatus').textContent='Admission failed: '+error.message}
+ $('#admitSource').disabled=false;
+});
+$('#trainModel').addEventListener('click',async()=>{
+ const sourcePath=$('#trainingSourcePath').value.trim();
+ if(!sourcePath){$('#modelOutput').textContent='Import a training source into local Computer first';return;}
+ $('#trainModel').disabled=true;
+ $('#modelOutput').textContent='Training requested from the original local Model Maker...';
+ try{
+  const response=await computerJson('/api/models/train',{
+    sourcePath,name:$('#trainModelName').value.trim(),epochs:1
+  });
+  $('#modelOutput').textContent=JSON.stringify(response,null,2);
+ }catch(error){$('#modelOutput').textContent='Original Model Maker training failed: '+error.message}
+ $('#trainModel').disabled=false;
+});
+$('#runModel').addEventListener('click',async()=>{
+ const mode=$('#modelMode').value, text=$('#modelPrompt').value.trim();
+ if(!text){$('#modelOutput').textContent='Enter a prompt';return;}
+ $('#runModel').disabled=true;
+ $('#modelOutput').textContent='Calling the selected original engine...';
+ try{
+  const result=['trident','modelmaker'].includes(mode)?
+    await computerJson('/api/models/generate',{text,backend:mode,maxNewTokens:16}):
+    await computerJson('/api/chat/forms',{text,mode});
+  $('#modelOutput').textContent=JSON.stringify(result,null,2).slice(0,22000);
+ }catch(error){$('#modelOutput').textContent='No verified response: '+error.message}
+ $('#runModel').disabled=false;
+});
