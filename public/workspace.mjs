@@ -1,4 +1,6 @@
 import {STORAGE_KEY,newBoard,validateBoard,updateGoal,progress,extractTextZip,pickEntry,makeSafePreview,safePath} from '/workspace-core.mjs';
+import {BrowserArchiveConnector} from '/computer-runtime/services/browser-archive-connector.mjs';
+import {LocalStoragePersistence} from '/computer-runtime/core/kernel.mjs';
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const safe=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const sources=[
@@ -48,7 +50,26 @@ $('#importBoard').addEventListener('change',async e=>{
  catch(error){$('#goalMessage').textContent=error.message;}
  e.target.value='';
 });
-let database=null,projects=[],active=null;
+let database=null,projects=[],active=null,selectedSource=null,connector=null;
+const integrationPending=new Map();
+try{connector=await new BrowserArchiveConnector({persistence:new LocalStoragePersistence(),namespace:'synthai-computer-web'}).boot();
+ $('#integrationState').textContent='Computer connector ready · original AutoLing/DISEMINER/Tool Factory mounted';
+}catch(error){$('#integrationState').textContent='Computer connector unavailable: '+error.message;}
+async function ensureIntegrated(project){
+ if(!project||!connector) return null;
+ if(integrationPending.has(project.id))return integrationPending.get(project.id);
+ const pending=(async()=>{
+  try{
+   const receipt=await connector.install({name:project.name,files:project.files,indexedDbId:project.id});
+   project.integration={id:receipt.id,mountId:receipt.mount.mountId,projectId:receipt.projectId,status:receipt.status};
+   if(database)await store('readwrite',s=>s.put(project));
+   if(active?.id===project.id)$('#integrationState').textContent='Mounted in Computer: '+project.name+' · '+receipt.fileCount+' source files · '+receipt.roles.join(', ')+' · model execution not yet verified';
+   return receipt;
+  }catch(error){if(active?.id===project.id)$('#integrationState').textContent='Computer mount failed: '+error.message;return null;}
+ })();integrationPending.set(project.id,pending);
+ try{return await pending}finally{integrationPending.delete(project.id)}
+}
+
 function openDatabase(){return new Promise((yes,no)=>{
  if(!window.indexedDB)return no(Error('IndexedDB not available'));
  const r=indexedDB.open('synthai-workspace-artifacts-v1',1);
@@ -65,6 +86,7 @@ function renderProjects(){
  $$('[data-p]').forEach(b=>b.addEventListener('click',()=>setActive(projects.find(p=>p.id===b.dataset.p))));
 }
 function showFile(f){
+ selectedSource=f;
  if(/\.html?$/i.test(f.path)){try{$('#appPreview').srcdoc=makeSafePreview(active.files,f);$('#previewState').textContent='Sandbox preview';$('#previewNote').textContent='Previewing '+f.path+' in an isolated origin, not a production build.'}catch(e){$('#previewNote').textContent=e.message;}}
  else{$('#appPreview').srcdoc='';$('#previewState').textContent='Source only';const pre=document.createElement('pre');pre.className='codeview';pre.textContent=f.text.slice(0,18000);$('#previewNote').replaceChildren(document.createTextNode('Source file '+f.path+' (not executed)'),pre);}
 }
@@ -73,10 +95,11 @@ function renderTree(){
  $$('[data-f]').forEach(b=>b.addEventListener('click',()=>{const f=active.files.find(f=>f.path===b.dataset.f);if(f)showFile(f)}));
 }
 function setActive(p){
- active=p||null;renderProjects();renderTree();
+ active=p||null;selectedSource=null;renderProjects();renderTree();
  if(!active){$('#appPreview').srcdoc='';$('#previewState').textContent='No app';return;}
  const f=pickEntry(active.files);
  if(f)showFile(f);else{$('#appPreview').srcdoc='';$('#previewState').textContent='Sources only';$('#previewNote').textContent='No runnable HTML entry. Source apps such as React or APKs require their toolchain to build.';}
+ if(connector)void ensureIntegrated(active);
 }
 try{database=await openDatabase();projects=await store('readonly',s=>s.getAll());projects.sort((a,b)=>b.addedAt-a.addedAt);$('#storageState').textContent='Saved on this device';setActive(projects[0])}
 catch(e){$('#storageState').textContent='Session-only';$('#importStatus').textContent='Persistent storage unavailable: '+e.message;renderProjects()}
@@ -100,4 +123,24 @@ $('#clearSelection').addEventListener('click',()=>{setActive(null);$('#importSta
 $('#openAppUrl').addEventListener('click',()=>{
  try{const url=new URL($('#appUrl').value.trim());if(url.protocol!=='https:')throw Error('HTTPS required');window.open(url.href,'_blank','noopener,noreferrer');$('#previewNote').textContent='Opened live app in new tab. Embedded display may be blocked by the app host.'}
  catch(e){$('#previewNote').textContent='Invalid URL: '+e.message}
+});
+$('#installSource').addEventListener('click',async()=>{if(!active){$('#integrationState').textContent='Choose a source archive first';return;}await ensureIntegrated(active);});
+$('#analyzeSource').addEventListener('click',async()=>{
+ if(!connector||!active||!selectedSource){$('#integrationResult').textContent='Select an imported file and connect the Computer first.';return;}
+ const receipt=await ensureIntegrated(active);if(!receipt)return;
+ $('#analyzeSource').disabled=true;$('#integrationResult').textContent='Analyzing the source with Synthia...';
+ try{
+  const result=await connector.analyzeFile(receipt.id,{path:selectedSource.path,text:selectedSource.text,engine:'autoling'});
+  $('#integrationResult').textContent=JSON.stringify({engine:'original AutoLing',archiveId:receipt.id,path:selectedSource.path,readingId:result.readingId,sourceSha256:result.sourceSha256,output:result.output},null,2).slice(0,16000);
+ }catch(error){$('#integrationResult').textContent='Analysis failed: '+error.message}
+ $('#analyzeSource').disabled=false;
+});
+$('#tryTool').addEventListener('click',async()=>{
+ if(!connector||!active){$('#integrationResult').textContent='Connect an archive first';return;}
+ const receipt=await ensureIntegrated(active);if(!receipt)return;
+ try{
+  const result=await connector.runGeneratedTool({purpose:'analyze integrated source',dimension:'Design',level:4,gate:14,
+    input:{archive:active.name,path:selectedSource?.path||'SOURCE_MANIFEST.json',sample:selectedSource?.text.slice(0,400)||''}});
+  $('#integrationResult').textContent=JSON.stringify(result,null,2);
+ }catch(error){$('#integrationResult').textContent='Tool execution failed: '+error.message}
 });
