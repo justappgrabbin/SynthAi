@@ -116,7 +116,10 @@ const server = createServer(async (req, res) => {
       }
       // Non-sensitive resident health; learning graph and user utterances stay private.
       if (req.method === 'GET' && url.pathname === '/api/synthia/status')
-        return json(res, 200, computer.synthia.status());
+        return json(res, 200, { ...computer.synthia.status(),
+          languageModel: { ...computer.languageModel.status(), configError: computer.languageModelConfigError },
+          adaptiveGoals: computer.adaptiveGoals.status(),
+          simulationKernels: computer.listSimulationKernels().map(kernel => ({ id: kernel.id, version: kernel.version })) });
       if (req.method === 'GET' && url.pathname === '/api/history') return json(res, 200, conversation.history());
       if (req.method === 'POST' && url.pathname === '/api/chat') return json(res, 200, await conversation.talk((await body(req)).text));
       if (req.method === 'GET' && url.pathname === '/api/filesystem') return json(res, 200, computer.state.get('computer.desktop.filesystem', null));
