@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url';
 import { ComputerRuntime } from '../ComputerRuntime.mjs';
 import { JsonFilePersistence } from '../runtime/json-file-persistence.mjs';
 import { ConversationExecution } from '../services/conversation-execution.mjs';
+import { LocalOllamaLlm } from '../services/local-ollama-llm.mjs';
 import { FileAdmission } from '../services/file-admission.mjs';
 import { readZipMembers } from './zip-members.mjs';
 
@@ -16,6 +17,7 @@ await mkdir(dataDir, { recursive: true });
 const computer = await new ComputerRuntime({
   persistence: new JsonFilePersistence(join(dataDir, 'state.json')),
   eventLogPath: join(dataDir, 'events.jsonl'),
+  llm: new LocalOllamaLlm({ model: process.env.SYNTHIA_LLM_MODEL || null }),
 }).boot();
 const conversation = new ConversationExecution(computer);
 const files = new FileAdmission(computer, conversation.execution);
@@ -96,7 +98,7 @@ const server = createServer(async (req, res) => {
     if (url.pathname.startsWith('/api/')) {
       if (req.method === 'GET' && url.pathname === '/api/status') {
         const swarm = await computer.automataGateway.snapshot();
-        return json(res, 200, { ready: true, computer: 'SynthAI Computer', swarmProcesses: swarm.processCount, files: computer.vfs.list('/').length });
+        return json(res, 200, { ready: true, computer: 'SynthAI Computer', swarmProcesses: swarm.processCount, files: computer.vfs.list('/').length, languageModel: computer.llm.status() });
       }
       // Read-only resonance discovery + proposal path for the real local
       // Android Computer. Deliberately NO execution endpoint here: loopback
@@ -116,7 +118,7 @@ const server = createServer(async (req, res) => {
       }
       // Non-sensitive resident health; learning graph and user utterances stay private.
       if (req.method === 'GET' && url.pathname === '/api/synthia/status')
-        return json(res, 200, computer.synthia.status());
+        return json(res, 200, { ...computer.synthia.status(), languageModel: computer.llm.status() });
       if (req.method === 'GET' && url.pathname === '/api/history') return json(res, 200, conversation.history());
       if (req.method === 'POST' && url.pathname === '/api/chat') return json(res, 200, await conversation.talk((await body(req)).text));
       if (req.method === 'GET' && url.pathname === '/api/filesystem') return json(res, 200, computer.state.get('computer.desktop.filesystem', null));
