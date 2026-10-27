@@ -222,7 +222,7 @@ const server = createServer(async (req, res) => {
     }
     if (req.method !== 'GET' && req.method !== 'HEAD') return json(res, 405, { error: 'Method not allowed.' });
     const requested = decodeURIComponent(url.pathname === '/' ? '/index.html' : url.pathname);
-    const workspaceAsset = /^\\/(workspace(?:-core)?\\.(?:html|css|mjs)|computer-runtime\\/)/.test(requested);
+    const workspaceAsset = ['/workspace.html','/workspace.css','/workspace.mjs','/workspace-core.mjs'].includes(requested) || requested.startsWith('/computer-runtime/');
     const selectedRoot = workspaceAsset ? workspaceRoot : root;
     const path = resolve(selectedRoot, '.' + requested);
     if (path !== selectedRoot && !path.startsWith(selectedRoot + sep)) return json(res, 403, { error: 'Invalid path.' });
