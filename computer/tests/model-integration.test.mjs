@@ -24,6 +24,13 @@ test('Model integration inspects real checkpoint availability and cannot fabrica
  assert.equal(state.get('models.inferenceReceipts',[]).length,0);
 });
 
+test('Modelmaker training requires original source, real corpus and configured output',async()=>{
+ const gateway=new ModelIntegrationGateway({env:{},python:'python3'});
+ await assert.rejects(gateway.trainModelmaker({name:'synthia-seed',corpus:'x'.repeat(1000)}),
+    /Configure existing Modelmaker/);
+ assert.throws(()=>gateway.args('trident','train'),/Only original Modelmaker/);
+});
+
 test('Model gateway rejects unsafe backend and invalid generation sizes before process launch',async()=>{
  const gateway=new ModelIntegrationGateway({env:{},python:'python3'});
  assert.throws(()=>gateway.args('made-up','generate'),/Unknown backend/);
