@@ -52,3 +52,9 @@ Self-host FastAPI + Gradio local HTTP: VERIFIED.
 Docker build/hardware: UNVERIFIED.
 Hugging Face published: BLOCKED (OAuth write scope + Free Docker restriction).
 Production-quality language intelligence: UNVERIFIED / NOT COMPLETE.
+
+## Owner-phone upload option (2026-10-27)
+- Created fourth artifact `TRIDENT_FLOAT_FREE_HF_ANDROID_UPLOAD.zip`, 13,370,605 bytes, SHA-256 `507dc10c8056984b3ead850a92da6bcc0fe6f8e3619df2b5156f02efe5c2fdfd`.
+- This ZIP is FLAT (six root files): `README.md`, `app.py`, exact owner `model.py`, `requirements.txt`, `training_receipt.json`, new trained `trident-trained-synthia-240.pt`. Unzip on Android and upload the files directly into a new Hugging Face **Gradio ZeroGPU** Space, preserving names. Android need not run Termux or Python.
+- All four Gradio specialist selections executed locally using original PyTorch. In addition, original Gradio Space folder served HTTP `/` and `/config` with status 200 on localhost.
+- HF Docker/standard CPU Spaces require paid account as of late October 2026; the connected user is Free. Free personal ZeroGPU Gradio is limited to two Spaces for eligible accounts, with remaining quota/eligibility not established. No capability to create a write-authorized new Space in the current HF connector. Do not claim this artifact is already hosted.
