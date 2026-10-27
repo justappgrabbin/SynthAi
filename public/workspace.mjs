@@ -176,6 +176,36 @@ $('#checkModels').addEventListener('click',async()=>{
    $('#modelOutput').textContent=error.message;
  }
 });
+$('#tridentCheckpointFile').addEventListener('change',event=>{
+ const selected=event.target.files?.[0];
+ $('#checkpointInstallStatus').textContent=selected?
+   selected.name+' · '+(selected.size/1048576).toFixed(1)+' MiB':'No checkpoint selected.';
+});
+$('#installTridentWeights').addEventListener('click',async()=>{
+ const file=$('#tridentCheckpointFile').files?.[0];
+ if(!file){$('#checkpointInstallStatus').textContent='Choose the trained .pt file first';return;}
+ if(file.size<100000||file.size>20*1024*1024 || !/\\.p(?:t|th)$/i.test(file.name)){
+   $('#checkpointInstallStatus').textContent='Choose genuine .pt/.pth weights between 100 KB and 20 MB';
+   return;
+ }
+ const button=$('#installTridentWeights');button.disabled=true;
+ $('#checkpointInstallStatus').textContent='Verifying original TRIDENT model and all heads...';
+ try{
+   const bytes=new Uint8Array(await file.arrayBuffer());
+   const chunks=[];
+   for(let i=0;i<bytes.length;i+=8192)
+     chunks.push(String.fromCharCode(...bytes.subarray(i,i+8192)));
+   const base64=btoa(chunks.join(''));
+   const result=await computerJson('/api/models/import-checkpoint',{base64});
+   if(!result?.verified||!result?.active)throw Error('Computer did not verify the model');
+   $('#checkpointInstallStatus').textContent='Verified '+result.trainableParameters+
+     ' parameters across '+result.verifiedHeads.join(', ')+'. Checkpoint SHA-256: '+result.sha256;
+   $('#modelEngineState').textContent='TRIDENT weights verified';
+ }catch(error){
+   $('#checkpointInstallStatus').textContent='Import not activated: '+error.message;
+ }
+ button.disabled=false;
+});
 $('#admitSource').addEventListener('click',async()=>{
  if(!selectedSource){$('#admitStatus').textContent='Choose a text file from the Files panel first';return;}
  if(selectedSource.size>700000){$('#admitStatus').textContent='Select a source under 700 KB for the first local model-training run';return;}
