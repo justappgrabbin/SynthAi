@@ -6,9 +6,11 @@ import { join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 
 const html = await readFile(resolve('public/fielddesk.html'),'utf8');
-const match = html.match(/<script type="importmap">([\\s\\S]*?)<\\/script>/);
-assert.ok(match,'FieldDesk single-file app must embed a resolved import map');
-const imports=JSON.parse(match[1]).imports;
+const marker='<script type="importmap">';
+const start=html.indexOf(marker);
+const stop=html.indexOf('</script>',start);
+assert.ok(start>=0 && stop>start,'FieldDesk single-file app must embed a resolved import map');
+const imports=JSON.parse(html.slice(start+marker.length,stop)).imports;
 const original=Object.keys(imports).filter(key=>key.startsWith('ato:'));
 assert.equal(original.length,33,'Preserve 33 owner-original ATO/Klein modules');
 assert.ok(imports['fd:core'],'Bundled executable app logic must exist');
@@ -24,7 +26,7 @@ try{
    assert.ok(src.startsWith('data:text/javascript;base64,'),'Imports must be self contained');
    const name=key==='fd:core'?'core.mjs':key.slice(4);
    const decoded=Buffer.from(src.split(',')[1],'base64').toString('utf8')
-      .replace(/(['"])ato:([a-z0-9-]+\\.mjs)\\1/g,(_,q,n)=>q+'./'+n+q);
+      .replaceAll("from 'ato:","from './").replaceAll('from "ato:','from "./');
    await writeFile(join(dir,name),decoded);
  }
  const core=await import(pathToFileURL(join(dir,'core.mjs')));
