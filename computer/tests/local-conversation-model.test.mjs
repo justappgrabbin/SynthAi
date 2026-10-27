@@ -1,3 +1,11 @@
+import { createServer } from 'node:http';
+import { join } from 'node:path';
+import { tmpdir } from 'node:os';
+import { randomUUID } from 'node:crypto';
+import { rm } from 'node:fs/promises';
+import { ComputerRuntime } from '../ComputerRuntime.mjs';
+import { ConversationExecution } from '../services/conversation-execution.mjs';
+import { MemoryPersistence } from '../core/kernel.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { LocalConversationModel } from '../services/local-conversation-model.mjs';
@@ -55,4 +63,49 @@ test('an explicit model must be locally installed', async () => {
   const status=await model.available();
   assert.equal(status.ready,false);
   assert.match(status.note,/not installed/);
+});
+
+test('real loopback HTTP model runs through original Computer, Klein pipeline and persisted chat', async () => {
+  const requests = [];
+  const stub = createServer(async (req, res) => {
+    if (req.url === '/api/tags') {
+      res.writeHead(200, {'content-type':'application/json'});
+      res.end(JSON.stringify({models:[{name:'llama3.2:latest',size:2000000000}]}));
+      return;
+    }
+    if (req.url === '/api/chat') {
+      let data = '';
+      for await (const part of req) data += part;
+      const body = JSON.parse(data);
+      requests.push(body);
+      res.writeHead(200,{'content-type':'application/json'});
+      res.end(JSON.stringify({message:{role:'assistant',
+        content:'The naming layer and the felt layer can describe different aspects of one relationship.'}}));
+      return;
+    }
+    res.writeHead(404);res.end();
+  });
+  await new Promise(resolve=>stub.listen(0,'127.0.0.1',resolve));
+  const url = 'http://127.0.0.1:' + stub.address().port;
+  const options = {persistence:new MemoryPersistence(),namespace:'real-http-'+randomUUID(),
+    eventLogPath:join(tmpdir(),'synthia-real-http-'+randomUUID()+'.jsonl')};
+  try {
+    const computer = await new ComputerRuntime(options).boot();
+    const chat = new ConversationExecution(computer);
+    chat.localModel = new LocalConversationModel({endpoint:url});
+    const answer = await chat.talk('Explore naming and feeling within one relationship.');
+    assert.equal(answer.answerKind,'local-generative-dialogue');
+    assert.equal(answer.provider,'local:ollama:llama3.2:latest');
+    assert.equal(answer.llm,true);
+    assert.match(answer.text,/naming layer/);
+    assert.equal(answer.resident.toolEvidence.autoling,'executed');
+    assert.equal(answer.resident.toolEvidence.diseminer,'executed');
+    assert.equal(chat.history().at(-1).text,answer.text);
+    assert.ok(computer.synthia.spacetime.nodes.some(n=>n.type==='response'&&n.text===answer.text));
+    assert.equal(requests.length,1);
+    assert.equal(requests[0].messages.at(-1).content,'Explore naming and feeling within one relationship.');
+  } finally {
+    await rm(options.eventLogPath,{force:true});
+    await new Promise(resolve=>stub.close(resolve));
+  }
 });
