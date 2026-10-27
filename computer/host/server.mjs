@@ -11,6 +11,7 @@ import { ModelIntegrationGateway } from '../services/model-integration-gateway.m
 import { GenerativeAddressGateway } from '../services/generative-address-gateway.mjs';
 
 const root = resolve(fileURLToPath(new URL('../shell/kimi-linux/dist/', import.meta.url)));
+const workspaceRoot = resolve(fileURLToPath(new URL('../../public/', import.meta.url)));
 const dataDir = resolve(process.env.SYNTHIA_DATA_DIR ?? fileURLToPath(new URL('../runtime/data/local-computer/', import.meta.url)));
 const port = Number(process.env.SYNTHIA_PORT ?? 8765);
 const host = '127.0.0.1';
@@ -221,9 +222,14 @@ const server = createServer(async (req, res) => {
     }
     if (req.method !== 'GET' && req.method !== 'HEAD') return json(res, 405, { error: 'Method not allowed.' });
     const requested = decodeURIComponent(url.pathname === '/' ? '/index.html' : url.pathname);
-    const path = resolve(root, '.' + requested);
-    if (path !== root && !path.startsWith(root + sep)) return json(res, 403, { error: 'Invalid path.' });
-    const target = (await stat(path).catch(() => null))?.isFile() ? path : join(root, 'index.html');
+    const workspaceAsset = /^\\/(workspace(?:-core)?\\.(?:html|css|mjs)|computer-runtime\\/)/.test(requested);
+    const selectedRoot = workspaceAsset ? workspaceRoot : root;
+    const path = resolve(selectedRoot, '.' + requested);
+    if (path !== selectedRoot && !path.startsWith(selectedRoot + sep)) return json(res, 403, { error: 'Invalid path.' });
+    const actual = await stat(path).catch(() => null);
+    if(workspaceAsset && !actual?.isFile())
+      return json(res,404,{error:'Workspace asset not built: run node computer/build-web.mjs'});
+    const target = actual?.isFile() ? path : join(root, 'index.html');
     const bytes = await readFile(target);
     res.writeHead(200, { 'Content-Type': mime[extname(target)] ?? 'application/octet-stream', 'X-Content-Type-Options': 'nosniff' });
     res.end(req.method === 'HEAD' ? undefined : bytes);
