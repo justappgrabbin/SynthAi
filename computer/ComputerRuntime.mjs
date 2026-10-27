@@ -19,8 +19,9 @@ import { ResonanceBus } from './services/resonance-bus.mjs';
 import { SynthiaResident } from './services/synthia-resident.mjs';
 
 export class ComputerRuntime {
-  constructor({ persistence = new MemoryPersistence(), namespace = 'synthai-computer', github = null, eventLogPath = null } = {}) {
+  constructor({ persistence = new MemoryPersistence(), namespace = 'synthai-computer', github = null, eventLogPath = null, llm = null } = {}) {
     this.eventLogPath = eventLogPath;
+    this.llm = llm;
     this.bus = new EventBus();
     this.resonance = new ResonanceBus({ bus: this.bus });
     this.state = new StateStore({ bus: this.bus, persistence, namespace });
@@ -117,6 +118,7 @@ export class ComputerRuntime {
     this.services.register('experiment-loop', { provider: this.experiments, contract: 'runExperiment' });
     this.services.register('resonance-bus', { provider: this.resonance, contract: 'publishOwner/registerAgent/snapshot' });
     this.services.register('synthia-resident', { provider: this.synthia, contract: 'observe/recordReply/teach/runTool/graph' });
+    if (this.llm?.configured) this.services.register('synthia-language-model', { provider: this.llm, contract: 'chat' });
     if (!this.agents.has('synthia-resident')) this.agents.register('synthia-resident', { role: 'local-reasoning-resident', model: 'online-neural+Klein-dual-graph' });
     if (!this.capabilityRegistry.has('synthia-context')) this.capabilities.register('synthia-context', { providers: ['computer:synthia-resident'] });
     if (!this.capabilityRegistry.has('resonance-routing')) this.capabilities.register('resonance-routing', { providers: ['computer'] });
@@ -254,6 +256,7 @@ export class ComputerRuntime {
       capabilities: this.capabilityRegistry.list(),
       resonance: this.resonance.snapshot(),
       synthia: this.synthia?.status() ?? { status: 'not-booted' },
+      languageModel: this.llm?.status() ?? { provider: 'none', configured: false },
       mounted: this.shellManager.listMounted()
     };
   }
