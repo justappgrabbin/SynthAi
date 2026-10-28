@@ -69,3 +69,41 @@ Source repository: justappgrabbin/SynthAi. All work is additive on a branch base
 - Goal board now marks actual versioned, CI-backed source mounts, Klein/Morph connections and HTTPS publish as completed. No trained language model or Android device validation is claimed.
 - Resolved first CI failure: missing torch on runner was reported correctly but test assertion was too narrow; original Morph produced >500KB response. Worker now checks checkpoint before dependency import, and bounded Morph response is consumed and summarized for receipts. Rerun CI succeeded.
 - Remaining: obtain an actual trained text model/checkpoint, install training dependencies, execute a user-corpus training-to-generation cycle, verify Android/browser GUI and owner ChatGPT MCP connection. See computer/docs/INTEGRATION_002_ACTUAL_MODELS.md.
+
+## 2026-10-27 — TRIDENT proactive native integration (not yet production)
+
+- Source: THUNLP ProactiveAgent main commit `3fcf9beebe256b86871659fbb12541c41c9381b9`, Apache-2.0, inspected actual desktop/Android files. The Android tool bodies are unimplemented; a running phone agent is NOT claimed.
+- Installed `ProactiveSynthia` into **existing** `ComputerRuntime.boot()` and its original service registry. It receives real VFS source imports, runs owner-original AutoLing, creates review proposals, records evidence, and persists observe/feedback state.
+- Actual small source builds use existing `ProjectWorkspace` and are add-only. No delete or overwrite. Larger builds require exact owner approval. Git push/publish requires a separate explicit confirmation and existing Git backend. No automatic push/deployment.
+- Original TRIDENT Code-head generation is wired through the EXISTING verified-inference `ModelIntegrationGateway`; invalid tokens or missing checkpoint never become fake source files. Real owner checkpoint has NOT been exercised in this incremental integration.
+- Local host endpoints and existing workspace **Synthia Agent** tab added; web-stage copies proactive module for existing browser imports. No replacement app.
+- Added native service integration tests, existing resident regression, CI workflow, and provenance in `computer/docs/TRIDENT_PROACTIVE_INTEGRATION_20261027.md`.
+- CI / live host / Android status: PENDING actual execution and receipt, not yet called complete.
+- Next: run CI and browser HTTP smoke checks, attach actual original model checkpoint and test quality, and test opt-in Android observation on physical device. Keep Foundry read-only and integration PR draft.
+
+
+### 2026-10-27 — Proactive integration acceptance receipts
+- PR #72: https://github.com/justappgrabbin/SynthAi/pull/72 remains draft.
+- Action run 40641584306: SUCCESS for actual Computer event observations, new project files and persistence, model-unavailable behavior, approval workflow, local HTTP integration, and original resident regression.
+- Initial runner did not initialize the existing Back-up- submodule. CI now checks out that original dependency. Resident training feedback label was corrected from a colon-delimited name to a slash-delimited name to match its real validator.
+- The local proactive build route ignores caller-supplied approved flags so substantial builds must follow the explicit review flow.
+- Source code is add-only, existing project contents remain untouched. Foundry remains unmodified. This PR is not a production release.
+- Remaining: verify genuine hosted TRIDENT generation on owner hardware, phone-wide watcher, Android behavior, and user-authorized real Git publication.
+
+### TRIDENT proactive verification (PR #72)
+- Code integration PR https://github.com/justappgrabbin/SynthAi/pull/72 is draft and unmerged, based on TRIDENT FLOAT PR #70; no production deployment, no original Foundry modifications.
+- Dedicated CI run `40641659978` **SUCCESS** at source SHA `4517e0b83716c77094fd23b625c8c132fd84da15`: source syntax, 14 original Computer proactive tests, local Computer integration tests, actual loopback HTTP server E2E, and existing Synthia/Klein neural resident regression.
+- End-to-end actual local HTTP test booted original `computer/host/server.mjs` on ephemeral loopback, checked `/api/proactive/status`, observed a test-failure through original AutoLing, accepted feedback, added a real project file in original VFS, verified file listing, rejected cross-origin controls, refused to fabricate TRIDENT generation when no weights were available, and observed 404 for unimplemented delete endpoint.
+- Security bug found: caller-supplied `approved:true` could bypass a large-build proposal. Fixed using a module-private approval capability symbol; regression test proves a POST with `approved:true` still requires owner approval.
+- CI also **SUCCESS** for the existing Workspace, Resonance Bus and neural resident pipelines on this branch; source archive suite was still running at this log checkpoint.
+- Still **NOT VERIFIED**: mobile physical APK, phone-wide observation or external app interaction; live user TRIDENT checkpoint produces valid JSON/source; upstream LLaMA 8B ProactiveAgent model loaded in TRIDENT; production deployment, authenticated owner approvals for remote publication.
+- Next task: owner-reviewed model weights and Android event source, not a separate app. Git publishing remains an explicit owner approval step; do not merge or deploy automatically.
+
+### 2026-10-28 — Android build / packaged Computer integration acceptance
+- Original Synthia Computer APK produced by GitHub Actions run `40642811665`: **SUCCESS** after source staging, Android Gradle compilation and ZIP integrity verification. Artifact ID `12796361312` (`synthia-computer-android-debug`).
+- Debug APK downloaded and independently verified: size **112,485,342 bytes**, SHA256 `75839f533265b6a9deeec81649cc397c4bbcebf7e2c47b33d1f8491efd2bf60c`. Nested `assets/computer-assets.zip` passed CRC checks and contains original Computer host, `services/proactive-synthia.mjs`, `public/workspace.html`, `public/workspace.mjs`, and bundled `public/computer-runtime/services/proactive-synthia.mjs`.
+- Found a real runtime error in earlier APK: the local host served `.mjs` as octet-stream, preventing browser JavaScript module execution; corrected `computer/host/server.mjs` to serve `text/javascript; charset=utf-8`.
+- **Independent extracted-APK runtime test passed**: started packaged `mobile-entry.mjs` in Node, `GET /api/proactive/status` HTTP 200 with active observer and no-delete/approval flags, `GET /workspace.html` HTTP 200, both workspace and proactive ESM module URLs HTTP 200 and `text/javascript`; real `POST /api/proactive/observe` returned successful original AutoLing + DISEMINER evidence and a queued test-failure proposal.
+- GitHub Actions at commit `0171a5572fb1a702caad16ee69d12d849bee28bc`: TRIDENT proactive, Workspace, Synthia resident, source integration, and resonance bus CI all **SUCCESS** after fixing a test-only malformed MIME regex. Test-only commit does not change APK implementation from SHA `4be80b33a806951cefa3fd2ab0055e35812d806f`.
+- **Still unverified**: physical Android device installation/UI/touch testing, Android-wide ActivityWatcher-equivalent sensing, Android native accessibility control, full independent TRIDENT Code-head source generation; no upstream THUNLP 8B model installed.
+- GitHub PR #72 remains DRAFT and UNMERGED; no production Git push or deployment approved. Original Foundry and original weights were not touched. Next task: run physical Android install/touch acceptance and supply a supported original neural checkpoint/runtime for true autonomous generation.

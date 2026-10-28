@@ -8,7 +8,7 @@ for(const d of ['core','runtime','adapters','micros']) {
 // Expose only the existing browser-compatible Computer donor language modules and
 // archive bridge. Original donor files remain read-only and unchanged.
 await mkdir(new URL('./services/',to),{recursive:true});
-for(const name of ['synthia-resident.mjs','browser-archive-connector.mjs']) {
+for(const name of ['synthia-resident.mjs','browser-archive-connector.mjs','proactive-synthia.mjs']) {
   await cp(new URL(`./services/${name}`,import.meta.url),new URL(`./services/${name}`,to));
 }
 await cp(new URL('./engines/unified-execution-spine/src/pure-synthia/',import.meta.url),

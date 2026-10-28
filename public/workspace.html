@@ -23,6 +23,7 @@
   <button class="tab" data-tab="goals" aria-selected="false">02 Goal Board</button>
   <button class="tab" data-tab="plan" aria-selected="false">03 Language Plan</button>
   <button class="tab" data-tab="model-lab" aria-selected="false">04 Model Lab</button>
+  <button class="tab" data-tab="proactive-agent" aria-selected="false">05 Synthia Agent</button>
 </nav>
 <section id="library" class="tabview active">
  <div class="columns">
@@ -105,6 +106,26 @@
  <button class="button" id="runModel">Run selected engine</button>
  <pre id="modelOutput" class="codeview" aria-live="polite">Run Check Computer / weights first. Missing checkpoints and unavailable services will be reported rather than fabricated.</pre>
  </article>
+ </div>
+</section>
+<section id="proactive-agent" class="tabview">
+ <div class="columns">
+  <article class="panel">
+   <div class="heading"><div><small>ORIGINAL TRIDENT + SYNTHIA COMPUTER</small><h2>Proactive Synthia</h2></div><span class="chip" id="proactiveState">Local host needed</span></div>
+   <p class="subtle">Synthia watches source admitted into the local Computer, uses her original AutoLing to analyze it, and records concrete issues. She can create NEW project files, but never delete or overwrite them. Major builds and all Git publications require your explicit approval. No simulated neural answers.</p>
+   <div class="line"><button class="button muted" id="refreshProactive">Inspect real activity</button></div>
+   <h3>Ask original TRIDENT to build</h3>
+   <label class="url-label" for="proactiveGoal">Build goal<input id="proactiveGoal" maxlength="1500" placeholder="Describe the functionality Synthia should implement"></label>
+   <div class="line"><button class="button" id="draftProactive">Generate and build new files</button></div>
+   <p class="note">Real inference requires the configured original TRIDENT checkpoint on the local Computer. If generation does not produce valid code files, Synthia will report that rather than make up an app.</p>
+   <pre id="proactiveResult" class="codeview" aria-live="polite">Refresh for live Computer events and source analysis.</pre>
+  </article>
+  <article class="panel">
+   <div class="heading"><div><small>OBSERVATIONS · FEEDBACK · BUILD RECEIPTS</small><h2>What Synthia found</h2></div></div>
+   <pre id="proactiveFeed" class="codeview" aria-live="polite">Waiting for local Computer.</pre>
+   <h3>Pending proposals</h3>
+   <div id="proactiveProposals" class="goallist">No proposals loaded.</div>
+  </article>
  </div>
 </section>
 </main>

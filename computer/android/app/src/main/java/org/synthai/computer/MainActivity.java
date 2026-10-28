@@ -7,6 +7,8 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.view.View;
+import android.view.Gravity;
+import android.graphics.Color;
 import android.webkit.RenderProcessGoneDetail;
 import android.util.Log;
 import android.view.WindowInsets;
@@ -180,6 +182,21 @@ public final class MainActivity extends Activity {
             }
         });
         root.addView(browser, new FrameLayout.LayoutParams(-1, -1));
+        // Keep the original Computer shell as the home view; expose the
+        // existing proactive Synthia panel without replacing the Computer.
+        TextView agentAccess = new TextView(this);
+        agentAccess.setText("Synthia Agent");
+        agentAccess.setTextColor(Color.WHITE);
+        agentAccess.setTextSize(13);
+        agentAccess.setPadding(20, 14, 20, 14);
+        agentAccess.setBackgroundColor(Color.rgb(28, 72, 92));
+        agentAccess.setOnClickListener(view -> browser.loadUrl(ORIGIN + "/workspace.html"));
+        FrameLayout.LayoutParams agentPosition = new FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.WRAP_CONTENT, FrameLayout.LayoutParams.WRAP_CONTENT,
+                Gravity.END | Gravity.BOTTOM);
+        agentPosition.rightMargin = 20;
+        agentPosition.bottomMargin = 20;
+        root.addView(agentAccess, agentPosition);
         browser.loadUrl(ORIGIN + "/");
     }
 

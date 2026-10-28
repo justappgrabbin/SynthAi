@@ -2,7 +2,7 @@ name: Synthia Computer Android checkpoint
 on:
   workflow_dispatch:
   push:
-    branches: [reassembly/computer-2026-09-29, integration/synthia-resident-dual-graph-20261025]
+    branches: [reassembly/computer-2026-09-29, integration/synthia-resident-dual-graph-20261025, integration/trident-proactive-synthia-20261027]
     paths: ['computer/**', '.github/workflows/computer-apk.yml']
 
 jobs:
@@ -26,7 +26,10 @@ jobs:
           gradle-version: '8.7'
       - run: sdkmanager 'platforms;android-35' 'ndk;27.0.12077973' 'cmake;3.22.1'
       - run: npm --prefix computer/shell/kimi-linux ci && npm --prefix computer run build && npm --prefix computer run test:reassembly
-      - run: python computer/android/prepare-assets.py
+      - name: Stage existing Computer workspace and proactive module for Android
+        run: |
+          node computer/build-web.mjs
+          python computer/android/prepare-assets.py
       - name: Stage Node 18 mobile runtime
         run: |
           curl -fL --retry 3 -o /tmp/node-mobile.zip 'https://github.com/nodejs-mobile/nodejs-mobile/releases/download/v18.20.4/nodejs-mobile-v18.20.4-android.zip'

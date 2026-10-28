@@ -25,3 +25,24 @@ with ZipFile(destination, 'w', ZIP_DEFLATED, compresslevel=7) as archive:
             archive.write(path, path.relative_to(root).as_posix())
 
 print(f'{destination}: {destination.stat().st_size} bytes')
+
+
+# The Android Computer is a real Node host; package the SAME existing
+# workspace assets under computer/public so /workspace.html and the new
+# Synthia Agent tab are usable from the APK with no external web hosting.
+# These files are staged by the existing npm build, never modified here.
+webroot = root.parent / 'public'
+with ZipFile(destination, 'a', ZIP_DEFLATED, compresslevel=7) as archive:
+    required = ['workspace.html', 'workspace.css', 'workspace.mjs', 'workspace-core.mjs']
+    for name in required:
+        path = webroot / name
+        if not path.is_file():
+            raise FileNotFoundError(f'Existing Computer Workspace asset missing: {path}')
+        archive.write(path, 'public/' + name)
+    mounted = webroot / 'computer-runtime'
+    if not (mounted / 'ComputerRuntime.mjs').is_file() or not (mounted / 'services/proactive-synthia.mjs').is_file():
+        raise FileNotFoundError('Computer browser runtime missing proactive module; run node computer/build-web.mjs')
+    for path in sorted(mounted.rglob('*')):
+        if path.is_file():
+            archive.write(path, 'public/' + path.relative_to(webroot).as_posix())
+print('Packaged original browser Workspace and Synthia Agent panel for Android')

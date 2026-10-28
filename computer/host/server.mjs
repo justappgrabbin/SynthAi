@@ -1,5 +1,6 @@
 import { createServer } from 'node:http';
 import { readFile, stat, mkdir } from 'node:fs/promises';
+import { existsSync } from 'node:fs';
 import { join, resolve, extname, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { ComputerRuntime } from '../ComputerRuntime.mjs';
@@ -11,7 +12,12 @@ import { ModelIntegrationGateway } from '../services/model-integration-gateway.m
 import { GenerativeAddressGateway } from '../services/generative-address-gateway.mjs';
 
 const root = resolve(fileURLToPath(new URL('../shell/kimi-linux/dist/', import.meta.url)));
-const workspaceRoot = resolve(fileURLToPath(new URL('../../public/', import.meta.url)));
+// Desktop checkout serves repo/public. The Android APK bundles the SAME
+// existing workspace underneath computer/public; never substitute a new UI.
+const desktopWorkspaceRoot = resolve(fileURLToPath(new URL('../../public/', import.meta.url)));
+const packagedWorkspaceRoot = resolve(fileURLToPath(new URL('../public/', import.meta.url)));
+const workspaceRoot = existsSync(join(desktopWorkspaceRoot,'workspace.html'))
+  ? desktopWorkspaceRoot : packagedWorkspaceRoot;
 const dataDir = resolve(process.env.SYNTHIA_DATA_DIR ?? fileURLToPath(new URL('../runtime/data/local-computer/', import.meta.url)));
 const port = Number(process.env.SYNTHIA_PORT ?? 8765);
 const host = '127.0.0.1';
@@ -28,6 +34,7 @@ const modelGateway = new ModelIntegrationGateway({
   bus:computer.bus,state:computer.state,
   env:{...process.env,SYNTHIA_TRAINED_MODELS_DIR:privateModelStore}
 });
+computer.proactive.modelGateway = modelGateway; // Original PyTorch TRIDENT, never simulated.
 const addressGateway = new GenerativeAddressGateway({bus:computer.bus,state:computer.state});
 let modelTrainingBusy = false;
 
@@ -87,7 +94,7 @@ async function ingestUpload({ name, base64 }) {
   }
 }
 
-const mime = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg', '.webp': 'image/webp', '.ico': 'image/x-icon' };
+const mime = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.mjs': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg', '.webp': 'image/webp', '.ico': 'image/x-icon' };
 const json = (res, status, value) => {
   res.writeHead(status, { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' });
   res.end(JSON.stringify(value));
@@ -101,6 +108,16 @@ async function body(req, maxChars = 8500000) {
   return JSON.parse(text);
 }
 
+// The Computer binds loopback only. Browser write requests must also have the
+// same origin; this is a local development boundary, NOT an Internet auth scheme.
+function requireLocalBrowser(req) {
+  const origin=req.headers.origin;
+  if(origin && origin!=='http://'+host+':'+port)
+    throw new TypeError('Cross-origin proactive control is not permitted');
+  const site=req.headers['sec-fetch-site'];
+  if(site && !['same-origin','none'].includes(site))
+    throw new TypeError('Cross-site proactive control is not permitted');
+}
 const server = createServer(async (req, res) => {
   try {
     const url = new URL(req.url ?? '/', `http://${host}:${port}`);
@@ -126,6 +143,35 @@ const server = createServer(async (req, res) => {
         }));
       }
 
+
+      // ProactiveAgent-inspired observer native to this Computer.
+      // No delete action exists. All drafts use the real original model gateway.
+      // Remote Git publication is a separate, explicitly confirmed decision.
+      if(req.method==='GET'&&url.pathname==='/api/proactive/status')
+        return json(res,200,computer.proactive.snapshot());
+      if(req.method==='POST'&&url.pathname==='/api/proactive/observe'){
+        requireLocalBrowser(req);
+        return json(res,200,await computer.proactive.observe(await body(req,5000)));
+      }
+      if(req.method==='POST'&&url.pathname==='/api/proactive/draft'){
+        requireLocalBrowser(req);
+        return json(res,200,await computer.proactive.draftWithTrident(await body(req,5000)));
+      }
+      if(req.method==='POST'&&url.pathname==='/api/proactive/build'){
+        requireLocalBrowser(req);
+        // The request body is untrusted, even on localhost. It cannot supply
+        // approved=true to bypass the major-build owner decision flow.
+        const request=await body(req,65000);
+        return json(res,200,await computer.proactive.buildNewFiles({...request,approved:false}));
+      }
+      if(req.method==='POST'&&url.pathname==='/api/proactive/decide'){
+        requireLocalBrowser(req);
+        return json(res,200,await computer.proactive.decide(await body(req,3000)));
+      }
+      if(req.method==='POST'&&url.pathname==='/api/proactive/request-publish'){
+        requireLocalBrowser(req);
+        return json(res,200,await computer.proactive.requestPublish(await body(req,2000)));
+      }
 
       // Functional extension into the ORIGINAL Generative Address assembly.
       // Communication mode remains on the existing Computer endpoint.
