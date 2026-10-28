@@ -2,7 +2,7 @@ name: Synthia Computer Android checkpoint
 on:
   workflow_dispatch:
   push:
-    branches: [reassembly/computer-2026-09-29, integration/synthia-resident-dual-graph-20261025]
+    branches: [reassembly/computer-2026-09-29, integration/synthia-resident-dual-graph-20261025, integration/trident-proactive-synthia-20261027]
     paths: ['computer/**', '.github/workflows/computer-apk.yml']
 
 jobs:
