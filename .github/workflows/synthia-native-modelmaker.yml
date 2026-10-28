@@ -31,4 +31,4 @@ jobs:
           node-version: '22'
       - name: Test Modelmaker-compatible Synthia chat and original Klein weights
         run: |
-          node --test computer/tests/synthia-native-modelmaker.test.mjs computer/tests/klein-tool-bridge.test.mjs computer/tests/synthia-weight-integrity.test.mjs computer/tests/synthia-resident.test.mjs
+          node --test computer/tests/synthia-native-modelmaker.test.mjs computer/tests/verify-modelmaker.test.mjs computer/tests/klein-tool-bridge.test.mjs computer/tests/synthia-weight-integrity.test.mjs computer/tests/synthia-resident.test.mjs
