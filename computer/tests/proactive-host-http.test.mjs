@@ -36,7 +36,7 @@ test('Actual loopback Computer HTTP boots proactive native Synthia and persists 
  assert.ok(ready,'Computer did not expose proactive HTTP routes: '+errorLog+' '+log);
  const moduleResponse=await fetch(url+'/workspace.mjs');
  assert.equal(moduleResponse.status,200);
- assert.match(moduleResponse.headers.get('content-type')||'',/text\\/javascript/,
+ assert.ok((moduleResponse.headers.get('content-type')||'').includes('text/javascript'),
   'Android WebView must be allowed to execute ES modules');
  const read=await (await fetch(url+'/api/proactive/status')).json();
  assert.equal(read.status.active,true);
