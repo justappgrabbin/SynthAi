@@ -17,6 +17,7 @@ import { PentaEphemerisService } from './services/penta-ephemeris.mjs';
 import { ExperimentLoop } from './services/experiment-loop.mjs';
 import { ResonanceBus } from './services/resonance-bus.mjs';
 import { SynthiaResident } from './services/synthia-resident.mjs';
+import { ProactiveSynthia } from './services/proactive-synthia.mjs';
 
 export class ComputerRuntime {
   constructor({ persistence = new MemoryPersistence(), namespace = 'synthai-computer', github = null, eventLogPath = null } = {}) {
@@ -76,6 +77,9 @@ export class ComputerRuntime {
     registerSystemAdapters(this);
     // Resident is new; all three Klein language engines below are unchanged donor imports.
     this.synthia = await new SynthiaResident({ state: this.state, bus: this.bus }).boot();
+    // THUNLP ProactiveAgent-inspired event/feedback loop backed by this exact
+    // Computer's existing Synthia and safe ProjectWorkspace operations.
+    this.proactive = await new ProactiveSynthia({ computer: this }).boot();
 
     this.policy.register('xynthai:age-boundary', ({ ageConfirmed = false } = {}) =>
       ageConfirmed ? { allow: true } : { allow: false, reason: 'XynthAI requires an explicit 18+ age confirmation.' }
@@ -117,6 +121,7 @@ export class ComputerRuntime {
     this.services.register('experiment-loop', { provider: this.experiments, contract: 'runExperiment' });
     this.services.register('resonance-bus', { provider: this.resonance, contract: 'publishOwner/registerAgent/snapshot' });
     this.services.register('synthia-resident', { provider: this.synthia, contract: 'observe/recordReply/teach/runTool/graph' });
+    this.services.register('synthia-proactive', { provider: this.proactive, contract: 'observe/inspect/draft/build/decide/requestPublish' });
     if (!this.agents.has('synthia-resident')) this.agents.register('synthia-resident', { role: 'local-reasoning-resident', model: 'online-neural+Klein-dual-graph' });
     if (!this.capabilityRegistry.has('synthia-context')) this.capabilities.register('synthia-context', { providers: ['computer:synthia-resident'] });
     if (!this.capabilityRegistry.has('resonance-routing')) this.capabilities.register('resonance-routing', { providers: ['computer'] });
@@ -254,6 +259,7 @@ export class ComputerRuntime {
       capabilities: this.capabilityRegistry.list(),
       resonance: this.resonance.snapshot(),
       synthia: this.synthia?.status() ?? { status: 'not-booted' },
+      proactive: this.proactive?.status() ?? { active: false },
       mounted: this.shellManager.listMounted()
     };
   }
