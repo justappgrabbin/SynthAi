@@ -80,3 +80,12 @@ Source repository: justappgrabbin/SynthAi. All work is additive on a branch base
 - Added native service integration tests, existing resident regression, CI workflow, and provenance in `computer/docs/TRIDENT_PROACTIVE_INTEGRATION_20261027.md`.
 - CI / live host / Android status: PENDING actual execution and receipt, not yet called complete.
 - Next: run CI and browser HTTP smoke checks, attach actual original model checkpoint and test quality, and test opt-in Android observation on physical device. Keep Foundry read-only and integration PR draft.
+
+
+### 2026-10-27 — Proactive integration acceptance receipts
+- PR #72: https://github.com/justappgrabbin/SynthAi/pull/72 remains draft.
+- Action run 40641584306: SUCCESS for actual Computer event observations, new project files and persistence, model-unavailable behavior, approval workflow, local HTTP integration, and original resident regression.
+- Initial runner did not initialize the existing Back-up- submodule. CI now checks out that original dependency. Resident training feedback label was corrected from a colon-delimited name to a slash-delimited name to match its real validator.
+- The local proactive build route ignores caller-supplied approved flags so substantial builds must follow the explicit review flow.
+- Source code is add-only, existing project contents remain untouched. Foundry remains unmodified. This PR is not a production release.
+- Remaining: verify genuine hosted TRIDENT generation on owner hardware, phone-wide watcher, Android behavior, and user-authorized real Git publication.
