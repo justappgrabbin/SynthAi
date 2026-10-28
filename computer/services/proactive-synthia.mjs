@@ -166,18 +166,27 @@ export class ProactiveSynthia {
  }
  async draftWithTrident({goal,name='synthia-build',backend='trident'}={}){
   const purpose=validText(goal,'Build goal',1600);
-  if(!['trident','modelmaker'].includes(backend))throw new TypeError('Unknown existing model backend');
+  if(!['trident','modelmaker','synthia-neural'].includes(backend))throw new TypeError('Unknown existing model backend');
   await this.observe({kind:'build-request',summary:purpose});
-  if(!this.modelGateway)return {status:'model-not-connected',built:false,reason:'Original model gateway not attached'};
+  const originalNeural = backend==='synthia-neural';
+  if(originalNeural && !this.standaloneNeural?.summary().mounted)
+   return {status:'model-not-connected',built:false,backend,
+     reason:'Mount original Synthia-Neural-Standalone before trying trained generation'};
+  if(!originalNeural && !this.modelGateway)
+   return {status:'model-not-connected',built:false,reason:'Original model gateway not attached'};
   let result;
-  try{
-   result=await this.modelGateway.generate({
-    text:'Return JSON only: {"files":[{"path":"src/main.js","content":"actual source code"}]}. Produce working new source files; no deletion or overwriting. Goal: '+purpose,
-    backend,head:backend==='trident'?'code':null,maxNewTokens:64,temperature:0.3
-   });
+  const prompt='Return JSON only: {"files":[{"path":"src/main.js","content":"actual source code"}]}. Produce working new source files; no deletion or overwriting. Goal: '+purpose;
+  try {
+    result=originalNeural
+      ? await this.standaloneNeural.generate({text:prompt,annotations:{max_new_bytes:320}})
+      : await this.modelGateway.generate({
+          text:prompt,backend,head:backend==='trident'?'code':null,
+          maxNewTokens:64,temperature:0.3
+        });
   }catch(error){
    return {status:'model-not-ready',built:false,backend,error:error.message};
   }
+  if(result?.ready===false)return {status:'model-not-ready',built:false,backend,reason:result.reason};
   if(!result?.weightsLoaded||!result?.inferenceVerified)
    return {status:'unverified-generation',built:false,backend};
   let files;
