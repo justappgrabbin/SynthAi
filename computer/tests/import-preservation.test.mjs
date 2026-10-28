@@ -20,7 +20,7 @@ async function freePort() {
 }
 async function start(port, dataDir) {
   const child = spawn(process.execPath, ['host/server.mjs'], {
-    cwd: computerRoot, env: { ...process.env, SYNTHIA_PORT: String(port), SYNTHIA_DATA_DIR: dataDir }, stdio: 'ignore',
+    cwd: computerRoot, env: { ...process.env, SYNTHIA_PORT: String(port), SYNTHIA_DATA_DIR: dataDir, SYNTHIA_ALLOW_INSECURE_DEV: '1' }, stdio: 'ignore',
   });
   const base = `http://127.0.0.1:${port}`;
   for (let i = 0; i < 150; i++) {
