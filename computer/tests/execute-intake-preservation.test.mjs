@@ -27,7 +27,7 @@ async function request(port, method, path, value) {
 async function start(port, dir) {
   const child = spawn(process.execPath, ['host/server.mjs'], {
     cwd: new URL('..', import.meta.url).pathname,
-    env: { ...process.env, SYNTHIA_PORT: String(port), SYNTHIA_DATA_DIR: dir },
+    env: { ...process.env, SYNTHIA_PORT: String(port), SYNTHIA_DATA_DIR: dir, SYNTHIA_ALLOW_INSECURE_DEV: '1' },
     stdio: 'ignore',
   });
   for (let i = 0; i < 120; i++) {
