@@ -250,3 +250,69 @@ $('#runModel').addEventListener('click',async()=>{
  }catch(error){$('#modelOutput').textContent='No verified response: '+error.message}
  $('#runModel').disabled=false;
 });
+
+
+// Synthia proactive agent: original Computer event bus + Klein tools +
+// actual TRIDENT inference, not a separate placeholder application.
+async function showProactive(){
+ const state=$('#proactiveState'),output=$('#proactiveFeed'),proposals=$('#proactiveProposals');
+ try{
+  const data=await computerJson('/api/proactive/status');
+  state.textContent=data.status.active?'Local watcher active':'Watcher not active';
+  output.textContent=JSON.stringify({
+   watcher:data.status.watches,
+   originalModelGatewayConnected:data.status.modelConnected,
+   autoBuildAddsOnly:data.status.automaticNewFiles,
+   deleteAllowed:false,
+   gitRequiresApproval:true,
+   latestSourceReports:data.reports.slice(-8),
+   recentBuilds:data.builds.slice(-6),
+   latestEvents:data.events.slice(-6)
+  },null,2);
+  proposals.replaceChildren();
+  const pending=data.proposals.filter(x=>x.status==='pending');
+  if(!pending.length){proposals.textContent='No pending proposals';return}
+  for(const task of pending){
+   const el=document.createElement('div');el.className='goal';
+   const reason=document.createElement('p');reason.textContent=task.action+': '+task.reason;
+   const meta=document.createElement('small');
+   meta.textContent=task.requiresApproval?'Explicit approval required':'Feedback requested';
+   el.append(reason,meta);
+   for(const [decision,label] of [['accept',task.requiresApproval?'Approve':'Useful'],['reject','Reject']]){
+    const button=document.createElement('button');button.type='button';
+    button.className='button muted';button.textContent=label;
+    button.addEventListener('click',async()=>{
+     let confirmation=null;
+     if(decision==='accept'&&task.requiresApproval){
+      const phrase=task.action==='publish-project'?'PUBLISH '+task.projectId:'BUILD '+task.id;
+      confirmation=window.prompt('This is a major change. Enter EXACTLY '+phrase+' to authorize:');
+      if(confirmation!==phrase){$('#proactiveResult').textContent='Approval cancelled; nothing executed.';return;}
+     }
+     button.disabled=true;
+     try{
+      const result=await computerJson('/api/proactive/decide',{proposalId:task.id,decision,confirmation});
+      $('#proactiveResult').textContent=JSON.stringify(result,null,2).slice(0,14000);
+      await showProactive();
+     }catch(error){$('#proactiveResult').textContent=error.message}
+     finally{button.disabled=false}
+    });
+    el.append(button);
+   }
+   proposals.append(el);
+  }
+ }catch(error){state.textContent='Local Computer required';output.textContent=error.message;proposals.replaceChildren();}
+}
+$('#refreshProactive').addEventListener('click',showProactive);
+$('#draftProactive').addEventListener('click',async()=>{
+ const goal=$('#proactiveGoal').value.trim();
+ if(!goal){$('#proactiveResult').textContent='Describe the functionality you want Synthia to build.';return;}
+ const button=$('#draftProactive');button.disabled=true;
+ $('#proactiveResult').textContent='Requesting actual original TRIDENT Code-head inference...';
+ try{
+  const result=await computerJson('/api/proactive/draft',{goal,name:'Synthia '+goal.slice(0,50),backend:'trident'});
+  $('#proactiveResult').textContent=JSON.stringify(result,null,2).slice(0,16000);
+  await showProactive();
+ }catch(error){$('#proactiveResult').textContent='TRIDENT build not verified: '+error.message}
+ finally{button.disabled=false}
+});
+$$('[data-tab="proactive-agent"]').forEach(button=>button.addEventListener('click',showProactive));
