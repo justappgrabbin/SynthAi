@@ -1,0 +1,34 @@
+name: Synthia native Modelmaker acceptance
+
+on:
+  push:
+    branches:
+      - integration/synthia-native-modelmaker-20261027
+    paths:
+      - 'computer/tests/synthia-native-modelmaker.test.mjs'
+      - 'computer/docs/MODELMAKER_NATIVE_LINUX.md'
+      - '.github/workflows/synthia-native-modelmaker.yml'
+  pull_request:
+    paths:
+      - 'computer/tests/synthia-native-modelmaker.test.mjs'
+      - 'computer/docs/MODELMAKER_NATIVE_LINUX.md'
+      - '.github/workflows/synthia-native-modelmaker.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  modelmaker-bridge:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Test Modelmaker-compatible Synthia chat and original Klein weights
+        run: |
+          node --test computer/tests/synthia-native-modelmaker.test.mjs computer/tests/klein-tool-bridge.test.mjs computer/tests/synthia-weight-integrity.test.mjs computer/tests/synthia-resident.test.mjs
