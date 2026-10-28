@@ -252,7 +252,7 @@ export class ProactiveSynthia {
   if(p.eventId){
    const source=latest.events.find(x=>x.id===p.eventId);
    if(source)await this.computer.synthia.teach({
-    text:source.summary,capability:'proactive:'+p.action,
+    text:source.summary,capability:'proactive/'+p.action,
     accepted:decision==='accept',source:'explicit-owner-feedback'
    });
   }
