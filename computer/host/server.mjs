@@ -1,4 +1,5 @@
 import { createServer } from 'node:http';
+import { timingSafeEqual } from 'node:crypto';
 import { readFile, stat, mkdir } from 'node:fs/promises';
 import { join, resolve, extname, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -12,6 +13,25 @@ const root = resolve(fileURLToPath(new URL('../shell/kimi-linux/dist/', import.m
 const dataDir = resolve(process.env.SYNTHIA_DATA_DIR ?? fileURLToPath(new URL('../runtime/data/local-computer/', import.meta.url)));
 const port = Number(process.env.SYNTHIA_PORT ?? 8765);
 const host = '127.0.0.1';
+// A per-process capability is provisioned by the Android host and stored only
+// in WebView's HttpOnly cookie jar. Host/Origin validation alone is not auth.
+// Insecure mode is an explicit opt-in for isolated development/tests only.
+const apiToken = process.env.SYNTHIA_API_TOKEN ?? '';
+const insecureDevelopment = process.env.SYNTHIA_ALLOW_INSECURE_DEV === '1';
+if (!insecureDevelopment && !/^[a-f0-9]{64}$/.test(apiToken)) {
+  throw new Error('Synthia Computer requires a 256-bit local API session token.');
+}
+const expectedToken = insecureDevelopment ? null : Buffer.from(apiToken, 'hex');
+function isAuthorizedRequest(req) {
+  if (insecureDevelopment) return true;
+  const candidates = String(req.headers.cookie ?? '').split(';')
+    .map(part => part.trim())
+    .filter(part => part.startsWith('synthia_session='))
+    .map(part => part.slice('synthia_session='.length));
+  if (candidates.length !== 1 || !/^[a-f0-9]{64}$/.test(candidates[0])) return false;
+  return timingSafeEqual(Buffer.from(candidates[0], 'hex'), expectedToken);
+}
+
 // WebView and the resident Node service share a loopback origin. Reject foreign
 // Host/Origin and cross-site Fetch Metadata before any API or file operation.
 // This is a browser/DNS-rebinding boundary, not authentication for other local apps.
@@ -127,6 +147,7 @@ const server = createServer(async (req, res) => {
     if (!isLocalRequest(req)) return json(res, 403, { error: 'Computer requests must use its local origin.' });
     const url = new URL(req.url ?? '/', `http://${host}:${port}`);
     if (url.pathname.startsWith('/api/')) {
+      if (!isAuthorizedRequest(req)) return json(res, 401, { error: 'Computer session authorization required.' });
       if (req.method === 'GET' && url.pathname === '/api/status') {
         const swarm = await computer.automataGateway.snapshot();
         return json(res, 200, { ready: true, computer: 'SynthAI Computer', swarmProcesses: swarm.processCount, files: computer.vfs.list('/').length });
