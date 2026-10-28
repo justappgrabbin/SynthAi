@@ -8,6 +8,9 @@ on:
       - 'computer/ComputerRuntime.mjs'
       - 'computer/host/server.mjs'
       - 'computer/tests/proactive-synthia.test.mjs'
+      - 'computer/tests/trident-proactive-agent.test.mjs'
+      - 'public/workspace.html'
+      - 'public/workspace.mjs'
       - '.github/workflows/trident-proactive-synthia.yml'
   pull_request:
     paths:
@@ -15,6 +18,9 @@ on:
       - 'computer/ComputerRuntime.mjs'
       - 'computer/host/server.mjs'
       - 'computer/tests/proactive-synthia.test.mjs'
+      - 'computer/tests/trident-proactive-agent.test.mjs'
+      - 'public/workspace.html'
+      - 'public/workspace.mjs'
       - '.github/workflows/trident-proactive-synthia.yml'
   workflow_dispatch:
 jobs:
@@ -33,7 +39,8 @@ jobs:
           node --check computer/services/proactive-synthia.mjs
           node --check computer/ComputerRuntime.mjs
           node --check computer/host/server.mjs
+          node --check public/workspace.mjs
       - name: Proactive Synthia tests over real existing Computer
-        run: node --test computer/tests/proactive-synthia.test.mjs
+        run: node --test computer/tests/proactive-synthia.test.mjs computer/tests/trident-proactive-agent.test.mjs
       - name: Existing neural and Klein resident regression
         run: node --test computer/tests/synthia-resident.test.mjs
