@@ -9,6 +9,7 @@ import { ConversationExecution } from '../services/conversation-execution.mjs';
 import { FileAdmission } from '../services/file-admission.mjs';
 import { readZipMembers } from './zip-members.mjs';
 import { ModelIntegrationGateway } from '../services/model-integration-gateway.mjs';
+import { StandaloneNeuralGateway } from '../services/standalone-neural-gateway.mjs';
 import { GenerativeAddressGateway } from '../services/generative-address-gateway.mjs';
 
 const root = resolve(fileURLToPath(new URL('../shell/kimi-linux/dist/', import.meta.url)));
@@ -35,6 +36,19 @@ const modelGateway = new ModelIntegrationGateway({
   env:{...process.env,SYNTHIA_TRAINED_MODELS_DIR:privateModelStore}
 });
 computer.proactive.modelGateway = modelGateway; // Original PyTorch TRIDENT, never simulated.
+// Mount the ORIGINAL already-integrated Synthia-Neural-Standalone model only
+// when the owner explicitly configures its extracted directory. Do not absorb
+// or rewrite its Semantic Spacetime, Human Design, Klein, UniMorph or weights.
+const neuralStandalone = await new StandaloneNeuralGateway({
+  home:process.env.SYNTHIA_NEURAL_HOME??null,
+  workspace:process.env.SYNTHIA_NEURAL_WORKSPACE??join(dataDir,'standalone-neural'),
+  python:process.env.SYNTHIA_PYTHON??'python3',
+  bus:computer.bus
+}).boot();
+computer.services.register('synthia-neural-standalone',{
+  provider:neuralStandalone,contract:'status/inspect/generate'
+});
+computer.proactive.standaloneNeural = neuralStandalone;
 const addressGateway = new GenerativeAddressGateway({bus:computer.bus,state:computer.state});
 let modelTrainingBusy = false;
 
@@ -171,6 +185,22 @@ const server = createServer(async (req, res) => {
       if(req.method==='POST'&&url.pathname==='/api/proactive/request-publish'){
         requireLocalBrowser(req);
         return json(res,200,await computer.proactive.requestPublish(await body(req,2000)));
+      }
+
+      // Real owner Synthia-Neural-PyTorch sidecar. No training or external
+      // actions are exposed here: training remains owner-approved in its
+      // original runtime; Git publishing remains separately gated.
+      if(req.method==='GET'&&url.pathname==='/api/neural/status')
+        return json(res,200,await neuralStandalone.status());
+      if(req.method==='POST'&&url.pathname==='/api/neural/inspect'){
+        requireLocalBrowser(req);
+        const request=await body(req,15000);
+        return json(res,200,await neuralStandalone.inspect(request));
+      }
+      if(req.method==='POST'&&url.pathname==='/api/neural/generate'){
+        requireLocalBrowser(req);
+        const request=await body(req,15000);
+        return json(res,200,await neuralStandalone.generate(request));
       }
 
       // Functional extension into the ORIGINAL Generative Address assembly.
