@@ -9,6 +9,9 @@
  * Never deletes, rewrites existing files, shells out, or silently git-pushes.
  */
 const STATE_KEY='computer.proactive.v1';
+// This capability cannot be supplied as JSON by an HTTP caller. Only the
+// internal owner decision path may authorize a large or otherwise gated build.
+const INTERNAL_BUILD_APPROVAL=Symbol('internal-proactive-build-approval');
 const ORIGINAL='https://github.com/thunlp/ProactiveAgent';
 const clone=value=>structuredClone(value);
 const timestamp=()=>new Date().toISOString();
@@ -193,7 +196,7 @@ export class ProactiveSynthia {
     throw new Error('Cannot overwrite an existing file: '+file.path);
   }
   const large=normalized.length>3||normalized.reduce((a,f)=>a+f.content.length,0)>8000;
-  if(large&&!approved){
+  if(large&&approved!==INTERNAL_BUILD_APPROVAL){
    const state=this._get(),proposal={id:id(),action:'build-add-only',
     reason:purpose,projectName:safeName,projectId,files:normalized,
     origin,requiresApproval:true,status:'pending',createdAt:timestamp()};
@@ -201,7 +204,7 @@ export class ProactiveSynthia {
    await this._save(state);
    return {status:'owner-approval-required',proposal:publicProposal(proposal),built:false};
   }
-  if(!this.enableAutomaticNewFiles&&!approved)throw new Error('Automatic building is disabled');
+  if(!this.enableAutomaticNewFiles&&approved!==INTERNAL_BUILD_APPROVAL)throw new Error('Automatic building is disabled');
   // Source content can only be added to new paths. No deletes, replacements,
   // writes outside the original ProjectWorkspace, or unreviewed git pushes.
   let project;
@@ -234,7 +237,7 @@ export class ProactiveSynthia {
   let result=null;
   if(decision==='accept'&&p.action==='build-add-only'){
    result=await this.buildNewFiles({goal:p.reason,name:p.projectName,projectId:p.projectId,
-    files:p.files,origin:p.origin,approved:true});
+    files:p.files,origin:p.origin,approved:INTERNAL_BUILD_APPROVAL});
   }
   if(decision==='accept'&&p.action==='publish-project'){
    // Even if GitHub is configured, this can only happen after explicit
