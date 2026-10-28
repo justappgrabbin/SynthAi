@@ -89,3 +89,12 @@ Source repository: justappgrabbin/SynthAi. All work is additive on a branch base
 - The local proactive build route ignores caller-supplied approved flags so substantial builds must follow the explicit review flow.
 - Source code is add-only, existing project contents remain untouched. Foundry remains unmodified. This PR is not a production release.
 - Remaining: verify genuine hosted TRIDENT generation on owner hardware, phone-wide watcher, Android behavior, and user-authorized real Git publication.
+
+### TRIDENT proactive verification (PR #72)
+- Code integration PR https://github.com/justappgrabbin/SynthAi/pull/72 is draft and unmerged, based on TRIDENT FLOAT PR #70; no production deployment, no original Foundry modifications.
+- Dedicated CI run `40641659978` **SUCCESS** at source SHA `4517e0b83716c77094fd23b625c8c132fd84da15`: source syntax, 14 original Computer proactive tests, local Computer integration tests, actual loopback HTTP server E2E, and existing Synthia/Klein neural resident regression.
+- End-to-end actual local HTTP test booted original `computer/host/server.mjs` on ephemeral loopback, checked `/api/proactive/status`, observed a test-failure through original AutoLing, accepted feedback, added a real project file in original VFS, verified file listing, rejected cross-origin controls, refused to fabricate TRIDENT generation when no weights were available, and observed 404 for unimplemented delete endpoint.
+- Security bug found: caller-supplied `approved:true` could bypass a large-build proposal. Fixed using a module-private approval capability symbol; regression test proves a POST with `approved:true` still requires owner approval.
+- CI also **SUCCESS** for the existing Workspace, Resonance Bus and neural resident pipelines on this branch; source archive suite was still running at this log checkpoint.
+- Still **NOT VERIFIED**: mobile physical APK, phone-wide observation or external app interaction; live user TRIDENT checkpoint produces valid JSON/source; upstream LLaMA 8B ProactiveAgent model loaded in TRIDENT; production deployment, authenticated owner approvals for remote publication.
+- Next task: owner-reviewed model weights and Android event source, not a separate app. Git publishing remains an explicit owner approval step; do not merge or deploy automatically.
