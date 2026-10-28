@@ -163,12 +163,14 @@ async function computerJson(path,payload){
 $('#checkModels').addEventListener('click',async()=>{
  $('#modelEngineState').textContent='Checking';
  try{
-  const [models,address]=await Promise.all([
-    computerJson('/api/models/status'),computerJson('/api/generative-address/status')
+  const [models,address,neural]=await Promise.all([
+    computerJson('/api/models/status'),computerJson('/api/generative-address/status'),
+    computerJson('/api/neural/status')
   ]);
   $('#modelEngineState').textContent='Computer connected';
   $('#modelOutput').textContent=JSON.stringify({
     trident:models.trident,modelmaker:models.modelmaker,
+    standaloneNeural:neural,
     generativeAddress:{connected:address.connected,provider:address.provider,error:address.error??null}
   },null,2);
  }catch(error){
@@ -243,9 +245,11 @@ $('#runModel').addEventListener('click',async()=>{
  $('#runModel').disabled=true;
  $('#modelOutput').textContent='Calling the selected original engine...';
  try{
-  const result=['trident','modelmaker'].includes(mode)?
-    await computerJson('/api/models/generate',{text,backend:mode,maxNewTokens:16}):
-    await computerJson('/api/chat/forms',{text,mode});
+  const result=mode==='synthia-neural'?
+    await computerJson('/api/neural/generate',{text,annotations:{max_new_bytes:80}}):
+    ['trident','modelmaker'].includes(mode)?
+      await computerJson('/api/models/generate',{text,backend:mode,maxNewTokens:16}):
+      await computerJson('/api/chat/forms',{text,mode});
   $('#modelOutput').textContent=JSON.stringify(result,null,2).slice(0,22000);
  }catch(error){$('#modelOutput').textContent='No verified response: '+error.message}
  $('#runModel').disabled=false;
@@ -303,13 +307,23 @@ async function showProactive(){
  }catch(error){state.textContent='Local Computer required';output.textContent=error.message;proposals.replaceChildren();}
 }
 $('#refreshProactive').addEventListener('click',showProactive);
+$('#inspectNeural').addEventListener('click',async()=>{
+ const text=$('#modelPrompt').value.trim();
+ if(!text){$('#modelOutput').textContent='Enter text to inspect';return;}
+ $('#inspectNeural').disabled=true;
+ try{
+  const result=await computerJson('/api/neural/inspect',{text});
+  $('#modelOutput').textContent=JSON.stringify(result,null,2).slice(0,24000);
+ }catch(error){$('#modelOutput').textContent='Original neural inspection unavailable: '+error.message}
+ $('#inspectNeural').disabled=false;
+});
 $('#draftProactive').addEventListener('click',async()=>{
  const goal=$('#proactiveGoal').value.trim();
  if(!goal){$('#proactiveResult').textContent='Describe the functionality you want Synthia to build.';return;}
  const button=$('#draftProactive');button.disabled=true;
  $('#proactiveResult').textContent='Requesting actual original TRIDENT Code-head inference...';
  try{
-  const result=await computerJson('/api/proactive/draft',{goal,name:'Synthia '+goal.slice(0,50),backend:'trident'});
+  const result=await computerJson('/api/proactive/draft',{goal,name:'Synthia '+goal.slice(0,50),backend:$('#proactiveBackend').value});
   $('#proactiveResult').textContent=JSON.stringify(result,null,2).slice(0,16000);
   await showProactive();
  }catch(error){$('#proactiveResult').textContent='TRIDENT build not verified: '+error.message}

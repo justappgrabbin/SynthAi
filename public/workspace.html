@@ -80,6 +80,7 @@
  <article class="panel">
  <div class="heading"><div><small>EXISTING COMPUTER · FUNCTIONAL ENGINES</small><h2>Run the real systems</h2></div><span class="chip" id="modelEngineState">Checking</span></div>
  <p class="subtle">This panel uses the local SYNTH AI Computer when opened at its own URL. The hosted website cannot read private files or execute a local model by itself.</p>
+ <p class="note">Synthia Neural uses the preserved standalone source. Configure SYNTHIA_NEURAL_HOME on your local Computer to mount it; the model is not replaced or implicitly trained.</p>
  <div class="line"><button class="button muted" id="checkModels">Check Computer / weights</button>
  <a class="button muted" href="http://127.0.0.1:8765/workspace.html" target="_blank" rel="noopener">Open local Computer Workspace</a></div>
  <h3>Install a real TRIDENT checkpoint</h3>
@@ -101,9 +102,10 @@
  </article>
  <article class="panel">
  <div class="heading"><div><small>REAL ENGINE RESPONSES ONLY</small><h2>Conversation and inference</h2></div></div>
- <label class="url-label">Processing mode<select id="modelMode"><option value="communication">Computer Communication</option><option value="klein">Original Klein</option><option value="morph">Original Morph</option><option value="trident">TRIDENT transformer</option><option value="modelmaker">Model Maker transformer</option></select></label>
+ <label class="url-label">Processing mode<select id="modelMode"><option value="communication">Computer Communication</option><option value="klein">Original Klein</option><option value="morph">Original Morph</option><option value="trident">TRIDENT transformer</option><option value="synthia-neural">Synthia Neural · Semantic Spacetime + TRIDENT</option><option value="modelmaker">Model Maker transformer</option></select></label>
  <label class="url-label">Message<input id="modelPrompt" maxlength="4000" value="What can we learn from language and context?"></label>
  <button class="button" id="runModel">Run selected engine</button>
+ <button class="button muted" id="inspectNeural" type="button">Inspect present meaning</button>
  <pre id="modelOutput" class="codeview" aria-live="polite">Run Check Computer / weights first. Missing checkpoints and unavailable services will be reported rather than fabricated.</pre>
  </article>
  </div>
@@ -116,6 +118,7 @@
    <div class="line"><button class="button muted" id="refreshProactive">Inspect real activity</button></div>
    <h3>Ask original TRIDENT to build</h3>
    <label class="url-label" for="proactiveGoal">Build goal<input id="proactiveGoal" maxlength="1500" placeholder="Describe the functionality Synthia should implement"></label>
+   <label class="url-label">Neural source<select id="proactiveBackend"><option value="trident">Original TRIDENT Code head</option><option value="synthia-neural">Synthia Neural · original Semantic Spacetime model</option></select></label>
    <div class="line"><button class="button" id="draftProactive">Generate and build new files</button></div>
    <p class="note">Real inference requires the configured original TRIDENT checkpoint on the local Computer. If generation does not produce valid code files, Synthia will report that rather than make up an app.</p>
    <pre id="proactiveResult" class="codeview" aria-live="polite">Refresh for live Computer events and source analysis.</pre>

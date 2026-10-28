@@ -1,0 +1,55 @@
+name: Owner Synthia Neural original model integration
+on:
+  push:
+    branches: [integration/synthia-neural-standalone-20261028]
+    paths:
+      - 'computer/services/standalone-neural-gateway.mjs'
+      - 'computer/services/proactive-synthia.mjs'
+      - 'computer/host/server.mjs'
+      - 'computer/scripts/attach_neural_archive.py'
+      - 'computer/tests/standalone-neural-gateway.test.mjs'
+      - 'computer/tests/test_attach_neural_archive.py'
+      - 'public/workspace.html'
+      - 'public/workspace.mjs'
+      - '.github/workflows/standalone-neural.yml'
+  pull_request:
+    paths:
+      - 'computer/services/standalone-neural-gateway.mjs'
+      - 'computer/services/proactive-synthia.mjs'
+      - 'computer/host/server.mjs'
+      - 'computer/scripts/attach_neural_archive.py'
+      - 'computer/tests/standalone-neural-gateway.test.mjs'
+      - 'computer/tests/test_attach_neural_archive.py'
+      - 'public/workspace.html'
+      - 'public/workspace.mjs'
+      - '.github/workflows/standalone-neural.yml'
+  workflow_dispatch:
+jobs:
+  owner-neural-compatibility:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          submodules: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Verify native owner integration entrypoint and existing mobile UI
+        run: |
+          node --check computer/services/standalone-neural-gateway.mjs
+          node --check computer/services/proactive-synthia.mjs
+          node --check computer/host/server.mjs
+          node --check public/workspace.mjs
+      - name: Verify standalone can never fake a trained model
+        run: node --test computer/tests/standalone-neural-gateway.test.mjs
+      - name: Verify read-only original ZIP extraction and anti-overwrite
+        run: python -m unittest -v computer/tests/test_attach_neural_archive.py
+      - name: Regression original proactive and Synthia resident
+        run: node --test computer/tests/proactive-synthia.test.mjs computer/tests/trident-proactive-agent.test.mjs computer/tests/synthia-resident.test.mjs
+      - name: Build the ORIGINAL existing Computer web assets
+        run: node computer/build-web.mjs
