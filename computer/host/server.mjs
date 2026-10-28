@@ -1,5 +1,6 @@
 import { createServer } from 'node:http';
 import { readFile, stat, mkdir } from 'node:fs/promises';
+import { existsSync } from 'node:fs';
 import { join, resolve, extname, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { ComputerRuntime } from '../ComputerRuntime.mjs';
@@ -11,7 +12,12 @@ import { ModelIntegrationGateway } from '../services/model-integration-gateway.m
 import { GenerativeAddressGateway } from '../services/generative-address-gateway.mjs';
 
 const root = resolve(fileURLToPath(new URL('../shell/kimi-linux/dist/', import.meta.url)));
-const workspaceRoot = resolve(fileURLToPath(new URL('../../public/', import.meta.url)));
+// Desktop checkout serves repo/public. The Android APK bundles the SAME
+// existing workspace underneath computer/public; never substitute a new UI.
+const desktopWorkspaceRoot = resolve(fileURLToPath(new URL('../../public/', import.meta.url)));
+const packagedWorkspaceRoot = resolve(fileURLToPath(new URL('../public/', import.meta.url)));
+const workspaceRoot = existsSync(join(desktopWorkspaceRoot,'workspace.html'))
+  ? desktopWorkspaceRoot : packagedWorkspaceRoot;
 const dataDir = resolve(process.env.SYNTHIA_DATA_DIR ?? fileURLToPath(new URL('../runtime/data/local-computer/', import.meta.url)));
 const port = Number(process.env.SYNTHIA_PORT ?? 8765);
 const host = '127.0.0.1';
