@@ -69,3 +69,14 @@ Source repository: justappgrabbin/SynthAi. All work is additive on a branch base
 - Goal board now marks actual versioned, CI-backed source mounts, Klein/Morph connections and HTTPS publish as completed. No trained language model or Android device validation is claimed.
 - Resolved first CI failure: missing torch on runner was reported correctly but test assertion was too narrow; original Morph produced >500KB response. Worker now checks checkpoint before dependency import, and bounded Morph response is consumed and summarized for receipts. Rerun CI succeeded.
 - Remaining: obtain an actual trained text model/checkpoint, install training dependencies, execute a user-corpus training-to-generation cycle, verify Android/browser GUI and owner ChatGPT MCP connection. See computer/docs/INTEGRATION_002_ACTUAL_MODELS.md.
+
+## 2026-10-27 — TRIDENT proactive native integration (not yet production)
+
+- Source: THUNLP ProactiveAgent main commit `3fcf9beebe256b86871659fbb12541c41c9381b9`, Apache-2.0, inspected actual desktop/Android files. The Android tool bodies are unimplemented; a running phone agent is NOT claimed.
+- Installed `ProactiveSynthia` into **existing** `ComputerRuntime.boot()` and its original service registry. It receives real VFS source imports, runs owner-original AutoLing, creates review proposals, records evidence, and persists observe/feedback state.
+- Actual small source builds use existing `ProjectWorkspace` and are add-only. No delete or overwrite. Larger builds require exact owner approval. Git push/publish requires a separate explicit confirmation and existing Git backend. No automatic push/deployment.
+- Original TRIDENT Code-head generation is wired through the EXISTING verified-inference `ModelIntegrationGateway`; invalid tokens or missing checkpoint never become fake source files. Real owner checkpoint has NOT been exercised in this incremental integration.
+- Local host endpoints and existing workspace **Synthia Agent** tab added; web-stage copies proactive module for existing browser imports. No replacement app.
+- Added native service integration tests, existing resident regression, CI workflow, and provenance in `computer/docs/TRIDENT_PROACTIVE_INTEGRATION_20261027.md`.
+- CI / live host / Android status: PENDING actual execution and receipt, not yet called complete.
+- Next: run CI and browser HTTP smoke checks, attach actual original model checkpoint and test quality, and test opt-in Android observation on physical device. Keep Foundry read-only and integration PR draft.
