@@ -9,6 +9,7 @@ import android.os.Looper;
 import android.view.View;
 import android.view.WindowInsets;
 import android.webkit.ValueCallback;
+import android.webkit.CookieManager;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebView;
@@ -20,6 +21,7 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.security.SecureRandom;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -27,6 +29,7 @@ public final class MainActivity extends Activity {
     static { System.loadLibrary("computer-node"); System.loadLibrary("node"); }
     private static final String ORIGIN = "http://127.0.0.1:8765";
     private static boolean nodeStarted = false;
+    private static String apiToken;
     private final Handler handler = new Handler(Looper.getMainLooper());
     private FrameLayout root;
     private TextView status;
@@ -51,12 +54,26 @@ public final class MainActivity extends Activity {
         root.addView(status);
         setContentView(root);
         synchronized (MainActivity.class) {
+            if (apiToken == null) apiToken = newSessionToken();
             if (!nodeStarted) {
                 nodeStarted = true;
                 new Thread(this::startComputer, "synthia-computer-runtime").start();
             }
         }
         waitForComputer(0);
+    }
+
+    private static String newSessionToken() {
+        byte[] bytes = new byte[32];
+        new SecureRandom().nextBytes(bytes);
+        final char[] alphabet = "0123456789abcdef".toCharArray();
+        char[] result = new char[bytes.length * 2];
+        for (int i = 0; i < bytes.length; i++) {
+            int value = bytes[i] & 0xff;
+            result[i * 2] = alphabet[value >>> 4];
+            result[i * 2 + 1] = alphabet[value & 15];
+        }
+        return new String(result);
     }
 
     private void startComputer() {
@@ -72,7 +89,7 @@ public final class MainActivity extends Activity {
             }
             File data = new File(getFilesDir(), "computer-data");
             if (!data.exists() && !data.mkdirs()) throw new IllegalStateException("Cannot create computer data directory");
-            int exit = startNode(new String[]{"node", entry.getAbsolutePath(), data.getAbsolutePath()});
+            int exit = startNode(new String[]{"node", entry.getAbsolutePath(), data.getAbsolutePath(), apiToken});
             handler.post(() -> status.setText("Computer service exited: " + exit));
         } catch (Exception error) {
             handler.post(() -> status.setText("Computer startup failed: " + error));
@@ -109,6 +126,7 @@ public final class MainActivity extends Activity {
                 HttpURLConnection check = (HttpURLConnection) new URL(ORIGIN + "/api/status").openConnection();
                 check.setConnectTimeout(700);
                 check.setReadTimeout(700);
+                check.setRequestProperty("Cookie", "synthia_session=" + apiToken);
                 ready = check.getResponseCode() == 200;
                 check.disconnect();
             } catch (Exception ignored) { }
@@ -147,7 +165,21 @@ public final class MainActivity extends Activity {
             }
         });
         root.addView(browser, new FrameLayout.LayoutParams(-1, -1));
-        browser.loadUrl(ORIGIN + "/");
+        CookieManager cookies = CookieManager.getInstance();
+        cookies.setAcceptCookie(true);
+        // The capability never appears in a URL or page JavaScript. Only this
+        // app's WebView cookie jar receives it; normal same-origin fetch sends it.
+        cookies.setCookie(ORIGIN, "synthia_session=" + apiToken + "; Path=/; HttpOnly; SameSite=Strict", accepted -> {
+            if (Boolean.TRUE.equals(accepted)) {
+                browser.loadUrl(ORIGIN + "/");
+            } else {
+                root.removeView(browser);
+                browser.destroy();
+                browser = null;
+                root.addView(status);
+                status.setText("Computer session could not be initialized.");
+            }
+        });
     }
 
     @Override protected void onActivityResult(int request, int result, Intent data) {
