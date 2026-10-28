@@ -60,6 +60,13 @@ test('Actual loopback Computer HTTP boots proactive native Synthia and persists 
  assert.equal(created.value.receipt.verifiedBuild,false);
  const exported=await (await fetch(url+'/api/files')).json();
  assert.ok(exported.some(f=>f.path.endsWith('/src/math.mjs')));
+ const attemptedBypass=await send('/api/proactive/build',{
+  name:'BYPASS-ATTEMPT',goal:'Try to bypass large build approval',approved:true,
+  files:[1,2,3,4].map(n=>({path:'src/part'+n+'.mjs',content:'export default '+n+';'}))
+ });
+ assert.equal(attemptedBypass.code,200);
+ assert.equal(attemptedBypass.value.status,'owner-approval-required',
+  'HTTP approved=true must never bypass explicit proposal approval');
  const crossOrigin=await send('/api/proactive/build',{name:'intruder',goal:'test',files:[{path:'x.js',content:'export default 1'}]},'https://evil.invalid');
  assert.equal(crossOrigin.code,400);
  assert.match(crossOrigin.value.error,/Cross-origin/);
