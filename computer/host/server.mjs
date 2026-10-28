@@ -153,7 +153,10 @@ const server = createServer(async (req, res) => {
       }
       if(req.method==='POST'&&url.pathname==='/api/proactive/build'){
         requireLocalBrowser(req);
-        return json(res,200,await computer.proactive.buildNewFiles(await body(req,65000)));
+        // The request body is untrusted, even on localhost. It cannot supply
+        // approved=true to bypass the major-build owner decision flow.
+        const request=await body(req,65000);
+        return json(res,200,await computer.proactive.buildNewFiles({...request,approved:false}));
       }
       if(req.method==='POST'&&url.pathname==='/api/proactive/decide'){
         requireLocalBrowser(req);
