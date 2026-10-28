@@ -6,6 +6,6 @@
     "install:shell": "npm --prefix shell/kimi-linux ci",
     "build": "npm --prefix shell/kimi-linux run build",
     "start": "node host/server.mjs",
-    "test:reassembly": "node --test tests/reassembly-ingest-e2e.test.mjs tests/import-preservation.test.mjs tests/execute-intake-preservation.test.mjs tests/registry-recovery.test.mjs tests/http-origin-boundary.test.mjs"
+    "test:reassembly": "node --test tests/reassembly-ingest-e2e.test.mjs tests/import-preservation.test.mjs tests/execute-intake-preservation.test.mjs tests/registry-recovery.test.mjs tests/http-origin-boundary.test.mjs tests/local-session-regression.test.mjs"
   }
 }
