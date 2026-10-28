@@ -1,0 +1,39 @@
+name: TRIDENT Proactive Synthia Computer acceptance
+on:
+  push:
+    branches:
+      - integration/trident-proactive-synthia-20261027
+    paths:
+      - 'computer/services/proactive-synthia.mjs'
+      - 'computer/ComputerRuntime.mjs'
+      - 'computer/host/server.mjs'
+      - 'computer/tests/proactive-synthia.test.mjs'
+      - '.github/workflows/trident-proactive-synthia.yml'
+  pull_request:
+    paths:
+      - 'computer/services/proactive-synthia.mjs'
+      - 'computer/ComputerRuntime.mjs'
+      - 'computer/host/server.mjs'
+      - 'computer/tests/proactive-synthia.test.mjs'
+      - '.github/workflows/trident-proactive-synthia.yml'
+  workflow_dispatch:
+jobs:
+  real-computer-proactive:
+    runs-on: ubuntu-latest
+    timeout-minutes: 9
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Syntax validation
+        run: |
+          node --check computer/services/proactive-synthia.mjs
+          node --check computer/ComputerRuntime.mjs
+          node --check computer/host/server.mjs
+      - name: Proactive Synthia tests over real existing Computer
+        run: node --test computer/tests/proactive-synthia.test.mjs
+      - name: Existing neural and Klein resident regression
+        run: node --test computer/tests/synthia-resident.test.mjs
