@@ -9,6 +9,7 @@ on:
       - 'computer/host/server.mjs'
       - 'computer/tests/proactive-synthia.test.mjs'
       - 'computer/tests/trident-proactive-agent.test.mjs'
+      - 'computer/tests/proactive-host-http.test.mjs'
       - 'computer/tests/proactive-http-approval.test.mjs'
       - 'public/workspace.html'
       - 'public/workspace.mjs'
@@ -20,6 +21,7 @@ on:
       - 'computer/host/server.mjs'
       - 'computer/tests/proactive-synthia.test.mjs'
       - 'computer/tests/trident-proactive-agent.test.mjs'
+      - 'computer/tests/proactive-host-http.test.mjs'
       - 'computer/tests/proactive-http-approval.test.mjs'
       - 'public/workspace.html'
       - 'public/workspace.mjs'
@@ -47,5 +49,7 @@ jobs:
         run: node --test computer/tests/proactive-synthia.test.mjs computer/tests/trident-proactive-agent.test.mjs
       - name: Live local Computer interaction tests
         run: node --test computer/tests/proactive-http-approval.test.mjs
+      - name: Actual local Computer HTTP end-to-end smoke test
+        run: node --test computer/tests/proactive-host-http.test.mjs
       - name: Existing neural and Klein resident regression
         run: node --test computer/tests/synthia-resident.test.mjs
