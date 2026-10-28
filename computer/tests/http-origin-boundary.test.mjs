@@ -32,7 +32,7 @@ test('full Computer rejects foreign HTTP origins and hosts without breaking loca
   const host = '127.0.0.1:' + port;
   const child = spawn(process.execPath, ['host/server.mjs'], {
     cwd: new URL('..', import.meta.url),
-    env: { ...process.env, SYNTHIA_PORT: String(port), SYNTHIA_DATA_DIR: dir }, stdio: 'ignore',
+    env: { ...process.env, SYNTHIA_PORT: String(port), SYNTHIA_DATA_DIR: dir, SYNTHIA_ALLOW_INSECURE_DEV: '1' }, stdio: 'ignore',
   });
   t.after(async () => {
     if (child.exitCode === null) {
