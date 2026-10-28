@@ -28,6 +28,7 @@ const modelGateway = new ModelIntegrationGateway({
   bus:computer.bus,state:computer.state,
   env:{...process.env,SYNTHIA_TRAINED_MODELS_DIR:privateModelStore}
 });
+computer.proactive.modelGateway = modelGateway; // Original PyTorch TRIDENT, never simulated.
 const addressGateway = new GenerativeAddressGateway({bus:computer.bus,state:computer.state});
 let modelTrainingBusy = false;
 
@@ -101,6 +102,16 @@ async function body(req, maxChars = 8500000) {
   return JSON.parse(text);
 }
 
+// The Computer binds loopback only. Browser write requests must also have the
+// same origin; this is a local development boundary, NOT an Internet auth scheme.
+function requireLocalBrowser(req) {
+  const origin=req.headers.origin;
+  if(origin && origin!=='http://'+host+':'+port)
+    throw new TypeError('Cross-origin proactive control is not permitted');
+  const site=req.headers['sec-fetch-site'];
+  if(site && !['same-origin','none'].includes(site))
+    throw new TypeError('Cross-site proactive control is not permitted');
+}
 const server = createServer(async (req, res) => {
   try {
     const url = new URL(req.url ?? '/', `http://${host}:${port}`);
@@ -126,6 +137,32 @@ const server = createServer(async (req, res) => {
         }));
       }
 
+
+      // ProactiveAgent-inspired observer native to this Computer.
+      // No delete action exists. All drafts use the real original model gateway.
+      // Remote Git publication is a separate, explicitly confirmed decision.
+      if(req.method==='GET'&&url.pathname==='/api/proactive/status')
+        return json(res,200,computer.proactive.snapshot());
+      if(req.method==='POST'&&url.pathname==='/api/proactive/observe'){
+        requireLocalBrowser(req);
+        return json(res,200,await computer.proactive.observe(await body(req,5000)));
+      }
+      if(req.method==='POST'&&url.pathname==='/api/proactive/draft'){
+        requireLocalBrowser(req);
+        return json(res,200,await computer.proactive.draftWithTrident(await body(req,5000)));
+      }
+      if(req.method==='POST'&&url.pathname==='/api/proactive/build'){
+        requireLocalBrowser(req);
+        return json(res,200,await computer.proactive.buildNewFiles(await body(req,65000)));
+      }
+      if(req.method==='POST'&&url.pathname==='/api/proactive/decide'){
+        requireLocalBrowser(req);
+        return json(res,200,await computer.proactive.decide(await body(req,3000)));
+      }
+      if(req.method==='POST'&&url.pathname==='/api/proactive/request-publish'){
+        requireLocalBrowser(req);
+        return json(res,200,await computer.proactive.requestPublish(await body(req,2000)));
+      }
 
       // Functional extension into the ORIGINAL Generative Address assembly.
       // Communication mode remains on the existing Computer endpoint.
