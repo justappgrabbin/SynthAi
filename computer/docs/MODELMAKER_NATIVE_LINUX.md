@@ -93,6 +93,14 @@ curl --fail -H 'Content-Type: application/json' \
   http://127.0.0.1:8765/api/chat
 ```
 
+For a single pass/fail check of the entire live Computer → Klein → Modelmaker route, run in another terminal:
+
+```sh
+node computer/host/verify-modelmaker.mjs
+```
+
+The checker fails unless Modelmaker loads a named checkpoint with a SHA-256 fingerprint, Synthia is configured for that same model, and a real Computer conversation reports Klein execution **and** `model.used: true`. It never trains or replaces weights. It sends one test chat message, which is recorded in Synthia's normal chat history.
+
 A verified response must contain:
 - `model.used: true` and `provider: "llm:openai-compatible"`;
 - `klein.passedToModel: true` and `klein.executed` showing AutoLing and
