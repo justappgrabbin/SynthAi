@@ -18,7 +18,7 @@ cd ../..
 python run_app.py
 ```
 
-Open http://localhost:8000. On a trusted local network, a phone can use the computer's local IP at port 8000. This is a working local web app, not an installed native APK or a publicly deployed service.
+Open http://localhost:8000. On a trusted local network, a phone can use the computer's local IP at port 8000. The Android preview connects to an HTTPS instance of this server. See [phone preview setup](docs/PHONE-PREVIEW.md) for the APK and server connection. The repository does not provide hosted server uptime.
 
 Create the master birth chart first. The chart, four frame views, cultivated-self guidance, game content, and prediction log share its configuration. The supplied Computer and Resonance Network are available from the same interface. Their existing field/waveform engine receives the master chart through an adapter; it does not calculate a competing birth chart. Human and isohuman origin pairs share the master configuration hash.
 
@@ -34,15 +34,15 @@ The six research protocol pages state expectations, comparison groups, and falsi
 
 Game fragments and archetypes use deterministic chart-derived selection. Their sequence also depends on the user's choices and progress. These are experimental game rules, not psychological measurements. Progress is browser-local and separated by configuration. Birth charts and chat sessions persist in local SQLite. Original observations and later interpretations must remain distinct.
 
-The original social server supports accounts, posts, messages, projects, and experiment observations. Production authentication for private chart APIs, account-to-chart linking, native packaging, and approved remote update delivery remain unfinished. Use the current build locally; do not expose private chart APIs publicly.
+The original social server supports accounts, posts, messages, projects, and experiment observations. Signed-in opt-in resonance discovery, account-to-chart ownership checks and invitation consent are integrated. Production authentication for all private chart APIs still needs hardening. Use the current build locally; do not expose private chart APIs publicly.
 
 No nested archives or duplicated donor projects are needed by the app. Development dependencies and model weights are excluded from phone frontend builds. Existing reference knowledge and source-derived mechanisms remain separate from observed evidence.
 
 ## Checks
 
 ```sh
-python -m pytest tests/test_birth_anchor.py tests/test_local_model.py tests/test_research_registry.py tests/test_integrated_questions.py tests/test_geonatal.py tests/test_contact_loop.py tests/test_being_state.py -q
+python -m pytest tests/test_birth_anchor.py tests/test_local_model.py tests/test_research_registry.py tests/test_integrated_questions.py tests/test_geonatal.py tests/test_contact_loop.py tests/test_being_state.py tests/test_cultivation.py tests/test_resonance_network.py -q
 node scripts/test-chart-game.mjs
 ```
 
-GitHub workflows validate changes and prepare an owner-approved frontend build. Configure the required owner reviewer on the owner-approved-release environment before using that workflow. It does not yet deploy an app update.
+The repository-level Human Design and Resonance APK workflow builds and tests this integration branch. After reviewing a change, use its manual workflow action to publish an APK prerelease. It does not silently install updates or deploy a backend. World embodiments and the interactive science lab come later.
