@@ -23,6 +23,6 @@ try{
  }
  for(const[label,value]of[['Birth date','1988-10-09'],['Birth time','12:30'],['Timezone','UTC'],['City','London'],['Latitude','51.5'],['Longitude','-0.12']])await page.getByLabel(label,{exact:true}).fill(value);
  await page.getByRole('button',{name:'Generate My Human Design',exact:true}).click();
- await page.getByText('Connect an HTTPS server from the Android Server settings menu to use this feature.',{exact:true}).waitFor();
+ await page.locator('#birth-information').getByText('Connect an HTTPS server from the Android Server settings menu to use this feature.',{exact:true}).waitFor();
  assert.deepEqual(errors,[]);console.log('PASS: actual bundled interface, six readable offline protocols, clear server requirement and no fabricated chart');
 }finally{await browser.close();}
