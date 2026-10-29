@@ -1,0 +1,12 @@
+{
+  "name": "synthia-mcp-opportunity-consent",
+  "version": "1.1.0",
+  "type": "module",
+  "description": "Consent-gated external capability, outreach, collaboration, and self-deployment layer for Synthia / YOU-N-I-VERSE.",
+  "scripts": {
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

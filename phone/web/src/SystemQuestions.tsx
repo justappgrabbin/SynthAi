@@ -1,0 +1,7 @@
+import { FormEvent, useState } from "react";
+const base = import.meta.env.VITE_API_BASE_URL ?? "";
+export default function SystemQuestions() {
+ const [question,setQuestion]=useState(""); const [answer,setAnswer]=useState(""); const [error,setError]=useState(""); const [busy,setBusy]=useState(false);
+ async function ask(e:FormEvent){e.preventDefault();setBusy(true);setError("");try{const r=await fetch(base+"/api/system/ask",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({question})});const data=await r.json();if(!r.ok)throw new Error(typeof data.detail==="string"?data.detail:"The local model is unavailable.");setAnswer(data.answer);}catch(e){setError(e instanceof Error?e.message:"Could not answer.");}finally{setBusy(false);}}
+ return <details className="panel"><summary>Ask about the system</summary><p>Ask about Human Design, perspectives, chart frames, the game, research tests, or how the pieces connect. No birth information is needed.</p><form onSubmit={ask}><label htmlFor="system-question">Your question</label><textarea id="system-question" value={question} onChange={e=>setQuestion(e.target.value)} maxLength={6000} required placeholder="How would I test whether a chart interpretation fits me?"/><button disabled={busy || !question.trim()}>{busy?"Asking local model…":"Ask Synthia"}</button></form>{error&&<p role="alert">{error}</p>}{answer&&<p style={{whiteSpace:"pre-wrap"}}>{answer}</p>}</details>;
+}

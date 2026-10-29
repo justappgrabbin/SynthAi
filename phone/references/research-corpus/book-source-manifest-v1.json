@@ -1,0 +1,191 @@
+{
+  "schema_version": "1.0.0",
+  "catalog_policy": {
+    "source_independence": true,
+    "shared_information_model": "The same energy is viewed through each dimension. Each source owns the slice observed from its perspective.",
+    "order_is_semantic": true,
+    "orders_preserved_separately": [
+      "PDF and printed reading order",
+      "order of terms inside each source-and-dimension-specific primitive chain",
+      "user-defined dimensional ordinal"
+    ],
+    "primitive_scope": "A primitive such as Being can have a different ordered expression in every dimension. No primitive chain is global.",
+    "merge_statements_automatically": false,
+    "treat_difference_as_correction": false,
+    "page_reference_system": "one-based PDF page",
+    "quotation_policy": "Store short excerpts only when necessary; otherwise store a structured assertion and page reference.",
+    "interpretation_policy": "Keep transcription, source assertion, reader interpretation, and application mapping in separate records."
+  },
+  "sources": [
+    {
+      "source_id": "hatcher-yijing-word-by-word-2009",
+      "title": "The Book of Changes: Yijing, Word by Word",
+      "author_or_teacher": "Bradford Hatcher",
+      "edition": "First edition, 2009; Volumes One and Two combined in this PDF",
+      "publisher": "Hermetica.info",
+      "pdf_pages": 1100,
+      "local_file": "C:\\Users\\Adaya Carter\\Downloads\\Yijing1+2 (1).pdf",
+      "sha256": "CB47886950546F6CBA968922924966114F0A17E7F6596DBF8C167D251654885B",
+      "text_layer": "substantial",
+      "verified_landmarks": [
+        {
+          "pdf_page": 1,
+          "description": "Volume One title and attribution"
+        },
+        {
+          "pdf_page": 5,
+          "description": "Combined contents identifies Volume Two Part Four: The Dimensions"
+        }
+      ],
+      "observed_perspective": {
+        "dimension": "Movement",
+        "question": "Where"
+      }
+    },
+    {
+      "source_id": "ra-uru-hu-rave-bodygraph-circuitry-2001",
+      "title": "Rave BodyGraph Circuitry: A Guide to Channels and Circuits",
+      "author_or_teacher": "Ra Uru Hu",
+      "edition": "Copyright 2001; training material also marked 2000",
+      "publisher": "Human Design America / Jovian Archive Corporation",
+      "pdf_pages": 119,
+      "local_file": "C:\\Users\\Adaya Carter\\Downloads\\pdfcoffee.com-rave-bodygraph-circuitry-by-ra-uru-hu.pdf",
+      "sha256": "DF5E48D56A287195D0172F70F4F538C689BAE317B7384583ED545D0B917CA5FE",
+      "text_layer": "OCR",
+      "verified_landmarks": [
+        {
+          "pdf_page": 2,
+          "description": "Title, author, publisher, and copyright"
+        },
+        {
+          "pdf_page": 5,
+          "description": "Table of contents"
+        },
+        {
+          "pdf_page": 9,
+          "description": "Seven circuitry types and three circuit groups"
+        }
+      ]
+    },
+    {
+      "source_id": "ra-uru-hu-human-design-black-book-1991",
+      "title": "The Human Design System: An Introduction",
+      "author_or_teacher": "Ra Uru Hu",
+      "edition": "Copyright 1991; printed 1992",
+      "publisher": "New Sun Services, Ibiza",
+      "pdf_pages": 126,
+      "local_file": "C:\\Users\\Adaya Carter\\Downloads\\pdfcoffee.com_the-black-book-5-pdf-free.pdf",
+      "sha256": "E2F4F41CEBD393A6B58CDBE43AD7BA9119BDB7C5C4AF3D1F334FF2FF1641AF39",
+      "text_layer": "OCR",
+      "verified_landmarks": [
+        {
+          "pdf_page": 3,
+          "description": "Publication and copyright"
+        },
+        {
+          "pdf_page": 4,
+          "description": "Title page"
+        },
+        {
+          "pdf_page": 9,
+          "description": "Crystals, monopole, dimensional nature chains, and keynotes"
+        },
+        {
+          "pdf_page": 11,
+          "description": "Zodiacal and 64-hexagram arc structure"
+        },
+        {
+          "pdf_page": 118,
+          "description": "Five-dimension table in printed order: Movement, Evolution, Being, Design, Space"
+        }
+      ],
+      "observed_perspective": {
+        "dimension": "Being",
+        "question": "When"
+      }
+    },
+    {
+      "source_id": "hua-ching-ni-book-changes-unchanging-truth",
+      "title": "The Book of Changes and the Unchanging Truth",
+      "author_or_teacher": "Hua-Ching Ni",
+      "edition": "First printing August 1983; revised edition 1990 shown in PDF front matter",
+      "publisher": "SevenStar Communications Group",
+      "pdf_pages": 702,
+      "local_file": "C:\\Users\\Adaya Carter\\Downloads\\pdfcoffee.com_i-ching-book-of-changes-pdf-free (1).pdf",
+      "sha256": "D934C8BF8ADB4DCC1C29C32B6021A9719406980EDED9DAB6F823E98B8A77E3E9",
+      "text_layer": "OCR",
+      "verified_landmarks": [
+        {
+          "pdf_page": 3,
+          "description": "Title and author"
+        },
+        {
+          "pdf_page": 4,
+          "description": "Publisher and edition information"
+        },
+        {
+          "pdf_page": 7,
+          "description": "Contents: natural truth, cyclic movement, energy cycles, and 64 hexagrams"
+        }
+      ],
+      "observed_perspective": {
+        "dimension": "Evolution",
+        "question": "What"
+      }
+    },
+    {
+      "source_id": "ra-uru-hu-rave-iching-line-companion",
+      "title": "The Rave I'Ching Line Companion: A Guide to the 384 Lines",
+      "author_or_teacher": "Ra Uru Hu",
+      "edition": "PDF metadata creation date 2012; source lectures/text require further edition verification",
+      "publisher": "Not established from the inspected front matter",
+      "pdf_pages": 542,
+      "local_file": "C:\\Users\\Adaya Carter\\Downloads\\pdfcoffee.com-the-rave-iching-line-companion-a-guide-to-384-lines-542p.pdf",
+      "sha256": "4939CB5D0B4E313C3A7DE3126C044896D0F8129D03176BFF542F417CCB4077AC",
+      "text_layer": "substantial",
+      "verified_landmarks": [
+        {
+          "pdf_page": 7,
+          "description": "Title and author"
+        },
+        {
+          "pdf_page": 8,
+          "description": "Hexagram line structure introduction"
+        },
+        {
+          "pdf_page": 9,
+          "description": "First-line archetype and foundation"
+        }
+      ]
+    },
+    {
+      "source_id": "michael-servetus-gnostic-book-of-changes",
+      "title": "The Gnostic Book of Changes: Studies in Crypto-Teleological Solipsism",
+      "author_or_teacher": "Michael Servetus (stated pseudonym)",
+      "edition": "Edition details require further front-matter verification",
+      "publisher": "Not established from the inspected front matter",
+      "pdf_pages": 973,
+      "local_file": "C:\\Users\\Adaya Carter\\Downloads\\I Ching_dl (1).pdf",
+      "sha256": "3C4459B184CA8D0F5C6E97EBEE6A73C07529D5398143A8D2912A693D3A81AC48",
+      "text_layer": "substantial",
+      "verified_landmarks": [
+        {
+          "pdf_page": 2,
+          "description": "Title, subtitle, and attribution"
+        },
+        {
+          "pdf_page": 4,
+          "description": "Introductory concepts"
+        },
+        {
+          "pdf_page": 7,
+          "description": "Cross-system symbolic correspondence premise"
+        }
+      ],
+      "observed_perspective": {
+        "dimension": "Design",
+        "question": "Why"
+      }
+    }
+  ]
+}
