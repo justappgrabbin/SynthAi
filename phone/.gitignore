@@ -45,3 +45,6 @@ android/local.properties
 runtimes/**/dist/
 runtimes/**/node_modules
 web/node_modules
+
+/android/.preview-signing/
+/preview-certificate.der

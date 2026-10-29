@@ -5,12 +5,13 @@ android {
  buildFeatures { buildConfig true }
  compileSdk 35
  defaultConfig {
-  applicationId 'app.synthia.resonance'
+  applicationId 'app.synthia.resonance.preview'
   minSdk 26
   targetSdk 35
   versionCode = debugBuildNumber
-  versionName '0.1-debug'
+  versionName '0.2-preview'
  }
+ signingConfigs { debug { storeFile rootProject.file('.preview-signing/debug.keystore'); storePassword 'android'; keyAlias 'androiddebugkey'; keyPassword 'android' } }
  compileOptions { sourceCompatibility JavaVersion.VERSION_17; targetCompatibility JavaVersion.VERSION_17 }
  sourceSets { main { assets.srcDirs = ['preview-assets'] } }
 }
