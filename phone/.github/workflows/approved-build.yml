@@ -1,0 +1,21 @@
+name: Owner-approved phone build
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  approved-build:
+    environment: owner-approved-release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci && npm run build
+        working-directory: web
+      - uses: actions/upload-artifact@v4
+        with:
+          name: approved-phone-frontend
+          path: web/dist
+          retention-days: 7

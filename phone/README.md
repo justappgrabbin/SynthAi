@@ -1,0 +1,48 @@
+# Synthia · Human Design, cultivation, and research
+
+One birth configuration is the source of truth: birth date, exact time, timezone, and place coordinates. The natal tropical Sun anchors the configuration. Tropical, Draconic Tropical True Node, Draconic Tropical Mean Node, and Sidereal Fagan–Bradley charts come from that same calculation.
+
+## Run the working phone interface
+
+Requires Python 3.11+ and Node 22+.
+
+```sh
+pip install -r requirements-web.txt
+cd web
+npm ci
+npm run build
+cd ../runtimes/isohuman
+npm ci --ignore-scripts
+npm run build
+cd ../..
+python run_app.py
+```
+
+Open http://localhost:8000. On a trusted local network, a phone can use the computer's local IP at port 8000. This is a working local web app, not an installed native APK or a publicly deployed service.
+
+Create the master birth chart first. The chart, four frame views, cultivated-self guidance, game content, and prediction log share its configuration. The supplied Computer and Resonance Network are available from the same interface. Their existing field/waveform engine receives the master chart through an adapter; it does not calculate a competing birth chart. Human and isohuman origin pairs share the master configuration hash.
+
+## Local model
+
+Copy .env.example to .env and set SYNTHIA_MODEL to a model already installed in Ollama. Start Ollama separately. For llamafile, change SYNTHIA_MODEL_RUNTIME and SYNTHIA_MODEL_URL as described in .env.example. Restart the app after configuration. Model weights are external; no language model is trained or bundled in this project. An unavailable model returns an explicit error instead of a canned answer.
+
+Users can ask about the system without entering personal birth information. Personal questions require the selected chart; detailed source records and the chosen coaching methodology are passed to the local model for English explanation. Translation fidelity and live model behavior still need evaluation with the chosen running model.
+
+## Evidence and data
+
+The six research protocol pages state expectations, comparison groups, and falsification criteria. The chart-scoped prediction log locks future claims, stores outcomes separately after the deadline, and computes Brier scores against a baseline. Hashes help detect changed records; they do not independently attest registration time. No empirical validation of Human Design, astrology, or the proposed resonance mechanics is claimed.
+
+Game fragments and archetypes use deterministic chart-derived selection. Their sequence also depends on the user's choices and progress. These are experimental game rules, not psychological measurements. Progress is browser-local and separated by configuration. Birth charts and chat sessions persist in local SQLite. Original observations and later interpretations must remain distinct.
+
+The original social server supports accounts, posts, messages, projects, and experiment observations. Production authentication for private chart APIs, account-to-chart linking, native packaging, and approved remote update delivery remain unfinished. Use the current build locally; do not expose private chart APIs publicly.
+
+No nested archives or duplicated donor projects are needed by the app. Development dependencies and model weights are excluded from phone frontend builds. Existing reference knowledge and source-derived mechanisms remain separate from observed evidence.
+
+## Checks
+
+```sh
+python -m pytest tests/test_birth_anchor.py tests/test_local_model.py tests/test_research_registry.py tests/test_integrated_questions.py tests/test_geonatal.py tests/test_contact_loop.py tests/test_being_state.py -q
+node scripts/test-chart-game.mjs
+```
+
+GitHub workflows validate changes and prepare an owner-approved frontend build. Configure the required owner reviewer on the owner-approved-release environment before using that workflow. It does not yet deploy an app update.

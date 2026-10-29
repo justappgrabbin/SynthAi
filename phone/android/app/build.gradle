@@ -1,0 +1,17 @@
+plugins { id 'com.android.application' }
+def debugBuildNumber = Integer.parseInt(project.findProperty('buildNumber')?.toString() ?: '1')
+android {
+ namespace 'app.synthia.resonance'
+ buildFeatures { buildConfig true }
+ compileSdk 35
+ defaultConfig {
+  applicationId 'app.synthia.resonance'
+  minSdk 26
+  targetSdk 35
+  versionCode = debugBuildNumber
+  versionName '0.1-debug'
+ }
+ compileOptions { sourceCompatibility JavaVersion.VERSION_17; targetCompatibility JavaVersion.VERSION_17 }
+ sourceSets { main { assets.srcDirs = ['preview-assets'] } }
+}
+dependencies { implementation 'androidx.webkit:webkit:1.12.1'; implementation 'androidx.core:core:1.15.0' }
