@@ -328,7 +328,7 @@ export async function createReadingVisual(
 
 async function postJson<T>(path: string, body: unknown): Promise<T> {
   const response = await fetch(`${API_BASE}${path}`, {
-    method: "POST",
+    method: "POST", credentials: "include",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body)
   });
@@ -352,7 +352,7 @@ export class ApiError extends Error {
 
 export async function requestJson<T>(path: string, body?: unknown, method = body === undefined ? "GET" : "POST"): Promise<T> {
   const response = await fetch(`${API_BASE}${path}`, {
-    method, credentials: "same-origin",
+    method, credentials: "include",
     ...(body === undefined ? {} : {headers: {"Content-Type": "application/json"}, body: JSON.stringify(body)})
   });
   const payload = await response.json();

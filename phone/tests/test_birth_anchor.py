@@ -29,6 +29,7 @@ def test_birth_configuration_survives_store_restart(monkeypatch,tmp_path):
     client=TestClient(create_app(HumanDesignWebStore(path)))
     data=client.post('/api/charts',json={'birth_date':'1988-10-09','birth_time':'12:30','timezone_name':'UTC','latitude':51.5,'longitude':-.12}).json()
     restarted=TestClient(create_app(HumanDesignWebStore(path)))
+    restarted.cookies.update(client.cookies)
     result=restarted.get('/api/charts/'+data['chart_id'])
     assert result.status_code==200,result.text
     assert result.json()['birth_anchor']==data['birth_anchor']

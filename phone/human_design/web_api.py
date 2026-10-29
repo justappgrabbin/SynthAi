@@ -8,6 +8,7 @@ from .birth_anchor import anchor_geonatal
 from .cultivation import CultivationStore, CultivationConflict, CATALOGUE, chart_practice_options
 from .resonance_network import ResonanceNetwork, NetworkConflict
 from .network_identity import network_identity, social_service_url
+from .private_access import ChartOwnership, private_session
 from .local_chart import calculate_local_chart
 import os
 import json
@@ -329,6 +330,7 @@ class HumanDesignWebStore:
             self.db_path.parent.mkdir(parents=True, exist_ok=True)
             with sqlite3.connect(self.db_path) as db:
                 db.execute("CREATE TABLE IF NOT EXISTS records (kind TEXT, id TEXT, payload TEXT NOT NULL, PRIMARY KEY(kind,id))")
+        self.ownership = ChartOwnership(self.db_path)
         self.charts: dict[str, SavedChart] = {}
         self.birth_configurations: dict[str, dict] = {}
         self.reports: dict[str, ReportPackage] = {}
@@ -352,10 +354,12 @@ class HumanDesignWebStore:
         self._write("configuration", chart_id, configuration)
 
     def save_chart(self, chart: SavedChart) -> None:
+        self.ownership.assign(chart.chart_id)
         self.charts[chart.chart_id] = chart
         self._write("chart", chart.chart_id, asdict(chart))
 
     def get_chart(self, chart_id: str) -> SavedChart:
+        self.ownership.require(chart_id)
         chart = self.charts.get(chart_id)
         if chart is None:
             stored = self._read("chart", chart_id)
@@ -430,6 +434,7 @@ def create_app(
     validated_db = cognitive_db.with_name("synthia-validated-learning.sqlite3")
     validated_learning = ValidatedLearningStore(validated_db)
     app = FastAPI(
+        dependencies=[Depends(private_session)],
         title="Human Design Web/App API",
         version=VERSION,
         description="Human Design calculation, research, and reflective cultivation API.",
@@ -442,6 +447,17 @@ def create_app(
         allow_methods=["*"],
         allow_headers=["*"],
     )
+
+    @app.middleware("http")
+    async def prevent_private_api_caching(request: Request, call_next):
+        response = await call_next(request)
+        if request.url.path.startswith("/api/"):
+            response.headers["Cache-Control"] = "no-store"
+            vary = [item.strip() for item in response.headers.get("Vary", "").split(",") if item.strip()]
+            if not any(item.lower() == "cookie" for item in vary):
+                vary.append("Cookie")
+            response.headers["Vary"] = ", ".join(vary)
+        return response
 
     registry = ResearchRegistry(cognitive_db.with_name("research-predictions.sqlite3"))
     cultivation = CultivationStore(cognitive_db.with_name("cultivation.sqlite3"))
@@ -523,7 +539,7 @@ def create_app(
     def predictions(chart_id: str):
         active_store.get_chart(chart_id)
         configuration_id = active_store.birth_configurations[chart_id]["birth_anchor"]["configuration_id"]
-        return {"predictions": [row for row in registry.list() if row.get("configuration_id") == configuration_id], "scope": "local pilot; no production multi-user access control"}
+        return {"predictions": [row for row in registry.list() if row.get("configuration_id") == configuration_id and row.get("chart_id") == chart_id], "scope": "private chart"}
 
     @app.post("/api/research/predictions")
     def lock_prediction(request: ForecastRequest):
@@ -531,7 +547,7 @@ def create_app(
             active_store.get_chart(request.chart_id)
             configuration_id = active_store.birth_configurations[request.chart_id]["birth_anchor"]["configuration_id"]
             fields = request.model_dump(exclude={"chart_id"})
-            return registry.lock(**fields, configuration_id=configuration_id)
+            return registry.lock(**fields, configuration_id=configuration_id, chart_id=request.chart_id)
         except (ValueError, TypeError) as exc:
             raise HTTPException(status_code=422, detail=str(exc)) from exc
 
@@ -541,7 +557,7 @@ def create_app(
             active_store.get_chart(request.chart_id)
             configuration_id = active_store.birth_configurations[request.chart_id]["birth_anchor"]["configuration_id"]
             record = next((row for row in registry.list() if row["id"] == prediction_id), None)
-            if not record or record.get("configuration_id") != configuration_id:
+            if not record or record.get("configuration_id") != configuration_id or record.get("chart_id") != request.chart_id:
                 raise ValueError("This prediction belongs to a different birth configuration.")
             registry.resolve(prediction_id, int(request.observed))
         except ValueError as exc:
@@ -927,6 +943,12 @@ def create_app(
         payload["precision_warnings"] = list(chart.input.warnings)
         payload["display_summary"] = _display_summary(chart)
         return payload
+
+    @app.get("/api/charts")
+    def my_charts() -> dict[str, Any]:
+        charts = [active_store.get_chart(chart_id) for chart_id in active_store.ownership.available_ids()]
+        return {"charts": [{"chart_id": chart.chart_id, "title": chart.user_name or "My Human Design", "created_at": chart.created_at_utc}
+                           for chart in sorted(charts, key=lambda chart: chart.created_at_utc, reverse=True)]}
 
     @app.get("/api/charts/{chart_id}")
     def get_chart(chart_id: str) -> dict[str, Any]:

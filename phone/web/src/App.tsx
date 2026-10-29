@@ -7,6 +7,7 @@ import ResearchTests from "./ResearchTests";
 import { FormEvent, useEffect, useRef, useState } from "react";
 import {
   askQuestion,
+  requestJson,
   ChartCreateInput,
   createChart,
   createInterpretationMap,
@@ -92,12 +93,16 @@ export default function App() {
     (async () => {
       try {
         const selected = JSON.parse(localStorage.getItem("synthia.birth.configuration.v1") || "null");
-        if (!selected?.chart_id) return;
-        const response = await fetch((import.meta.env.VITE_API_BASE_URL ?? "") + "/api/charts/" + encodeURIComponent(selected.chart_id));
-        if (!response.ok) return;
-        const restored = await response.json() as SavedChartResponse;
+        const available = await requestJson<{charts:Array<{chart_id:string}>}>("/api/charts");
+        const selectedId = available.charts.find(item=>item.chart_id===selected?.chart_id)?.chart_id ?? available.charts[0]?.chart_id;
+        if (!selectedId) {
+          if (selected?.chart_id && active) setStatus("Your saved chart is private. Sign in to its account or use the browser that created it.");
+          return;
+        }
+        const restored = await requestJson<SavedChartResponse>("/api/charts/" + encodeURIComponent(selectedId));
         const map = await createInterpretationMap(restored.chart_id, "talent");
         if (!active) return;
+        localStorage.setItem("synthia.birth.configuration.v1", JSON.stringify({chart_id:restored.chart_id,birth_anchor:restored.birth_anchor}));
         setChart(restored); setGeonatal(restored.geonatal); setForm(restored.birth_profile);
         setLatitude(String(restored.birth_anchor.location.latitude)); setLongitude(String(restored.birth_anchor.location.longitude));
         setMapPackage(map); setOpenItemKey(firstItemKey(map)); setStatus("Restored your master birth chart.");

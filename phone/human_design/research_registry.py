@@ -19,14 +19,14 @@ class ResearchRegistry:
         db.execute('PRAGMA foreign_keys=ON')
         return db
 
-    def lock(self, title, criterion, probability, baseline, deadline, now=None, configuration_id=None):
+    def lock(self, title, criterion, probability, baseline, deadline, now=None, configuration_id=None, chart_id=None):
         now = now or datetime.now(timezone.utc)
         due = datetime.fromisoformat(deadline.replace('Z', '+00:00'))
         if due.tzinfo is None or due <= now:
             raise ValueError('Choose an outcome deadline in the future, including a timezone.')
         if not title.strip() or not criterion.strip() or not 0 <= probability <= 1 or not 0 <= baseline <= 1:
             raise ValueError('A prediction needs a title, measurable criterion, and probabilities between 0 and 1.')
-        row = dict(id=str(uuid4()), title=title.strip(), criterion=criterion.strip(), probability=probability, baseline=baseline, deadline=due.isoformat(), locked_at=now.isoformat(), protocol_version='pilot-v1', configuration_id=configuration_id)
+        row = dict(id=str(uuid4()), title=title.strip(), criterion=criterion.strip(), probability=probability, baseline=baseline, deadline=due.isoformat(), locked_at=now.isoformat(), protocol_version='pilot-v1', configuration_id=configuration_id, chart_id=chart_id)
         payload = json.dumps(row, sort_keys=True, separators=(',', ':'))
         digest = hashlib.sha256(payload.encode()).hexdigest()
         with self.connect() as db:

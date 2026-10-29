@@ -17,7 +17,7 @@ npm run build --prefix runtimes/isohuman
 python run_app.py
 ```
 
-The service listens on port 8000. Put it behind HTTPS and enter its origin in the APK. Live connections require this server to stay running. Birth records, accounts, network consent and experiment observations are local SQLite runtime data, excluded from Git. Back up these databases privately. This development server requires further access-control hardening before an open public launch.
+The service listens on port 8000. Put it behind HTTPS and enter its origin in the APK. Live connections require this server to stay running. Birth records, accounts, network consent and experiment observations are local SQLite runtime data, excluded from Git. Back up these databases privately. Saved charts, journal entries, personal chat and predictions are private to their creating browser or linked account. Sign in from that browser to link a chart; another device signed into the same account can restore it. Unowned legacy charts stay unavailable by ID. This development server still needs an operational and administrative access review before an open public launch.
 
 Configure Ollama or llamafile with SYNTHIA_MODEL_RUNTIME, SYNTHIA_MODEL and SYNTHIA_MODEL_URL. Models are supplied by that runtime; the app does not create or bundle its own model.
 

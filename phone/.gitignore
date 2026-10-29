@@ -41,3 +41,7 @@ android/local.properties
 *.keystore
 
 /android/app/preview-assets/preview/
+
+runtimes/**/dist/
+runtimes/**/node_modules
+web/node_modules

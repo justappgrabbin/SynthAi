@@ -18,6 +18,14 @@ try{
   await page.getByText('Restored your master birth chart.',{exact:true}).waitFor();
  }
  const a=pages[0],b=pages[1];await a.reload();
+ const denied=await contexts[1].request.get(base+'/api/charts/'+masters[0].chart_id);assert.equal(denied.status(),404);
+ const device=await browser.newContext({viewport:{width:390,height:844}});contexts.push(device);
+ const login=await device.request.post(base+'/api/auth/login',{data:{email:`qa${stamp}-0@example.invalid`,password:`qa-only-${stamp}-test`}});assert.ok(login.ok());
+ const devicePage=await device.newPage();await devicePage.goto(base);
+ await devicePage.getByText('Restored your master birth chart.',{exact:true}).waitFor();
+ const recovered=await devicePage.evaluate(()=>JSON.parse(localStorage.getItem('synthia.birth.configuration.v1')));
+ assert.equal(recovered.chart_id,masters[0].chart_id);
+
  await a.locator('.connection-card').filter({has:a.getByRole('heading',{name:members[1].name,exact:true})}).getByRole('button',{name:'Invite to connect',exact:true}).click();
  await a.getByText('outgoing · pending',{exact:true}).waitFor();
  await b.reload();await b.getByRole('button',{name:'Accept connection',exact:true}).click();
@@ -38,5 +46,5 @@ try{
  const observation=await save('/observations',{practice_id:practice.id,situation:'Conversation',action_taken:'Paused',result:'Still interrupted',assessment:'contradicted'});
  await save('/interpretations',{observation_id:observation.id,text:'This practice did not help in this setting.'});
  const saved=await (await contexts[0].request.get(journeyBase)).json();assert.equal(saved.practices[0].expected,'Less interruption');assert.equal(saved.observations[0].result,'Still interrupted');assert.equal(saved.interpretations.length,1);
- console.log('PASS: real accounts, chart-derived suggestions, invitation, recipient acceptance, saved conversation, opt-out, private journey and append-only interpretation');
+ console.log('PASS: private chart isolation, real sign-in on another device, chart-derived suggestions, recipient consent, saved conversation, opt-out and private journey');
 }finally{await browser.close();}
