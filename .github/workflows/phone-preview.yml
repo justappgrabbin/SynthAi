@@ -4,6 +4,11 @@ on:
     branches: [integration/human-design-resonance-phone]
     paths: ['phone/**', '.github/workflows/phone-preview.yml']
   workflow_dispatch:
+    inputs:
+      release_tag:
+        description: Existing owner-approved phone-preview tag for this commit
+        required: true
+        type: string
 permissions:
   contents: write
 concurrency:
@@ -18,6 +23,21 @@ jobs:
         working-directory: phone
     steps:
       - uses: actions/checkout@v4
+      - name: Verify owner-approved release source
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          PREVIEW_RELEASE_TAG: ${{ inputs.release_tag }}
+        run: |
+          if [[ ! "$PREVIEW_RELEASE_TAG" =~ ^phone-preview-[A-Za-z0-9][A-Za-z0-9._-]*$ ]]; then
+            echo '::error::Choose an existing owner-approved phone-preview tag.'
+            exit 1
+          fi
+          git fetch --depth=1 origin "refs/tags/$PREVIEW_RELEASE_TAG"
+          approved_source=$(git rev-parse 'FETCH_HEAD^{commit}')
+          if [ "$approved_source" != "$GITHUB_SHA" ]; then
+            echo '::error::The approved tag does not match this source commit.'
+            exit 1
+          fi
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
@@ -68,5 +88,6 @@ jobs:
         if: github.event_name == 'workflow_dispatch'
         env:
           GH_TOKEN: ${{ github.token }}
+          PREVIEW_RELEASE_TAG: ${{ inputs.release_tag }}
         run: |
-          gh release create "phone-preview-${GITHUB_RUN_ID}" Synthia-Resonance-preview.apk preview-certificate.der --prerelease --target "$GITHUB_SHA" --title 'Human Design and Resonance Phone Preview' --notes 'Android 8+. This preview client connects to your HTTPS Synthia server. It does not bundle a running server or model weights. Source and server setup: phone/docs/PHONE-PREVIEW.md. Review changes before installing. World embodiments and the interactive science lab are later phases.'
+          gh release create "$PREVIEW_RELEASE_TAG" Synthia-Resonance-preview.apk preview-certificate.der --verify-tag --prerelease --target "$GITHUB_SHA" --title 'Human Design and Resonance Phone Preview' --notes 'Android 8+. This preview client connects to your HTTPS Synthia server. It does not bundle a running server or model weights. Source and server setup: phone/docs/PHONE-PREVIEW.md. Review changes before installing. World embodiments and the interactive science lab are later phases.'
