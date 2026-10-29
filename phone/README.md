@@ -41,10 +41,12 @@ No nested archives or duplicated donor projects are needed by the app. Developme
 ## Checks
 
 ```sh
-python -m pytest tests/test_birth_anchor.py tests/test_local_model.py tests/test_research_registry.py tests/test_integrated_questions.py tests/test_geonatal.py tests/test_contact_loop.py tests/test_being_state.py tests/test_cultivation.py tests/test_resonance_network.py tests/test_private_access.py -q
+python -m pytest tests/test_birth_anchor.py tests/test_local_model.py tests/test_research_registry.py tests/test_integrated_questions.py tests/test_geonatal.py tests/test_contact_loop.py tests/test_being_state.py tests/test_cultivation.py tests/test_resonance_network.py tests/test_private_access.py tests/test_ephemeris_reference.py -q
 node scripts/test-chart-game.mjs
 ```
 
 The repository-level Human Design and Resonance APK workflow builds and tests this integration branch. After reviewing a change, use its manual workflow action to publish an APK prerelease. It does not silently install updates or deploy a backend. World embodiments and the interactive science lab come later.
 
 Browser-only charts require the original private cookie. Link a chart by signing in from its creating browser before clearing cookies. Legacy local charts without ownership records are not claimable by ID; recreate them rather than exposing an adoption endpoint. Linking removes anonymous access to that chart.
+
+Independent chart-reference checks and the version-2 node/horizon corrections are documented in [Ephemeris checks](docs/EPHEMERIS-CHECKS.md). Numerical agreement does not validate personality or resonance hypotheses.

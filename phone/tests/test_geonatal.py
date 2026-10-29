@@ -53,11 +53,11 @@ def test_geonatal_api_exposes_local_calculator() -> None:
 def test_mean_draconic_preserves_angular_separations():
     payload = calculate_geonatal("2000-01-01T12:00:00Z", latitude=0, longitude=0)
     rows = {(p["planetary"], p["frame"]): p for p in payload["placements"] if p["orientation"] == "personality"}
-    # At J2000 the mean lunar node is 125.0445479 degrees.
+    # Independent mean-node reference at J2000 UTC, expressed in the true equinox.
     for planet in ("Sun", "Moon", "Mars"):
         tropical = rows[(planet, "tropical")]["longitude"]
         mean = rows[(planet, "draconic_tropical_mean")]["longitude"]
-        assert abs(((tropical - mean) % 360) - 125.0445479) < 1e-6
+        assert abs(((tropical - mean) % 360) - 125.0406460566) < 0.0001
 
 
 def test_draconic_offsets_are_applied_to_positions_not_to_shared_anchor():

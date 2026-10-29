@@ -62,6 +62,8 @@ const initialForm: ChartCreateInput = {
   timezone_name: ""
 };
 
+type SavedChartOption = {chart_id:string;title:string;created_at:string};
+
 type ChatLine = {
   role: "user" | "assistant";
   content: string;
@@ -72,6 +74,7 @@ export default function App() {
   const [birthRegion, setBirthRegion] = useState("");
   const [birthCity, setBirthCity] = useState("");
   const [chart, setChart] = useState<SavedChartResponse | null>(null);
+  const [savedCharts,setSavedCharts]=useState<SavedChartOption[]>([]);
   const [geonatal, setGeonatal] = useState<GeonatalResponse | null>(null);
   const [latitude, setLatitude] = useState("");
   const [longitude, setLongitude] = useState("");
@@ -88,12 +91,31 @@ export default function App() {
   const [loading, setLoading] = useState(false);
   const chatDockRef = useRef<HTMLElement | null>(null);
 
+  function applySavedChart(restored:SavedChartResponse,map:InterpretationMapResponse) {
+    localStorage.setItem("synthia.birth.configuration.v1",JSON.stringify({chart_id:restored.chart_id,birth_anchor:restored.birth_anchor}));
+    setChart(restored);setGeonatal(restored.geonatal);setForm(restored.birth_profile);
+    setBirthCity(restored.birth_profile.city||"");setBirthRegion(restored.birth_profile.region||"");
+    setLatitude(String(restored.birth_anchor.location.latitude));setLongitude(String(restored.birth_anchor.location.longitude));
+    setMapPackage(map);setOpenItemKey(firstItemKey(map));setChatLines([]);setChatSessionId(undefined);
+    setStatus("Restored your master birth chart.");
+  }
+
+  async function selectSavedChart(chartId:string) {
+    setLoading(true);setError(null);
+    try{const restored=await requestJson<SavedChartResponse>("/api/charts/"+encodeURIComponent(chartId));
+      const map=await createInterpretationMap(chartId,activeMap);applySavedChart(restored,map);
+    }catch(e){setError(e instanceof Error?e.message:"This saved chart could not be opened.");}
+    finally{setLoading(false);}
+  }
+
   useEffect(() => {
     let active = true;
+    setLoading(true);
     (async () => {
       try {
         const selected = JSON.parse(localStorage.getItem("synthia.birth.configuration.v1") || "null");
-        const available = await requestJson<{charts:Array<{chart_id:string}>}>("/api/charts");
+        const available = await requestJson<{charts:SavedChartOption[]}>("/api/charts");
+        if(active)setSavedCharts(available.charts);
         const selectedId = available.charts.find(item=>item.chart_id===selected?.chart_id)?.chart_id ?? available.charts[0]?.chart_id;
         if (!selectedId) {
           if (selected?.chart_id && active) setStatus("Your saved chart is private. Sign in to its account or use the browser that created it.");
@@ -102,11 +124,9 @@ export default function App() {
         const restored = await requestJson<SavedChartResponse>("/api/charts/" + encodeURIComponent(selectedId));
         const map = await createInterpretationMap(restored.chart_id, "talent");
         if (!active) return;
-        localStorage.setItem("synthia.birth.configuration.v1", JSON.stringify({chart_id:restored.chart_id,birth_anchor:restored.birth_anchor}));
-        setChart(restored); setGeonatal(restored.geonatal); setForm(restored.birth_profile);
-        setLatitude(String(restored.birth_anchor.location.latitude)); setLongitude(String(restored.birth_anchor.location.longitude));
-        setMapPackage(map); setOpenItemKey(firstItemKey(map)); setStatus("Restored your master birth chart.");
+        applySavedChart(restored,map);
       } catch { if (active) setStatus("Enter birth information to restore your chart; saved game progress stays separate."); }
+      finally { if(active)setLoading(false); }
     })();
     return () => { active = false; };
   }, []);
@@ -135,6 +155,7 @@ export default function App() {
       setChatLines([]);
       setChatSessionId(undefined);
       setStatus("Generated. Explore any section or ask a question.");
+      void requestJson<{charts:SavedChartOption[]}>("/api/charts").then(result=>setSavedCharts(result.charts)).catch(()=>setStatus("Chart saved. Reload to refresh your saved-chart list."));
     } catch (err) {
       setError(err instanceof Error ? err.message : "Generation failed. Please try again.");
       setStatus("A formal chart requires a birth date, exact time, and location.");
@@ -234,7 +255,8 @@ export default function App() {
         </div>
         <div className="topbar-note"><a href="/computer/">Computer &amp; Network →</a><br/>English · Chart-grounded · Non-deterministic</div>
       </header>
-      {chart && <section className="panel"><strong>One birth configuration · Tropical Sun anchor</strong><p>Sun {chart.birth_anchor.tropical_sun.longitude.toFixed(6)}° · Gate {chart.birth_anchor.tropical_sun.gate}.{chart.birth_anchor.tropical_sun.line} · All four frames and the cultivation game use this same chart.</p><small>Configuration {chart.birth_anchor.configuration_id.slice(0,16)}</small></section>}
+      {savedCharts.length>1&&<section className="panel"><label>Your saved charts <select value={chart?.chart_id||""} disabled={loading} onChange={e=>void selectSavedChart(e.target.value)}>{savedCharts.map(item=><option key={item.chart_id} value={item.chart_id}>{item.title} · {new Date(item.created_at).toLocaleString("en")}</option>)}</select></label><p>Opening a saved chart keeps its original calculation, observations and predictions together.</p></section>}
+      {chart && <section className="panel"><strong>One birth configuration · Tropical Sun anchor</strong><p>Sun {chart.birth_anchor.tropical_sun.longitude.toFixed(6)}° · Gate {chart.birth_anchor.tropical_sun.gate}.{chart.birth_anchor.tropical_sun.line} · All four frames and the cultivation game use this same chart.</p><small>Configuration {chart.birth_anchor.configuration_id.slice(0,16)}</small>{chart.geonatal.methods.revision !== "anchored-ephemeris-v2" && <p>An earlier calculation method is saved here. Create a new chart with the same birth details to apply corrected nodes and houses. Existing observations stay with the original chart.</p>}</section>}
       <CultivationJourney chart={chart} onAsk={question=>{void sendQuestion(question);}} />
       <ResonanceConnections chart={chart} onAsk={question=>{void sendQuestion(question,undefined,"resonance_match");}} />
       <ResearchTests />
@@ -509,6 +531,7 @@ function GeonatalPanel({
           {Object.entries(frameLabels).map(([key, label]) => <option key={key} value={key}>{label}</option>)}
         </select>
       </div>
+      <p>{chart.methods.precision ?? "Positions are approximate; fine subdivisions can change near boundaries."}</p>
       <div className="geonatal-table-wrap">
         <table className="geonatal-table">
           <thead>

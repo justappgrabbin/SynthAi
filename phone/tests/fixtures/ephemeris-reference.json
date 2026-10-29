@@ -1,0 +1,820 @@
+{
+  "reference": "Swiss Ephemeris 2.10.03",
+  "binding": "pyswisseph 2.10.3.2",
+  "ephemeris": "built-in Moshier (FLG_MOSEPH), apparent geocentric ecliptic of date",
+  "sidereal": "SIDM_FAGAN_BRADLEY",
+  "houses": "equal (E), eastern ascendant",
+  "scope": "Five fixed timestamps and locations, plus independently solved prior 88-degree solar design times. Numerical checks do not validate personality or resonance claims.",
+  "cases": [
+    {
+      "timestamp": "1950-01-01T12:00:00Z",
+      "latitude": 51.5,
+      "longitude": -0.12,
+      "design_timestamp": "1949-10-06T02:43:18.509858+00:00",
+      "personality": {
+        "tropical": {
+          "positions": {
+            "Sun": 280.51438919,
+            "Moon": 67.544353906,
+            "Mercury": 299.972018843,
+            "Venus": 317.152478774,
+            "Mars": 182.394444601,
+            "Jupiter": 306.618042937,
+            "Saturn": 169.435539875,
+            "Uranus": 92.661451618,
+            "Neptune": 197.271024339,
+            "Pluto": 137.789569382,
+            "North Node": 12.476332041,
+            "Earth": 100.51438919,
+            "South Node": 192.476332041
+          },
+          "ascendant": 24.281864101,
+          "ascendant_rate_deg_per_second": 0.0091414929
+        },
+        "draconic_tropical_true": {
+          "positions": {
+            "Sun": 268.038057149,
+            "Moon": 55.068021865,
+            "Mercury": 287.495686801,
+            "Venus": 304.676146733,
+            "Mars": 169.91811256,
+            "Jupiter": 294.141710895,
+            "Saturn": 156.959207833,
+            "Uranus": 80.185119577,
+            "Neptune": 184.794692298,
+            "Pluto": 125.313237341,
+            "North Node": 0.0,
+            "Earth": 88.038057149,
+            "South Node": 180.0
+          },
+          "ascendant": 11.80553206,
+          "ascendant_rate_deg_per_second": 0.0091414929
+        },
+        "draconic_tropical_mean": {
+          "positions": {
+            "Sun": 268.428554919,
+            "Moon": 55.458519635,
+            "Mercury": 287.886184572,
+            "Venus": 305.066644503,
+            "Mars": 170.308610331,
+            "Jupiter": 294.532208666,
+            "Saturn": 157.349705604,
+            "Uranus": 80.575617347,
+            "Neptune": 185.185190069,
+            "Pluto": 125.703735112,
+            "North Node": 0.0,
+            "Earth": 88.428554919,
+            "South Node": 180.0
+          },
+          "ascendant": 12.196029831,
+          "ascendant_rate_deg_per_second": 0.0091414929
+        },
+        "sidereal_fagan_bradley": {
+          "positions": {
+            "Sun": 256.47333886,
+            "Moon": 43.503303576,
+            "Mercury": 275.930968513,
+            "Venus": 293.111428444,
+            "Mars": 158.353394272,
+            "Jupiter": 282.576992607,
+            "Saturn": 145.394489545,
+            "Uranus": 68.620401288,
+            "Neptune": 173.22997401,
+            "Pluto": 113.748519053,
+            "North Node": 348.435281712,
+            "Earth": 76.47333886,
+            "South Node": 168.435281712
+          },
+          "ascendant": 0.240813771,
+          "ascendant_rate_deg_per_second": 0.0091414929
+        }
+      },
+      "design": {
+        "tropical": {
+          "positions": {
+            "Sun": 192.514389191,
+            "Moon": 1.613356512,
+            "Mercury": 187.764327451,
+            "Venus": 235.025830969,
+            "Mars": 137.779672989,
+            "Jupiter": 292.822001894,
+            "Saturn": 163.710523156,
+            "Uranus": 95.006947783,
+            "Neptune": 194.823347088,
+            "Pluto": 137.741656828,
+            "North Node": 16.652681756,
+            "Earth": 12.514389191,
+            "South Node": 196.652681756
+          },
+          "ascendant": 155.481396426,
+          "ascendant_rate_deg_per_second": 0.0029249242
+        },
+        "draconic_tropical_true": {
+          "positions": {
+            "Sun": 175.861707434,
+            "Moon": 344.960674755,
+            "Mercury": 171.111645695,
+            "Venus": 218.373149213,
+            "Mars": 121.126991233,
+            "Jupiter": 276.169320138,
+            "Saturn": 147.0578414,
+            "Uranus": 78.354266027,
+            "Neptune": 178.170665332,
+            "Pluto": 121.088975072,
+            "North Node": 0.0,
+            "Earth": 355.861707434,
+            "South Node": 180.0
+          },
+          "ascendant": 138.82871467,
+          "ascendant_rate_deg_per_second": 0.0029249242
+        },
+        "draconic_tropical_mean": {
+          "positions": {
+            "Sun": 175.801734198,
+            "Moon": 344.90070152,
+            "Mercury": 171.051672459,
+            "Venus": 218.313175977,
+            "Mars": 121.067017997,
+            "Jupiter": 276.109346902,
+            "Saturn": 146.997868164,
+            "Uranus": 78.294292791,
+            "Neptune": 178.110692096,
+            "Pluto": 121.029001836,
+            "North Node": 0.0,
+            "Earth": 355.801734198,
+            "South Node": 180.0
+          },
+          "ascendant": 138.768741434,
+          "ascendant_rate_deg_per_second": 0.0029249242
+        },
+        "sidereal_fagan_bradley": {
+          "positions": {
+            "Sun": 168.477313635,
+            "Moon": 337.576280956,
+            "Mercury": 163.727251895,
+            "Venus": 210.988755414,
+            "Mars": 113.742597434,
+            "Jupiter": 268.784926338,
+            "Saturn": 139.673447601,
+            "Uranus": 70.969872228,
+            "Neptune": 170.786271532,
+            "Pluto": 113.704581273,
+            "North Node": 352.615606201,
+            "Earth": 348.477313635,
+            "South Node": 172.615606201
+          },
+          "ascendant": 131.44432087,
+          "ascendant_rate_deg_per_second": 0.0029249242
+        }
+      }
+    },
+    {
+      "timestamp": "1988-10-09T12:30:00Z",
+      "latitude": 31.2304,
+      "longitude": 121.4737,
+      "design_timestamp": "1988-07-10T11:53:54.072131+00:00",
+      "personality": {
+        "tropical": {
+          "positions": {
+            "Sun": 196.430985385,
+            "Moon": 181.209333538,
+            "Mercury": 200.248916948,
+            "Venus": 155.756471544,
+            "Mars": 2.144404564,
+            "Jupiter": 65.756740697,
+            "Saturn": 267.209626399,
+            "Uranus": 267.536612963,
+            "Neptune": 277.537520962,
+            "Pluto": 221.475993704,
+            "North Node": 343.899631868,
+            "Earth": 16.430985385,
+            "South Node": 163.899631868
+          },
+          "ascendant": 73.1946503,
+          "ascendant_rate_deg_per_second": 0.0042546719
+        },
+        "draconic_tropical_true": {
+          "positions": {
+            "Sun": 212.531353516,
+            "Moon": 197.309701669,
+            "Mercury": 216.34928508,
+            "Venus": 171.856839676,
+            "Mars": 18.244772696,
+            "Jupiter": 81.857108829,
+            "Saturn": 283.309994531,
+            "Uranus": 283.636981095,
+            "Neptune": 293.637889094,
+            "Pluto": 237.576361836,
+            "North Node": 0.0,
+            "Earth": 32.531353516,
+            "South Node": 180.0
+          },
+          "ascendant": 89.295018432,
+          "ascendant_rate_deg_per_second": 0.0042546719
+        },
+        "draconic_tropical_mean": {
+          "positions": {
+            "Sun": 214.222967984,
+            "Moon": 199.001316137,
+            "Mercury": 218.040899548,
+            "Venus": 173.548454144,
+            "Mars": 19.936387164,
+            "Jupiter": 83.548723297,
+            "Saturn": 285.001608999,
+            "Uranus": 285.328595563,
+            "Neptune": 295.329503562,
+            "Pluto": 239.267976304,
+            "North Node": 0.0,
+            "Earth": 34.222967984,
+            "South Node": 180.0
+          },
+          "ascendant": 90.9866329,
+          "ascendant_rate_deg_per_second": 0.0042546719
+        },
+        "sidereal_fagan_bradley": {
+          "positions": {
+            "Sun": 171.846344152,
+            "Moon": 156.624692305,
+            "Mercury": 175.664275715,
+            "Venus": 131.171830311,
+            "Mars": 337.559763331,
+            "Jupiter": 41.172099464,
+            "Saturn": 242.624985166,
+            "Uranus": 242.95197173,
+            "Neptune": 252.95287973,
+            "Pluto": 196.891352471,
+            "North Node": 319.314990635,
+            "Earth": 351.846344152,
+            "South Node": 139.314990635
+          },
+          "ascendant": 48.610009067,
+          "ascendant_rate_deg_per_second": 0.0042546719
+        }
+      },
+      "design": {
+        "tropical": {
+          "positions": {
+            "Sun": 108.430985384,
+            "Moon": 68.507236801,
+            "Mercury": 87.727607317,
+            "Venus": 74.577679044,
+            "Mars": 358.425081208,
+            "Jupiter": 57.918283513,
+            "Saturn": 267.819134689,
+            "Uranus": 268.249601909,
+            "Neptune": 278.542087537,
+            "Pluto": 219.785471908,
+            "North Node": 345.866672359,
+            "Earth": 288.430985384,
+            "South Node": 165.866672359
+          },
+          "ascendant": 304.02246703,
+          "ascendant_rate_deg_per_second": 0.0048287521
+        },
+        "draconic_tropical_true": {
+          "positions": {
+            "Sun": 122.564313026,
+            "Moon": 82.640564442,
+            "Mercury": 101.860934958,
+            "Venus": 88.711006685,
+            "Mars": 12.558408849,
+            "Jupiter": 72.051611155,
+            "Saturn": 281.95246233,
+            "Uranus": 282.382929551,
+            "Neptune": 292.675415179,
+            "Pluto": 233.918799549,
+            "North Node": 0.0,
+            "Earth": 302.564313026,
+            "South Node": 180.0
+          },
+          "ascendant": 318.155794672,
+          "ascendant_rate_deg_per_second": 0.0048287521
+        },
+        "draconic_tropical_mean": {
+          "positions": {
+            "Sun": 121.402798313,
+            "Moon": 81.47904973,
+            "Mercury": 100.699420246,
+            "Venus": 87.549491972,
+            "Mars": 11.396894136,
+            "Jupiter": 70.890096442,
+            "Saturn": 280.790947618,
+            "Uranus": 281.221414838,
+            "Neptune": 291.513900466,
+            "Pluto": 232.757284837,
+            "North Node": 0.0,
+            "Earth": 301.402798313,
+            "South Node": 180.0
+          },
+          "ascendant": 316.994279959,
+          "ascendant_rate_deg_per_second": 0.0048287521
+        },
+        "sidereal_fagan_bradley": {
+          "positions": {
+            "Sun": 83.849776994,
+            "Moon": 43.92602841,
+            "Mercury": 63.146398926,
+            "Venus": 49.996470653,
+            "Mars": 333.843872817,
+            "Jupiter": 33.337075123,
+            "Saturn": 243.237926298,
+            "Uranus": 243.668393518,
+            "Neptune": 253.960879147,
+            "Pluto": 195.204263517,
+            "North Node": 321.285463968,
+            "Earth": 263.849776994,
+            "South Node": 141.285463968
+          },
+          "ascendant": 279.44125864,
+          "ascendant_rate_deg_per_second": 0.0048287521
+        }
+      }
+    },
+    {
+      "timestamp": "2000-01-01T12:00:00Z",
+      "latitude": -33.8688,
+      "longitude": 151.2093,
+      "design_timestamp": "1999-10-06T01:48:52.769093+00:00",
+      "personality": {
+        "tropical": {
+          "positions": {
+            "Sun": 280.368919675,
+            "Moon": 223.323775438,
+            "Mercury": 271.889275007,
+            "Venus": 241.565798326,
+            "Mars": 327.963313319,
+            "Jupiter": 25.253030309,
+            "Saturn": 40.395638956,
+            "Uranus": 314.809223166,
+            "Neptune": 303.192981224,
+            "Pluto": 251.454708847,
+            "North Node": 123.952895413,
+            "Earth": 100.368919675,
+            "South Node": 303.952895413
+          },
+          "ascendant": 152.488909139,
+          "ascendant_rate_deg_per_second": 0.0059834319
+        },
+        "draconic_tropical_true": {
+          "positions": {
+            "Sun": 156.416024262,
+            "Moon": 99.370880025,
+            "Mercury": 147.936379594,
+            "Venus": 117.612902913,
+            "Mars": 204.010417905,
+            "Jupiter": 261.300134896,
+            "Saturn": 276.442743543,
+            "Uranus": 190.856327753,
+            "Neptune": 179.240085811,
+            "Pluto": 127.501813434,
+            "North Node": 0.0,
+            "Earth": 336.416024262,
+            "South Node": 180.0
+          },
+          "ascendant": 28.536013726,
+          "ascendant_rate_deg_per_second": 0.0059834319
+        },
+        "draconic_tropical_mean": {
+          "positions": {
+            "Sun": 155.328273619,
+            "Moon": 98.283129382,
+            "Mercury": 146.848628951,
+            "Venus": 116.52515227,
+            "Mars": 202.922667262,
+            "Jupiter": 260.212384253,
+            "Saturn": 275.354992899,
+            "Uranus": 189.768577109,
+            "Neptune": 178.152335167,
+            "Pluto": 126.41406279,
+            "North Node": 0.0,
+            "Earth": 335.328273619,
+            "South Node": 180.0
+          },
+          "ascendant": 27.448263083,
+          "ascendant_rate_deg_per_second": 0.0059834319
+        },
+        "sidereal_fagan_bradley": {
+          "positions": {
+            "Sun": 255.632489549,
+            "Moon": 198.587345312,
+            "Mercury": 247.152844881,
+            "Venus": 216.829368199,
+            "Mars": 303.226883192,
+            "Jupiter": 0.516600183,
+            "Saturn": 15.659208829,
+            "Uranus": 290.072793039,
+            "Neptune": 278.456551097,
+            "Pluto": 226.71827872,
+            "North Node": 99.216465286,
+            "Earth": 75.632489549,
+            "South Node": 279.216465286
+          },
+          "ascendant": 127.752479013,
+          "ascendant_rate_deg_per_second": 0.0059834319
+        }
+      },
+      "design": {
+        "tropical": {
+          "positions": {
+            "Sun": 192.368919676,
+            "Moon": 151.740151615,
+            "Mercury": 211.252422001,
+            "Venus": 148.825310498,
+            "Mars": 262.173929405,
+            "Jupiter": 32.236440331,
+            "Saturn": 46.017851557,
+            "Uranus": 312.984656829,
+            "Neptune": 301.60543158,
+            "Pluto": 248.360810356,
+            "North Node": 131.277248659,
+            "Earth": 12.368919676,
+            "South Node": 311.277248659
+          },
+          "ascendant": 295.674705399,
+          "ascendant_rate_deg_per_second": 0.003481919
+        },
+        "draconic_tropical_true": {
+          "positions": {
+            "Sun": 61.091671017,
+            "Moon": 20.462902956,
+            "Mercury": 79.975173343,
+            "Venus": 17.548061839,
+            "Mars": 130.896680746,
+            "Jupiter": 260.959191672,
+            "Saturn": 274.740602899,
+            "Uranus": 181.70740817,
+            "Neptune": 170.328182921,
+            "Pluto": 117.083561698,
+            "North Node": 0.0,
+            "Earth": 241.091671017,
+            "South Node": 180.0
+          },
+          "ascendant": 164.39745674,
+          "ascendant_rate_deg_per_second": 0.003481919
+        },
+        "draconic_tropical_mean": {
+          "positions": {
+            "Sun": 62.698824468,
+            "Moon": 22.070056407,
+            "Mercury": 81.582326793,
+            "Venus": 19.15521529,
+            "Mars": 132.503834197,
+            "Jupiter": 262.566345123,
+            "Saturn": 276.347756349,
+            "Uranus": 183.314561621,
+            "Neptune": 171.935336372,
+            "Pluto": 118.690715148,
+            "North Node": 0.0,
+            "Earth": 242.698824468,
+            "South Node": 180.0
+          },
+          "ascendant": 166.004610191,
+          "ascendant_rate_deg_per_second": 0.003481919
+        },
+        "sidereal_fagan_bradley": {
+          "positions": {
+            "Sun": 167.635834655,
+            "Moon": 127.007066594,
+            "Mercury": 186.519336981,
+            "Venus": 124.092225477,
+            "Mars": 237.440844384,
+            "Jupiter": 7.50335531,
+            "Saturn": 21.284766537,
+            "Uranus": 288.251571808,
+            "Neptune": 276.872346559,
+            "Pluto": 223.627725336,
+            "North Node": 106.544163638,
+            "Earth": 347.635834655,
+            "South Node": 286.544163638
+          },
+          "ascendant": 270.941620378,
+          "ascendant_rate_deg_per_second": 0.003481919
+        }
+      }
+    },
+    {
+      "timestamp": "2026-10-29T12:00:00Z",
+      "latitude": 34.0522,
+      "longitude": -118.2437,
+      "design_timestamp": "2026-07-31T06:10:21.579629+00:00",
+      "personality": {
+        "tropical": {
+          "positions": {
+            "Sun": 216.07875714,
+            "Moon": 81.420119542,
+            "Mercury": 229.025034069,
+            "Venus": 207.569531105,
+            "Mars": 137.352553184,
+            "Jupiter": 144.012153415,
+            "Saturn": 9.447013186,
+            "Uranus": 64.765391676,
+            "Neptune": 2.137286118,
+            "Pluto": 303.110928835,
+            "North Node": 327.111786563,
+            "Earth": 36.07875714,
+            "South Node": 147.111786563
+          },
+          "ascendant": 188.081679169,
+          "ascendant_rate_deg_per_second": 0.0035169929
+        },
+        "draconic_tropical_true": {
+          "positions": {
+            "Sun": 248.966970577,
+            "Moon": 114.308332979,
+            "Mercury": 261.913247506,
+            "Venus": 240.457744542,
+            "Mars": 170.240766621,
+            "Jupiter": 176.900366852,
+            "Saturn": 42.335226623,
+            "Uranus": 97.653605113,
+            "Neptune": 35.025499555,
+            "Pluto": 335.999142272,
+            "North Node": 0.0,
+            "Earth": 68.966970577,
+            "South Node": 180.0
+          },
+          "ascendant": 220.969892606,
+          "ascendant_rate_deg_per_second": 0.0035169929
+        },
+        "draconic_tropical_mean": {
+          "positions": {
+            "Sun": 249.872898068,
+            "Moon": 115.21426047,
+            "Mercury": 262.819174997,
+            "Venus": 241.363672032,
+            "Mars": 171.146694112,
+            "Jupiter": 177.806294343,
+            "Saturn": 43.241154114,
+            "Uranus": 98.559532604,
+            "Neptune": 35.931427046,
+            "Pluto": 336.905069763,
+            "North Node": 0.0,
+            "Earth": 69.872898068,
+            "South Node": 180.0
+          },
+          "ascendant": 221.875820097,
+          "ascendant_rate_deg_per_second": 0.0035169929
+        },
+        "sidereal_fagan_bradley": {
+          "positions": {
+            "Sun": 190.961513685,
+            "Moon": 56.302876087,
+            "Mercury": 203.907790614,
+            "Venus": 182.452287649,
+            "Mars": 112.235309729,
+            "Jupiter": 118.894909959,
+            "Saturn": 344.32976973,
+            "Uranus": 39.648148221,
+            "Neptune": 337.020042662,
+            "Pluto": 277.99368538,
+            "North Node": 301.994543108,
+            "Earth": 10.961513685,
+            "South Node": 121.994543108
+          },
+          "ascendant": 162.964435714,
+          "ascendant_rate_deg_per_second": 0.0035169929
+        }
+      },
+      "design": {
+        "tropical": {
+          "positions": {
+            "Sun": 128.07875714,
+            "Moon": 326.84434069,
+            "Mercury": 108.952035198,
+            "Venus": 173.28703091,
+            "Mars": 82.56628796,
+            "Jupiter": 126.797227825,
+            "Saturn": 14.733214021,
+            "Uranus": 64.985298066,
+            "Neptune": 4.268330431,
+            "Pluto": 304.192679859,
+            "North Node": 329.819418936,
+            "Earth": 308.07875714,
+            "South Node": 149.819418936
+          },
+          "ascendant": 20.138449951,
+          "ascendant_rate_deg_per_second": 0.0061967569
+        },
+        "draconic_tropical_true": {
+          "positions": {
+            "Sun": 158.259338204,
+            "Moon": 357.024921754,
+            "Mercury": 139.132616262,
+            "Venus": 203.467611974,
+            "Mars": 112.746869024,
+            "Jupiter": 156.977808889,
+            "Saturn": 44.913795085,
+            "Uranus": 95.16587913,
+            "Neptune": 34.448911495,
+            "Pluto": 334.373260923,
+            "North Node": 0.0,
+            "Earth": 338.259338204,
+            "South Node": 180.0
+          },
+          "ascendant": 50.319031015,
+          "ascendant_rate_deg_per_second": 0.0061967569
+        },
+        "draconic_tropical_mean": {
+          "positions": {
+            "Sun": 157.093759791,
+            "Moon": 355.859343342,
+            "Mercury": 137.967037849,
+            "Venus": 202.302033562,
+            "Mars": 111.581290611,
+            "Jupiter": 155.812230477,
+            "Saturn": 43.748216673,
+            "Uranus": 94.000300717,
+            "Neptune": 33.283333083,
+            "Pluto": 333.207682511,
+            "North Node": 0.0,
+            "Earth": 337.093759791,
+            "South Node": 180.0
+          },
+          "ascendant": 49.153452603,
+          "ascendant_rate_deg_per_second": 0.0061967569
+        },
+        "sidereal_fagan_bradley": {
+          "positions": {
+            "Sun": 102.964520827,
+            "Moon": 301.730104377,
+            "Mercury": 83.837798885,
+            "Venus": 148.172794598,
+            "Mars": 57.452051647,
+            "Jupiter": 101.682991513,
+            "Saturn": 349.618977709,
+            "Uranus": 39.871061753,
+            "Neptune": 339.154094118,
+            "Pluto": 279.078443546,
+            "North Node": 304.705182623,
+            "Earth": 282.964520827,
+            "South Node": 124.705182623
+          },
+          "ascendant": 355.024213639,
+          "ascendant_rate_deg_per_second": 0.0061967569
+        }
+      }
+    },
+    {
+      "timestamp": "2050-01-01T12:00:00Z",
+      "latitude": 51.5,
+      "longitude": -0.12,
+      "design_timestamp": "2049-10-06T01:40:56.041925+00:00",
+      "personality": {
+        "tropical": {
+          "positions": {
+            "Sun": 281.258003259,
+            "Moon": 25.381853567,
+            "Mercury": 269.600679846,
+            "Venus": 281.877297555,
+            "Mars": 228.03243873,
+            "Jupiter": 121.632153189,
+            "Saturn": 297.632173238,
+            "Uranus": 170.729565746,
+            "Neptune": 53.594575847,
+            "Pluto": 337.54163737,
+            "North Node": 239.50895345,
+            "Earth": 101.258003259,
+            "South Node": 59.50895345
+          },
+          "ascendant": 25.939316054,
+          "ascendant_rate_deg_per_second": 0.0090169088
+        },
+        "draconic_tropical_true": {
+          "positions": {
+            "Sun": 41.74904981,
+            "Moon": 145.872900118,
+            "Mercury": 30.091726396,
+            "Venus": 42.368344105,
+            "Mars": 348.52348528,
+            "Jupiter": 242.123199739,
+            "Saturn": 58.123219789,
+            "Uranus": 291.220612296,
+            "Neptune": 174.085622397,
+            "Pluto": 98.032683921,
+            "North Node": 0.0,
+            "Earth": 221.74904981,
+            "South Node": 180.0
+          },
+          "ascendant": 146.430362604,
+          "ascendant_rate_deg_per_second": 0.0090169088
+        },
+        "draconic_tropical_mean": {
+          "positions": {
+            "Sun": 43.303398676,
+            "Moon": 147.427248984,
+            "Mercury": 31.646075263,
+            "Venus": 43.922692972,
+            "Mars": 350.077834147,
+            "Jupiter": 243.677548606,
+            "Saturn": 59.677568656,
+            "Uranus": 292.774961163,
+            "Neptune": 175.639971264,
+            "Pluto": 99.587032788,
+            "North Node": 0.0,
+            "Earth": 223.303398676,
+            "South Node": 180.0
+          },
+          "ascendant": 147.984711471,
+          "ascendant_rate_deg_per_second": 0.0090169088
+        },
+        "sidereal_fagan_bradley": {
+          "positions": {
+            "Sun": 255.814951577,
+            "Moon": 359.938801885,
+            "Mercury": 244.157628164,
+            "Venus": 256.434245872,
+            "Mars": 202.589387048,
+            "Jupiter": 96.189101506,
+            "Saturn": 272.189121556,
+            "Uranus": 145.286514064,
+            "Neptune": 28.151524165,
+            "Pluto": 312.098585688,
+            "North Node": 214.065901767,
+            "Earth": 75.814951577,
+            "South Node": 34.065901767
+          },
+          "ascendant": 0.496264372,
+          "ascendant_rate_deg_per_second": 0.0090169088
+        }
+      },
+      "design": {
+        "tropical": {
+          "positions": {
+            "Sun": 193.258003259,
+            "Moon": 305.323515319,
+            "Mercury": 179.047779642,
+            "Venus": 172.298680288,
+            "Mars": 172.429943461,
+            "Jupiter": 121.206768285,
+            "Saturn": 290.879066434,
+            "Uranus": 168.037476723,
+            "Neptune": 55.755050544,
+            "Pluto": 337.570791934,
+            "North Node": 241.38949862,
+            "Earth": 13.258003259,
+            "South Node": 61.38949862
+          },
+          "ascendant": 145.089423558,
+          "ascendant_rate_deg_per_second": 0.0029173166
+        },
+        "draconic_tropical_true": {
+          "positions": {
+            "Sun": 311.868504639,
+            "Moon": 63.934016699,
+            "Mercury": 297.658281022,
+            "Venus": 290.909181668,
+            "Mars": 291.040444841,
+            "Jupiter": 239.817269666,
+            "Saturn": 49.489567815,
+            "Uranus": 286.647978104,
+            "Neptune": 174.365551924,
+            "Pluto": 96.181293314,
+            "North Node": 0.0,
+            "Earth": 131.868504639,
+            "South Node": 180.0
+          },
+          "ascendant": 263.699924939,
+          "ascendant_rate_deg_per_second": 0.0029173166
+        },
+        "draconic_tropical_mean": {
+          "positions": {
+            "Sun": 310.673728018,
+            "Moon": 62.739240078,
+            "Mercury": 296.463504401,
+            "Venus": 289.714405047,
+            "Mars": 289.84566822,
+            "Jupiter": 238.622493044,
+            "Saturn": 48.294791193,
+            "Uranus": 285.453201483,
+            "Neptune": 173.170775303,
+            "Pluto": 94.986516693,
+            "North Node": 0.0,
+            "Earth": 130.673728018,
+            "South Node": 180.0
+          },
+          "ascendant": 262.505148318,
+          "ascendant_rate_deg_per_second": 0.0029173166
+        },
+        "sidereal_fagan_bradley": {
+          "positions": {
+            "Sun": 167.818363338,
+            "Moon": 279.883875398,
+            "Mercury": 153.608139722,
+            "Venus": 146.859040367,
+            "Mars": 146.99030354,
+            "Jupiter": 95.767128365,
+            "Saturn": 265.439426514,
+            "Uranus": 142.597836803,
+            "Neptune": 30.315410623,
+            "Pluto": 312.131152013,
+            "North Node": 215.949858699,
+            "Earth": 347.818363338,
+            "South Node": 35.949858699
+          },
+          "ascendant": 119.649783638,
+          "ascendant_rate_deg_per_second": 0.0029173166
+        }
+      }
+    }
+  ]
+}

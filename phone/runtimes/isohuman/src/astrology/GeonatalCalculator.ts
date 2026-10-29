@@ -3,9 +3,11 @@ import {
   Ecliptic,
   EclipticGeoMoon,
   GeoVector,
-  NextMoonNode,
-  NodeEventKind,
-  SearchMoonNode,
+  GeoMoonState,
+  MakeTime,
+  RotateState,
+  Rotation_EQJ_ECT,
+  e_tilt,
   SiderealTime,
 } from "astronomy-engine";
 import { DimensionPerspective } from "../state/FiveSpaceState";
@@ -77,6 +79,8 @@ export interface GeonatalChart {
     draconic: string;
     design: string;
     houses: string;
+    revision: string;
+    precision: string;
   };
 }
 
@@ -183,10 +187,12 @@ export function calculateGeonatalChart(
     charts,
     methods: {
       ephemeris: "astronomy-engine 2.1.19 geocentric true-ecliptic-of-date",
-      sidereal: "Fagan-Bradley J2000 offset with general-precession rate",
-      draconic: "tropical longitude minus the chosen true or polynomial mean ascending lunar node; node placements use the same chosen convention",
+      sidereal: "Fagan-Bradley J2000 reference with general precession and nutation in longitude",
+      draconic: "tropical longitude minus the chosen osculating true or polynomial mean ascending lunar node; node placements use the same chosen convention",
       design: "timestamp at 88 degrees of prior solar longitude",
-      houses: "equal houses; planets, ascendant, and cusps use the same chart-frame offset",
+      houses: "equal houses from the eastern horizon and true obliquity; planets, ascendant, and cusps use the same chart-frame offset",
+      revision: "anchored-ephemeris-v2",
+      precision: "Approximate numerical positions. Reference checks do not guarantee fine gate subdivisions near boundaries.",
     },
   };
 }
@@ -208,7 +214,8 @@ export function humanDesignResolution(longitude: number): HDResolution {
 export function faganBradleyAyanamsa(date: Date): number {
   const j2000 = Date.UTC(2000, 0, 1, 12);
   const tropicalYears = (date.getTime() - j2000) / (365.2425 * 86400000);
-  return normalize(24.7366667 + (50.290966 / 3600) * tropicalYears);
+  // Mean J2000 Fagan-Bradley reference, expressed in the apparent equinox used by the planets.
+  return normalize(24.740299994434963 + (50.290966 / 3600) * tropicalYears + e_tilt(MakeTime(date)).dpsi / 3600);
 }
 
 function makePlacement(
@@ -264,23 +271,12 @@ function tropicalLongitude(body: Body, date: Date): number {
 }
 
 function trueNodeLongitude(date: Date): number {
-  let event = SearchMoonNode(new Date(date.getTime() - 35 * 86400000));
-  let previous = event;
-  while (event.time.date.getTime() <= date.getTime()) {
-    previous = event;
-    event = NextMoonNode(event);
-  }
-  const before = nodeLongitudeAtEvent(previous);
-  const after = nodeLongitudeAtEvent(event);
-  const span = event.time.date.getTime() - previous.time.date.getTime();
-  const fraction = (date.getTime() - previous.time.date.getTime()) / span;
-  const delta = signedDelta(before, after);
-  return normalize(before + delta * fraction);
-}
-
-function nodeLongitudeAtEvent(event: ReturnType<typeof SearchMoonNode>): number {
-  const moon = EclipticGeoMoon(event.time).lon;
-  return normalize(event.kind === NodeEventKind.Ascending ? moon : moon + 180);
+  // Instantaneous lunar orbital plane in the same true ecliptic-of-date frame.
+  // The ascending node is z-hat cross (position cross velocity).
+  const moon = RotateState(Rotation_EQJ_ECT(date), GeoMoonState(date));
+  const hx = moon.y * moon.vz - moon.z * moon.vy;
+  const hy = moon.z * moon.vx - moon.x * moon.vz;
+  return normalize(Math.atan2(hx, -hy) * 180 / Math.PI);
 }
 
 function findDesignTimestamp(natal: Date, natalSun: number): Date {
@@ -301,18 +297,15 @@ function equalHouseAscendant(date: Date, location: GeoLocation): number {
   const radians = Math.PI / 180;
   const theta = lst * radians;
   const latitude = location.latitude * radians;
-  const obliquity = 23.4392911 * radians;
+  const obliquity = e_tilt(MakeTime(date)).tobl * radians;
   const ascendant =
     Math.atan2(
       -Math.cos(theta),
       Math.sin(obliquity) * Math.tan(latitude) +
         Math.cos(obliquity) * Math.sin(theta)
     ) / radians;
-  return normalize(ascendant);
-}
-
-function signedDelta(from: number, to: number): number {
-  return ((to - from + 540) % 360) - 180;
+  // atan2 above gives the western intersection; the ascendant rises in the east.
+  return normalize(ascendant + 180);
 }
 
 function normalize(value: number): number {
@@ -337,10 +330,11 @@ function validateLocation(location: GeoLocation): void {
 }
 
 
-/** Mean ascending lunar node, Meeus polynomial, degrees of date. */
+/** Mean orbit node: Meeus polynomial in TT, expressed in the true equinox of date. */
 export function meanNodeLongitude(date: Date): number {
-  const t = (date.getTime() - Date.UTC(2000, 0, 1, 12)) / (36525 * 86400000);
-  return normalize(125.0445479 - 1934.1362891*t + 0.0020754*t*t + t*t*t/467441 - t*t*t*t/60616000);
+  const t = MakeTime(date).tt / 36525;
+  const mean = 125.0445479 - 1934.1362891*t + 0.0020754*t*t + t*t*t/467441 - t*t*t*t/60616000;
+  return normalize(mean + e_tilt(MakeTime(date)).dpsi / 3600);
 }
 
 function chartFrameOffset(frame: ZodiacFrame, date: Date): number {

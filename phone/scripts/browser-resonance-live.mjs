@@ -46,5 +46,17 @@ try{
  const observation=await save('/observations',{practice_id:practice.id,situation:'Conversation',action_taken:'Paused',result:'Still interrupted',assessment:'contradicted'});
  await save('/interpretations',{observation_id:observation.id,text:'This practice did not help in this setting.'});
  const saved=await (await contexts[0].request.get(journeyBase)).json();assert.equal(saved.practices[0].expected,'Less interruption');assert.equal(saved.observations[0].result,'Still interrupted');assert.equal(saved.interpretations.length,1);
- console.log('PASS: private chart isolation, real sign-in on another device, chart-derived suggestions, recipient consent, saved conversation, opt-out and private journey');
+ const forecast=await contexts[0].request.post(base+'/api/research/predictions',{data:{chart_id:masters[0].chart_id,title:'QA original forecast',criterion:'A recorded event',probability:.7,baseline:.5,deadline:'2099-01-01T00:00:00Z'}});assert.ok(forecast.ok());
+ const newerResponse=await contexts[0].request.post(base+'/api/charts',{data:{birth_date:'1988-10-09',birth_time:'12:30',timezone_name:'UTC',latitude:51.5,longitude:-.12}});assert.ok(newerResponse.ok());
+ const newer=await newerResponse.json();assert.equal(newer.birth_anchor.configuration_id,masters[0].birth_anchor.configuration_id);
+ await a.goto(base);const picker=a.getByRole('combobox',{name:/Your saved charts/});await picker.waitFor();
+ await a.locator('#cultivation-journey').getByText('Still interrupted',{exact:false}).waitFor();
+ await a.getByText('Prediction log · Commit before the outcome',{exact:true}).click();
+ await a.getByRole('heading',{name:'QA original forecast',exact:true}).waitFor();
+ await picker.selectOption(newer.chart_id);
+ await a.getByRole('heading',{name:'QA original forecast',exact:true}).waitFor({state:'hidden'});
+ await picker.selectOption(masters[0].chart_id);
+ await a.locator('#cultivation-journey').getByText('Still interrupted',{exact:false}).waitFor();
+ await a.getByRole('heading',{name:'QA original forecast',exact:true}).waitFor();
+ console.log('PASS: saved-chart selection preserves separate histories, private chart isolation, real sign-in on another device, chart-derived suggestions, recipient consent, saved conversation, opt-out and private journey');
 }finally{await browser.close();}
