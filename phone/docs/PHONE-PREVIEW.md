@@ -1,6 +1,6 @@
 # Phone preview
 
-The Android client reuses the Java WebView shell from justappgrabbin/Simlish, pinned to SOURCE-INTEGRATION.md. It connects to this app server over HTTPS. This build does not contain a Python server or model weights. Server settings remain accessible in the Android action bar.
+The Android client reuses the Java WebView shell from justappgrabbin/Simlish, pinned to SOURCE-INTEGRATION.md. It connects to this app server over HTTPS. Use “Explore the interface and research pages offline” on the first screen to browse without a server. Chart calculation, persistence, matching and inference require your server; the offline preview supplies no fabricated chart values. This build does not contain a Python server or model weights. Server settings remain accessible in the Android action bar.
 
 The active priorities are Human Design, four distinct chart frames and opt-in resonance connections. World embodiments and the interactive science lab are a later phase. Current research pages already specify predictions, controls and disconfirmation criteria.
 

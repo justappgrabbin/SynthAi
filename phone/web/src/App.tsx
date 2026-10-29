@@ -218,6 +218,7 @@ export default function App() {
 
   return (
     <main className="app-shell">
+      {window.location.hostname === "appassets.androidplatform.net" && <section className="panel" role="status"><strong>Offline interface preview</strong><p>You can explore these screens and read all six research protocols. Use the Android Server settings menu to connect an HTTPS server for chart calculation, saved records, live connections and AI answers.</p><a href="/assets/index.html">Open server setup →</a></section>}
       <header className="topbar">
         <div className="brand">
           <span className="brand-mark">HD</span>

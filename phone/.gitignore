@@ -39,3 +39,5 @@ android/**/build/
 android/local.properties
 *.apk
 *.keystore
+
+/android/app/preview-assets/preview/
