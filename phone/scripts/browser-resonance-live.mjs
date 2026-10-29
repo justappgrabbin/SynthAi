@@ -10,7 +10,7 @@ try{
  for(let i=0;i<2;i++){
   const context=await browser.newContext({viewport:{width:390,height:844}});contexts.push(context);
   async function post(path,data){const r=await context.request.post(base+path,{data});assert.ok(r.ok(),await r.text());return r.json();}
-  const account=await post('/api/auth/register',{name:`QA Member ${i+1}`,email:`qa${stamp}-${i}@example.invalid`,password:`qa-only-${stamp}-test`});members.push(account.user);
+  const account=await post('/api/auth/register',{name:`QA ${stamp} Member ${i+1}`,email:`qa${stamp}-${i}@example.invalid`,password:`qa-only-${stamp}-test`});members.push(account.user);
   const master=await post('/api/charts',{birth_date:i?'1991-02-16':'1988-10-09',birth_time:'12:30',timezone_name:'UTC',latitude:51.5,longitude:-.12});masters.push(master);
   const p=await context.request.put(base+'/api/resonance-network/profile',{data:{chart_id:master.chart_id,discoverable:true,intents:['conversation'],interests:['music']}});assert.ok(p.ok(),await p.text());
   const page=await context.newPage();pages.push(page);
@@ -18,7 +18,7 @@ try{
   await page.getByText('Restored your master birth chart.',{exact:true}).waitFor();
  }
  const a=pages[0],b=pages[1];await a.reload();
- await a.getByRole('button',{name:'Invite to connect',exact:true}).click();
+ await a.locator('.connection-card').filter({has:a.getByRole('heading',{name:members[1].name,exact:true})}).getByRole('button',{name:'Invite to connect',exact:true}).click();
  await a.getByText('outgoing · pending',{exact:true}).waitFor();
  await b.reload();await b.getByRole('button',{name:'Accept connection',exact:true}).click();
  await b.getByRole('link',{name:'Open conversation →',exact:true}).waitFor();
@@ -29,7 +29,7 @@ try{
  const response=await contexts[1].request.get(base+'/api/messages?with='+members[0].id);assert.ok(response.ok());assert.equal((await response.json()).messages.at(-1).content,'A real consented QA conversation.');
  await b.getByRole('button',{name:'Leave resonance discovery',exact:true}).click();
  await b.getByText('Discovery is',{exact:false}).first().waitFor();
- const matches=await contexts[0].request.get(base+'/api/resonance-network/matches');assert.deepEqual((await matches.json()).matches,[]);
+ const matches=await contexts[0].request.get(base+'/api/resonance-network/matches');assert.ok(!(await matches.json()).matches.some(m=>m.member_id===members[1].id));
  const journeyBase=base+'/api/cultivation/'+masters[0].chart_id;
  const state=await (await contexts[0].request.get(journeyBase)).json();const option=state.practice_options[0];
  async function save(path,data){const r=await contexts[0].request.post(journeyBase+path,{data});assert.ok(r.ok(),await r.text());return r.json();}
