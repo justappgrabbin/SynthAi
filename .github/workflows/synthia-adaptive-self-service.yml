@@ -67,9 +67,28 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+      - name: Check whether private Drive access is configured
+        id: drive_access
+        env:
+          DRIVE_FOLDER: ${{ secrets.SYNTHIA_DRIVE_FOLDER_ID }}
+          DRIVE_JSON: ${{ secrets.SYNTHIA_DRIVE_SERVICE_ACCOUNT_JSON }}
+        run: |
+          if [ -n "$DRIVE_FOLDER" ] && [ -n "$DRIVE_JSON" ]; then
+            echo 'enabled=true' >> "$GITHUB_OUTPUT"
+          else
+            echo 'enabled=false' >> "$GITHUB_OUTPUT"
+            echo 'Drive credentials not configured. Original APK unchanged; no publication.'
+          fi
+      - name: Require setup for manual release
+        if: steps.drive_access.outputs.enabled != 'true' && github.event_name == 'workflow_dispatch'
+        run: |
+          echo 'Configure the two repository secrets per delivery/README.md.' >&2
+          exit 1
       - name: Install Drive read-only client
+        if: steps.drive_access.outputs.enabled == 'true'
         run: python -m pip install --disable-pip-version-check "google-auth>=2.30,<3" "requests>=2.31,<3"
       - name: Fetch original split archive from owner's Drive
+        if: steps.drive_access.outputs.enabled == 'true'
         env:
           SYNTHIA_DRIVE_FOLDER_ID: ${{ secrets.SYNTHIA_DRIVE_FOLDER_ID }}
           SYNTHIA_DRIVE_SERVICE_ACCOUNT_JSON: ${{ secrets.SYNTHIA_DRIVE_SERVICE_ACCOUNT_JSON }}
@@ -78,19 +97,24 @@ jobs:
             --manifest delivery/synthia-adaptive-v0.5.4.json \
             fetch-parts --parts-dir "$RUNNER_TEMP/synthia-parts"
       - name: Verify and reassemble original signed APK
+        if: steps.drive_access.outputs.enabled == 'true'
         run: |
           python delivery/synthia_adaptive_release.py \
             --manifest delivery/synthia-adaptive-v0.5.4.json \
             assemble --parts-dir "$RUNNER_TEMP/synthia-parts" \
             --output-dir "$RUNNER_TEMP/synthia-out"
       - uses: android-actions/setup-android@v3
+        if: steps.drive_access.outputs.enabled == 'true'
       - name: Install Android signature verification tools
+        if: steps.drive_access.outputs.enabled == 'true'
         run: sdkmanager 'build-tools;35.0.0'
       - name: Verify Android signature without re-signing
+        if: steps.drive_access.outputs.enabled == 'true'
         run: |
           "$ANDROID_HOME/build-tools/35.0.0/apksigner" verify --verbose \
             --min-sdk-version 24 "$RUNNER_TEMP/synthia-out/Synthia-Adaptive-v0.5.4.apk"
       - name: Publish one APK, never overwrite existing asset
+        if: steps.drive_access.outputs.enabled == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
           TAG: synthia-adaptive-v0.5.4
