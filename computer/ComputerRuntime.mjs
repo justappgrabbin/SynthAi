@@ -47,11 +47,13 @@ export class ComputerRuntime {
     this.morph = new MorphEngine({ bus: this.bus, state: this.state, micros: this.micros });
     this.characterMorph = new MorphCapability({
       bus: this.bus, state: this.state,
-      onProvidersChanged: providers => this.capabilityRegistry.register('character-morph', {
-        providers: providers.map(p => p.id),
-        requires: [],
-        description: 'Private character image/animation preparation via registered local providers. Not a 3D reconstruction guarantee.'
-      }, { replace: true }),
+      onProvidersChanged: providers => {
+        this.capabilityRegistry.register('character-morph', {
+          providers: providers.map(p => p.id), requires: [],
+          description: 'Private character preparation through registered local providers.'
+        }, { replace: true });
+        this._refreshCharacterMorphRegistry(providers);
+      },
     });
     // Preserve the existing MorphEngine expression API; add actual rendering
     // dispatch without pretending Computer itself can generate images.
@@ -65,6 +67,22 @@ export class ComputerRuntime {
     this.projects = new ProjectWorkspace({ bus: this.bus, state: this.state, vfs: this.vfs, backends: this.backends });
 
     if (github) this.configureGitHub(github);
+  }
+
+  // Dynamic, evidence-honest mirror for the Computer's queryCapability() API.
+  // Registering an adapter is PRESENT, not verified output or 3D quality.
+  _refreshCharacterMorphRegistry(providers) {
+    if (!this.capabilityRegistryService) return;
+    this.capabilityRegistryService.capabilities.set('character-morph', {
+      capability: 'character-morph',
+      description: 'Optional device-local portrait or animation provider. No user-visible studio required; full-body 3D is separate.',
+      providers: providers.map(({ id, formats }) => ({
+        provider_id: id, status: 'PRESENT', repository: 'runtime-registered',
+        source_artifact: 'injected-local-morph-adapter',
+        verification_evidence: [], last_verified: null,
+        known_limitations: [`declared formats: ${formats.join(', ')}`, 'Physical visual quality and device availability are not inferred from registration'],
+      })),
+    });
   }
 
   configureGitHub(config = {}) {
@@ -106,6 +124,7 @@ export class ComputerRuntime {
       eventLog: () => this.eventEmitter.readAll(),
     });
     this.capabilityRegistryService = await new CapabilityRegistryService({ bus: this.bus }).load();
+    this._refreshCharacterMorphRegistry(this.characterMorph.listProviders());
     this.addressService.capabilityRegistry = this.capabilityRegistryService; // routing_decision recording
     this.services.register('event-emitter', { provider: this.eventEmitter, contract: 'emitEvent' });
     this.services.register('address-service', { provider: this.addressService, contract: 'resolveAddress' });
