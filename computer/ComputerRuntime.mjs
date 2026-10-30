@@ -191,8 +191,14 @@ export class ComputerRuntime {
         emitEvent: (event) => runtime.emitEvent({ ...event, actor_id: event.actor_id ?? `app:${appId}`, actor_type: event.actor_type ?? 'application' }),
         resolveAddress: (input, options) => runtime.resolveAddress(input, options),
         resolveState: (entity, event, context) => runtime.resolveState(entity, event, context),
-        morphCharacter: (request = {}) => runtime.characterMorph.prepare({ ...request, subjectId: `${String(appId).replace(/[^a-zA-Z0-9_-]/g, '_').slice(0,40)}__${request.subjectId ?? 'player'}` }),
-        getCharacterMorphReceipt: (subjectId = 'player') => runtime.characterMorph.getReceipt(`${String(appId).replace(/[^a-zA-Z0-9_-]/g, '_').slice(0,40)}__${subjectId}`),
+        morphCharacter: (request = {}) => runtime.characterMorph.prepareForApp(
+          String(appId).replace(/[^a-zA-Z0-9_-]/g, '_').slice(0,40), request),
+        getCharacterMorphReceipt: (subjectId = 'player') => {
+          const key = String(appId).replace(/[^a-zA-Z0-9_-]/g, '_').slice(0,40);
+          return runtime.characterMorph.appGrants.has(key)
+            ? runtime.characterMorph.getReceipt(`${key}__${subjectId}`)
+            : null;
+        },
         getState: (path, fallback) => runtime.state.get(`${ns}.${path}`, fallback),
         setState: (path, value) => runtime.state.set(`${ns}.${path}`, value, { source: `app:${appId}` }),
         readArtifact: () => runtime.vfs.read(runtime.artifacts.get(artifactId).path),
