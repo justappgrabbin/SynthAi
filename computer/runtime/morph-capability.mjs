@@ -13,6 +13,7 @@ export class MorphCapability {
     this.state = state;
     this.onProvidersChanged = onProvidersChanged;
     this.providers = new Map();
+    this.appGrants = new Set(); // volatile, trusted-host approvals only; never granted by app request flags
   }
 
   registerProvider(id, adapter, { formats = ['portrait'], priority = 0 } = {}) {
@@ -25,6 +26,34 @@ export class MorphCapability {
     this.bus?.emit('morph:provider-registered', { provider: id, formats });
     this.onProvidersChanged?.(this.listProviders());
     return id;
+  }
+
+  /** Only the trusted host may call this after a real user approval. */
+  grantApp(appId, { approved = false } = {}) {
+    if (typeof appId !== 'string' || !SUBJECT.test(appId)) throw new TypeError('Invalid app ID');
+    if (approved !== true) throw new Error('Explicit user approval required for character access');
+    this.appGrants.add(appId);
+    this.bus?.emit('morph:app-access-granted', { appId });
+    return true;
+  }
+
+  revokeApp(appId) {
+    if (typeof appId !== 'string' || !SUBJECT.test(appId)) throw new TypeError('Invalid app ID');
+    const removed = this.appGrants.delete(appId);
+    if (removed) this.bus?.emit('morph:app-access-revoked', { appId });
+    return removed;
+  }
+
+  /** Application requests are gated here; a caller's reuseSavedPortrait flag is NOT consent. */
+  async prepareForApp(appId, request = {}) {
+    if (typeof appId !== 'string' || !SUBJECT.test(appId)) throw new TypeError('Invalid app ID');
+    if (!request || typeof request !== 'object' || Array.isArray(request)) throw new TypeError('Morph request must be an object');
+    if (!this.appGrants.has(appId)) return {
+      status: 'needs_consent', reason: 'app-portrait-access', question: 'May I use your saved character in this experience?',
+    };
+    const subjectId = request.subjectId ?? 'player';
+    if (typeof subjectId !== 'string' || !SUBJECT.test(subjectId)) throw new TypeError('Invalid character ID');
+    return this.prepare({ ...request, subjectId: `${appId}__${subjectId}`, reuseSavedPortrait: true });
   }
 
   listProviders() {
