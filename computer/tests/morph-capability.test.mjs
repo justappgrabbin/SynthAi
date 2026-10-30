@@ -42,9 +42,17 @@ test('app contract exposes a namespaced morph call, not privileged studio contro
   const a = await c.intake.ingest({ name: 'game.html', text: '<main>Game</main>' });
   const mounted = await c.mountApplication('game', { artifactId: a.id });
   assert.equal(typeof mounted.services.morphCharacter, 'function');
+  const unauthorized = await mounted.services.morphCharacter({ subjectId: 'player', intent: 'portrait', reuseSavedPortrait: true });
+  assert.equal(unauthorized.status, 'needs_consent');
+  assert.equal(mounted.services.getCharacterMorphReceipt('player'), null);
+  assert.throws(() => c.characterMorph.grantApp('game'), /Explicit user approval/);
+  c.characterMorph.grantApp('game', { approved: true });
   const receipt = await mounted.services.morphCharacter({ subjectId: 'player', intent: 'portrait' });
   assert.equal(receipt.receipt.subjectId, 'game__player');
   assert.equal(mounted.services.getCharacterMorphReceipt('player').provider, 'simlish-test');
+  c.characterMorph.revokeApp('game');
+  assert.equal((await mounted.services.morphCharacter({ intent: 'portrait' })).status, 'needs_consent');
+  assert.equal(mounted.services.getCharacterMorphReceipt('player'), null);
 });
 test('no 2D/3D capability conflation and no automatic private portrait read', async () => {
   const morph = new MorphCapability();
