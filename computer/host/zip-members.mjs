@@ -1,5 +1,18 @@
 import { inflateRawSync } from 'node:zlib';
 
+// ZIP CRC-32 detects damaged member bytes before they enter addressed storage.
+// It is an integrity check, not a cryptographic signature.
+const crcTable = Uint32Array.from({ length: 256 }, (_, index) => {
+  let crc = index;
+  for (let bit = 0; bit < 8; bit++) crc = crc & 1 ? (crc >>> 1) ^ 0xedb88320 : crc >>> 1;
+  return crc >>> 0;
+});
+function crc32(bytes) {
+  let crc = 0xffffffff;
+  for (const byte of bytes) crc = crcTable[(crc ^ byte) & 0xff] ^ (crc >>> 8);
+  return (crc ^ 0xffffffff) >>> 0;
+}
+
 /** Read ZIP central directory entries without relying on an OS unzip command. */
 export function readZipMembers(bytes, { maxEntries = 200, maxMemberBytes = 600000, maxTotalBytes = 6000000 } = {}) {
   const data = Buffer.from(bytes);
@@ -24,6 +37,7 @@ export function readZipMembers(bytes, { maxEntries = 200, maxMemberBytes = 60000
     const method = data.readUInt16LE(at + 10);
     const compressed = data.readUInt32LE(at + 20);
     const expanded = data.readUInt32LE(at + 24);
+    const expectedCrc = data.readUInt32LE(at + 16);
     const nameBytes = data.readUInt16LE(at + 28);
     const extraBytes = data.readUInt16LE(at + 30);
     const commentBytes = data.readUInt16LE(at + 32);
@@ -45,6 +59,7 @@ export function readZipMembers(bytes, { maxEntries = 200, maxMemberBytes = 60000
     const encoded = data.subarray(start, start + compressed);
     const content = method === 0 ? encoded : inflateRawSync(encoded, { maxOutputLength: maxMemberBytes });
     if (content.length !== expanded) throw new TypeError('ZIP expanded size mismatch.');
+    if (crc32(content) !== expectedCrc) throw new TypeError('ZIP CRC-32 mismatch.');
     members.push({ name, content });
   }
   return members;
