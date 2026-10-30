@@ -2,6 +2,7 @@ import { EventBus, MemoryPersistence, StateStore, Registry } from './core/kernel
 import { VirtualFileSystem, ArtifactIntake } from './runtime/storage.mjs';
 import { AutomataEngine, ProcessFabric, BackendBroker } from './runtime/execution.mjs';
 import { CapabilityGraph, MorphEngine, CultivationEngine, PolicyEngine } from './runtime/experience.mjs';
+import { MorphCapability } from './runtime/morph-capability.mjs';
 import { ShellManager, MutationDispatcher } from './runtime/shells.mjs';
 import { ProjectWorkspace } from './runtime/projects.mjs';
 import { GitHubWorkspaceAdapter } from './adapters/GitHubWorkspaceAdapter.mjs';
@@ -44,6 +45,19 @@ export class ComputerRuntime {
     this.backends = new BackendBroker({ bus: this.bus, backends: this.backendsRegistry });
     this.capabilities = new CapabilityGraph({ capabilities: this.capabilityRegistry });
     this.morph = new MorphEngine({ bus: this.bus, state: this.state, micros: this.micros });
+    this.characterMorph = new MorphCapability({
+      bus: this.bus, state: this.state,
+      onProvidersChanged: providers => this.capabilityRegistry.register('character-morph', {
+        providers: providers.map(p => p.id),
+        requires: [],
+        description: 'Private character image/animation preparation via registered local providers. Not a 3D reconstruction guarantee.'
+      }, { replace: true }),
+    });
+    // Preserve the existing MorphEngine expression API; add actual rendering
+    // dispatch without pretending Computer itself can generate images.
+    this.morph.registerProvider = (...args) => this.characterMorph.registerProvider(...args);
+    this.morph.prepare = (request) => this.characterMorph.prepare(request);
+    this.morph.getReceipt = (subjectId) => this.characterMorph.getReceipt(subjectId);
     this.cultivation = new CultivationEngine({ bus: this.bus, state: this.state });
     this.policy = new PolicyEngine({ bus: this.bus });
     this.mutations = new MutationDispatcher({ bus: this.bus, state: this.state, shellManager: this.shellManager, automata: this.automata, tools: this.tools, agents: this.agents, morph: this.morph });
@@ -95,6 +109,11 @@ export class ComputerRuntime {
     this.addressService.capabilityRegistry = this.capabilityRegistryService; // routing_decision recording
     this.services.register('event-emitter', { provider: this.eventEmitter, contract: 'emitEvent' });
     this.services.register('address-service', { provider: this.addressService, contract: 'resolveAddress' });
+    this.services.register('character-morph', { provider: this.characterMorph, contract: 'prepare' });
+    if (!this.capabilityRegistry.has('character-morph')) this.capabilities.register('character-morph', {
+      providers: [], requires: [],
+      description: 'Character morph is unavailable until an actual local renderer registers.'
+    });
     this.services.register('state-resolver', { provider: this.stateResolver, contract: 'resolveState' });
     this.services.register('capability-registry', { provider: this.capabilityRegistryService, contract: 'queryCapability' });
     // Stage-4b/Amendment-C: automata organism gateway (donor pure-synthia
@@ -153,6 +172,8 @@ export class ComputerRuntime {
         emitEvent: (event) => runtime.emitEvent({ ...event, actor_id: event.actor_id ?? `app:${appId}`, actor_type: event.actor_type ?? 'application' }),
         resolveAddress: (input, options) => runtime.resolveAddress(input, options),
         resolveState: (entity, event, context) => runtime.resolveState(entity, event, context),
+        morphCharacter: (request = {}) => runtime.characterMorph.prepare({ ...request, subjectId: `${String(appId).replace(/[^a-zA-Z0-9_-]/g, '_').slice(0,40)}__${request.subjectId ?? 'player'}` }),
+        getCharacterMorphReceipt: (subjectId = 'player') => runtime.characterMorph.getReceipt(`${String(appId).replace(/[^a-zA-Z0-9_-]/g, '_').slice(0,40)}__${subjectId}`),
         getState: (path, fallback) => runtime.state.get(`${ns}.${path}`, fallback),
         setState: (path, value) => runtime.state.set(`${ns}.${path}`, value, { source: `app:${appId}` }),
         readArtifact: () => runtime.vfs.read(runtime.artifacts.get(artifactId).path),
