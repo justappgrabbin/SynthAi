@@ -6,6 +6,9 @@ import { ComputerRuntime } from '../ComputerRuntime.mjs';
 test('no local renderer reports unavailable, not a fake finished character', async () => {
   const c = await new ComputerRuntime().boot();
   assert.equal(c.capabilities.resolve('character-morph').available, false);
+  assert.equal(c.queryCapability('character-morph').found, true);
+  assert.equal(c.queryCapability('character-morph').providers.length, 0);
+  assert.equal(c.route('character-morph').selected_provider, null);
   assert.equal((await c.morph.prepare()).status, 'unavailable');
   assert.equal(c.services.get('character-morph').provider, c.characterMorph);
 });
@@ -21,6 +24,8 @@ test('routing uses the real provider and never records image bytes', async () =>
     },
   }, { formats: ['portrait', 'animated'] });
   assert.equal(c.capabilities.resolve('character-morph').available, true);
+  assert.equal(c.queryCapability('character-morph').providers[0].provider_id, 'simlish-test');
+  assert.equal(c.queryCapability('character-morph').providers[0].status, 'PRESENT');
   const done = await c.characterMorph.prepare({ intent: 'portrait', subjectId: 'player' });
   assert.equal(done.output.dataUrl, 'secret-photo-bytes');
   assert.equal(c.characterMorph.getReceipt('player').status, 'ready');
