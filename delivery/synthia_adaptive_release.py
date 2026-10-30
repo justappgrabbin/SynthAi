@@ -2,18 +2,15 @@
 """Checksum-locked release handoff for the ORIGINAL Synthia Adaptive APK.
 
 Does not build, re-sign, patch, or change the Android app. No LLM/model is removed.
-Google Drive file IDs and credentials are intentionally kept out of source control.
+The workflow uses only GitHub Actions build artifacts and GitHub Releases.
 """
 import argparse
 import hashlib
 import json
-import os
 from pathlib import Path
 import re
 import shutil
 import sys
-import tempfile
-import time
 from zipfile import ZipFile, BadZipFile
 
 
@@ -114,86 +111,22 @@ def assemble(manifest, parts_dir, output_dir):
             tmp.unlink(missing_ok=True)
 
 
-def list_drive_files(session, folder_id):
-    if not re.fullmatch(r"[A-Za-z0-9_-]+", folder_id):
-        raise DeliveryError("Invalid folder id")
-    found = {}
-    token = None
-    while True:
-        params = {
-            "q": f"'{folder_id}' in parents and trashed = false",
-            "fields": "nextPageToken,files(id,name,size)",
-            "pageSize": 100,
-            "supportsAllDrives": "true",
-            "includeItemsFromAllDrives": "true",
-        }
-        if token:
-            params["pageToken"] = token
-        result = session.get("https://www.googleapis.com/drive/v3/files",
-                             params=params, timeout=90)
-        result.raise_for_status()
-        data = result.json()
-        for item in data.get("files", []):
-            if item["name"] in found:
-                raise DeliveryError(f"Ambiguous duplicate in Drive: {item['name']}")
-            found[item["name"]] = item
-        token = data.get("nextPageToken")
-        if not token:
-            return found
-
-
-def fetch_parts(manifest, parts_dir, folder_id, google_json):
+def verify_apk(manifest, apk_path):
+    """Verify the original APK without requiring Drive or the split archive."""
+    apk_path = verify_file(apk_path, manifest["apk_size_bytes"],
+                           manifest["apk_sha256"])
     try:
-        from google.oauth2 import service_account
-        from google.auth.transport.requests import AuthorizedSession
-    except ImportError as exc:
-        raise DeliveryError("Install google-auth and requests for Drive retrieval") from exc
-    if not google_json or not folder_id:
-        raise DeliveryError("Set Google Drive service-account JSON and folder ID in Actions secrets")
-    info = json.loads(google_json)
-    credentials = service_account.Credentials.from_service_account_info(
-        info, scopes=["https://www.googleapis.com/auth/drive.readonly"])
-    session = AuthorizedSession(credentials)
-    files = list_drive_files(session, folder_id)
-    parts_dir = Path(parts_dir)
-    parts_dir.mkdir(parents=True, exist_ok=True)
-    for part in manifest["parts"]:
-        name = part["name"]
-        item = files.get(name)
-        if not item:
-            raise DeliveryError(f"Drive folder is missing {name} (or access was not granted)")
-        if int(item.get("size", -1)) != part["size_bytes"]:
-            raise DeliveryError(f"Drive metadata size differs for {name}")
-        target = parts_dir / name
-        try:
-            verify_file(target, part["size_bytes"], part["sha256"])
-            print(f"Already verified: {name}")
-            continue
-        except DeliveryError:
-            pass
-        temp = target.with_name(name + ".download")
-        for attempt in range(3):
-            try:
-                with session.get(
-                    f"https://www.googleapis.com/drive/v3/files/{item['id']}",
-                    params={"alt": "media", "supportsAllDrives": "true"},
-                    timeout=180,
-                    stream=True,
-                ) as response:
-                    response.raise_for_status()
-                    with temp.open("wb") as output:
-                        for block in response.iter_content(chunk_size=4 * 1024 * 1024):
-                            if block:
-                                output.write(block)
-                verify_file(temp, part["size_bytes"], part["sha256"])
-                temp.replace(target)
-                print(f"Downloaded and verified: {name}")
-                break
-            except Exception:
-                temp.unlink(missing_ok=True)
-                if attempt == 2:
-                    raise DeliveryError(f"Failed to retrieve and verify {name}") from None
-                time.sleep(2 ** attempt)
+        with ZipFile(apk_path, "r") as apk_zip:
+            if apk_zip.getinfo("AndroidManifest.xml").file_size == 0:
+                raise DeliveryError("Android manifest is empty")
+            if not any(name.startswith("classes") and name.endswith(".dex")
+                       for name in apk_zip.namelist()):
+                raise DeliveryError("No Android dex code in APK")
+    except (BadZipFile, KeyError) as exc:
+        raise DeliveryError(f"Malformed APK: {exc}") from exc
+    print(f"VERIFIED APK: {apk_path.name} ({apk_path.stat().st_size} bytes)")
+    print(f"SHA-256: {manifest['apk_sha256']}")
+    return apk_path
 
 
 def release_status(manifest, release_json):
@@ -219,9 +152,8 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--manifest", required=True)
     actions = parser.add_subparsers(dest="action", required=True)
-    download = actions.add_parser("fetch-parts")
-    download.add_argument("--parts-dir", required=True)
-    download.add_argument("--folder-id", default=os.environ.get("SYNTHIA_DRIVE_FOLDER_ID"))
+    direct = actions.add_parser("verify-apk")
+    direct.add_argument("--apk", required=True)
     verify = actions.add_parser("assemble")
     verify.add_argument("--parts-dir", required=True)
     verify.add_argument("--output-dir", required=True)
@@ -229,9 +161,8 @@ def main():
     status.add_argument("--release-json", required=True)
     args = parser.parse_args()
     manifest = load_manifest(args.manifest)
-    if args.action == "fetch-parts":
-        fetch_parts(manifest, args.parts_dir, args.folder_id,
-                    os.environ.get("SYNTHIA_DRIVE_SERVICE_ACCOUNT_JSON"))
+    if args.action == "verify-apk":
+        verify_apk(manifest, args.apk)
     elif args.action == "assemble":
         assemble(manifest, args.parts_dir, args.output_dir)
     elif args.action == "release-status":
