@@ -9,7 +9,7 @@ import unittest
 from zipfile import ZipFile
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from synthia_adaptive_release import assemble, DeliveryError, load_manifest, release_status
+from synthia_adaptive_release import assemble, DeliveryError, load_manifest, release_status, verify_apk
 
 
 def sha(data):
@@ -57,6 +57,22 @@ class TestSynthiaDelivery(unittest.TestCase):
             self.assertEqual(output.name, fixture["apk_name"])
             self.assertEqual(sha(output.read_bytes()), fixture["apk_sha256"])
             self.assertTrue((root / "out" / fixture["archive_name"]).is_file())
+
+    def test_verify_direct_github_apk(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            fixture = make_fixture(root / "parts")
+            apk = assemble(fixture, root / "parts", root / "out")
+            self.assertEqual(verify_apk(fixture, apk), apk)
+
+    def test_verify_direct_apk_fails_closed_on_wrong_bytes(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            fixture = make_fixture(root / "parts")
+            apk = assemble(fixture, root / "parts", root / "out")
+            apk.write_bytes(apk.read_bytes() + b"unknown bytes")
+            with self.assertRaisesRegex(DeliveryError, "size"):
+                verify_apk(fixture, apk)
 
     def test_rejects_corruption(self):
         with tempfile.TemporaryDirectory() as tmp:

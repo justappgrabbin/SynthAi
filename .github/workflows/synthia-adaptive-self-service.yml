@@ -1,14 +1,20 @@
-name: Synthia Adaptive — single-APK release recovery
+name: Synthia Adaptive — GitHub-only single-APK release
 
 on:
   pull_request:
     paths: ["delivery/**", ".github/workflows/synthia-adaptive-self-service.yml"]
   workflow_dispatch:
+    inputs:
+      source_run_id:
+        description: "Optional successful main-branch Actions run containing the original APK artifact"
+        required: false
+        type: string
   schedule:
     - cron: "17 10 * * 1"
 
 permissions:
   contents: read
+  actions: read
 
 concurrency:
   group: synthia-adaptive-v0.5.4-release
@@ -23,7 +29,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-      - name: Check release tool and offline regression tests
+      - name: Offline tests with synthetic APK; no credentials required
         run: |
           python -m py_compile delivery/synthia_adaptive_release.py
           python -m unittest discover -s delivery/tests -p 'test_*.py' -v
@@ -36,7 +42,7 @@ jobs:
       needs_publish: ${{ steps.check.outputs.needs_publish }}
     steps:
       - uses: actions/checkout@v4
-      - name: Check existing asset size and SHA-256 before any download
+      - name: Check existing release; refuse mismatching assets
         id: check
         env:
           GH_TOKEN: ${{ github.token }}
@@ -51,106 +57,126 @@ jobs:
             release-status --release-json "$RUNNER_TEMP/release.json")"
           if [ "$state" = complete ]; then
             echo 'needs_publish=false' >> "$GITHUB_OUTPUT"
+            echo 'Correct APK already published; no action needed.'
           else
             echo 'needs_publish=true' >> "$GITHUB_OUTPUT"
           fi
 
-  repair-delivery:
+  discover-github-artifact:
     if: github.event_name != 'pull_request' && needs.release-check.outputs.needs_publish == 'true'
     needs: [tests, release-check]
     runs-on: ubuntu-latest
+    outputs:
+      run_id: ${{ steps.lookup.outputs.run_id }}
+    steps:
+      - name: Look for original APK in successful GitHub build output
+        id: lookup
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ARTIFACT_NAME: synthia-adaptive-v0.5.4-apk
+          REQUESTED_RUN_ID: ${{ inputs.source_run_id || '' }}
+        run: |
+          set -euo pipefail
+          gh api "repos/$GITHUB_REPOSITORY/actions/artifacts?name=$ARTIFACT_NAME&per_page=100" > "$RUNNER_TEMP/artifacts.json"
+          run_id="$(jq -r --arg name "$ARTIFACT_NAME" --arg requested "$REQUESTED_RUN_ID" '
+            [.artifacts[] |
+              select(.name == $name and .expired == false) |
+              select(.workflow_run.head_branch == "main") |
+              select(($requested == "") or ((.workflow_run.id | tostring) == $requested))
+            ] | sort_by(.created_at) | last | .workflow_run.id // empty
+          ' "$RUNNER_TEMP/artifacts.json")"
+          if [ -z "$run_id" ]; then
+            echo 'No Synthia Adaptive v0.5.4 APK build artifact on main.'
+            echo 'This workflow will not use Drive, replace the app with another package, or invent a build.'
+            echo 'run_id=' >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          event="$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$run_id" --jq .event)"
+          conclusion="$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$run_id" --jq .conclusion)"
+          branch="$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$run_id" --jq .head_branch)"
+          if [ "$conclusion" != success ] || [ "$branch" != main ]; then
+            echo 'Artifact run is not a successful main-branch run' >&2
+            exit 1
+          fi
+          if [ "$event" != push ] && [ "$event" != workflow_dispatch ]; then
+            echo 'Refusing artifact from untrusted event' >&2
+            exit 1
+          fi
+          echo "Verified GitHub artifact source run: $run_id"
+          echo "run_id=$run_id" >> "$GITHUB_OUTPUT"
+
+  publish-original-apk:
+    if: github.event_name != 'pull_request' && needs.discover-github-artifact.outputs.run_id != ''
+    needs: [tests, release-check, discover-github-artifact]
+    runs-on: ubuntu-latest
     timeout-minutes: 90
     permissions:
+      actions: read
       contents: write
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-      - name: Check whether private Drive access is configured
-        id: drive_access
+      - name: Download original APK from GitHub Actions only
         env:
-          DRIVE_FOLDER: ${{ secrets.SYNTHIA_DRIVE_FOLDER_ID }}
-          DRIVE_JSON: ${{ secrets.SYNTHIA_DRIVE_SERVICE_ACCOUNT_JSON }}
+          GH_TOKEN: ${{ github.token }}
+          SOURCE_RUN_ID: __EXPR_needs.discover-github-artifact.outputs.run_id__
         run: |
-          if [ -n "$DRIVE_FOLDER" ] && [ -n "$DRIVE_JSON" ]; then
-            echo 'enabled=true' >> "$GITHUB_OUTPUT"
-          else
-            echo 'enabled=false' >> "$GITHUB_OUTPUT"
-            echo 'Drive credentials not configured. Original APK unchanged; no publication.'
-          fi
-      - name: Require setup for manual release
-        if: steps.drive_access.outputs.enabled != 'true' && github.event_name == 'workflow_dispatch'
-        run: |
-          echo 'Configure the two repository secrets per delivery/README.md.' >&2
-          exit 1
-      - name: Install Drive read-only client
-        if: steps.drive_access.outputs.enabled == 'true'
-        run: python -m pip install --disable-pip-version-check "google-auth>=2.30,<3" "requests>=2.31,<3"
-      - name: Fetch original split archive from owner's Drive
-        if: steps.drive_access.outputs.enabled == 'true'
-        env:
-          SYNTHIA_DRIVE_FOLDER_ID: ${{ secrets.SYNTHIA_DRIVE_FOLDER_ID }}
-          SYNTHIA_DRIVE_SERVICE_ACCOUNT_JSON: ${{ secrets.SYNTHIA_DRIVE_SERVICE_ACCOUNT_JSON }}
+          set -euo pipefail
+          gh run download "$SOURCE_RUN_ID" --name synthia-adaptive-v0.5.4-apk \
+            --dir "$RUNNER_TEMP/synthia-apk"
+      - name: Check exact known APK bytes and archive structure
         run: |
           python delivery/synthia_adaptive_release.py \
             --manifest delivery/synthia-adaptive-v0.5.4.json \
-            fetch-parts --parts-dir "$RUNNER_TEMP/synthia-parts"
-      - name: Verify and reassemble original signed APK
-        if: steps.drive_access.outputs.enabled == 'true'
-        run: |
-          python delivery/synthia_adaptive_release.py \
-            --manifest delivery/synthia-adaptive-v0.5.4.json \
-            assemble --parts-dir "$RUNNER_TEMP/synthia-parts" \
-            --output-dir "$RUNNER_TEMP/synthia-out"
+            verify-apk --apk "$RUNNER_TEMP/synthia-apk/Synthia-Adaptive-v0.5.4.apk"
       - uses: android-actions/setup-android@v3
-        if: steps.drive_access.outputs.enabled == 'true'
-      - name: Install Android signature verification tools
-        if: steps.drive_access.outputs.enabled == 'true'
+      - name: Install Android APK signature tools
         run: sdkmanager 'build-tools;35.0.0'
-      - name: Verify Android signature without re-signing
-        if: steps.drive_access.outputs.enabled == 'true'
+      - name: Verify signature and package identity without re-signing
         run: |
+          set -euo pipefail
+          apk="$RUNNER_TEMP/synthia-apk/Synthia-Adaptive-v0.5.4.apk"
           "$ANDROID_HOME/build-tools/35.0.0/apksigner" verify --verbose \
-            --min-sdk-version 24 "$RUNNER_TEMP/synthia-out/Synthia-Adaptive-v0.5.4.apk"
-      - name: Publish one APK, never overwrite existing asset
-        if: steps.drive_access.outputs.enabled == 'true'
+            --min-sdk-version 24 "$apk"
+          package_line="$("$ANDROID_HOME/build-tools/35.0.0/aapt" dump badging "$apk" | head -n 1)"
+          if [[ "$package_line" != *"name='com.synthia.adaptive'"* ]]; then
+            echo "Wrong Android package identity: $package_line" >&2
+            exit 1
+          fi
+      - name: Upload one signed APK as GitHub Release asset
         env:
           GH_TOKEN: ${{ github.token }}
           TAG: synthia-adaptive-v0.5.4
         run: |
           set -euo pipefail
-          apk="$RUNNER_TEMP/synthia-out/Synthia-Adaptive-v0.5.4.apk"
+          apk="$RUNNER_TEMP/synthia-apk/Synthia-Adaptive-v0.5.4.apk"
           if gh api "repos/$GITHUB_REPOSITORY/releases/tags/$TAG" > "$RUNNER_TEMP/release.json" 2>/dev/null; then
             state="$(python delivery/synthia_adaptive_release.py \
               --manifest delivery/synthia-adaptive-v0.5.4.json \
               release-status --release-json "$RUNNER_TEMP/release.json")"
             if [ "$state" = complete ]; then
-              echo 'Verified release already published.'
+              echo 'Correct APK already published.'
               exit 0
             fi
             gh release upload "$TAG" "$apk"
           else
             cat > "$RUNNER_TEMP/notes.md" <<'EOF'
-          ONE signed, offline ARM64 Synthia Adaptive v0.5.4 APK,
-          recovered byte-for-byte from 13 verified Google Drive parts.
-          No source, model, Android package, signature, or app data was changed.
+          One original signed, offline Synthia Adaptive v0.5.4 APK,
+          delivered through GitHub Actions. No Google Drive access required.
 
-          APK SHA-256:
+          SHA-256:
           068cae9639be745bdb9540fa5b0de790d66c506ba9973589251004fb9249a5b5
 
-          47 repository checks were reported as passing in the original
-          verification notes. Physical phone install, inference, permissions,
-          and background lifecycle remain UNVERIFIED.
-
-          This is a delivery recovery, NOT a source rebuild. The release tag
-          identifies the delivery workflow rather than the APK source commit.
+          This is the original verified APK, not a rebuild or replacement of
+          the embedded Qwen model. Physical phone install, local inference,
+          and Android background behavior remain unverified.
           EOF
             gh release create "$TAG" "$apk" \
               --title "Synthia Adaptive v0.5.4 — offline ARM64" \
-              --notes-file "$RUNNER_TEMP/notes.md" --prerelease --target "$GITHUB_SHA"
+              --notes-file "$RUNNER_TEMP/notes.md" \
+              --prerelease --target "$GITHUB_SHA"
           fi
-          gh api "repos/$GITHUB_REPOSITORY/releases/tags/$TAG" > "$RUNNER_TEMP/after.json"
-          python delivery/synthia_adaptive_release.py \
+          gh api "repos/$GITHUB_REPOSITORY/releases/tags/$TAG" > "$RUNNER_TEMP/final.json"
+          state="$(python delivery/synthia_adaptive_release.py \
             --manifest delivery/synthia-adaptive-v0.5.4.json \
-            release-status --release-json "$RUNNER_TEMP/after.json"
+            release-status --release-json "$RUNNER_TEMP/final.json")"
+          test "$state" = complete

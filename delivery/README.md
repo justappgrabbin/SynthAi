@@ -1,78 +1,75 @@
-# Synthia Adaptive v0.5.4 — one-file, self-service release delivery
+# Synthia Adaptive v0.5.4 — GitHub-only one-file release
 
-This workflow repairs **delivery of the original, already-built APK**. It does not
-replace the existing Synthia Adaptive implementation, change its model, infer
-the app architecture, or claim on-device acceptance.
+The release workflow **does not access Google Drive**, request Drive authorization,
+create Google credentials, or download the 13 Drive parts.
 
-## Original evidence
+It keeps the actual Synthia Adaptive Android package and embedded model intact.
+It does not substitute the separate `org.synthai.computer` application for the
+original `com.synthia.adaptive` APK.
 
-- The owner-delivered original is a 13-part archive in Google Drive.
-- All 13 SHA-256 hashes are recorded in [synthia-adaptive-v0.5.4.json](synthia-adaptive-v0.5.4.json).
-- The APK must be 1,225,329,912 bytes with SHA-256
-  `068cae9639be745bdb9540fa5b0de790d66c506ba9973589251004fb9249a5b5`.
-- Package identity is `com.synthia.adaptive`. **Do not replace it with**
-  `org.synthai.computer`; that is a separate Android application.
-- The original VERIFICATION.md reports 47 passing tests, but no successful physical Android install, on-device model inference, or background lifecycle test.
+## Where things stand
 
-## One-time private GitHub setup
+The original signed APK is 1,225,329,912 bytes and its SHA-256 is:
 
-The connected Google Drive files are private, so GitHub Actions **cannot** fetch
-them with its standard GitHub token. Do not make them public or put tokens in
-source code.
+`068cae9639be745bdb9540fa5b0de790d66c506ba9973589251004fb9249a5b5`
 
-1. In Google Cloud, enable the Drive API and create a dedicated service account
-   with only the Drive read scope used by this workflow.
-2. Share only the existing Google Drive delivery folder with the service
-   account's `client_email` as **Viewer**.
-3. In **justappgrabbin/SynthAi → Settings → Secrets and variables → Actions**,
-   add two repository secrets:
-   - `SYNTHIA_DRIVE_SERVICE_ACCOUNT_JSON`: the full service-account JSON.
-   - `SYNTHIA_DRIVE_FOLDER_ID`: the ID of the existing 13-part delivery folder
-     (not its full URL).
-4. Merge the reviewed pull request containing the release workflow to
-   `main`. Then open **Actions → Synthia Adaptive — single-APK release
-   recovery → Run workflow**. The first run publishes one APK as a prerelease
-   asset on `synthia-adaptive-v0.5.4` once checks pass.
+The release workflow can publish it as **one GitHub Release asset** once GitHub
+Actions actually contains an artifact named
+`synthia-adaptive-v0.5.4-apk`, holding exactly
+`Synthia-Adaptive-v0.5.4.apk`.
 
-No service-account key is committed; folder identifiers remain private. It is
-also valid to leave credentials unconfigured: that fails explicitly and changes
-nothing.
+**There is no evidence this GitHub Actions artifact currently exists.**
+The previous delivery was built outside this workflow; simply merging it
+will not manufacture an APK, repair Android runtime behavior, or instantly
+produce a download. Do not use unrelated Synthia Computer build outputs.
 
-## After setup: what is automatic?
+## How automatic recovery works
 
-Every Monday GitHub checks the release asset metadata without downloading the
-model. If the APK is **missing**, GitHub Actions retrieves the 13 original
-pieces from Drive, verifies each hash, reassembles the archive, verifies the
-APK bytes and Android signature, and publishes **one GitHub Release APK**.
-A complete verified asset causes no download. An existing conflicting or
-unverified asset causes a hard failure rather than silent replacement.
+The workflow `.github/workflows/synthia-adaptive-self-service.yml`:
 
-The APK is still about **1.23 GB**: bundling the local quantized Qwen model
-keeps inference available offline. Converting this to a small installer with
-one-time model provisioning is a separate **app-code** change that requires
-the exact Synthia Adaptive source and phone tests. The release workflow does
-not create a substitute app or pretend to fix Android runtime behavior.
+1. Runs regression tests on changes.
+2. Every Monday, checks the v0.5.4 GitHub Release. An existing asset must
+   match both size and GitHub's reported SHA-256.
+3. If the APK is missing, searches GitHub Actions artifacts for the exact
+   name `synthia-adaptive-v0.5.4-apk`.
+4. Uses only a successful `main`-branch GitHub Actions run triggered by
+   `push` or `workflow_dispatch`.
+5. Downloads that artifact using the repository's existing GitHub token,
+   checks the exact APK hash, Android APK structure, package identity and
+   Android signature, then creates/uploads the single Release APK.
+6. Never overwrites a conflicting release file.
 
-## Reproducible no-network test
+If no artifact exists, the check finishes without publishing. Once a trusted
+build provides the exact original APK artifact, the next automatic check
+can publish it with no Google authorization.
 
-Run `python -m unittest discover -s delivery/tests -p 'test_*.py' -v`.
+For an existing successful build, **Actions → Synthia Adaptive — GitHub-only
+single-APK release → Run workflow** can optionally target its numeric
+`source_run_id`. The run must still provide the exact-named artifact and
+pass every verification check.
 
-For an operator with authorized local copies of the original 13 files:
+A future GitHub build from Synthia Adaptive's **actual source** can emit the
+named APK artifact and hand off to this workflow. The currently inspected
+`SynthAi` repository has separate Computer Android build implementations,
+not a proven reproducible source for the v0.5.4 signed Adaptive APK; do not
+claim they are interchangeable.
+
+## Verification and historical archive tools
 
 ```sh
+python -m unittest discover -s delivery/tests -p 'test_*.py' -v
 python delivery/synthia_adaptive_release.py \
   --manifest delivery/synthia-adaptive-v0.5.4.json \
-  assemble --parts-dir /path/to/parts --output-dir /path/to/out
+  verify-apk --apk /path/to/Synthia-Adaptive-v0.5.4.apk
 ```
 
-No part is re-signed or modified. ZIP CRC is checked during extraction, and
-the APK SHA-256 must match exactly before publication.
+The original 13-part split-delivery manifest and optional **local-only**
+`assemble` command remain for historical verification. GitHub Actions does
+not invoke them and has no Drive access.
 
-## Limits and next real app acceptance gate
+## Explicit limits
 
-This does **not** implement self-repairing code or an always-running resident
-agent in the Android app. A CI monitor can repair a missing download; it cannot
-verify how Android Accessibility, native inference, v86, background persistence,
-or user-data migration behave on a physical phone. Those need device results
-and the original Synthia Adaptive source, without conflating its package with
-any unrelated Synthia/Computer branches.
+This is a release-delivery workflow, not a Synthia application rebuild, model
+replacement, or in-app autonomous server. The original build verification
+reported 47 passing tests, but physical phone installation, inference, native
+permission behavior and Android background persistence remain unverified.
