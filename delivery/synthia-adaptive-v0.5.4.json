@@ -1,0 +1,79 @@
+{
+  "schema_version": 1,
+  "app": "Synthia Adaptive",
+  "version": "0.5.4",
+  "package_name": "com.synthia.adaptive",
+  "archive_name": "Synthia-Adaptive-v0.5.4.zip",
+  "archive_size_bytes": 1225330064,
+  "apk_name": "Synthia-Adaptive-v0.5.4.apk",
+  "apk_size_bytes": 1225329912,
+  "apk_sha256": "068cae9639be745bdb9540fa5b0de790d66c506ba9973589251004fb9249a5b5",
+  "release_tag": "synthia-adaptive-v0.5.4",
+  "parts": [
+    {
+      "name": "Synthia-Adaptive-v0.5.4.zip.001",
+      "sha256": "6fffe5d23fca9808a2cff6834ab902f504b26aaae71ce2e719cb249232007bed",
+      "size_bytes": 100000000
+    },
+    {
+      "name": "Synthia-Adaptive-v0.5.4.zip.002",
+      "sha256": "12186c2d963eef2fd13b8713886f60458b630dca17e6fb5068d828d3908afc6b",
+      "size_bytes": 100000000
+    },
+    {
+      "name": "Synthia-Adaptive-v0.5.4.zip.003",
+      "sha256": "3cdc9dbd09b727f05d08ca966b34feef4311aa4587e2e6d5e77bc75b5d41c3bf",
+      "size_bytes": 100000000
+    },
+    {
+      "name": "Synthia-Adaptive-v0.5.4.zip.004",
+      "sha256": "a6bf03990155ba95122b4001725f2dcd02be3e73ec25b2700e8d63d0ee70e0c2",
+      "size_bytes": 100000000
+    },
+    {
+      "name": "Synthia-Adaptive-v0.5.4.zip.005",
+      "sha256": "c7791e8cb2511c2a5a5fb53e2a40e3df9874c408d520f8c9c20ae8754e6f8655",
+      "size_bytes": 100000000
+    },
+    {
+      "name": "Synthia-Adaptive-v0.5.4.zip.006",
+      "sha256": "17ec87a2811d4cf283d3dd27b8e6afa8761349cf1ae73af0281ae0c4f8043c8b",
+      "size_bytes": 100000000
+    },
+    {
+      "name": "Synthia-Adaptive-v0.5.4.zip.007",
+      "sha256": "df61f76a3d413816042bf23b4ab8ee152620ad993fe82ff58ce1662ca9765ef7",
+      "size_bytes": 100000000
+    },
+    {
+      "name": "Synthia-Adaptive-v0.5.4.zip.008",
+      "sha256": "6cea93b1f3bfc1825b9ca8b9e010f849fac7d0c7a5e8e1f6bad7be9d58dd73e5",
+      "size_bytes": 100000000
+    },
+    {
+      "name": "Synthia-Adaptive-v0.5.4.zip.009",
+      "sha256": "8fea0de6769c40b0b518c6e77fdd393d98143840fbce5fc86a57e38bb2b34094",
+      "size_bytes": 100000000
+    },
+    {
+      "name": "Synthia-Adaptive-v0.5.4.zip.010",
+      "sha256": "e8884ea94a2d42160fa298573c988a27e131f47406a587caaf9f2d00723adbd8",
+      "size_bytes": 100000000
+    },
+    {
+      "name": "Synthia-Adaptive-v0.5.4.zip.011",
+      "sha256": "e05b9328a3f5bc0f4ca7f2aff75f5046ad99e577e137e5a63475235fea18d2fe",
+      "size_bytes": 100000000
+    },
+    {
+      "name": "Synthia-Adaptive-v0.5.4.zip.012",
+      "sha256": "0eafe91235b3768bc7a30734b9d8929eb52f6d7e988a5957f33202f7285fc706",
+      "size_bytes": 100000000
+    },
+    {
+      "name": "Synthia-Adaptive-v0.5.4.zip.013",
+      "sha256": "97e99c711ef1629e90b6e9cd4493553afe65c37fef83b4165fc80f61e1eda7b2",
+      "size_bytes": 25330064
+    }
+  ]
+}
