@@ -1,0 +1,22 @@
+name: Synthia standalone host trial smoke
+on:
+  push:
+    branches: [experiment/synthia-native-host-20261027]
+    paths:
+      - 'experiments/synthia-native-host/**'
+      - '.github/workflows/synthia-native-host-trial.yml'
+  pull_request:
+    paths:
+      - 'experiments/synthia-native-host/**'
+      - '.github/workflows/synthia-native-host-trial.yml'
+  workflow_dispatch:
+jobs:
+  isolated-launcher:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Bash syntax check
+        run: bash -n experiments/synthia-native-host/launch.sh experiments/synthia-native-host/tests/smoke.sh
+      - name: Test reversible isolated candidate setup
+        run: bash experiments/synthia-native-host/tests/smoke.sh
