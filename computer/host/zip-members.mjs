@@ -25,7 +25,8 @@ export function readZipMembers(bytes, { maxEntries = 200, maxMemberBytes = 60000
   if (data.readUInt16LE(eocd + 4) || data.readUInt16LE(eocd + 6)) throw new TypeError('Multi-disk ZIP is unsupported.');
   const count = data.readUInt16LE(eocd + 10);
   if (count > maxEntries) throw new RangeError('Archive has more than 200 entries.');
-  let at = data.readUInt32LE(eocd + 16);
+  const directoryStart = data.readUInt32LE(eocd + 16);
+  let at = directoryStart;
   const endDirectory = at + data.readUInt32LE(eocd + 12);
   if (endDirectory > eocd) throw new TypeError('Invalid ZIP directory extent.');
   const members = [];
@@ -44,7 +45,8 @@ export function readZipMembers(bytes, { maxEntries = 200, maxMemberBytes = 60000
     const local = data.readUInt32LE(at + 42);
     const next = at + 46 + nameBytes + extraBytes + commentBytes;
     if (next > endDirectory || (flags & 1) || ![0, 8].includes(method) || [compressed, expanded, local].includes(0xffffffff)) throw new TypeError('Unsupported ZIP entry.');
-    const name = data.subarray(at + 46, at + 46 + nameBytes).toString('utf8');
+    const centralNameStart = at + 46;
+    const name = data.subarray(centralNameStart, centralNameStart + nameBytes).toString('utf8');
     at = next;
     if (name.endsWith('/')) continue;
     const parts = name.split('/');
@@ -53,13 +55,31 @@ export function readZipMembers(bytes, { maxEntries = 200, maxMemberBytes = 60000
     paths.add(name);
     total += expanded;
     if (expanded > maxMemberBytes || total > maxTotalBytes) throw new RangeError('ZIP content exceeds the file limit.');
-    if (local + 30 > data.length || data.readUInt32LE(local) !== 0x04034b50) throw new TypeError('Invalid ZIP local entry.');
-    const start = local + 30 + data.readUInt16LE(local + 26) + data.readUInt16LE(local + 28);
-    if (start + compressed > data.length) throw new TypeError('Truncated ZIP member.');
+    if (local + 30 > directoryStart || data.readUInt32LE(local) !== 0x04034b50) throw new TypeError('Invalid ZIP local entry.');
+    const localFlags = data.readUInt16LE(local + 6);
+    const localMethod = data.readUInt16LE(local + 8);
+    const localNameBytes = data.readUInt16LE(local + 26);
+    const localExtraBytes = data.readUInt16LE(local + 28);
+    const localNameStart = local + 30;
+    const start = localNameStart + localNameBytes + localExtraBytes;
+    if (localFlags !== flags || localMethod !== method || localNameBytes !== nameBytes ||
+        start > directoryStart || !data.subarray(localNameStart, localNameStart + localNameBytes).equals(data.subarray(centralNameStart, centralNameStart + nameBytes))) {
+      throw new TypeError('ZIP local/central header mismatch.');
+    }
+    // With a data descriptor (bit 3), local CRC/sizes may be zero; the central
+    // directory is authoritative and expanded bytes are still CRC-checked.
+    if (!(flags & 0x8) && (data.readUInt32LE(local + 18) !== compressed ||
+        data.readUInt32LE(local + 22) !== expanded)) {
+      throw new TypeError('ZIP local/central header mismatch.');
+    }
+    if (start + compressed > directoryStart) throw new TypeError('ZIP member overlaps central directory.');
     const encoded = data.subarray(start, start + compressed);
     const content = method === 0 ? encoded : inflateRawSync(encoded, { maxOutputLength: maxMemberBytes });
     if (content.length !== expanded) throw new TypeError('ZIP expanded size mismatch.');
     if (crc32(content) !== expectedCrc) throw new TypeError('ZIP CRC-32 mismatch.');
+    if (!(flags & 0x8) && data.readUInt32LE(local + 14) !== expectedCrc) {
+      throw new TypeError('ZIP local/central header mismatch.');
+    }
     members.push({ name, content });
   }
   return members;
