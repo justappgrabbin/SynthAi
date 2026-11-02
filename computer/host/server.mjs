@@ -7,6 +7,7 @@ import { ComputerRuntime } from '../ComputerRuntime.mjs';
 import { JsonFilePersistence } from '../runtime/json-file-persistence.mjs';
 import { ConversationExecution } from '../services/conversation-execution.mjs';
 import { FileAdmission } from '../services/file-admission.mjs';
+import { NeurosymbolicInventory } from '../services/neurosymbolic-inventory.mjs';
 import { readZipMembers } from './zip-members.mjs';
 
 const root = resolve(fileURLToPath(new URL('../shell/kimi-linux/dist/', import.meta.url)));
@@ -51,6 +52,8 @@ const computer = await new ComputerRuntime({
 }).boot();
 const conversation = new ConversationExecution(computer);
 const files = new FileAdmission(computer, conversation.execution);
+const inventory = new NeurosymbolicInventory({ sourceRoot: resolve(fileURLToPath(new URL('../', import.meta.url))), dataDir, computer });
+await inventory.start();
 
 // Import names are allocated before the first asynchronous write. This prevents
 // an upload with the same filename from replacing an earlier user's original.
@@ -152,6 +155,8 @@ const server = createServer(async (req, res) => {
         const swarm = await computer.automataGateway.snapshot();
         return json(res, 200, { ready: true, computer: 'SynthAI Computer', swarmProcesses: swarm.processCount, files: computer.vfs.list('/').length });
       }
+      if (req.method === 'GET' && url.pathname === '/api/inventory') return json(res, 200, url.searchParams.get('summary') === '1' ? inventory.getSummary() : inventory.getFull());
+      if (req.method === 'POST' && url.pathname === '/api/inventory/refresh') return json(res, 200, await inventory.refresh('manual-api-request'));
       if (req.method === 'GET' && url.pathname === '/api/history') return json(res, 200, conversation.history());
       if (req.method === 'POST' && url.pathname === '/api/chat') return json(res, 200, await conversation.talk((await body(req)).text));
       if (req.method === 'GET' && url.pathname === '/api/filesystem') return json(res, 200, computer.state.get('computer.desktop.filesystem', null));
