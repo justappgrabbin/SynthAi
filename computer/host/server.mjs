@@ -9,6 +9,7 @@ import { FileAdmission } from '../services/file-admission.mjs';
 import { readZipMembers } from './zip-members.mjs';
 import { ModelIntegrationGateway } from '../services/model-integration-gateway.mjs';
 import { GenerativeAddressGateway } from '../services/generative-address-gateway.mjs';
+import { MajikiLoop } from '../services/majiki-loop.mjs';
 
 const root = resolve(fileURLToPath(new URL('../shell/kimi-linux/dist/', import.meta.url)));
 const workspaceRoot = resolve(fileURLToPath(new URL('../../public/', import.meta.url)));
@@ -30,6 +31,12 @@ const modelGateway = new ModelIntegrationGateway({
 });
 const addressGateway = new GenerativeAddressGateway({bus:computer.bus,state:computer.state});
 let modelTrainingBusy = false;
+// The embedded Node service owns this loop. It survives UI navigation and
+// writes its private job/outbox state into Android app-private storage.
+const majiki = await new MajikiLoop({
+  file: join(dataDir, 'majiki-state.json'),
+  listFiles: async () => computer.vfs.list('/'),
+}).boot();
 
 // Import names are allocated before the first asynchronous write. This prevents
 // an upload with the same filename from replacing an earlier user's original.
@@ -105,6 +112,20 @@ const server = createServer(async (req, res) => {
   try {
     const url = new URL(req.url ?? '/', `http://${host}:${port}`);
     if (url.pathname.startsWith('/api/')) {
+      if (url.pathname.startsWith('/api/majiki/')) {
+        const origin = req.headers.origin;
+        if (req.method !== 'GET' && origin && origin !== `http://${host}:${port}`)
+          return json(res, 403, { error: 'Cross-origin Majiki writes are not allowed' });
+        if (req.method === 'GET' && url.pathname === '/api/majiki/status')
+          return json(res, 200, majiki.snapshot());
+        if (req.method === 'POST' && url.pathname === '/api/majiki/task')
+          return json(res, 200, await majiki.enqueue((await body(req, 4000)).goal));
+        if (req.method === 'POST' && url.pathname === '/api/majiki/tick')
+          return json(res, 200, await majiki.tick());
+        if (req.method === 'POST' && url.pathname === '/api/majiki/scan')
+          return json(res, 200, await majiki.scan());
+        return json(res, 404, { error: 'Unknown Majiki operation' });
+      }
       if (req.method === 'GET' && url.pathname === '/api/status') {
         const swarm = await computer.automataGateway.snapshot();
         return json(res, 200, { ready: true, computer: 'SynthAI Computer', swarmProcesses: swarm.processCount, files: computer.vfs.list('/').length });
