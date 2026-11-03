@@ -48,3 +48,21 @@ test('Majiki states a blocker rather than claiming to have coded an unverified f
 test('Majiki refuses binary imports and unrelated system paths',()=>{
  assert.equal(inspectMajikiSources([{path:'/etc/passwd',content:'TODO'}, {path:'/home/user/Imports/private.bin',content:'TODO',meta:{encoding:'base64'}}]).length,0);
 });
+
+test('Majiki proactively queues only new reproducible defects and avoids duplicate work',async()=>{
+ const dir=await mkdtemp(join(tmpdir(),'majiki-watch-'));
+ try {
+   const m=await new MajikiLoop({file:join(dir,'state.json'),listFiles:async()=>[good]}).boot({automatic:false});
+   await m.heartbeat();
+   assert.equal(m.snapshot().jobs.length,1);
+   for(let i=0;i<3;i++)await m.tick();
+   assert.equal(m.snapshot().jobs[0].stage,'complete');
+   const count=m.snapshot().jobs.length;
+   await m.scan({autopilot:true});
+   assert.equal(m.snapshot().jobs.length,count,'Do not repeat same unfixed source revision');
+   const n=await new MajikiLoop({file:join(dir,'state.json'),listFiles:async()=>[good]}).boot({automatic:false});
+   await n.scan({autopilot:true});
+   assert.equal(n.snapshot().jobs.length,count,'Deduplication survives service restart');
+   m.close();n.close();
+ }finally{await rm(dir,{recursive:true,force:true});}
+});
