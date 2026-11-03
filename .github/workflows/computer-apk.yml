@@ -2,8 +2,11 @@ name: Synthia Computer Android checkpoint
 on:
   workflow_dispatch:
   push:
-    branches: [reassembly/computer-2026-09-29, integration/synthia-resident-dual-graph-20261025]
+    branches: [reassembly/computer-2026-09-29, integration/synthia-resident-dual-graph-20261025, integration/majiki-success-engine-20261103]
     paths: ['computer/**', '.github/workflows/computer-apk.yml']
+
+permissions:
+  contents: write
 
 jobs:
   apk:
@@ -26,6 +29,8 @@ jobs:
           gradle-version: '8.7'
       - run: sdkmanager 'platforms;android-35' 'ndk;27.0.12077973' 'cmake;3.22.1'
       - run: npm --prefix computer/shell/kimi-linux ci && npm --prefix computer run build && npm --prefix computer run test:reassembly
+      - name: Run Majiki autonomous loop acceptance tests
+        run: node --test computer/tests/majiki-loop.test.mjs
       - run: python computer/android/prepare-assets.py
       - name: Stage Node 18 mobile runtime
         run: |
@@ -87,3 +92,34 @@ jobs:
           name: synthia-computer-apk-part-07
           path: /tmp/computer-apk-parts/synthia-computer.apk.part-07
           if-no-files-found: warn
+
+      - name: Confirm Majiki assets are packaged
+        if: github.ref == 'refs/heads/integration/majiki-success-engine-20261103'
+        run: |
+          python - <<'PY'
+          from zipfile import ZipFile
+          from io import BytesIO
+          apk = 'computer/android/app/build/outputs/apk/debug/app-debug.apk'
+          with ZipFile(apk) as package:
+              payload = package.read('assets/computer-assets.zip')
+          with ZipFile(BytesIO(payload)) as assets:
+              files = set(assets.namelist())
+              required = [
+                  'host/server.mjs',
+                  'services/majiki-loop.mjs',
+                  'shell/kimi-linux/dist/majiki.html',
+              ]
+              missing = [p for p in required if p not in files]
+              if missing: raise SystemExit('Majiki APK is missing: ' + ', '.join(missing))
+              print('Majiki embedded Node, persistent loop and front screen packaged')
+          PY
+      - name: Publish direct installable APK preview
+        if: github.ref == 'refs/heads/integration/majiki-success-engine-20261103'
+        env:
+          GH_TOKEN: \${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "majiki-preview-\${GITHUB_RUN_ID}" \
+            "computer/android/app/build/outputs/apk/debug/app-debug.apk#Majiki-Success-Engine-preview.apk" \
+            --repo "\${GITHUB_REPOSITORY}" --target "\${GITHUB_SHA}" --prerelease \
+            --title "Majiki Success Engine - Android preview \${GITHUB_RUN_NUMBER}" \
+            --notes "Embedded local Node server, persistent task loop, verified non-destructive JSON repair outbox. Automated source and APK packaging checks passed. Physical-device Android testing, general coding autonomy, background survival, and update-key continuity are NOT yet verified. A preview debug signature may not update any existing org.synthai.computer installation. Preserve installed app data."
