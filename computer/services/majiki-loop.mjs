@@ -6,6 +6,30 @@ const iso = () => new Date().toISOString();
 const fresh = () => ({ version: 1, jobs: [], events: [], outbox: [], lastScan: null, seenScans: [] });
 const MAX_FILES = 250;
 
+function stripTrailingCommas(text) {
+  // JSON-aware comma removal: never rewrite comma/bracket sequences in strings.
+  let quoted = false, escaped = false, out = '';
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+    if (quoted) {
+      out += ch;
+      if (escaped) escaped = false;
+      else if (ch === '\\') escaped = true;
+      else if (ch === '"') quoted = false;
+      continue;
+    }
+    if (ch === '"') { quoted = true; out += ch; continue; }
+    if (ch === ',') {
+      let j = i + 1;
+      while (/\s/.test(text[j] || '') && j < text.length) j++;
+      if (text[j] === '}' || text[j] === ']') continue;
+    }
+    out += ch;
+  }
+  return out;
+}
+
+
 function inspect(records) {
   const findings = [];
   for (const item of records.slice(0, MAX_FILES)) {
@@ -16,7 +40,7 @@ function inspect(records) {
     if (path.endsWith('.json')) {
       try { JSON.parse(item.content); }
       catch (error) {
-        const candidate = item.content.replace(/,\s*([}\]])/g, '$1');
+        const candidate = stripTrailingCommas(item.content);
         let proposedFix = null;
         if (candidate !== item.content) {
           try { JSON.parse(candidate); proposedFix = candidate; } catch { /* no safe candidate */ }
