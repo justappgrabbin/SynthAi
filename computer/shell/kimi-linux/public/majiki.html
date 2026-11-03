@@ -17,7 +17,7 @@ details{margin-top:10px}summary{cursor:pointer;font-weight:600}hr{border:none;bo
 </style></head><body>
 <header><div class="wrap"><div class="eyebrow">EMBEDDED ANDROID COMPUTER</div><h1>Majiki Success Engine</h1><p>One durable work queue. Research what is locally observable, propose repairs, verify results, preserve originals.</p><div class="row"><span id="live" class="pill">Connecting to local server</span><a class="btn secondary" href="/">Open existing computer</a></div></div></header>
 <main class="wrap">
-<section><h2>Give Majiki a job</h2><label for="goal">Work objective</label><textarea id="goal">Inspect my imported Human Design application files, identify broken source, and prepare only repairs that can be verified.</textarea><div class="row"><button id="start">Start job</button><button class="secondary" id="scan">Scan local files</button><button class="secondary" id="step">Run one step</button></div><p id="message" role="status">No job submitted.</p></section>
+<section><h2>Give Majiki a job</h2><label for="goal">Work objective</label><textarea id="goal">Inspect my imported Human Design application files, identify broken source, and prepare only repairs that can be verified.</textarea><div class="row"><input type="file" id="imports" multiple aria-label="Import local source files" style="max-width:100%;padding:10px"><button class="secondary" id="importFiles">Import source (up to 6 MB per file)</button></div><div class="row"><button id="start">Start job</button><button class="secondary" id="scan">Scan local files</button><button class="secondary" id="step">Run one step</button></div><p id="message" role="status">No job submitted.</p></section>
 <section><h2>Continuous flow <span id="count" class="pill">0 jobs</span></h2><p>Each stage advances inside the embedded Node service. The screen shows the receipts, not pretend agent activity.</p><div id="jobs" aria-live="polite"></div></section>
 <section><h2>Research &amp; diagnostics</h2><div id="findings" class="muted">No scan yet.</div></section>
 <section><h2>Verified outbox</h2><p>Repairs are drafts. Original files stay untouched. Passing JSON syntax validation does not prove the whole application works.</p><div id="outbox" class="muted">Nothing ready yet.</div></section>
@@ -35,6 +35,15 @@ q('findings').replaceChildren();if(!s.lastScan)q('findings').append(node('p','Us
 lastOutbox=s.outbox;q('outbox').replaceChildren();if(!s.outbox.length)q('outbox').append(node('p','No verified drafts yet.'));for(const a of [...s.outbox].reverse()){const d=row(q('outbox'),a.name+' · '+a.status,a.originalPath);const show=document.createElement('details'),summary=node('summary','View generated repair'),pre=node('pre',a.content);show.append(summary,pre);d.append(show);const copy=node('button','Copy repair','secondary');copy.addEventListener('click',async()=>{try{await navigator.clipboard.writeText(a.content);q('message').textContent='Repair copied';}catch{q('message').textContent='Open generated repair and select its text to copy.'}});d.append(copy);}
 }catch(e){q('live').textContent='Local runtime unavailable';q('live').className='pill error';q('message').textContent='Cannot connect: '+e.message;}}
 async function act(path,data){try{q('message').textContent='Working…';const r=await api(path,data);q('message').textContent=path==='task'?'Job queued '+r.id:path==='tick'?'Step result: '+JSON.stringify(r):'Scan completed: '+r.count+' findings';await refresh();}catch(e){q('message').textContent='Operation failed: '+e.message;}}
+q('importFiles').addEventListener('click',async()=>{
+ const files=[...q('imports').files];if(!files.length){q('message').textContent='Choose a local file first.';return;}
+ let ok=0;for(const f of files){if(f.size>6000000){q('message').textContent='Import limit: '+f.name+' is over 6 MB; original file remains on your device.';continue;}
+ try{const base64=await new Promise((resolve,reject)=>{const reader=new FileReader();reader.onerror=()=>reject(reader.error);reader.onload=()=>resolve(String(reader.result).split(',')[1]||'');reader.readAsDataURL(f)});
+ const response=await fetch('/api/ingest',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:f.name,base64})});
+ const payload=await response.json();if(!response.ok)throw Error(payload.error||'Import rejected');ok++;
+ }catch(e){q('message').textContent='Import failed for '+f.name+': '+e.message;}}
+ if(ok){q('message').textContent=ok+' source file(s) imported into the existing Computer. Scan or allow the local watcher to inspect them.';await act('scan',{});}
+});
 q('start').addEventListener('click',()=>act('task',{goal:q('goal').value}));q('scan').addEventListener('click',()=>act('scan',{}));q('step').addEventListener('click',()=>act('tick',{}));
 refresh();setInterval(refresh,3000);
 </script></body></html>
