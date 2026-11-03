@@ -35,8 +35,22 @@ export class ConversationExecution {
     // loop. Its result is consumed as evidence, not substituted for the answer.
     const learned = await this.execution.chat(text);
     let responseText = donor.text;
+    let replyProvider = donor.assistant?.provider ?? 'local-morph';
+    const isImportQuery = /\b(what|which|show|list)\b/i.test(text) &&
+      /\b(files?|imports?|uploaded)\b/i.test(text);
+    // Existing donor tools produce the semantic grounding and learning record.
+    // The optional local LLM only realizes the response in natural language.
+    // If the configured model cannot answer, surface the error, not a fake model reply.
+    if (this.computer.llm?.configured && !isImportQuery) {
+      const generated = await this.computer.llm.chat({
+        text, history: this.computer.state.get('computer.chat.history', []),
+      });
+      responseText = generated.text;
+      replyProvider = generated.provider + ':' + generated.model;
+    }
     const imported = this.computer.vfs.list('/home/user/Imports/');
-    if (/\b(what|which|show|list)\b/i.test(text) && /\b(files?|imports?|uploaded)\b/i.test(text)) {
+    if (isImportQuery) {
+      replyProvider = 'computer-imports';
       responseText = imported.length
         ? `I have ${imported.length} imported file${imported.length === 1 ? '' : 's'} addressed in this computer:\n${imported.slice(-30).map((file) => `• ${file.path.replace('/home/user/Imports/', '')} — ${file.meta.address.dimension}, Gate ${file.meta.address.gate}`).join('\n')}`
         : 'There are no imported files yet. Open Import and choose a file or ZIP.';
@@ -48,17 +62,17 @@ export class ConversationExecution {
       intent: donor.conversation.semantic.intent,
       dimension: donor.conversation.semantic.dimension,
       linguisticGrounded: true,
-      provider: donor.assistant?.provider ?? 'local-morph',
+      provider: replyProvider,
       learningRecord: learned.recordId,
     };
     const history = this.computer.state.get('computer.chat.history', []);
     await this.computer.state.set('computer.chat.history', [...history, item].slice(-120), { source: 'conversation' });
     const residentReceipt = await this.computer.synthia.recordReply(residentReading, {
-      text: responseText, provider: donor.assistant?.provider ?? 'local-morph',
+      text: responseText, provider: replyProvider,
     });
     const event = await this.computer.emitEvent({
       actor_id: 'user:local', actor_type: 'user', target_id: 'synthia', event_type: 'message',
-      input: text, event_address: item.address, provider: 'donor:morph-chat+execution-spine',
+      input: text, event_address: item.address, provider: replyProvider,
       result: { text: item.text, focus: item.focus, intent: item.intent, learningRecord: item.learningRecord },
       result_status: 'success', observable_effect: 'readable reply and persistent conversation record',
     });
