@@ -38,6 +38,14 @@ jobs:
           echo 'bd7321eaa1a7602fbe0bb87302df2d79d87835cf4363fbdd17c350dbb485c2af  /tmp/node-mobile.zip' | sha256sum -c -
           python computer/android/prepare-node.py /tmp/node-mobile.zip
       - run: gradle -p computer/android :app:assembleDebug --stacktrace
+      - name: Launch APK in Android emulator and verify actual local API
+        if: github.ref == 'refs/heads/integration/majiki-success-engine-20261103'
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 35
+          arch: x86_64
+          target: google_apis
+          script: bash computer/android/majiki-smoke.sh
       - name: Verify and prepare APK handoff
         run: |
           APK=computer/android/app/build/outputs/apk/debug/app-debug.apk
@@ -118,8 +126,11 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          TIP=$(gh api "repos/${GITHUB_REPOSITORY}/git/ref/heads/integration/majiki-success-engine-20261103" --jq '.object.sha')
+          if [ "$TIP" != "$GITHUB_SHA" ]; then echo "Newer build exists; skip old APK release"; exit 0; fi
+          cp computer/android/app/build/outputs/apk/debug/app-debug.apk /tmp/Majiki-Success-Engine-preview.apk
           gh release create "majiki-preview-${GITHUB_RUN_ID}" \
-            "computer/android/app/build/outputs/apk/debug/app-debug.apk#Majiki-Success-Engine-preview.apk" \
+            "/tmp/Majiki-Success-Engine-preview.apk" \
             --repo "${GITHUB_REPOSITORY}" --target "${GITHUB_SHA}" --prerelease \
             --title "Majiki Success Engine - Android preview ${GITHUB_RUN_NUMBER}" \
             --notes "Embedded local Node server, persistent task loop, verified non-destructive JSON repair outbox. Automated source and APK packaging checks passed. Physical-device Android testing, general coding autonomy, background survival, and update-key continuity are NOT yet verified. A preview debug signature may not update any existing org.synthai.computer installation. Preserve installed app data."
