@@ -116,10 +116,10 @@ jobs:
       - name: Publish direct installable APK preview
         if: github.ref == 'refs/heads/integration/majiki-success-engine-20261103'
         env:
-          GH_TOKEN: \${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release create "majiki-preview-\${GITHUB_RUN_ID}" \
+          gh release create "majiki-preview-${GITHUB_RUN_ID}" \
             "computer/android/app/build/outputs/apk/debug/app-debug.apk#Majiki-Success-Engine-preview.apk" \
-            --repo "\${GITHUB_REPOSITORY}" --target "\${GITHUB_SHA}" --prerelease \
-            --title "Majiki Success Engine - Android preview \${GITHUB_RUN_NUMBER}" \
+            --repo "${GITHUB_REPOSITORY}" --target "${GITHUB_SHA}" --prerelease \
+            --title "Majiki Success Engine - Android preview ${GITHUB_RUN_NUMBER}" \
             --notes "Embedded local Node server, persistent task loop, verified non-destructive JSON repair outbox. Automated source and APK packaging checks passed. Physical-device Android testing, general coding autonomy, background survival, and update-key continuity are NOT yet verified. A preview debug signature may not update any existing org.synthai.computer installation. Preserve installed app data."
