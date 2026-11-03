@@ -1,0 +1,138 @@
+{
+  "version": "cultivation-v1",
+  "profile_source": "English adaptation of supplied MYLIFE twelve-question interview; birth details are reused from the master chart. Unanswered fields stay empty.",
+  "practice_source": "Titles and reflection prompts from supplied Self-Discovery GAME_CONFIG.",
+  "questions": [
+    {
+      "id": "q1",
+      "label": "Your present situation",
+      "prompt": "Your birth details already belong to your chart. What would you like to share about your life today?"
+    },
+    {
+      "id": "q2",
+      "label": "Work and resources",
+      "prompt": "What do you currently do, and how are you supported financially?"
+    },
+    {
+      "id": "q3",
+      "label": "Strengths",
+      "prompt": "Name up to three strengths. How strong does each feel, from 1 to 10?"
+    },
+    {
+      "id": "q4",
+      "label": "Difficulties",
+      "prompt": "Name up to three recurring difficulties. How much does each affect you, from 1 to 10?"
+    },
+    {
+      "id": "q5",
+      "label": "Your first priority",
+      "prompt": "What matters most to you right now, and why?"
+    },
+    {
+      "id": "q6",
+      "label": "A concrete picture",
+      "prompt": "If that priority were going well, what would you actually see happening?"
+    },
+    {
+      "id": "q7",
+      "label": "Other priorities",
+      "prompt": "What are your second and third priorities?"
+    },
+    {
+      "id": "q8",
+      "label": "Longer direction",
+      "prompt": "Five years from now, where would you like to be, with whom, doing what?"
+    },
+    {
+      "id": "q9",
+      "label": "A recurring loop",
+      "prompt": "What situation tends to repeat: what happens, what do you do, and how does it end?"
+    },
+    {
+      "id": "q10",
+      "label": "Early signals",
+      "prompt": "What two or three signs tell you that things are becoming difficult?"
+    },
+    {
+      "id": "q11",
+      "label": "What supports you",
+      "prompt": "What two or three habits or conditions help you stay steady?"
+    },
+    {
+      "id": "q12",
+      "label": "This quarter",
+      "prompt": "What are up to three goals that would make the next three months worthwhile?"
+    }
+  ],
+  "practice_options": [
+    {
+      "id": "reflection",
+      "title": "Self Reflection",
+      "description": "Explore a thought about yourself",
+      "category": "identity",
+      "prompts": [
+        "What makes you unique?",
+        "What do you love about yourself?",
+        "When do you feel most like you?",
+        "What is something only you can do?",
+        "What makes you smile inside?"
+      ]
+    },
+    {
+      "id": "pattern",
+      "title": "Purpose Pattern",
+      "description": "Discover what drives you forward",
+      "category": "purpose",
+      "prompts": [
+        "What do you want to create?",
+        "How do you want to help others?",
+        "What problem do you want to solve?",
+        "What makes you feel useful?",
+        "What would you do if you could do anything?"
+      ]
+    },
+    {
+      "id": "connection",
+      "title": "Heart Link",
+      "description": "Strengthen your bonds with others",
+      "category": "connection",
+      "prompts": [
+        "Who makes you feel understood?",
+        "How do you show you care?",
+        "What do you value in a friend?",
+        "When do you feel connected?",
+        "What makes a relationship special?"
+      ]
+    },
+    {
+      "id": "memory",
+      "title": "Strength Recall",
+      "description": "Remember your inner power",
+      "category": "strength",
+      "prompts": [
+        "When were you brave?",
+        "What challenge have you overcome?",
+        "What are you proud of?",
+        "When did you surprise yourself?",
+        "What strength do others see in you?"
+      ]
+    }
+  ],
+  "story_paths": [
+    {
+      "id": "remember",
+      "label": "Remember",
+      "text": "Who were you before this moment?"
+    },
+    {
+      "id": "explore",
+      "label": "Explore",
+      "text": "The void ripples around you, revealing hidden patterns."
+    },
+    {
+      "id": "dream",
+      "label": "Dream",
+      "text": "You see yourself—many selves—reflected in an infinite mirror."
+    }
+  ]
+}

@@ -1,0 +1,93 @@
+name: Human Design and Resonance APK
+on:
+  push:
+    branches: [integration/human-design-resonance-phone]
+    paths: ['phone/**', '.github/workflows/phone-preview.yml']
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: Existing owner-approved phone-preview tag for this commit
+        required: true
+        type: string
+permissions:
+  contents: write
+concurrency:
+  group: phone-preview-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    defaults:
+      run:
+        working-directory: phone
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify owner-approved release source
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          PREVIEW_RELEASE_TAG: ${{ inputs.release_tag }}
+        run: |
+          if [[ ! "$PREVIEW_RELEASE_TAG" =~ ^phone-preview-[A-Za-z0-9][A-Za-z0-9._-]*$ ]]; then
+            echo '::error::Choose an existing owner-approved phone-preview tag.'
+            exit 1
+          fi
+          git fetch --depth=1 origin "refs/tags/$PREVIEW_RELEASE_TAG"
+          approved_source=$(git rev-parse 'FETCH_HEAD^{commit}')
+          if [ "$approved_source" != "$GITHUB_SHA" ]; then
+            echo '::error::The approved tag does not match this source commit.'
+            exit 1
+          fi
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - run: pip install -r requirements-web.txt pytest
+      - run: npm ci --prefix web && npm run build --prefix web
+      - run: npm ci --ignore-scripts --prefix runtimes/isohuman && npm run build --prefix runtimes/isohuman
+      - run: python -m pytest tests/test_birth_anchor.py tests/test_local_model.py tests/test_research_registry.py tests/test_integrated_questions.py tests/test_geonatal.py tests/test_contact_loop.py tests/test_being_state.py tests/test_cultivation.py tests/test_resonance_network.py tests/test_private_access.py tests/test_ephemeris_reference.py -q
+      - run: node scripts/test-chart-game.mjs
+      - run: node scripts/package-phone-preview.mjs
+      - uses: android-actions/setup-android@v3
+        with:
+          packages: platform-tools
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+      - uses: actions/cache@v4
+        with:
+          path: phone/android/.preview-signing/debug.keystore
+          key: synthai-phone-preview-signing-v2
+      - name: Prepare and verify stable preview signing
+        run: |
+          mkdir -p android/.preview-signing
+          if [ ! -f android/.preview-signing/debug.keystore ]; then
+            if [ -f android/preview-signing.sha256 ]; then
+              echo '::error::The pinned preview signing key is unavailable. Restore the owner key; do not create a replacement or uninstall the existing app.'
+              exit 1
+            fi
+            keytool -genkeypair -keystore android/.preview-signing/debug.keystore -storepass android -keypass android -alias androiddebugkey -dname 'CN=Synthia Preview,O=Synthia,C=US' -keyalg RSA -keysize 2048 -validity 10000
+          fi
+          keytool -exportcert -keystore android/.preview-signing/debug.keystore -storepass android -alias androiddebugkey -file preview-certificate.der
+          python scripts/check-preview-signing.py
+      - run: sdkmanager 'platforms;android-35' 'build-tools;35.0.0'
+      - run: gradle -p android --no-daemon assembleDebug -PbuildNumber=${{ github.run_number }}
+      - run: cp android/app/build/outputs/apk/debug/app-debug.apk Synthia-Resonance-preview.apk
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Synthia-Resonance-preview-apk
+          path: phone/Synthia-Resonance-preview.apk
+          retention-days: 30
+      - name: Publish approved APK
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PREVIEW_RELEASE_TAG: ${{ inputs.release_tag }}
+        run: |
+          gh release create "$PREVIEW_RELEASE_TAG" Synthia-Resonance-preview.apk preview-certificate.der --verify-tag --prerelease --target "$GITHUB_SHA" --title 'Human Design and Resonance Phone Preview' --notes 'Android 8+. This preview client connects to your HTTPS Synthia server. It does not bundle a running server or model weights. Source and server setup: phone/docs/PHONE-PREVIEW.md. Review changes before installing. World embodiments and the interactive science lab are later phases.'

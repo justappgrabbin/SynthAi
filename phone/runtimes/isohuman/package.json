@@ -1,0 +1,36 @@
+{
+  "name": "isohuman",
+  "version": "1.0.0",
+  "description": "IsoHuman Vector Mapping — Unified Relational Cognitive Architecture",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "dev": "ts-node src/api/server.ts",
+    "start": "node dist/api/server.js",
+    "test": "jest",
+    "geonatal": "node dist/cli/geonatal.js",
+    "synthia:build": "node dist/cli/synthia-build.js",
+    "ui:build": "cd src/ui && npm run build",
+    "ui:dev": "cd src/ui && npm start",
+    "setup": "ts-node scripts/setup.ts"
+  },
+  "dependencies": {
+    "astronomy-engine": "^2.1.19",
+    "better-sqlite3": "^9.4.3",
+    "cors": "^2.8.5",
+    "express": "^4.18.3",
+    "uuid": "^9.0.1"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.9",
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
+    "@types/jest": "^29.5.12",
+    "@types/node": "^20.11.24",
+    "@types/uuid": "^9.0.8",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.2",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.3"
+  }
+}

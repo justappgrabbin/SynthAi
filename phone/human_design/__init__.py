@@ -1,0 +1,80 @@
+"""Human Design product workspace."""
+
+from .bodygraph import render_bodygraph_svg, write_bodygraph_svg
+from .being_state import Activation, ActivationEngine, BeingStateSpace, Coordinate, reaction_flux
+from .body_energy import build_body_energy_profile
+from .career import generate_career_report, render_career_report_markdown
+from .contact_loop import ContactLoop, GrammarController
+from .deep_synthesis import build_deep_synthesis_profile, render_deep_synthesis_markdown
+from .dimensional import DimensionalOntology, PerspectiveEngine
+from .empirical import analyze_forced_choice_experiment
+from .empirical_dataset import build_public_figure_manifest, load_manifest
+from .field_hub import FieldEvent, KleinToolLayer, MCPHub, build_local_field_hub
+from .prediction_registry import analyze_prospective_registry
+from .engine import calculate_chart, parse_birth_datetime
+from .input import normalize_birth_input, normalize_birth_time_range
+from .language_contact import Autoling, Diseminer, SemanticGraph
+from .product import build_llm_product
+from .providers import DeepSeekClient, MiniMaxImageClient, external_provider_status
+from .relationship import compare_relationship
+from .relationship_product import build_relationship_product
+from .relationship_reading import (
+    generate_relationship_reading,
+    render_relationship_reading_markdown,
+)
+from .reading import generate_reading, render_reading_markdown
+from .timing import analyze_timing
+from .timing_product import build_timing_product
+from .timing_reading import generate_timing_reading, render_timing_reading_markdown
+from .uncertainty import analyze_birth_time_range
+from .version import VERSION as __version__
+
+__all__ = [
+    "__version__",
+    "BeingStateSpace",
+    "Coordinate",
+    "Activation",
+    "ActivationEngine",
+    "reaction_flux",
+    "build_llm_product",
+    "build_timing_product",
+    "build_body_energy_profile",
+    "build_deep_synthesis_profile",
+    "DimensionalOntology",
+    "PerspectiveEngine",
+    "SemanticGraph",
+    "Diseminer",
+    "Autoling",
+    "ContactLoop",
+    "GrammarController",
+    "FieldEvent",
+    "MCPHub",
+    "KleinToolLayer",
+    "build_local_field_hub",
+    "DeepSeekClient",
+    "MiniMaxImageClient",
+    "external_provider_status",
+    "analyze_forced_choice_experiment",
+    "analyze_prospective_registry",
+    "build_public_figure_manifest",
+    "load_manifest",
+    "calculate_chart",
+    "generate_career_report",
+    "render_bodygraph_svg",
+    "write_bodygraph_svg",
+    "analyze_birth_time_range",
+    "analyze_timing",
+    "compare_relationship",
+    "build_relationship_product",
+    "normalize_birth_input",
+    "normalize_birth_time_range",
+    "parse_birth_datetime",
+    "generate_reading",
+    "render_career_report_markdown",
+    "render_deep_synthesis_markdown",
+    "generate_timing_reading",
+    "generate_relationship_reading",
+    "render_reading_markdown",
+    "render_timing_reading_markdown",
+    "render_relationship_reading_markdown",
+]

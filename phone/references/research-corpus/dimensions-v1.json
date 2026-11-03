@@ -1,0 +1,155 @@
+{
+  "schema_version": "1.0.0",
+  "status": "source-derived-provisional",
+  "source_note": "Structured transcription of six user-supplied reference images. Each image is a separate contextual assertion set, not a duplicate table expected to use identical correspondences. Base number and dimension number are separate coordinates. The second uploaded image is from Book of Colors.",
+  "merge_policy": "Source assertions may converge in a weighted synthesis when perspective proportions support it. The synthesis remains reversible and retains source, layer, condition, scope, and contribution weight.",
+  "source_records": [
+    {"upload_index": 1, "source": "user-supplied dimensional chart", "dimension_upload_order": 2, "scope": "macrocosm-to-microcosm translation", "assertion_set": "macro_micro"},
+    {"upload_index": 2, "source": "Book of Colors", "content": "color, tone, and base correspondences", "scope": "substructure and Base consciousness", "assertion_set": "book_of_colors"},
+    {"upload_index": 3, "source": "user-supplied crystals and monopole page", "dimension_upload_order": 1, "scope": "crystal, vehicle, witness, and attractor binaries", "assertion_set": "crystals_monopole"},
+    {"upload_index": 4, "source": "user-supplied numbered dimension page", "content": "explicit dimension numbering", "dimension_upload_order": 3, "scope": "dimension identity and first nature relation", "assertion_set": "numbered_natures"},
+    {"upload_index": 5, "source": "user-supplied dimensional/basic-component page", "dimension_upload_order": 4, "scope": "four-dimensional basic components with separate Space entry", "assertion_set": "basic_components"},
+    {"upload_index": 6, "source": "user-supplied cosmology conditions page", "dimension_upload_order": 5, "scope": "pre-contact, singularity-contact, and post-contact transformations", "assertion_set": "cosmology_conditions"}
+  ],
+  "declared_dimension_upload_order": [2, 1, 3, 4, 5],
+  "order_semantics": "none; upload and display order are provenance only",
+  "identity_rule": "Resolve dimensions primarily through explicit correspondence fields and stable IDs. Order may contribute proportional evidence when a source defines it as meaningful.",
+  "dimension_number_map": [
+    {"dimension_number": 1, "dimension": "Being"},
+    {"dimension_number": 2, "dimension": "Movement"},
+    {"dimension_number": 3, "dimension": "Space"},
+    {"dimension_number": 4, "dimension": "Design"},
+    {"dimension_number": 5, "dimension": "Evolution"}
+  ],
+  "dimensions": [
+    {
+      "base": 1,
+      "dimension_number": 2,
+      "macro": "Movement",
+      "question": "Where?",
+      "micro": "Individuality",
+      "polarity": "Yang/Yang",
+      "mode": "Reactive",
+      "sense": "Seeing",
+      "function": "Location",
+      "basic_component": "Magnetic Monopole",
+      "nature_chain": ["Movement", "Energy", "Creation", "Seeing", "Landscape", "Environment"],
+      "micro_nature": ["Activity", "Reaction", "Limitation", "Perspective", "Relation"],
+      "keynote_variants": ["I Define", "I Create"],
+      "keyword_variants": ["Uniqueness", "to measure", "to name"],
+      "symbol": "energy"
+    },
+    {
+      "base": 2,
+      "dimension_number": 5,
+      "macro": "Evolution",
+      "question": "What?",
+      "micro": "The Mind",
+      "polarity": "Yang/Yin",
+      "mode": "Integrative",
+      "sense": "Taste",
+      "function": "Identification",
+      "basic_component": "Personality Crystal",
+      "nature_chain": ["Evolution", "Gravity", "Memory", "Taste", "Love", "Light"],
+      "micro_nature": ["Character", "Separation", "Nature", "Integration", "Spirit"],
+      "keynote_variants": ["I Remember"],
+      "keyword_variants": ["Role", "transgenerational consciousness"],
+      "symbol": "gravity_or_light"
+    },
+    {
+      "base": 3,
+      "dimension_number": 1,
+      "macro": "Being",
+      "question": "When?",
+      "micro": "The Body",
+      "polarity": "Yin/Yin",
+      "mode": "Objective",
+      "sense": "Touching",
+      "function": "Collaboration",
+      "basic_component": "The Atom",
+      "nature_chain": ["Being", "Matter", "Touch", "Sex", "Survival"],
+      "micro_nature": ["Biology", "Chemistry", "Objectivity", "Geometry", "Trajectory"],
+      "keynote_variants": ["I Am"],
+      "keyword_variants": ["Genetics", "Matter is Being"],
+      "symbol": "matter"
+    },
+    {
+      "base": 4,
+      "dimension_number": 4,
+      "macro": "Design",
+      "question": "Why?",
+      "micro": "The Ego",
+      "polarity": "Yin/Yang",
+      "mode": "Progressive",
+      "sense": "Smell",
+      "function": "Manifestation",
+      "basic_component": "Design Crystal",
+      "nature_chain": ["Design", "Structure", "Progress", "Smell", "Life", "Art"],
+      "micro_nature": ["Homo Sapiens", "Growth", "Decay", "Continuity", "Manifestation"],
+      "keynote_variants": ["I Design"],
+      "keyword_variants": ["Self", "information feed"],
+      "symbol": "structure_or_progress"
+    },
+    {
+      "base": 5,
+      "dimension_number": 3,
+      "macro": "Space",
+      "question": "Who?",
+      "micro": "Personality",
+      "polarity": "Space/Illusion",
+      "mode": "Subjective",
+      "sense": "Hearing",
+      "function": "Mutation",
+      "basic_component": "Personality Crystal",
+      "nature_chain": ["Space", "Form", "Illusion", "Hearing", "Music", "Freedom"],
+      "micro_nature": ["Type", "Fantasy", "Subjectivity", "Rhythm", "Timing"],
+      "keynote_variants": ["I Think", "I Communicate"],
+      "keyword_variants": ["Presence", "Communication"],
+      "symbol": "space_or_form"
+    }
+  ],
+  "tone_map": [
+    {"tone": 1, "theme": "Security", "department": "Smell", "binary": "Splenic"},
+    {"tone": 2, "theme": "Uncertainty", "department": "Taste", "binary": "Splenic"},
+    {"tone": 3, "theme": "Action", "department": "Outer Vision", "binary": "Ajna"},
+    {"tone": 4, "theme": "Meditation", "department": "Inner Vision", "binary": "Ajna"},
+    {"tone": 5, "theme": "Judgement", "department": "Feeling", "binary": "Solar Plexus"},
+    {"tone": 6, "theme": "Acceptance", "department": "Touch", "binary": "Solar Plexus"}
+  ],
+  "color_map": [
+    {"color": 1, "response": "Fear", "mode_binary": ["Communalist", "Separatist"], "awareness_binary": "Splenic"},
+    {"color": 2, "response": "Hope", "mode_binary": ["Theist", "Anti-theist"], "awareness_binary": "Splenic"},
+    {"color": 3, "response": "Desire", "mode_binary": ["Leader", "Follower"], "awareness_binary": "Ajna"},
+    {"color": 4, "response": "Need", "mode_binary": ["Master", "Novice"], "awareness_binary": "Ajna"},
+    {"color": 5, "response": "Guilt", "mode_binary": ["Conditioner", "Conditioned"], "awareness_binary": "Solar Plexus"},
+    {"color": 6, "response": "Innocence", "mode_binary": ["Observer", "Observed"], "awareness_binary": "Solar Plexus"}
+  ],
+  "cosmology_conditions": [
+    {
+      "condition": "pre-Big-Bang",
+      "description": "The void",
+      "components": ["Yang: energy to evolve form", "Yin: structure of matter"]
+    },
+    {
+      "condition": "singularity-contact",
+      "description": "Four dimensions",
+      "components": [
+        "Energy: Movement / Magnetic Monopole",
+        "Matter: Being / Quarks",
+        "Gravity: Evolution / Personality Crystal",
+        "Structure: Design / Design Crystal"
+      ]
+    },
+    {
+      "condition": "post-Big-Bang",
+      "description": "Five-dimensional relativity",
+      "components": [
+        "Energy: Movement / Magnetic Monopole",
+        "Matter: Being / Atomic",
+        "Light: Evolution / Personality Crystal",
+        "Progress: Design / Design Crystal",
+        "Space: emergent fifth dimension"
+      ]
+    }
+  ]
+}

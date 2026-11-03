@@ -1,0 +1,62 @@
+[
+  {
+    "id": "calculation",
+    "title": "Calculation reproducibility",
+    "question": "Does the chart reproduce independent astronomical and Human Design references?",
+    "method": "Use fixed UTC instants, explicit coordinates, timezone versions, node conventions and reference outputs. Include boundary cases and birth-time uncertainty.",
+    "expected": "Matching positions and derived gates within a tolerance fixed before the run.",
+    "notExpected": "Personality validity, purpose, or psychological effects.",
+    "falsification": "Any repeated mismatch beyond the declared tolerance rejects the implementation for that domain.",
+    "baseline": "Independent ephemeris, saved reference fixtures, and the supplied free-human-design engine."
+  },
+  {
+    "id": "blind",
+    "title": "Blinded chart matching",
+    "question": "Can people identify their chart-derived description above chance?",
+    "method": "Randomize one actual and three decoy descriptions, equalize length and tone, conceal birth data and chart labels from raters. Lock one choice per participant.",
+    "expected": "Accuracy above 25%, with a preregistered meaningful margin and confidence interval.",
+    "notExpected": "A pleasing description or a single correct guess is not evidence.",
+    "falsification": "A powered equivalence test contained within the preregistered near-chance interval contradicts meaningful matching ability; wide intervals are inconclusive.",
+    "baseline": "Four-choice chance and generic equally positive descriptions."
+  },
+  {
+    "id": "prospective",
+    "title": "Prospective prediction",
+    "question": "Do frozen chart predictions improve forecasts of later measured behavior?",
+    "method": "Register outcome, time window, probability, chart version, model fingerprint and scoring rule before outcomes. Never edit the prediction; append corrections.",
+    "expected": "Lower held-out Brier score than the locked baseline by a preregistered useful margin.",
+    "notExpected": "Retrospective stories, edited predictions, or forecast confidence alone.",
+    "falsification": "A precise null improvement or worse held-out score contradicts the stated predictive advantage.",
+    "baseline": "Personal historical base rate, questionnaire-only model, shuffled charts, and chart-free local model."
+  },
+  {
+    "id": "cultivation",
+    "title": "Randomized cultivation trial",
+    "question": "Does chart-personalized practice help more than equally attentive generic practice?",
+    "method": "Randomly assign consenting adults to personalized or matched generic exercises. Fix the primary wellbeing measure and duration, record adherence, analyze all assigned participants, and document attrition.",
+    "expected": "A meaningful between-group change with uncertainty reported.",
+    "notExpected": "Improvement alone does not validate astrology; attention and expectation can help both groups.",
+    "falsification": "A sufficiently precise effect below the preregistered minimum useful difference contradicts the added benefit claim.",
+    "baseline": "Same model, contact time, exercise difficulty, and supportive language without chart personalization."
+  },
+  {
+    "id": "resonance",
+    "title": "Resonance network prediction",
+    "question": "Do declared relational features predict later mutual connection?",
+    "method": "Use opt-in pseudonymous pairs, record connection outcomes independently from both people, freeze features, hold out entire people and pairs, and allow withdrawal.",
+    "expected": "Better held-out prediction than shared interests, prior familiarity and baseline sociability.",
+    "notExpected": "Chart similarity is not a measured bond or permission to contact someone.",
+    "falsification": "No useful incremental held-out accuracy with adequate precision contradicts the network prediction claim.",
+    "baseline": "Interest-only matching and permuted chart-to-person assignments."
+  },
+  {
+    "id": "perspective",
+    "title": "Perspective and ablation test",
+    "question": "Do the five perspective views add measurable information?",
+    "method": "Keep event coordinates and original observations immutable. Append reinterpretations with timestamps. Compare the full system with one perspective or chart input withheld, using the same model and unseen tasks.",
+    "expected": "Improved locked task scores and provenance retention across held-out contexts.",
+    "notExpected": "Duplicating one placement across five named views does not create five independent observations.",
+    "falsification": "No incremental predictive benefit rejects the added-information claim; any overwritten historical observation fails the preservation rule.",
+    "baseline": "Single-view, chart-free and shuffled-coordinate ablations."
+  }
+]

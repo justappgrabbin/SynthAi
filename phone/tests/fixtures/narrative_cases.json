@@ -1,0 +1,112 @@
+[
+  {
+    "id": "career-team-lens",
+    "input": {
+      "birth_time": "1988-10-09T20:30:00+08:00"
+    },
+    "focus": "career",
+    "question": "我在工作里最该怎么用这张图？",
+    "citation_mode": "sources",
+    "required_substrings": [
+      "这次问题怎么落到图上",
+      "团队与协作场景",
+      "图表里最相关的结构",
+      "来源："
+    ],
+    "required_block_keys": ["question-lens", "focus-highlights"],
+    "required_source_blocks": ["focus-highlights", "decision", "profile-definition", "channels"],
+    "required_block_source_kinds": {
+      "decision": ["authority"],
+      "profile-definition": ["profile", "definition"],
+      "channels": ["channel"]
+    },
+    "required_citation_keys": ["focus-highlights", "decision", "channels"],
+    "required_citation_source_kinds": {
+      "focus-highlights": ["type", "authority"],
+      "decision": ["authority"],
+      "channels": ["channel"]
+    },
+    "forbidden_substrings": ["医疗建议", "法律建议"]
+  },
+  {
+    "id": "career-transition-lens",
+    "input": {
+      "birth_time": "1999-03-14T08:05:00"
+    },
+    "focus": "decision",
+    "question": "我现在要不要换工作？",
+    "required_substrings": [
+      "现实决策压力",
+      "排盘提醒",
+      "图表里最相关的结构"
+    ],
+    "required_block_keys": ["input-precision", "question-lens", "focus-highlights"],
+    "required_source_blocks": ["focus-highlights", "decision", "profile-definition", "integration"],
+    "required_block_source_kinds": {
+      "decision": ["authority"],
+      "profile-definition": ["profile", "definition"],
+      "integration": ["type", "authority"]
+    }
+  },
+  {
+    "id": "relationship-intimacy-lens",
+    "input": {
+      "birth_time": "2001-06-21T14:45:00",
+      "timezone_name": "Europe/London"
+    },
+    "focus": "relationship",
+    "question": "我在亲密关系里最该注意什么？",
+    "required_substrings": [
+      "亲密关系场景",
+      "图表里最相关的结构"
+    ],
+    "required_block_keys": ["question-lens", "focus-highlights"],
+    "required_source_blocks": ["focus-highlights", "centers", "channels"],
+    "required_block_source_kinds": {
+      "centers": ["center"],
+      "channels": ["channel"]
+    }
+  },
+  {
+    "id": "growth-pattern-lens",
+    "input": {
+      "birth_time": "1977-12-01T23:59:00",
+      "timezone_name": "Asia/Tokyo"
+    },
+    "focus": "growth",
+    "question": "我最近最大的内耗和成长课题是什么？",
+    "required_substrings": [
+      "自我成长场景",
+      "图表里最相关的结构"
+    ],
+    "required_block_keys": ["question-lens", "focus-highlights"],
+    "required_source_blocks": ["focus-highlights", "centers", "gates"],
+    "required_block_source_kinds": {
+      "centers": ["center"],
+      "gates": ["gate"]
+    }
+  },
+  {
+    "id": "overview-baseline",
+    "input": {
+      "birth_time": "1992-01-03T06:15:00-05:00"
+    },
+    "focus": "overview",
+    "question": "先给我一个总览。",
+    "required_substrings": [
+      "核心身份"
+    ],
+    "required_block_keys": [],
+    "required_source_blocks": ["core", "decision", "profile-definition", "centers", "channels", "gates", "integration"],
+    "required_block_source_kinds": {
+      "core": ["type"],
+      "decision": ["authority"],
+      "profile-definition": ["profile", "definition"],
+      "centers": ["center"],
+      "channels": ["channel"],
+      "gates": ["gate"],
+      "integration": ["type", "authority"]
+    },
+    "forbidden_substrings": ["当前聚焦", "## 焦点提示"]
+  }
+]
