@@ -1,9 +1,9 @@
 import { readFile, writeFile, rename, mkdir } from 'node:fs/promises';
 import { dirname } from 'node:path';
-import { randomUUID } from 'node:crypto';
+import { createHash, randomUUID } from 'node:crypto';
 
 const iso = () => new Date().toISOString();
-const fresh = () => ({ version: 1, jobs: [], events: [], outbox: [], lastScan: null });
+const fresh = () => ({ version: 1, jobs: [], events: [], outbox: [], lastScan: null, seenScans: [] });
 const MAX_FILES = 250;
 
 function inspect(records) {
@@ -63,7 +63,10 @@ export class MajikiLoop {
     }
     await this.persist();
     if (automatic) {
-      this.timer = setInterval(() => { void this.tick().catch(() => {}); }, this.intervalMs);
+      this.timer = setInterval(() => { void this.heartbeat().catch((error) => {
+        this.event('watch:error', null, String(error?.message || error).slice(0, 180));
+        void this.persist().catch(() => {});
+      }); }, this.intervalMs);
       this.timer.unref?.();
     }
     return this;
@@ -101,6 +104,11 @@ export class MajikiLoop {
     this.event('task:created', job, job.goal.slice(0, 100));
     await this.persist();
     return { id: job.id, stage: job.stage };
+  }
+  async heartbeat() {
+    const age = this.data.lastScan ? Date.now() - Date.parse(this.data.lastScan.at) : Infinity;
+    if (age > 60000 && !this.busy) await this.scan({ autopilot: true });
+    return this.tick();
   }
   async tick() {
     if (this.busy) return { busy: true };
@@ -157,11 +165,23 @@ export class MajikiLoop {
     }
     return { jobId: job.id, stage: job.stage };
   }
-  async scan() {
+  async scan({ autopilot = false } = {}) {
     if (this.busy) return { busy: true };
     const findings = inspect(await this.listFiles());
     this.data.lastScan = { at: iso(), count: findings.length, findings: findings.map(x => ({ ...x, proposedFix: undefined })) };
     this.event('scan:completed', null, String(findings.length) + ' findings');
+    // Autonomous work is limited to *provable* local repairs. All originals remain
+    // unchanged; each distinct source revision is proposed only once.
+    if (autopilot && findings.some(x => x.proposedFix)) {
+      const ready = findings.filter(x => x.proposedFix);
+      const digest = createHash('sha256').update(
+        ready.map(x => x.path + '\0' + x.proposedFix).join('\n')).digest('hex');
+      if (!this.data.seenScans.includes(digest)) {
+        this.data.seenScans.push(digest);
+        if (this.data.seenScans.length > 150) this.data.seenScans.shift();
+        await this.enqueue('Automatically detected invalid JSON in imported source; produce tested, non-destructive drafts.');
+      }
+    }
     await this.persist();
     return this.data.lastScan;
   }
