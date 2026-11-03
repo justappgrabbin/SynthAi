@@ -66,3 +66,11 @@ test('Majiki proactively queues only new reproducible defects and avoids duplica
    m.close();n.close();
  }finally{await rm(dir,{recursive:true,force:true});}
 });
+
+test('JSON repair preserves quoted commas and bracket characters',()=>{
+ const original = '{"string":"keep,} and ,] exactly","items":[1,2,]}';
+ const issue=inspectMajikiSources([{path:'/home/user/Imports/tricky.json',content:original}])[0];
+ assert.equal(issue.type,'json-parse');
+ assert.equal(JSON.parse(issue.proposedFix).string,'keep,} and ,] exactly');
+ assert.deepEqual(JSON.parse(issue.proposedFix).items,[1,2]);
+});
