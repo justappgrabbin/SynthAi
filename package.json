@@ -1,1 +1,15 @@
-{"name":"synthai-computer-modular-monolith","private":true,"type":"module","scripts":{"test:computer":"node --test computer/tests/*.test.mjs","build:computer":"node computer/build-web.mjs","test":"npm run test:computer && npm run build:computer"}}
+{
+  "name": "synthai-computer-modular-monolith",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test:computer": "node --test computer/tests/*.test.mjs",
+    "build:computer": "node computer/build-web.mjs",
+    "test": "npm run test:computer && npm run build:computer",
+    "test:browser": "node computer/tests/browser-relay.mjs",
+    "start:worker": "node computer/worker/server.mjs"
+  },
+  "devDependencies": {
+    "playwright": "1.64.0"
+  }
+}

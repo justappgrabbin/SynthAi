@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: synthai-relay-worker
+    runtime: docker
+    repo: https://github.com/justappgrabbin/SynthAi
+    branch: fix/relay-browser-runtime
+    dockerfilePath: ./Dockerfile.relay
+    plan: 1c-2g
+    autoDeployTrigger: off
+    maxShutdownDelaySeconds: 90
+    healthCheckPath: /health
+    disk:
+      name: relay-job-storage
+      mountPath: /var/data
+      sizeGB: 1
+    envVars:
+      - key: RELAY_API_TOKEN
+        generateValue: true
+      - key: RELAY_DATA_DIR
+        value: /var/data/relay
+      - key: RELAY_ALLOWED_ORIGINS
+        value: https://relay.local

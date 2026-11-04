@@ -7,14 +7,6 @@ import { ProjectWorkspace } from './runtime/projects.mjs';
 import { GitHubWorkspaceAdapter } from './adapters/GitHubWorkspaceAdapter.mjs';
 import { registerCanonicalMicros } from './micros/MicroRegistry.mjs';
 import { registerSystemAdapters } from './adapters/SystemAdapters.mjs';
-import { AddressService } from './services/address-service.mjs';
-import { StateResolver } from './services/state-resolver.mjs';
-import { CapabilityRegistryService } from './registry/capability-registry.mjs';
-import { EventEmitter } from './events/event-emitter.mjs';
-import { AutomataEngineGateway } from './services/automata-engine.mjs';
-import { WorldEngineGateway } from './services/world-engine.mjs';
-import { PentaEphemerisService } from './services/penta-ephemeris.mjs';
-import { ExperimentLoop } from './services/experiment-loop.mjs';
 
 export class ComputerRuntime {
   constructor({ persistence = new MemoryPersistence(), namespace = 'synthai-computer', github = null, eventLogPath = null } = {}) {
@@ -80,38 +72,49 @@ export class ComputerRuntime {
       if (!this.capabilityRegistry.has(id)) this.capabilities.register(id, { providers: ['computer'] });
     }
 
-    // Stage-4a mount: Back-up- addressing + state-space providers behind
-    // Computer contracts. Services are Computer components; donor modules stay
-    // sovereign and are only wrapped (lazy dynamic import, failures surface
-    // as 'service:provider-failure' bus events).
-    this.eventEmitter = new EventEmitter({ bus: this.bus, ...(this.eventLogPath ? { logPath: this.eventLogPath } : {}) });
-    this.addressService = new AddressService({ bus: this.bus });
-    this.stateResolver = new StateResolver({
-      bus: this.bus,
-      addressService: this.addressService,
-      eventLog: () => this.eventEmitter.readAll(),
-    });
-    this.capabilityRegistryService = await new CapabilityRegistryService({ bus: this.bus }).load();
-    this.addressService.capabilityRegistry = this.capabilityRegistryService; // routing_decision recording
-    this.services.register('event-emitter', { provider: this.eventEmitter, contract: 'emitEvent' });
-    this.services.register('address-service', { provider: this.addressService, contract: 'resolveAddress' });
-    this.services.register('state-resolver', { provider: this.stateResolver, contract: 'resolveState' });
-    this.services.register('capability-registry', { provider: this.capabilityRegistryService, contract: 'queryCapability' });
-    // Stage-4b/Amendment-C: automata organism gateway (donor pure-synthia
-    // v0.4.0 swarm behind execute/route; gateway only, donor stays sovereign).
-    this.automataGateway = new AutomataEngineGateway({ bus: this.bus, state: this.state });
-    this.services.register('automata-engine', { provider: this.automataGateway, contract: 'execute' });
-    // Stage-4e: glowing-winner embodied world (donor EmbodiedWorldEngine) +
-    // Synthai2 penta ephemeris (python child_process donor boundary).
-    this.worldGateway = new WorldEngineGateway({ bus: this.bus });
-    this.services.register('world-engine', { provider: this.worldGateway, contract: 'worldEvent' });
-    this.pentaEphemeris = new PentaEphemerisService({ bus: this.bus });
-    this.services.register('penta-ephemeris', { provider: this.pentaEphemeris, contract: 'groupPenta' });
-    // Acceptance-7: experiment loop (donor HypothesisRegistry, wrap-only).
-    this.experiments = new ExperimentLoop({ bus: this.bus });
-    this.services.register('experiment-loop', { provider: this.experiments, contract: 'runExperiment' });
-    for (const id of ['resolve_address', 'resolve_state', 'emit_event', 'query_capability', 'automata_activation']) {
-      if (!this.capabilityRegistry.has(id)) this.capabilities.register(id, { providers: ['back-up-', 'computer'] });
+    if (typeof window === "undefined") {
+      const { AddressService } = await import('./services/address-service.mjs');
+      const { StateResolver } = await import('./services/state-resolver.mjs');
+      const { CapabilityRegistryService } = await import('./registry/capability-registry.mjs');
+      const { EventEmitter } = await import('./events/event-emitter.mjs');
+      const { AutomataEngineGateway } = await import('./services/automata-engine.mjs');
+      const { WorldEngineGateway } = await import('./services/world-engine.mjs');
+      const { PentaEphemerisService } = await import('./services/penta-ephemeris.mjs');
+      const { ExperimentLoop } = await import('./services/experiment-loop.mjs');
+
+      // Stage-4a mount: Back-up- addressing + state-space providers behind
+      // Computer contracts. Services are Computer components; donor modules stay
+      // sovereign and are only wrapped (lazy dynamic import, failures surface
+      // as 'service:provider-failure' bus events).
+      this.eventEmitter = new EventEmitter({ bus: this.bus, ...(this.eventLogPath ? { logPath: this.eventLogPath } : {}) });
+      this.addressService = new AddressService({ bus: this.bus });
+      this.stateResolver = new StateResolver({
+        bus: this.bus,
+        addressService: this.addressService,
+        eventLog: () => this.eventEmitter.readAll(),
+      });
+      this.capabilityRegistryService = await new CapabilityRegistryService({ bus: this.bus }).load();
+      this.addressService.capabilityRegistry = this.capabilityRegistryService; // routing_decision recording
+      this.services.register('event-emitter', { provider: this.eventEmitter, contract: 'emitEvent' });
+      this.services.register('address-service', { provider: this.addressService, contract: 'resolveAddress' });
+      this.services.register('state-resolver', { provider: this.stateResolver, contract: 'resolveState' });
+      this.services.register('capability-registry', { provider: this.capabilityRegistryService, contract: 'queryCapability' });
+      // Stage-4b/Amendment-C: automata organism gateway (donor pure-synthia
+      // v0.4.0 swarm behind execute/route; gateway only, donor stays sovereign).
+      this.automataGateway = new AutomataEngineGateway({ bus: this.bus, state: this.state });
+      this.services.register('automata-engine', { provider: this.automataGateway, contract: 'execute' });
+      // Stage-4e: glowing-winner embodied world (donor EmbodiedWorldEngine) +
+      // Synthai2 penta ephemeris (python child_process donor boundary).
+      this.worldGateway = new WorldEngineGateway({ bus: this.bus });
+      this.services.register('world-engine', { provider: this.worldGateway, contract: 'worldEvent' });
+      this.pentaEphemeris = new PentaEphemerisService({ bus: this.bus });
+      this.services.register('penta-ephemeris', { provider: this.pentaEphemeris, contract: 'groupPenta' });
+      // Acceptance-7: experiment loop (donor HypothesisRegistry, wrap-only).
+      this.experiments = new ExperimentLoop({ bus: this.bus });
+      this.services.register('experiment-loop', { provider: this.experiments, contract: 'runExperiment' });
+      for (const id of ['resolve_address', 'resolve_state', 'emit_event', 'query_capability', 'automata_activation']) {
+        if (!this.capabilityRegistry.has(id)) this.capabilities.register(id, { providers: ['back-up-', 'computer'] });
+      }
     }
 
     await this.state.set('computer.boot', { status: 'ready', at: Date.now(), version: '0.2.0-project-workspace' }, { source: 'boot' });
@@ -119,18 +122,23 @@ export class ComputerRuntime {
     return this;
   }
 
+  requireService(name) {
+    if (!this[name]) throw new Error(`${name} requires the Node worker; it is not mounted in this offline browser runtime.`);
+    return this[name];
+  }
+
   // ── Stage-4a contract surface (delegates to mounted services, not direct donor imports) ──
-  queryCapability(name) { return this.capabilityRegistryService.queryCapability(name); }
-  route(capability, ctx = {}) { return this.capabilityRegistryService.route(capability, ctx); }
-  resolveAddress(entityOrEvent, options) { return this.addressService.resolveAddress(entityOrEvent, options); }
-  compareAddresses(a, b) { return this.addressService.compareAddresses(a, b); }
-  resolveRelationship(a, b, context) { return this.addressService.resolveRelationship(a, b, context); }
-  resolveState(entity, event, context) { return this.stateResolver.resolveState(entity, event, context); }
-  emitEvent(event) { return this.eventEmitter.emitEvent(event); }
-  executeOnSwarm(capability, input, ctx) { return this.automataGateway.execute(capability, input, ctx); }
-  worldEvent(event) { return this.worldGateway.process(event); }
-  observeWorld() { return this.worldGateway.snapshot(); }
-  groupPenta(members) { return this.pentaEphemeris.groupPenta(members); }
+  queryCapability(name) { return this.requireService('capabilityRegistryService').queryCapability(name); }
+  route(capability, ctx = {}) { return this.requireService('capabilityRegistryService').route(capability, ctx); }
+  resolveAddress(entityOrEvent, options) { return this.requireService('addressService').resolveAddress(entityOrEvent, options); }
+  compareAddresses(a, b) { return this.requireService('addressService').compareAddresses(a, b); }
+  resolveRelationship(a, b, context) { return this.requireService('addressService').resolveRelationship(a, b, context); }
+  resolveState(entity, event, context) { return this.requireService('stateResolver').resolveState(entity, event, context); }
+  emitEvent(event) { return this.requireService('eventEmitter').emitEvent(event); }
+  executeOnSwarm(capability, input, ctx) { return this.requireService('automataGateway').execute(capability, input, ctx); }
+  worldEvent(event) { return this.requireService('worldGateway').process(event); }
+  observeWorld() { return this.requireService('worldGateway').snapshot(); }
+  groupPenta(members) { return this.requireService('pentaEphemeris').groupPenta(members); }
 
   /**
    * Contract: mount(application, contract). Mounts a real artifact app through
