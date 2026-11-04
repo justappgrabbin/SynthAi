@@ -36,8 +36,31 @@ jobs:
         run: |
           curl -fL --retry 3 -o /tmp/node-mobile.zip 'https://github.com/nodejs-mobile/nodejs-mobile/releases/download/v18.20.4/nodejs-mobile-v18.20.4-android.zip'
           echo 'bd7321eaa1a7602fbe0bb87302df2d79d87835cf4363fbdd17c350dbb485c2af  /tmp/node-mobile.zip' | sha256sum -c -
-          python computer/android/prepare-node.py /tmp/node-mobile.zip
+          python computer/android/prepare-node.py /tmp/node-mobile.zip "$ANDROID_HOME/ndk/27.0.12077973"
       - run: gradle -p computer/android :app:assembleDebug --stacktrace
+      - name: Verify native Node dependency is bundled for both Android ABIs
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          from subprocess import check_output
+          from tempfile import TemporaryDirectory
+          from zipfile import ZipFile
+          apk = Path('computer/android/app/build/outputs/apk/debug/app-debug.apk')
+          with ZipFile(apk) as packaged, TemporaryDirectory() as tmp:
+              assets = set(packaged.namelist())
+              for abi in ('arm64-v8a', 'x86_64'):
+                  required = [f'lib/{abi}/{name}' for name in
+                              ('libnode.so', 'libcomputer-node.so', 'libc++_shared.so')]
+                  missing = [name for name in required if name not in assets]
+                  if missing:
+                      raise SystemExit('Native startup would fail: APK lacks ' + ', '.join(missing))
+                  node = Path(tmp) / f'node-{abi}.so'
+                  node.write_bytes(packaged.read(f'lib/{abi}/libnode.so'))
+                  dependencies = check_output(['readelf', '-d', str(node)], text=True)
+                  if 'Shared library: [libc++_shared.so]' not in dependencies:
+                      raise SystemExit(f'Unexpected {abi} libnode.so dependency list')
+                  print(f'{abi}: Node JNI bridge and dependent C++ runtime packaged')
+          PY
       - name: Launch APK in Android emulator and verify actual local API
         if: github.ref == 'refs/heads/integration/majiki-success-engine-20261103'
         uses: reactivecircus/android-emulator-runner@v2
