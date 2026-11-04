@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Majiki Success Engine</title>
+<style>
+:root{color-scheme:dark;--bg:#080b17;--panel:#131b30;--line:#293752;--ink:#f2f5ff;--muted:#b6bfd0;--accent:#b49cff;--ok:#7ee2b1;--warn:#ffd49b}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 50% -12%,#30316e,transparent 48%),var(--bg);color:var(--ink);font:15px/1.48 system-ui,sans-serif}
+header{padding:24px 18px 16px;border-bottom:1px solid var(--line)}.wrap{max-width:950px;margin:auto}.eyebrow{color:var(--accent);font-size:12px;letter-spacing:.12em;font-weight:700}h1{margin:4px 0 6px;font-size:28px}h2{font-size:18px;margin:0 0 12px}p{margin:6px 0 12px;color:var(--muted)}main{padding:18px 14px 90px}
+section{background:var(--panel);border:1px solid var(--line);padding:17px;border-radius:17px;margin:14px 0;box-shadow:0 4px 30px #0002}
+textarea{width:100%;min-height:112px;resize:vertical;background:#0a1022;border:1px solid #42516d;border-radius:11px;padding:13px;color:var(--ink);font:inherit}
+button,.btn{appearance:none;display:inline-block;border:1px solid #6650b5;background:#42378b;color:white;border-radius:11px;padding:11px 13px;font-size:14px;font-weight:650;text-decoration:none;cursor:pointer}
+button.secondary,.btn.secondary{background:#1d2b42;border-color:#3a4c69}button:disabled{opacity:.55;cursor:not-allowed}
+.row{display:flex;gap:9px;flex-wrap:wrap;align-items:center}.card{background:#0a1224;border:1px solid #273754;border-radius:11px;padding:12px;margin-top:10px}
+small,.muted{color:var(--muted)}.pill{border:1px solid #596bb2;border-radius:30px;padding:4px 8px;font-size:12px}.status{color:var(--ok);font-weight:700}.error{color:#ffb5b5}.warn{color:var(--warn)}
+pre{white-space:pre-wrap;overflow-wrap:anywhere;max-height:300px;overflow:auto;font-size:12px;color:#d4e2fc}code{font-family:ui-monospace,monospace}
+details{margin-top:10px}summary{cursor:pointer;font-weight:600}hr{border:none;border-top:1px solid var(--line);margin:16px 0}a{color:#c3b1ff}
+</style></head><body>
+<header><div class="wrap"><div class="eyebrow">EMBEDDED ANDROID COMPUTER</div><h1>Majiki Success Engine</h1><p>One durable work queue. Research what is locally observable, propose repairs, verify results, preserve originals.</p><div class="row"><span id="live" class="pill">Connecting to local server</span><a class="btn secondary" href="/">Open existing computer</a></div></div></header>
+<main class="wrap">
+<section><h2>Give Majiki a job</h2><label for="goal">Work objective</label><textarea id="goal">Inspect my imported Human Design application files, identify broken source, and prepare only repairs that can be verified.</textarea><div class="row"><input type="file" id="imports" multiple aria-label="Import local source files" style="max-width:100%;padding:10px"><button class="secondary" id="importFiles">Import source (up to 6 MB per file)</button></div><div class="row"><button id="start">Start job</button><button class="secondary" id="scan">Scan local files</button><button class="secondary" id="step">Run one step</button></div><p id="message" role="status">No job submitted.</p></section>
+<section><h2>Continuous flow <span id="count" class="pill">0 jobs</span></h2><p>Each stage advances inside the embedded Node service. The screen shows the receipts, not pretend agent activity.</p><div id="jobs" aria-live="polite"></div></section>
+<section><h2>Research &amp; diagnostics</h2><div id="findings" class="muted">No scan yet.</div></section>
+<section><h2>Verified outbox</h2><p>Repairs are drafts. Original files stay untouched. Passing JSON syntax validation does not prove the whole application works.</p><div id="outbox" class="muted">Nothing ready yet.</div></section>
+<section><h2>Execution boundaries</h2><p>Running now: local scan, evidence capture, persistent job stages, deterministic JSON repair drafts, parse verification, and outbox. General autonomous coding, internet research, external MCP tools, APK compilation, and background execution after Android terminates the app are <strong>not yet verified</strong> in this stage.</p></section>
+</main>
+<script>
+const q=id=>document.getElementById(id);
+const esc=s=>String(s??'');
+let lastOutbox=[];
+async function api(path,data){const response=await fetch('/api/majiki/'+path,{method:data===undefined?'GET':'POST',headers:{'Content-Type':'application/json'},body:data===undefined?undefined:JSON.stringify(data)});const result=await response.json();if(!response.ok)throw Error(result.error||response.statusText);return result;}
+function node(tag,text,className){const el=document.createElement(tag);el.textContent=esc(text);if(className)el.className=className;return el;}
+function row(container,kind,content){const item=node('div','', 'card');item.append(node('strong',kind),node('div',content));container.append(item);return item;}
+async function refresh(){try{const s=await api('status');q('live').textContent=(s.ready?'Local server running':'Server starting')+' · '+(s.automatic?'Auto loop enabled':'Manual only');q('live').className='pill '+(s.ready?'status':'warn');q('count').textContent=s.jobs.length+' jobs';q('jobs').replaceChildren();if(!s.jobs.length)q('jobs').append(node('p','No queued work.'));for(const j of [...s.jobs].reverse()){const d=row(q('jobs'),j.goal,j.stage);d.append(node('small','Updated '+j.updatedAt));if(j.error)d.append(node('p',j.error,'warn'));if(j.plan?.length)d.append(node('small',j.plan.map(x=>x.action+': '+x.path).join('\n')));}
+q('findings').replaceChildren();if(!s.lastScan)q('findings').append(node('p','Use Scan local files to inspect currently imported source.'));else{q('findings').append(node('p',s.lastScan.count+' findings · '+s.lastScan.at));for(const f of s.lastScan.findings.slice(0,40))row(q('findings'),f.type,f.path+(f.line?':'+f.line:'')+' — '+f.message);}
+lastOutbox=s.outbox;q('outbox').replaceChildren();if(!s.outbox.length)q('outbox').append(node('p','No verified drafts yet.'));for(const a of [...s.outbox].reverse()){const d=row(q('outbox'),a.name+' · '+a.status,a.originalPath);const show=document.createElement('details'),summary=node('summary','View generated repair'),pre=node('pre',a.content);show.append(summary,pre);d.append(show);const copy=node('button','Copy repair','secondary');copy.addEventListener('click',async()=>{try{await navigator.clipboard.writeText(a.content);q('message').textContent='Repair copied';}catch{q('message').textContent='Open generated repair and select its text to copy.'}});d.append(copy);}
+}catch(e){q('live').textContent='Local runtime unavailable';q('live').className='pill error';q('message').textContent='Cannot connect: '+e.message;}}
+async function act(path,data){try{q('message').textContent='Working…';const r=await api(path,data);q('message').textContent=path==='task'?'Job queued '+r.id:path==='tick'?'Step result: '+JSON.stringify(r):'Scan completed: '+r.count+' findings';await refresh();}catch(e){q('message').textContent='Operation failed: '+e.message;}}
+q('importFiles').addEventListener('click',async()=>{
+ const files=[...q('imports').files];if(!files.length){q('message').textContent='Choose a local file first.';return;}
+ let ok=0;for(const f of files){if(f.size>6000000){q('message').textContent='Import limit: '+f.name+' is over 6 MB; original file remains on your device.';continue;}
+ try{const base64=await new Promise((resolve,reject)=>{const reader=new FileReader();reader.onerror=()=>reject(reader.error);reader.onload=()=>resolve(String(reader.result).split(',')[1]||'');reader.readAsDataURL(f)});
+ const response=await fetch('/api/ingest',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:f.name,base64})});
+ const payload=await response.json();if(!response.ok)throw Error(payload.error||'Import rejected');ok++;
+ }catch(e){q('message').textContent='Import failed for '+f.name+': '+e.message;}}
+ if(ok){q('message').textContent=ok+' source file(s) imported into the existing Computer. Scan or allow the local watcher to inspect them.';await act('scan',{});}
+});
+q('start').addEventListener('click',()=>act('task',{goal:q('goal').value}));q('scan').addEventListener('click',()=>act('scan',{}));q('step').addEventListener('click',()=>act('tick',{}));
+refresh();setInterval(refresh,3000);
+</script></body></html>

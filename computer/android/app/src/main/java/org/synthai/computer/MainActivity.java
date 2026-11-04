@@ -180,7 +180,7 @@ public final class MainActivity extends Activity {
             }
         });
         root.addView(browser, new FrameLayout.LayoutParams(-1, -1));
-        browser.loadUrl(ORIGIN + "/");
+        browser.loadUrl(ORIGIN + "/majiki.html");
     }
 
     @Override protected void onActivityResult(int request, int result, Intent data) {

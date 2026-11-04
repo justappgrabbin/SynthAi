@@ -2,8 +2,11 @@ name: Synthia Computer Android checkpoint
 on:
   workflow_dispatch:
   push:
-    branches: [reassembly/computer-2026-09-29, integration/synthia-resident-dual-graph-20261025]
+    branches: [reassembly/computer-2026-09-29, integration/synthia-resident-dual-graph-20261025, integration/majiki-success-engine-20261103]
     paths: ['computer/**', '.github/workflows/computer-apk.yml']
+
+permissions:
+  contents: write
 
 jobs:
   apk:
@@ -26,13 +29,46 @@ jobs:
           gradle-version: '8.7'
       - run: sdkmanager 'platforms;android-35' 'ndk;27.0.12077973' 'cmake;3.22.1'
       - run: npm --prefix computer/shell/kimi-linux ci && npm --prefix computer run build && npm --prefix computer run test:reassembly
+      - name: Run Majiki autonomous loop acceptance tests
+        run: node --test computer/tests/majiki-loop.test.mjs
       - run: python computer/android/prepare-assets.py
       - name: Stage Node 18 mobile runtime
         run: |
           curl -fL --retry 3 -o /tmp/node-mobile.zip 'https://github.com/nodejs-mobile/nodejs-mobile/releases/download/v18.20.4/nodejs-mobile-v18.20.4-android.zip'
           echo 'bd7321eaa1a7602fbe0bb87302df2d79d87835cf4363fbdd17c350dbb485c2af  /tmp/node-mobile.zip' | sha256sum -c -
-          python computer/android/prepare-node.py /tmp/node-mobile.zip
+          python computer/android/prepare-node.py /tmp/node-mobile.zip "$ANDROID_HOME/ndk/27.0.12077973"
       - run: gradle -p computer/android :app:assembleDebug --stacktrace
+      - name: Verify native Node dependency is bundled for both Android ABIs
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          from subprocess import check_output
+          from tempfile import TemporaryDirectory
+          from zipfile import ZipFile
+          apk = Path('computer/android/app/build/outputs/apk/debug/app-debug.apk')
+          with ZipFile(apk) as packaged, TemporaryDirectory() as tmp:
+              assets = set(packaged.namelist())
+              for abi in ('arm64-v8a', 'x86_64'):
+                  required = [f'lib/{abi}/{name}' for name in
+                              ('libnode.so', 'libcomputer-node.so', 'libc++_shared.so')]
+                  missing = [name for name in required if name not in assets]
+                  if missing:
+                      raise SystemExit('Native startup would fail: APK lacks ' + ', '.join(missing))
+                  node = Path(tmp) / f'node-{abi}.so'
+                  node.write_bytes(packaged.read(f'lib/{abi}/libnode.so'))
+                  dependencies = check_output(['readelf', '-d', str(node)], text=True)
+                  if 'Shared library: [libc++_shared.so]' not in dependencies:
+                      raise SystemExit(f'Unexpected {abi} libnode.so dependency list')
+                  print(f'{abi}: Node JNI bridge and dependent C++ runtime packaged')
+          PY
+      - name: Launch APK in Android emulator and verify actual local API
+        if: github.ref == 'refs/heads/integration/majiki-success-engine-20261103'
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 35
+          arch: x86_64
+          target: google_apis
+          script: bash computer/android/majiki-smoke.sh
       - name: Verify and prepare APK handoff
         run: |
           APK=computer/android/app/build/outputs/apk/debug/app-debug.apk
@@ -87,3 +123,37 @@ jobs:
           name: synthia-computer-apk-part-07
           path: /tmp/computer-apk-parts/synthia-computer.apk.part-07
           if-no-files-found: warn
+
+      - name: Confirm Majiki assets are packaged
+        if: github.ref == 'refs/heads/integration/majiki-success-engine-20261103'
+        run: |
+          python - <<'PY'
+          from zipfile import ZipFile
+          from io import BytesIO
+          apk = 'computer/android/app/build/outputs/apk/debug/app-debug.apk'
+          with ZipFile(apk) as package:
+              payload = package.read('assets/computer-assets.zip')
+          with ZipFile(BytesIO(payload)) as assets:
+              files = set(assets.namelist())
+              required = [
+                  'host/server.mjs',
+                  'services/majiki-loop.mjs',
+                  'shell/kimi-linux/dist/majiki.html',
+              ]
+              missing = [p for p in required if p not in files]
+              if missing: raise SystemExit('Majiki APK is missing: ' + ', '.join(missing))
+              print('Majiki embedded Node, persistent loop and front screen packaged')
+          PY
+      - name: Publish direct installable APK preview
+        if: github.ref == 'refs/heads/integration/majiki-success-engine-20261103'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TIP=$(gh api "repos/${GITHUB_REPOSITORY}/git/ref/heads/integration/majiki-success-engine-20261103" --jq '.object.sha')
+          if [ "$TIP" != "$GITHUB_SHA" ]; then echo "Newer build exists; skip old APK release"; exit 0; fi
+          cp computer/android/app/build/outputs/apk/debug/app-debug.apk /tmp/Majiki-Success-Engine-preview.apk
+          gh release create "majiki-preview-${GITHUB_RUN_ID}" \
+            "/tmp/Majiki-Success-Engine-preview.apk" \
+            --repo "${GITHUB_REPOSITORY}" --target "${GITHUB_SHA}" --prerelease \
+            --title "Majiki Success Engine - Android preview ${GITHUB_RUN_NUMBER}" \
+            --notes "Embedded local Node server, persistent task loop, verified non-destructive JSON repair outbox. Automated source and APK packaging checks passed. Physical-device Android testing, general coding autonomy, background survival, and update-key continuity are NOT yet verified. A preview debug signature may not update any existing org.synthai.computer installation. Preserve installed app data."
