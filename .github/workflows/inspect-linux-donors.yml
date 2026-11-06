@@ -1,0 +1,43 @@
+name: Inspect Linux Donors
+
+on:
+  push:
+    branches:
+      - integration/github-only-app-20260923
+    paths:
+      - .github/workflows/inspect-linux-donors.yml
+
+permissions:
+  contents: read
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Inspect Linux donor archives
+        shell: bash
+        run: |
+          set -euo pipefail
+          git clone --depth 1 https://github.com/justappgrabbin/Linux.git donor
+          {
+            echo "=== REPO ROOT ==="
+            find donor -maxdepth 2 -type f | sed 's#^donor/##' | sort
+            for z in donor/*.zip; do
+              echo
+              echo "=== ARCHIVE: $(basename "$z") ==="
+              unzip -Z1 "$z" | sed -n '1,500p'
+            done
+            echo
+            echo "=== TEXT MATCHES: PROOT ROOTFS CHROOT TERMUX LINUX CONTAINER SERVER ==="
+            rm -rf extracted && mkdir extracted
+            for z in donor/*.zip; do
+              d="extracted/$(basename "$z" .zip)"
+              mkdir -p "$d"
+              unzip -q "$z" -d "$d" || true
+            done
+            grep -RIniE 'proot|rootfs|chroot|termux|linux container|localhost|127\.0\.0\.1|server\.py|server\.js|docker' extracted --include='*.sh' --include='*.md' --include='*.txt' --include='*.json' --include='*.yaml' --include='*.yml' --include='*.java' --include='*.kt' --include='*.py' --include='*.js' --include='*.mjs' 2>/dev/null | sed -n '1,1200p' || true
+          } | tee donor-report.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: linux-donor-report
+          path: donor-report.txt

@@ -1,0 +1,63 @@
+name: Resident Mesh Integration
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - 'integration/synthia-reality-resident'
+    paths:
+      - 'computer/runtime/mesh-kernel.mjs'
+      - 'computer/runtime/dormant-compiler.mjs'
+      - 'computer/runtime/resident-host.mjs'
+      - 'computer/residents/**'
+      - 'computer/worlds/**'
+      - 'computer/labs/**'
+      - 'computer/mobile/MobileComputerRuntime.mjs'
+      - 'computer/native/**'
+      - 'computer/adapters/termux-compiler.mjs'
+      - 'computer/tests/resident-*.test.mjs'
+      - 'computer/tests/synthia57-*.test.mjs'
+      - 'computer/tests/world-federation.test.mjs'
+      - 'computer/tests/mesh-core-routing.test.mjs'
+      - 'computer/tests/native-seed.test.mjs'
+      - 'computer/tests/native-seed-server.test.mjs'
+      - 'computer/tests/termux-compiler.test.mjs'
+      - 'computer/tests/stellar-lab-mesh.test.mjs'
+      - 'computer/tests/consciousness-realm-adapter.test.mjs'
+      - 'computer/tests/human-agent-mechanics.test.mjs'
+      - 'computer/tests/phone-world.test.mjs'
+      - 'computer/tests/triform-mesh.test.mjs'
+      - 'computer/tests/world-adapters.test.mjs'
+      - '.github/workflows/resident-integration-check.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  resident-integration:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Run resident stack contract tests
+        run: >
+          node --test
+          computer/tests/mesh-core-routing.test.mjs
+          computer/tests/native-seed.test.mjs
+          computer/tests/native-seed-server.test.mjs
+          computer/tests/termux-compiler.test.mjs
+          computer/tests/stellar-lab-mesh.test.mjs
+          computer/tests/consciousness-realm-adapter.test.mjs
+          computer/tests/human-agent-mechanics.test.mjs
+          computer/tests/phone-world.test.mjs
+          computer/tests/triform-mesh.test.mjs
+          computer/tests/world-adapters.test.mjs
+          computer/tests/resident-mesh-indiverse.test.mjs
+          computer/tests/synthia57-resident.test.mjs
+          computer/tests/synthia57-package-loader.test.mjs
+          computer/tests/world-federation.test.mjs

@@ -76,12 +76,18 @@ export class ProjectWorkspace {
     if (!this.backends) throw new Error('backend broker unavailable');
     const project = this.snapshot(projectId);
     const result = await this.backends.request(backend, { action: 'create-project', project, private: Boolean(isPrivate) });
+    await this.recordPublication(projectId, backend, result);
+    return result;
+  }
+
+  async recordPublication(projectId, backend, result) {
     const current = this.get(projectId);
+    if (!current) throw new Error(`unknown project: ${projectId}`);
     current.status = 'published';
     current.updatedAt = Date.now();
     current.publications = [...(current.publications || []), { backend, result, at: Date.now() }];
     await this.state.set(`projects.items.${projectId}`, current, { source: 'project-workspace' });
     this.bus?.emit('project:published', { projectId, backend, result });
-    return result;
+    return current;
   }
 }

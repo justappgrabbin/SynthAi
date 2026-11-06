@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="world_accessibility_description">Turns visible Android interfaces into interactive IndiVerse world objects so the user and Synthia can navigate the device as a world.</string>
+</resources>

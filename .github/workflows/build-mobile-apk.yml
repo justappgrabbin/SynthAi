@@ -1,0 +1,69 @@
+name: Build SynthAI Android APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - 'mobile/synthimg-computer'
+      - 'integration/synthia-reality-resident'
+    paths:
+      - 'computer/mobile/**'
+      - 'computer/runtime/**'
+      - 'computer/worlds/**'
+      - 'computer/tests/**'
+      - 'computer/build-mobile-web.mjs'
+      - 'computer/build-web.mjs'
+      - 'public/mobile-computer.html'
+      - 'public/synthimg-sw.js'
+      - 'package.json'
+      - 'capacitor.config.json'
+      - '.github/workflows/build-mobile-apk.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Install Capacitor toolchain
+        run: npm install --no-audit --no-fund
+
+      - name: Run mobile acceptance tests
+        run: node --test computer/tests/mobile-synthimg.test.mjs computer/tests/resident-mesh-indiverse.test.mjs computer/tests/world-federation.test.mjs computer/tests/synthia57-resident.test.mjs computer/tests/synthia57-package-loader.test.mjs computer/tests/consciousness-realm-adapter.test.mjs computer/tests/world-adapters.test.mjs computer/tests/termux-compiler.test.mjs
+
+      - name: Stage mobile web bundle
+        run: npm run build:mobile
+
+      - name: Generate Android wrapper
+        run: npx cap add android
+
+      - name: Sync SynthAI mobile bundle
+        run: npx cap sync android
+
+      - name: Build debug APK
+        working-directory: android
+        run: ./gradlew assembleDebug
+
+      - name: Verify APK exists
+        run: test -s android/app/build/outputs/apk/debug/app-debug.apk
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: SynthAI-Computer-Mobile-debug
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+          retention-days: 30
