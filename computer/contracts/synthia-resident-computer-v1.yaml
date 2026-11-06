@@ -1,0 +1,128 @@
+contract: synthia-resident-computer.v1
+status: implementation-contract
+platform:
+  primary: android
+  residence: dedicated-tablet
+  rough_computer_lineage:
+    preserved: true
+    host_targets:
+      - android
+      - windows
+      - macos
+    android_execution:
+      - local-linux-residence
+      - proot-arm64
+      - qemu-tcg-where-required
+    macos_companion:
+      technology: Virtualization.framework
+      scope: mac-host-companion
+    windows_companion:
+      scope: rough-computer-host
+canonical_boot_order:
+  - execution-engine
+  - state-space
+  - ato-engine
+  - tool-factory
+  - klein
+  - synthia
+  - hands
+canonical_components:
+  execution_engine:
+    provider: back-up-:pure-synthia-v0.4.0-swarm
+  state_space:
+    providers:
+      - back-up-:kimi-mesh-state-space
+      - ato-core:StateSpaceKernel
+  ato_engine:
+    provider: pure-synthia-v0.4.0/ato-core
+  tool_factory:
+    provider: pure-synthia-v0.4.0/integrated-tool-factory
+    native_bridge: ATONativeBridge
+    retention_rule: successful-runtime-probe
+  klein:
+    providers:
+      - ato-core/klein-tools
+      - kimi-state-space-mesh/klein-analogy
+      - kimi-state-space-mesh/iching-grammar
+  synthia:
+    provider: kimi-agent-automata-state-space-merge/SynthiaAutomata
+    canonical_tools: 16
+    mesh_projections:
+      - knowledge
+      - causal
+      - phase
+      - temporal
+      - dependency
+  hands:
+    browser:
+      - browser-form
+      - research-browser
+      - ChromeDevToolsBrowserExecutor
+    android:
+      - AndroidSelfCompileCapability
+      - AndroidReproductionExecutor
+resident_services:
+  autoloader:
+    rule: verified-builds-only
+    storage: resident.loadedBuilds
+  build_intake:
+    pipeline:
+      - receive
+      - register
+      - analyze-through-resident-chat
+      - verify
+      - promote
+      - autoload
+  admin_center:
+    transport: MCPHub
+    providers:
+      - synthia-resident
+    functions:
+      - chat
+      - tool-factory
+      - build-intake
+      - state-space
+  browser:
+    mode: resident-browser-hands
+  chat:
+    required_trace:
+      - state-space
+      - ato-engine
+      - tool-factory
+      - autoling
+      - diseminer
+      - klein-analogy
+      - iching-grammar
+      - conversation
+android_lifecycle:
+  target: 24x7-resident
+  startup_sequence:
+    - app-install
+    - local-linux-residence
+    - ComputerRuntime.boot
+    - resident-autoload
+    - admin-center
+    - browser-hands
+  persistent_host:
+    foreground_service: required-by-native-shell
+    boot_receiver: required-by-native-shell
+    battery_optimization_exemption: owner-approved
+  installation:
+    standard_android: package-installer-confirmation
+    managed_device_owner: unattended-update-capable
+  self_reproduction:
+    steps:
+      - prepare-source
+      - compile-resources
+      - compile-source
+      - dex
+      - package
+      - sign
+      - verify
+      - request-install
+governance:
+  automatic_registration: true
+  accepted_resource_registration: immediate
+  verified_promotion_only: true
+  destructive_baseline_replacement: false
+  donor_authority_preserved: true

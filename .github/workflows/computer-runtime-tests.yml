@@ -1,0 +1,43 @@
+name: Computer Runtime Tests
+
+on:
+  pull_request:
+    paths:
+      - 'computer/**'
+      - 'package.json'
+      - '.github/workflows/computer-runtime-tests.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: computer-runtime-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  computer-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install verified ephemeris dependency
+        run: python -m pip install ephem==4.2.1
+
+      - name: Run Computer tests and web build
+        run: npm test
