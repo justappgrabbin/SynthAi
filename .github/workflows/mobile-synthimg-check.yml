@@ -1,0 +1,38 @@
+name: Mobile SynthIMG Check
+
+on:
+  pull_request:
+    paths:
+      - 'computer/mobile/**'
+      - 'computer/tests/mobile-synthimg.test.mjs'
+      - 'computer/build-web.mjs'
+      - 'public/mobile-computer.html'
+      - 'public/synthimg-sw.js'
+      - '.github/workflows/mobile-synthimg-check.yml'
+  push:
+    branches:
+      - 'mobile/synthimg-computer'
+
+permissions:
+  contents: read
+
+jobs:
+  mobile-synthimg:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Mobile SynthIMG acceptance
+        run: node --test computer/tests/mobile-synthimg.test.mjs
+      - name: Stage browser runtime
+        run: node computer/build-web.mjs
+      - name: Verify staged launcher dependencies
+        run: |
+          test -f public/computer-runtime/mobile/MobileComputerRuntime.mjs
+          test -f public/computer-runtime/mobile/SynthImageRuntime.mjs
+          test -f public/computer-runtime/donors/recovered/you-n-i-verse-corrected/state-space-engine-v2.ported.mjs
+          test -f public/mobile-computer.html
+          test -f public/synthimg-sw.js

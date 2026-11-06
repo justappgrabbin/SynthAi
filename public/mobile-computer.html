@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#12091d">
+<title>SynthAI Mobile Computer</title>
+<style>
+:root{color-scheme:dark;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#0d0714;color:#f8f4ff}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(circle at 30% -10%,#4a236b 0,#1a0e29 35%,#0d0714 70%);padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
+button,input,textarea{font:inherit}.app{max-width:780px;margin:auto;padding:18px 14px 50px}.top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:4px 2px 18px}
+.brand{font-weight:900;font-size:20px;letter-spacing:-.03em}.sub{font-size:12px;color:#b8a9c8}.pill{border:1px solid #6e4e87;background:#1d1029;border-radius:999px;padding:7px 10px;color:#dec7ef;font-size:12px}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.card{border:1px solid #49315d;background:linear-gradient(180deg,#1c1028e8,#130b1de8);border-radius:20px;padding:15px;box-shadow:0 18px 45px #0004}
+.card h2,.card h3{margin:6px 0 7px}.card p{margin:0;color:#b9abc4;font-size:13px;line-height:1.45}.mode{cursor:pointer;min-height:124px}.mode.selected{border-color:#c290e9;box-shadow:0 0 0 1px #c290e955,0 18px 45px #0005}
+.section{margin-top:12px}.wide{grid-column:1/-1}.drop{border:1px dashed #815aa1;border-radius:17px;padding:18px;text-align:center;background:#150c20;position:relative}
+.drop input{position:absolute;inset:0;opacity:0;width:100%;height:100%;cursor:pointer}.primary,.secondary,.danger{border:0;border-radius:13px;padding:10px 13px;font-weight:800;cursor:pointer}.primary{background:#9a66c5;color:white}.secondary{background:#30203e;color:#e8daf3}.danger{background:#3a1e34;color:#ffcfe8}.actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:11px}
+.status{font-size:12px;color:#cbb8d8;margin-top:9px;min-height:18px}.apps{display:grid;gap:10px}.appcard{display:flex;flex-direction:column;gap:8px}.row{display:flex;align-items:center;justify-content:space-between;gap:10px}.life{font-size:11px;font-weight:900;letter-spacing:.1em;color:#d4b1ef}
+input[type=text],textarea{width:100%;border:1px solid #4e3860;border-radius:13px;background:#0e0815;color:#f9f4ff;padding:11px;outline:none}textarea{min-height:118px;resize:vertical;font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:12px}
+pre{white-space:pre-wrap;word-break:break-word;background:#0c0712;border-radius:13px;padding:11px;margin:10px 0 0;color:#d9cce2;font-size:11px;max-height:260px;overflow:auto}
+.viewer{width:100%;height:62vh;border:1px solid #513a63;border-radius:18px;background:white;margin-top:10px}.hidden{display:none}.metric{font-size:28px;font-weight:900;letter-spacing:-.04em}.tiny{font-size:11px;color:#9d8ca9}
+@media(max-width:560px){.grid{grid-template-columns:1fr}.wide{grid-column:auto}.viewer{height:68vh}.app{padding-inline:11px}.top{align-items:flex-start;flex-direction:column}}
+</style>
+</head>
+<body>
+<main class="app">
+  <div class="top">
+    <div><div class="brand">SynthAI Computer</div><div class="sub">Mobile SynthIMG runtime · same brain, lighter substrate</div></div>
+    <div class="pill" id="boot">BOOTING</div>
+  </div>
+
+  <div class="grid">
+    <section class="card mode selected" data-mode="compact">
+      <div class="life">COMPACT</div><h2>Wake what I need</h2>
+      <p>Restore checkpoints first. Apps and heavy state wake only when summoned.</p>
+    </section>
+    <section class="card mode" data-mode="full">
+      <div class="life">FULL</div><h2>Wake the room</h2>
+      <p>Same Computer, but mounted apps start ACTIVE instead of WARM.</p>
+    </section>
+  </div>
+
+  <section class="card section">
+    <div class="row"><div><div class="life">SYNTH IMAGE</div><h2>Install an app</h2></div><div class="metric">📦</div></div>
+    <div class="drop">
+      <strong>Tap to choose a .synthimg</strong><br><span class="tiny">SHA-256 verified before install · files stay in device cache</span>
+      <input id="imageFile" type="file" accept=".synthimg,application/octet-stream">
+    </div>
+    <div class="status" id="imageStatus"></div>
+  </section>
+
+  <section class="card section">
+    <div class="row"><div><div class="life">INSTALLED</div><h2>Apps</h2></div><span class="pill" id="appCount">0</span></div>
+    <div class="apps" id="apps"><p>No Synth images installed yet.</p></div>
+  </section>
+
+  <section class="card section">
+    <div class="row"><div><div class="life">UNIVERSAL STATE-SPACE</div><h2>Relocate an address</h2></div><div class="metric">◉</div></div>
+    <p>Paste a full or partial canonical address. Gate/Line/Color/Tone/Base activate the recovered five-stage state-space locally.</p>
+    <textarea id="address">{
+  "planetary": "Sun",
+  "dimension": "Movement",
+  "gate": 25,
+  "line": 2,
+  "color": 4,
+  "tone": 4,
+  "base": 2,
+  "degree": 25,
+  "minute": 59,
+  "second": 31,
+  "arc": 93571,
+  "zodiac": "Virgo",
+  "house": 5
+}</textarea>
+    <div class="actions">
+      <button class="primary" id="activate">Activate state</button>
+      <button class="secondary" id="relocate">Find last state</button>
+    </div>
+    <pre id="stateResult">State-space ready.</pre>
+  </section>
+
+  <section class="section hidden" id="viewerWrap">
+    <div class="row"><div class="life" id="viewerTitle">ACTIVE APP</div><button class="secondary" id="closeViewer">Close view</button></div>
+    <iframe class="viewer" id="viewer" sandbox="allow-scripts allow-forms allow-same-origin allow-downloads"></iframe>
+  </section>
+</main>
+
+<script type="module">
+import { MobileComputerRuntime } from './computer-runtime/mobile/MobileComputerRuntime.mjs';
+
+const $ = id => document.getElementById(id);
+const computer = await new MobileComputerRuntime().boot();
+window.synthComputer = computer;
+
+try {
+  const sw = await computer.images.registerServiceWorker('/synthimg-sw.js');
+  $('boot').textContent = sw.supported ? 'READY' : 'READY · NO SW';
+} catch (error) {
+  $('boot').textContent = 'READY · SW ERROR';
+  console.warn(error);
+}
+
+let mode = computer.state.get('computer.launchProfile', 'compact');
+await computer.setLaunchProfile(mode);
+
+function setMode(next) {
+  mode = next;
+  computer.setLaunchProfile(next);
+  document.querySelectorAll('.mode').forEach(el => el.classList.toggle('selected', el.dataset.mode === next));
+}
+document.querySelectorAll('.mode').forEach(el => el.addEventListener('click', () => setMode(el.dataset.mode)));
+setMode(mode);
+
+function formatBytes(n=0) {
+  if (n < 1024) return n + ' B';
+  if (n < 1024*1024) return (n/1024).toFixed(1) + ' KB';
+  return (n/1024/1024).toFixed(1) + ' MB';
+}
+
+function renderApps() {
+  const images = computer.images.list();
+  $('appCount').textContent = String(images.length);
+  if (!images.length) {
+    $('apps').innerHTML = '<p>No Synth images installed yet.</p>';
+    return;
+  }
+  $('apps').innerHTML = '';
+  for (const app of images) {
+    const el = document.createElement('div');
+    el.className = 'card appcard';
+    el.innerHTML = `
+      <div class="row"><strong>${app.name}</strong><span class="life">${app.lifecycle.toUpperCase()}</span></div>
+      <div class="tiny">${app.version} · ${app.fileCount} files · ${formatBytes(app.storedPayloadBytes)} · ${app.payloadSha256.slice(0,12)}…</div>
+      <div class="tiny">${app.lastCheckpoint ? 'Checkpoint saved ' + new Date(app.lastCheckpoint.savedAt).toLocaleString() : 'No checkpoint yet'}</div>
+      <div class="actions">
+        <button class="primary" data-wake>Summon</button>
+        <button class="secondary" data-sleep>Sleep</button>
+      </div>`;
+    el.querySelector('[data-wake]').onclick = async () => {
+      try {
+        const result = await computer.launchSynthImage(app.id, { full: mode === 'full' });
+        $('viewer').src = result.launchUrl;
+        $('viewerTitle').textContent = `${app.name} · ${result.record.lifecycle.toUpperCase()}`;
+        $('viewerWrap').classList.remove('hidden');
+        renderApps();
+        $('viewerWrap').scrollIntoView({behavior:'smooth'});
+      } catch (error) { alert(error.message); }
+    };
+    el.querySelector('[data-sleep]').onclick = async () => {
+      await computer.sleepSynthImage(app.id);
+      if ($('viewerTitle').textContent.startsWith(app.name)) {
+        $('viewer').src = 'about:blank';
+        $('viewerWrap').classList.add('hidden');
+      }
+      renderApps();
+    };
+    $('apps').appendChild(el);
+  }
+}
+
+$('imageFile').addEventListener('change', async event => {
+  const file = event.target.files?.[0];
+  if (!file) return;
+  $('imageStatus').textContent = 'Verifying image…';
+  try {
+    const record = await computer.installSynthImage(file);
+    $('imageStatus').textContent = `Installed ${record.name}. SHA verified. ${record.fileCount} files cached.`;
+    renderApps();
+  } catch (error) {
+    $('imageStatus').textContent = 'Install failed: ' + error.message;
+  } finally {
+    event.target.value = '';
+  }
+});
+
+$('activate').onclick = async () => {
+  try {
+    const address = JSON.parse($('address').value);
+    const result = await computer.activateAddress(address);
+    $('stateResult').textContent = JSON.stringify({
+      addressKey: result.key,
+      dimension: result.state.node.dimension,
+      coherence: result.state.coherence,
+      node: result.state.node,
+      sentence: result.sentence,
+    }, null, 2);
+  } catch (error) {
+    $('stateResult').textContent = 'ERROR: ' + error.message;
+  }
+};
+
+$('relocate').onclick = async () => {
+  try {
+    const address = JSON.parse($('address').value);
+    const result = await computer.relocateAddress(address);
+    $('stateResult').textContent = JSON.stringify(result, null, 2);
+  } catch (error) {
+    $('stateResult').textContent = 'ERROR: ' + error.message;
+  }
+};
+
+$('closeViewer').onclick = () => {
+  $('viewer').src = 'about:blank';
+  $('viewerWrap').classList.add('hidden');
+};
+
+renderApps();
+</script>
+</body>
+</html>

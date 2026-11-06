@@ -1,0 +1,9 @@
+{
+  "appId": "org.synthai.computer",
+  "appName": "SynthAI Computer",
+  "webDir": "mobile-web",
+  "bundledWebRuntime": false,
+  "server": {
+    "androidScheme": "https"
+  }
+}
