@@ -8,26 +8,34 @@
  * (unknown stays unknown, and claimed statuses are never silently lowered).
  */
 
-import { readFile } from 'node:fs/promises';
-import { fileURLToPath } from 'node:url';
-
-const SEED_PATH = fileURLToPath(new URL('./capability-registry.json', import.meta.url));
+const SEED_URL = new URL('./capability-registry.json', import.meta.url);
 const STATUSES = Object.freeze(['NOT_FOUND', 'PRESENT', 'PARTIALLY_WIRED', 'WIRED', 'VERIFIED']);
 
 export class CapabilityRegistryService {
-  constructor({ bus = null, seedPath = SEED_PATH } = {}) {
+  constructor({ bus = null, seedPath = null } = {}) {
     this.bus = bus;
     this.seedPath = seedPath;
     this.capabilities = new Map();
   }
 
   async load() {
-    const doc = JSON.parse(await readFile(this.seedPath, 'utf8'));
+    const url = this.seedPath ?? SEED_URL;
+    let doc;
+    if (typeof window !== 'undefined') {
+      const response = await fetch(url);
+      if (!response.ok) throw new Error('Computer capability registry could not load: HTTP ' + response.status);
+      doc = await response.json();
+    } else {
+      // Keep the established Node JSON seed and avoid static Node imports in browsers.
+      const { readFile } = await import('node:fs/promises');
+      const { fileURLToPath } = await import('node:url');
+      doc = JSON.parse(await readFile(url instanceof URL ? fileURLToPath(url) : url, 'utf8'));
+    }
     for (const entry of doc.capabilities ?? []) {
       this.capabilities.set(entry.capability, entry);
     }
     this.meta = { schema: doc.schema, stage: doc.stage, donor_pin: doc.donor_pin };
-    this.bus?.emit('capability-registry:loaded', { capabilities: [...this.capabilities.keys()], seed: this.seedPath });
+    this.bus?.emit('capability-registry:loaded', { capabilities: [...this.capabilities.keys()], seed: String(url) });
     return this;
   }
 

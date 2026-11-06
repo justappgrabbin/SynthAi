@@ -1,5 +1,6 @@
 import { ComputerRuntime } from '/computer-runtime/ComputerRuntime.mjs';
 import { LocalStoragePersistence } from '/computer-runtime/core/kernel.mjs';
+import { mountSwarmComputerUI } from '/swarm-ui.mjs';
 
 const $ = selector => document.querySelector(selector);
 const $$ = selector => [...document.querySelectorAll(selector)];
@@ -12,6 +13,7 @@ const computer = await new ComputerRuntime({
 }).boot();
 
 globalThis.SynthAIComputer = computer;
+const swarmUI = mountSwarmComputerUI({ computer });
 
 let currentProjectId = localStorage.synthaiCurrentProject || '';
 let activity = [];
@@ -29,7 +31,7 @@ function show(view) {
   $$('.nav').forEach(el => el.classList.toggle('active', el.dataset.view === view));
   $('#viewTitle').textContent = titleFor(view);
   if (view === 'files') renderFiles();
-  if (view === 'systems') renderSystems();
+  if (view === 'systems') { renderSystems(); void swarmUI.render(); }
 }
 
 $$('[data-view]').forEach(button => button.addEventListener('click', () => show(button.dataset.view)));
@@ -254,12 +256,13 @@ if (savedToken) $('#computerToken').value = savedToken;
 
 $('#bootDot').classList.add('good');
 $('#bootLabel').textContent = 'runtime online';
-$('#runtimeStatus').textContent = 'VERIFIED';
+$('#runtimeStatus').textContent = 'LOCAL';
 $('#runtimeDetail').textContent = computer.snapshot().version;
 $('#mountCount').textContent = `${computer.shellManager.listMounted().length} mounted`;
 
 renderProjects();
 renderSystems();
+await swarmUI.render();
 renderActivity();
 if (currentProjectId && computer.projects.get(currentProjectId)) loadCurrentFile();
 if (savedServer && savedToken) connectGitHub();
