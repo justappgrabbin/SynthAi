@@ -56,7 +56,7 @@ def build(rootfs, proot, rootfs_sha, proot_sha, output):
     rh = check_hash(rootfs, rootfs_sha)
     ph = check_hash(proot, proot_sha)
     validate_tar(rootfs)
-    if not proot.read_bytes()[:4] == b"\\x7fELF":
+    if not proot.read_bytes()[:4] == b"\x7fELF":
         raise ValueError("PRoot input is not an ELF binary")
     manifest = {
         "schema": 1, "platform": "android-arm64", "runtime": "linux-proot",
@@ -70,7 +70,7 @@ def build(rootfs, proot, rootfs_sha, proot_sha, output):
     with ZipFile(output, "w", ZIP_DEFLATED, compresslevel=6) as archive:
         archive.write(rootfs, "rootfs.tar.gz")
         archive.write(proot, "proot")
-        archive.writestr("linux-manifest.json", json.dumps(manifest, indent=2) + "\\n")
+        archive.writestr("linux-manifest.json", json.dumps(manifest, indent=2) + "\n")
     return manifest
 
 def main():
