@@ -7,7 +7,6 @@ download an unverified rootfs or silently substitute Android's host runtime.
 import argparse
 import hashlib
 import json
-import os
 from pathlib import Path
 import tarfile
 from zipfile import ZipFile, ZIP_DEFLATED
@@ -39,14 +38,14 @@ def validate_tar(path):
             if item.ischr() or item.isblk() or item.isfifo():
                 raise ValueError(f"Unsupported device member: {item.name}")
             if item.issym() or item.islnk():
-                # Rootfs symlinks need a separate confined extractor at install time.
-                # Keep them in the archive; do not unpack this tar on the build host.
+                # Preserve links in the archive, but require an independently
+                # audited Android extractor before any installation.
                 if item.linkname.startswith("/") or ".." in Path(item.linkname).parts:
                     raise ValueError(f"Unconfined rootfs link: {item.name}")
             names.add(name)
-        if not any(n.endswith("bin/sh") for n in names):
+        if "bin/sh" not in names and "usr/bin/sh" not in names:
             raise ValueError("Rootfs must contain bin/sh")
-        if not any(n.endswith("usr/bin/node") or n.endswith("bin/node") for n in names):
+        if "usr/bin/node" not in names and "bin/node" not in names:
             raise ValueError("Rootfs must contain Linux Node.js; Android libnode is not a substitute")
 
 def build(rootfs, proot, rootfs_sha, proot_sha, output):
@@ -56,7 +55,9 @@ def build(rootfs, proot, rootfs_sha, proot_sha, output):
     rh = check_hash(rootfs, rootfs_sha)
     ph = check_hash(proot, proot_sha)
     validate_tar(rootfs)
-    if not proot.read_bytes()[:4] == b"\x7fELF":
+    with proot.open("rb") as executable:
+        magic = executable.read(4)
+    if magic != b"\x7fELF":
         raise ValueError("PRoot input is not an ELF binary")
     manifest = {
         "schema": 1, "platform": "android-arm64", "runtime": "linux-proot",
