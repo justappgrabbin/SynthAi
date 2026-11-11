@@ -21,3 +21,10 @@ One APK contains an embedded Linux userspace (root filesystem and PRoot), Node.j
 
 ## Change / evidence policy
 No original APK bytes modified, no deletion/overwrite, no deployment/merge/registration or paid CI. Branch work is incomplete. Do not claim an installable Linux APK exists. Do not recommend uninstalling the existing app. Historical original APK: 112010294 bytes, SHA256 `9fc1983e3afeb1f10663231d349c74ba57fe525d9ec032baaa7683085ae77581`.
+
+## 2026-11-11 source hardening checkpoint
+- Read canonical Foundry Google Doc and Drive master reassembly again before source changes.
+- Derived branch only: staging script commit `893a42cde96d692bc1929aefd5e9d66d1fcd1e61` (blob `3d9823470cfc736710738b23bddda714da3da272`). Replaced suffix-matching tar entries with exact `bin/sh` / `usr/bin/sh` and `usr/bin/node` / `bin/node` checks; PRoot ELF check now reads only four bytes, not the entire executable. This prevents false-positive entries such as `fake/usr/bin/node`.
+- Added isolated offline unittest suite `computer/android/tests/test_stage_linux_assets.py` at commit `febb70c108290a81edfee4814d058363245d2252`. Seven cases cover manifest, overwrite protection, wrong hash, missing Node, suffix spoofing, traversal, and invalid ELF. **Committed but not executed**: container DNS cannot resolve GitHub raw host; connector source readback succeeds but no container materialization path. Do not claim passing tests.
+- No Linux image/PRoot binary supplied or built; no Gradle/Java/Android startup integration, physical device test, APK, update notifier, merge, deployment or registration. Original APK hashes remain historical checkpoint values, not freshly rehashed.
+- Next unblocked action: test the committed Python files in a build-capable environment, then implement Android private rootfs extraction and native PRoot launch using verified ARM64 assets; preserve existing auth and signing identity.
