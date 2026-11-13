@@ -30,7 +30,7 @@ class StageTests(unittest.TestCase):
         self.dir = Path(self.tmp.name)
         self.rootfs = self.dir / "rootfs.tar.gz"
         self.proot = self.dir / "proot"
-        self.proot.write_bytes(b"\\x7fELF" + b"fixture")
+        self.proot.write_bytes(b"\x7fELF" + b"fixture")
         make_tar(self.rootfs, [("bin/sh", "shell"), ("usr/bin/node", "node")])
 
     def test_staging_and_manifest(self):
