@@ -17,3 +17,5 @@ The original split archives are preserved in `parts/`. `assemble_original.py` ve
 ## Smaller installer
 
 The **Synthia Adaptive Lite** releases provide a separate ~108 MB installer with first-use model downloads. See [lightweight/README.md](lightweight/README.md) for setup, build details and verification boundaries. The original full APK remains unchanged under `synthia-adaptive-v0.5.4`.
+
+Lite **0.5.5** adds optional GitHub updates in Settings. It checks only compatible, signed Lite releases and leaves downloading/installing under the user's control. See `lightweight/README.md` for the first-install signing limitation and the release-key requirements.

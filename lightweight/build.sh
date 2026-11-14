@@ -20,16 +20,22 @@ PY
 java -jar "$APKTOOL_JAR" d -f -r "$work/input.apk" -o "$work/app"
 python3 "$project/lightweight/patch.py" "$work/app"
 # Preserve the original native components; compile a separate application identity.
-"$BUILD_TOOLS/aapt2" link -I "$ANDROID_JAR" --manifest "$project/lightweight/AndroidManifest.xml" -o "$work/manifest.apk"
+python3 - "$project" "$work/AndroidManifest.xml" <<'PYTHON'
+import pathlib,sys,json
+root=pathlib.Path(sys.argv[1]);version=json.loads((root/'lightweight/version.json').read_text())
+text=(root/'lightweight/AndroidManifest.xml').read_text().replace('android:versionCode="10"','android:versionCode="'+str(version['versionCode'])+'"').replace('android:versionName="0.5.4-lite"','android:versionName="'+version['versionName']+'"')
+pathlib.Path(sys.argv[2]).write_text(text)
+PYTHON
+"$BUILD_TOOLS/aapt2" link -I "$ANDROID_JAR" --manifest "$work/AndroidManifest.xml" -o "$work/manifest.apk"
 python3 - "$work/manifest.apk" "$work/app/AndroidManifest.xml" <<'PY'
 import zipfile,sys
 with zipfile.ZipFile(sys.argv[1]) as z: open(sys.argv[2],'wb').write(z.read('AndroidManifest.xml'))
 PY
 mkdir "$work/classes" "$work/dex"
 if [[ -n "${ECJ_JAR:-}" ]]; then
- java -jar "$ECJ_JAR" -1.8 -proc:none -warn:none -cp "$ANDROID_JAR" -d "$work/classes" "$project/lightweight/src/com/synthia/autonomy/ModelDownload.java"
+ java -jar "$ECJ_JAR" -1.8 -proc:none -warn:none -cp "$ANDROID_JAR" -d "$work/classes" "$project"/lightweight/src/com/synthia/autonomy/*.java
 else
- javac -source 8 -target 8 -cp "$ANDROID_JAR" -d "$work/classes" "$project/lightweight/src/com/synthia/autonomy/ModelDownload.java"
+ javac -source 8 -target 8 -cp "$ANDROID_JAR" -d "$work/classes" "$project"/lightweight/src/com/synthia/autonomy/*.java
 fi
 mapfile -t classes < <(find "$work/classes" -name '*.class' | sort)
 "$BUILD_TOOLS/d8" --min-api 24 --lib "$ANDROID_JAR" --output "$work/dex" "${classes[@]}"

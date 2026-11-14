@@ -6,6 +6,8 @@ changed={'AndroidManifest.xml','classes.dex','assets/web/proactive/model.mjs','a
 with zipfile.ZipFile(original) as src,zipfile.ZipFile(output) as dst:
  assert removed not in dst.namelist()
  assert 'classes2.dex' in dst.namelist()
+ assert b'com/synthia/autonomy/AppUpdates' in dst.read('classes.dex')
+ assert 'assets/web/proactive/updater.mjs' in dst.namelist()
  assert dst.testzip() is None
  preserved=0
  for name in src.namelist():
@@ -17,7 +19,7 @@ with zipfile.ZipFile(original) as src,zipfile.ZipFile(output) as dst:
  assert b'cc324af070c2ecbfd324a30884d2f951a7ff756aba85cb811a6ec436933bb046' in dst.read('classes2.dex')
  assert b'resume' in dst.read('assets/web/index.html')
 with output.open('rb') as f:digest=hashlib.file_digest(f,'sha256').hexdigest()
-report={'apk':output.name,'bytes':output.stat().st_size,'sha256':digest,'originalModelBytesRemoved':1117320768,'modelDownloadBytes':1117320768,'modelChecksum':'cc324af070c2ecbfd324a30884d2f951a7ff756aba85cb811a6ec436933bb046','originalEntriesPreservedByteForByte':preserved,'changedEntries':sorted(changed),'addedEntries':['classes2.dex'],'apkZipIntegrity':'passed','physicalPhoneTested':False,'package':'com.synthia.adaptive.lite','version':'0.5.4-lite','versionCode':10}
+report={'apk':output.name,'bytes':output.stat().st_size,'sha256':digest,'originalModelBytesRemoved':1117320768,'modelDownloadBytes':1117320768,'modelChecksum':'cc324af070c2ecbfd324a30884d2f951a7ff756aba85cb811a6ec436933bb046','originalEntriesPreservedByteForByte':preserved,'changedEntries':sorted(changed),'addedEntries':['classes2.dex','assets/web/proactive/updater.mjs'],'apkZipIntegrity':'passed','physicalPhoneTested':False,'package':'com.synthia.adaptive.lite','version':json.loads((Path(__file__).parent/'version.json').read_text())['versionName'],'versionCode':json.loads((Path(__file__).parent/'version.json').read_text())['versionCode']}
 (output.parent/'LITE-VERIFICATION.json').write_text(json.dumps(report,indent=2)+'\n')
 (output.parent/'SHA256SUMS-lite').write_text(digest+'  '+output.name+'\n')
 print(json.dumps(report),flush=True)

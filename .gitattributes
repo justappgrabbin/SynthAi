@@ -1,1 +1,2 @@
 parts/* -diff -text
+lite-delivery/**/*.part* -diff -text

@@ -1,8 +1,10 @@
-Smaller installer derived from the original Synthia Adaptive 0.5.4 app. Download **Synthia-Adaptive-v0.5.4-lite.apk** below.
+Synthia Adaptive Lite 0.5.5 adds **Settings → App updates**.
 
-- Installs separately as **Synthia Adaptive Lite**; it does not replace or import data from the original app.
-- In Computer, choose **Download / start model**. Initial setup downloads the original 1.12 GB Qwen Coder 1.5B weights from a pinned official source. Use Wi-Fi and allow at least 1.2 GB free storage.
-- Download progress, Stop/pause and resumable retries are supported. The model must pass size and SHA-256 verification before use.
-- The engine stays bundled. After the first setup, verified weights are reused and inference works offline.
-- Original app assets are preserved byte for byte except the model-related status text; the original APK remains available under `synthia-adaptive-v0.5.4`.
-- This is a separately signed distribution patch, not a rebuild from the unavailable original native Java source. Downloader regressions, package/signature/integrity checks pass; operation on a physical Android phone remains unverified.
+- Optional daily GitHub checks when the app opens; a manual Check button is always available.
+- Download is offered only for a newer Lite APK with the same package and signing identity. Other applications and older releases are ignored.
+- You choose whether to download. The browser downloads the APK; Android asks before installing. There is no silent install or forced update.
+- The original downloadable, quantized Qwen model stays unchanged. Compatible updates preserve downloaded weights and app data.
+
+**First-install limitation:** the previous 0.5.4 GitHub APK used a temporary signing key that was not retained. Android may reject installing this release over that build. Preserve existing work before considering any fresh installation. Future updater releases must use this release's pinned signing key.
+
+The APK remains about 108 MB; first model setup downloads 1.12 GB. Automated policy/download tests, rebuilt-payload comparison, signature and integrity checks pass. Physical Android update installation remains unverified.
