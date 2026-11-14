@@ -1,0 +1,13 @@
+Synthia Adaptive 0.5.4 - offline ARM64 Android APK
+
+Download ALL 13 Synthia-Adaptive-v0.5.4.zip.001 through .013 files to the SAME folder. Keep their names unchanged.
+
+Use an archive app supporting split ZIP archives (for example ZArchiver). Open .zip.001 and choose Extract. The result is Synthia-Adaptive-v0.5.4.apk. Tap that APK to install; Android may ask to allow installation from your file manager. Do not tap the archive parts as if they were APKs.
+
+This archive contains one complete signed APK, split only because the delivery connector limits each upload to 100 MB. Qwen2.5-Coder 1.5B Q4_K_M and its ARM64 CPU engine are bundled. No Termux or remote inference is needed for chat/Hands. Allow several GB of free space during extraction and installation.
+
+In Computer choose the embedded model and start local AI. Enable Synthia Accessibility and notification permission for Hands. The existing Adaptive app can be updated without clearing its data.
+
+47 automated tests and the APK signature/integrity checks passed. Real-model host inference and native policy tests passed. Physical-phone installation/native execution has not been tested.
+
+APK SHA-256: 068cae9639be745bdb9540fa5b0de790d66c506ba9973589251004fb9249a5b5

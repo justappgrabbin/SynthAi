@@ -1,0 +1,12 @@
+{
+  "apk": "Synthia-Adaptive-v0.5.4.apk",
+  "bytes": 1225329912,
+  "sha256": "068cae9639be745bdb9540fa5b0de790d66c506ba9973589251004fb9249a5b5",
+  "originalDrivePartsVerified": 13,
+  "matchesOriginalAPKHash": true,
+  "apkZipIntegrity": "passed",
+  "modified": false,
+  "rebuilt": false,
+  "resigned": false,
+  "physicalPhoneTested": false
+}

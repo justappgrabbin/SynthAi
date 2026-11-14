@@ -1,0 +1,24 @@
+name: Publish original Synthia Adaptive APK
+on:
+  push:
+    branches: [delivery/synthia-adaptive-v054-original]
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify all original parts and reconstruct unchanged APK
+        run: python3 assemble_original.py
+      - name: Upload original APK and verification documents
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          gh release upload synthia-adaptive-v0.5.4 \
+            dist/Synthia-Adaptive-v0.5.4.apk dist/SHA256SUMS \
+            VERIFICATION.md DELIVERY-VERIFICATION.json ARCHIVE-SHA256SUMS.txt START-HERE.txt
+          gh release edit synthia-adaptive-v0.5.4 --target "$GITHUB_SHA" --draft=false --latest=false
