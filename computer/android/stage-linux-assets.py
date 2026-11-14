@@ -35,8 +35,10 @@ def validate_tar(path):
             parts = Path(name).parts
             if not name or name.startswith("/") or ".." in parts:
                 raise ValueError(f"Unsafe rootfs member: {item.name}")
-            if item.ischr() or item.isblk() or item.isfifo():
-                raise ValueError(f"Unsupported device member: {item.name}")
+            if name in names:
+                raise ValueError(f"Duplicate rootfs member: {item.name}")
+            if item.ischr() or item.isblk() or item.isfifo() or not (item.isfile() or item.isdir() or item.issym() or item.islnk()):
+                raise ValueError(f"Unsupported rootfs member: {item.name}")
             if item.issym() or item.islnk():
                 # Preserve links in the archive, but require an independently
                 # audited Android extractor before any installation.
