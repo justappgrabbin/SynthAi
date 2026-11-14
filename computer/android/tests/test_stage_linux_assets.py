@@ -67,6 +67,26 @@ class StageTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             stage.build(self.rootfs, self.proot, sha(self.rootfs), sha(self.proot), self.dir / "out.zip")
 
+    def test_duplicate_member_rejected(self):
+        make_tar(self.rootfs, [("bin/sh", "first"), ("bin/sh", "second"),
+                               ("usr/bin/node", "node")])
+        with self.assertRaisesRegex(ValueError, "Duplicate"):
+            stage.build(self.rootfs, self.proot, sha(self.rootfs), sha(self.proot),
+                        self.dir / "out.zip")
+
+    def test_unsupported_tar_member_rejected(self):
+        with tarfile.open(self.rootfs, "w:gz") as tar:
+            for name in ("bin/sh", "usr/bin/node"):
+                info = tarfile.TarInfo(name)
+                info.size = 0
+                tar.addfile(info, io.BytesIO())
+            special = tarfile.TarInfo("tmp/socket")
+            special.type = tarfile.FIFOTYPE
+            tar.addfile(special)
+        with self.assertRaisesRegex(ValueError, "Unsupported"):
+            stage.build(self.rootfs, self.proot, sha(self.rootfs), sha(self.proot),
+                        self.dir / "out.zip")
+
     def test_invalid_elf(self):
         self.proot.write_bytes(b"not-elf")
         with self.assertRaises(ValueError):
