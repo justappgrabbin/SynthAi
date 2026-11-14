@@ -2,6 +2,7 @@ name: Publish original Synthia Adaptive APK
 on:
   push:
     branches: [delivery/synthia-adaptive-v054-original]
+    paths: ["parts/**", "assemble_original.py", ".github/workflows/publish-original-adaptive.yml"]
   workflow_dispatch:
 permissions:
   contents: write
@@ -18,6 +19,12 @@ jobs:
           GH_REPO: ${{ github.repository }}
         run: |
           set -euo pipefail
+          EXPECTED="sha256:068cae9639be745bdb9540fa5b0de790d66c506ba9973589251004fb9249a5b5"
+          ACTUAL=$(gh api "repos/$GH_REPO/releases/tags/synthia-adaptive-v0.5.4" --jq '.assets[] | select(.name == "Synthia-Adaptive-v0.5.4.apk") | .digest' 2>/dev/null || true)
+          if [[ "$ACTUAL" == "$EXPECTED" ]]; then
+            echo "Original unchanged APK is already published and verified."
+            exit 0
+          fi
           gh release upload synthia-adaptive-v0.5.4 \
             dist/Synthia-Adaptive-v0.5.4.apk dist/SHA256SUMS \
             VERIFICATION.md DELIVERY-VERIFICATION.json ARCHIVE-SHA256SUMS.txt START-HERE.txt

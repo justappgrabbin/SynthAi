@@ -1,2 +1,6 @@
 *.zip
 *.apk
+
+.signing/
+
+dist/

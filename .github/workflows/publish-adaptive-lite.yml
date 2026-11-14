@@ -1,0 +1,74 @@
+name: Build and publish Synthia Adaptive Lite
+on:
+  push:
+    branches: [delivery/synthia-adaptive-v054-original]
+    paths: ['lightweight/**', '.github/workflows/publish-adaptive-lite.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: android-actions/setup-android@v3
+        with:
+          packages: 'platform-tools'
+      - name: Install packaging tools
+        run: |
+          sdkmanager 'platforms;android-35' 'build-tools;35.0.0'
+          curl -fL https://github.com/iBotPeaches/Apktool/releases/download/v2.12.1/apktool_2.12.1.jar -o "$RUNNER_TEMP/apktool.jar"
+          echo "66cf4524a4a45a7f56567d08b2c9b6ec237bcdd78cee69fd4a59c8a0243aeafa  $RUNNER_TEMP/apktool.jar" | sha256sum -c -
+      - name: Reconstruct and verify original input
+        run: python3 assemble_original.py
+      - name: Test resumable model delivery
+        run: |
+          mkdir -p "$RUNNER_TEMP/tests"
+          javac -source 8 -target 8 -cp "$ANDROID_HOME/platforms/android-35/android.jar" -d "$RUNNER_TEMP/tests" \
+            lightweight/src/com/synthia/autonomy/ModelDownload.java lightweight/tests/ModelDownloadTest.java
+          java -cp "$RUNNER_TEMP/tests:$ANDROID_HOME/platforms/android-35/android.jar" com.synthia.autonomy.ModelDownloadTest
+      - name: Build and verify separate Lite APK
+        run: |
+          export APKTOOL_JAR="$RUNNER_TEMP/apktool.jar"
+          export ANDROID_JAR="$ANDROID_HOME/platforms/android-35/android.jar"
+          export BUILD_TOOLS="$ANDROID_HOME/build-tools/35.0.0"
+          bash lightweight/build.sh dist/Synthia-Adaptive-v0.5.4.apk
+      - name: Test packaged model setup interface
+        run: |
+          python3 - <<'PYTHON'
+          import os, pathlib, zipfile, re
+          root=pathlib.Path(os.environ['RUNNER_TEMP'])/'lite-web'
+          with zipfile.ZipFile('dist/Synthia-Adaptive-v0.5.4-lite.apk') as z:
+              for n in z.namelist():
+                  if n.startswith('assets/web/proactive/') and not n.endswith('/'):
+                      p=root/n.removeprefix('assets/web/');p.parent.mkdir(parents=True,exist_ok=True);p.write_bytes(z.read(n))
+              scripts=re.findall(r'<script[^>]*>(.*?)</script>',z.read('assets/web/index.html').decode(),re.S|re.I)
+          assert len(scripts)==1
+          (pathlib.Path(os.environ['RUNNER_TEMP'])/'lite-ui.mjs').write_text(scripts[0])
+          PYTHON
+          ADAPTIVE_WEB_ROOT="$RUNNER_TEMP/lite-web" node --test lightweight/tests/web-model.test.mjs
+          node --check "$RUNNER_TEMP/lite-ui.mjs"
+      - name: Upload verified Lite APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: Synthia-Adaptive-Lite-APK
+          path: |
+            dist/Synthia-Adaptive-v0.5.4-lite.apk
+            dist/LITE-VERIFICATION.json
+            dist/SHA256SUMS-lite
+          if-no-files-found: error
+      - name: Publish single-file lightweight download
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          TAG="synthia-adaptive-lite-v0.5.4-${GITHUB_SHA:0:12}"
+          gh release create "$TAG" \
+            dist/Synthia-Adaptive-v0.5.4-lite.apk dist/LITE-VERIFICATION.json dist/SHA256SUMS-lite \
+            --target "$GITHUB_SHA" --title 'Synthia Adaptive Lite — smaller installer, downloadable model' \
+            --notes-file lightweight/RELEASE-NOTES.md --prerelease --latest=false
