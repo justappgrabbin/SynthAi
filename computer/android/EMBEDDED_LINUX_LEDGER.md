@@ -34,3 +34,14 @@ No original APK bytes modified, no deletion/overwrite, no deployment/merge/regis
 - Source readback found the committed test fixture used ASCII backslash-x bytes (`b"\\\\x7fELF"`) rather than ELF magic (`b"\\x7fELF"`), so the nominal success test would fail. Fixed the test fixture in commit `3daa5f69079dcfead3f9f03dba2d1873a927bc58`, updated blob `197c44370b7791a7d2f6ed89779cdc55cf53fdb8`.
 - Reconstructed the inspected staging logic and seven tests into a separate local scratch directory and ran `python -m unittest discover`: 7/7 passed (0.014 s). **These are reconstructed equivalent files, not a byte-for-byte execution of the exact GitHub checkout.** They use synthetic rootfs/ELF fixtures, not Android/Linux integration.
 - Blockers unchanged: real verified ARM64 PRoot/rootfs+Node assets, safe Android installer, Linux process launcher, terminal wiring, Android SDK/device, and stable original signing identity. No APK, registration, merge, deployment, or paid CI.
+
+
+## 2026-11-14 derived validation checkpoint
+- Read canonical Foundry Google Doc and Drive REASSEMBLY_MASTER_BUILD.md before changes; inspected GitHub staging script and test fixture by exact blob SHA.
+- New derived branch `repair/embedded-linux-validation-20261114` from `repair/embedded-linux-computer-20261109`; no changes to historical branches or original APKs.
+- Source hardening commit `81efdab3117efb29229ddf6621e1fc61ee6ce251`: reject duplicate normalized tar member names and unsupported tar member types before packaging. Previous source blob `3d9823470cfc736710738b23bddda714da3da272`; new blob `3c456f1678141fea51d53d069ec16a24fd7860ab`.
+- Regression tests commit `878d8da27e9427c61f56aab6b828191d69d09661`: add duplicate-member and FIFO-member rejection cases. New test blob `ec098c9e1802210a7e98134ae4470d2ab12c708c`. Committed tests **not executed directly from exact GitHub bytes**.
+- Local isolated Python reproduction of the modified tar guard ran 4/4 tests PASS (valid, duplicate, FIFO, traversal); this is not execution of the exact full committed suite or Android acceptance.
+- Known gap: tar member names and links still need a full confined extraction design, including symlink-parent and hardlink semantics; existing validation is not proof of safe extraction. ELF magic alone does not prove architecture or executable compatibility.
+- No rootfs or PRoot binary supplied; no Linux startup integration, APK, device test, signing verification, registration, merge, deployment, paid CI or deletion.
+- Next: implement and test an Android-compatible confined extractor and launcher, then supply SHA-verified ARM64 rootfs/PRoot/Node assets and build/test the real APK.
