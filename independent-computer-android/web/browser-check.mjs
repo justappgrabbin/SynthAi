@@ -1,0 +1,18 @@
+import {chromium} from 'playwright-core';
+const browser=await chromium.launch({executablePath:'/usr/bin/chromium',headless:true,args:['--no-sandbox','--enable-unsafe-webgpu','--use-angle=swiftshader','--enable-features=Vulkan','--disable-vulkan-surface']});
+const page=await browser.newPage({viewport:{width:1280,height:900}}),errors=[];
+page.on('pageerror',e=>errors.push(e.message));
+await page.goto('http://127.0.0.1:8080/');
+await page.click('#proof');
+await page.waitForFunction(()=>document.getElementById('result').textContent.includes('secondGeneration')||document.getElementById('result').textContent.includes('"error"'),null,{timeout:30000});
+const proof=await page.locator('#result').textContent();
+await page.reload();
+await page.waitForFunction(()=>document.getElementById('capabilities').options.length===3);
+const capabilities=await page.locator('#capabilities option').allTextContents();
+const gpu=await page.evaluate(async()=>{try{const adapter=await navigator.gpu?.requestAdapter();return {available:!!adapter,features:adapter?[...adapter.features]:[]};}catch(e){return {error:e.message};}});
+await page.screenshot({path:'evidence/foundation-desktop.png',fullPage:true});
+await page.setViewportSize({width:390,height:844});await page.screenshot({path:'evidence/foundation-mobile.png',fullPage:true});
+const result={proof:JSON.parse(proof),capabilitiesAfterReload:capabilities,gpu,errors};
+console.log(JSON.stringify(result,null,2));
+await browser.close();
+if(errors.length||result.proof.error)process.exitCode=1;

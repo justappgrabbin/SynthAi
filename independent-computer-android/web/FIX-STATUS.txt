@@ -1,0 +1,1 @@
+v26.4.1: Required named inputs derived from verified contracts. 16 foundation tests pass. Real local Qwen generated execute/double/arg0=21. Original Klein CALL executed the saved implementation and returned42. See evidence/local-model-action-receipt.json. No API key or external model call. Historical failure receipt retained separately.

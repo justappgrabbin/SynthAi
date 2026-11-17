@@ -1,0 +1,51 @@
+{
+  "version": "26.3-drive-source-integration",
+  "base_archive": {
+    "name": "Independent-Computer-v26.2-Living-World-source.zip",
+    "sha256": "c1b7ee537871c29097cdd235d856385a03987edac6089bf7e770988c13f02786"
+  },
+  "verified_donors": [
+    {
+      "driveId": "1qEeyp97SisOeJUy3gOgw9KYVTqEvPROs",
+      "name": "world-engine-foundry-4.html",
+      "sha256": "80ec9bbdb94732dcaf57576f05b2cbadff4acafb66a9e5ffab551ec24c0075cc",
+      "path": "world-engine-foundry-4.original.html",
+      "change": "Unchanged, adapter fixed separately"
+    },
+    {
+      "driveId": "1BZRURo39_sU_m41XzwtPrGEouVgz1zpz",
+      "name": "Synthia-Resonance-Computer-Integrated-v11.html",
+      "sha256": "26d9bb15529f47a249667355a6e74ba450dddf1c09fd11fc11340d5f59409a5a",
+      "path": "donors/Synthia-Resonance-Computer-Integrated-v11.original.html",
+      "change": "Unchanged, full 216-module donor; appended-only bridge in connected copy"
+    }
+  ],
+  "integrations": [
+    {
+      "from": "Independent Computer source registry",
+      "to": "real Synthia DesktopRuntime file store",
+      "endpoint": "source.save/source.read",
+      "validation": "exact content equality after readback"
+    },
+    {
+      "from": "Synthia DesktopRuntime file store",
+      "to": "World Engine Foundry v4",
+      "endpoint": "source.read to computer.manifest",
+      "validation": "building.brick.content === source.content"
+    },
+    {
+      "from": "Independent Computer editor",
+      "to": "World Engine Foundry v4",
+      "endpoint": "computer.manifest",
+      "validation": "building.brick.content === editor.content"
+    }
+  ],
+  "original_module_count": 216,
+  "not_claimed": [
+    "full autonomous self-building",
+    "unified cross-engine RSS semantics",
+    "Android installation",
+    "agent behavioral simulation",
+    "external services without configured dependencies"
+  ]
+}

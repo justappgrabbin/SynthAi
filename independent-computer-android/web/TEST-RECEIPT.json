@@ -1,0 +1,18 @@
+{
+  "checkpoint": "Independent-Computer-Rebuild-v26.3",
+  "verified_on": "2026-11-17 (UTC); 2026-11-16 local PST",
+  "original_node_test_files": 26,
+  "new_node_test_files": 2,
+  "total_node_test_files": 28,
+  "failed_node_test_files": 0,
+  "actual_source_modules_from_drive": 216,
+  "donor_module_hash_mismatches": 0,
+  "real_synthia_runtime_boot": "pass (Node)",
+  "real_synthia_expression_execution": "6 * 7 = 42; receipt.ok = true",
+  "connected_bridge_actual_source_readback": "8863 UTF-8 bytes exact; success",
+  "real_connected_chat_command": "calculate 6 * 7 -> 42, acted=true",
+  "world_untruncated_bridge": "static adapter verification + in-script equality receipt; interactive browser not tested",
+  "browser_UI": "not verified; local navigation blocked by test environment",
+  "android": "not tested",
+  "full_project_rebuild": "not claimed"
+}

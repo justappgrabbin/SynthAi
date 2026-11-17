@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Qwen Computer — prototype</title>
+<style>
+  :root{--bg:#0d0f14;--panel:#151922;--line:#262c3a;--text:#d7dce6;--dim:#7d869a;--acc:#9bff6a;--warn:#ffb86b;--err:#ff6b6b}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font:13px/1.45 ui-monospace,Menlo,Consolas,monospace}
+  header{padding:10px 12px;border-bottom:1px solid var(--line);display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  header b{color:var(--acc)}
+  select,button,input,textarea{background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:6px;padding:6px 8px;font:inherit}
+  button{cursor:pointer}button:hover{border-color:var(--acc)}button:disabled{opacity:.4;cursor:default}
+  main{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:10px}
+  @media(max-width:800px){main{grid-template-columns:1fr}}
+  section{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:8px;min-width:0}
+  h3{margin:0 0 6px;font-size:12px;color:var(--dim);text-transform:uppercase;letter-spacing:.08em}
+  #term{height:340px;overflow:auto;white-space:pre-wrap;word-break:break-word}
+  .t-sys{color:var(--dim)}.t-cmd{color:var(--acc)}.t-out{color:var(--text)}.t-err{color:var(--err)}.t-thought{color:var(--warn)}
+  canvas{width:100%;background:#000;border-radius:6px;display:block}
+  #disk,#ram{max-height:170px;overflow:auto;white-space:pre-wrap;font-size:12px}
+  .row{display:flex;gap:6px;margin-top:6px}.row input{flex:1}
+  #status{color:var(--dim)}
+  progress{width:160px}
+</style>
+</head>
+<body>
+<header>
+  <b>QWEN·COMPUTER</b>
+  <select id="model">
+    <option value="Qwen2.5-0.5B-Instruct-q4f16_1-MLC">Qwen2.5 0.5B q4 (~400MB)</option>
+    <option value="Qwen2.5-1.5B-Instruct-q4f16_1-MLC" selected>Qwen2.5 1.5B q4 (~1GB)</option>
+    <option value="Qwen2.5-3B-Instruct-q4f16_1-MLC">Qwen2.5 3B q4 (~2GB)</option>
+  </select>
+  <button id="boot">Power on</button>
+  <progress id="prog" max="1" value="0" hidden></progress>
+  <span id="status">off</span>
+</header>
+<main>
+  <section>
+    <h3>Terminal</h3>
+    <div id="term"></div>
+    <div class="row">
+      <input id="goal" placeholder="Give the computer a task… e.g. draw a sun and save a poem to poem.txt" disabled>
+      <button id="run" disabled>Run</button>
+      <button id="stop" disabled>Halt</button>
+    </div>
+    <div class="row">
+      <label class="t-sys">max steps <input id="maxSteps" type="number" value="12" min="1" max="100" style="width:60px"></label>
+      <label class="t-sys">tick ms <input id="tick" type="number" value="150" min="0" style="width:70px"></label>
+      <button id="wipe">Wipe disk</button>
+    </div>
+  </section>
+  <section>
+    <h3>Screen</h3>
+    <canvas id="screen" width="480" height="320"></canvas>
+  </section>
+  <section>
+    <h3>Disk (IndexedDB)</h3>
+    <div id="disk"></div>
+  </section>
+  <section>
+    <h3>RAM</h3>
+    <div id="ram"></div>
+  </section>
+</main>
+
+<script type="module">
+import * as webllm from "https://esm.run/@mlc-ai/web-llm";
+
+/* ---------------- I/O helpers ---------------- */
+const $ = id => document.getElementById(id);
+const term = $("term");
+function log(text, cls="t-out"){
+  const d=document.createElement("div"); d.className=cls; d.textContent=text;
+  term.appendChild(d); term.scrollTop=term.scrollHeight;
+}
+
+/* ---------------- DISK: IndexedDB key/value file store ---------------- */
+const Disk = {
+  db:null,
+  open(){ return new Promise((res,rej)=>{
+    const r=indexedDB.open("qwen-computer",1);
+    r.onupgradeneeded=()=>r.result.createObjectStore("files");
+    r.onsuccess=()=>{this.db=r.result;res()}; r.onerror=()=>rej(r.error);
+  })},
+  tx(mode){ return this.db.transaction("files",mode).objectStore("files") },
+  req(r){ return new Promise((res,rej)=>{r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)}) },
+  write(p,c){ return this.req(this.tx("readwrite").put(String(c),p)) },
+  read(p){ return this.req(this.tx("readonly").get(p)) },
+  del(p){ return this.req(this.tx("readwrite").delete(p)) },
+  list(){ return this.req(this.tx("readonly").getAllKeys()) },
+  clear(){ return this.req(this.tx("readwrite").clear()) },
+};
+async function renderDisk(){
+  const keys=await Disk.list(); const out=[];
+  for(const k of keys){ const v=await Disk.read(k); out.push(`${k}  (${v.length}b)`) }
+  $("disk").textContent = out.length? out.join("\n") : "(empty)";
+}
+
+/* ---------------- RAM: working state the loop carries ---------------- */
+const RAM = { goal:"", step:0, notes:[], history:[], halted:true };
+function renderRAM(){
+  $("ram").textContent = JSON.stringify({goal:RAM.goal,step:RAM.step,notes:RAM.notes,
+    last:RAM.history.slice(-3)},null,1);
+}
+
+/* ---------------- SCREEN: canvas the model draws on ---------------- */
+const cv=$("screen"), g=cv.getContext("2d");
+function clearScreen(){ g.fillStyle="#000"; g.fillRect(0,0,cv.width,cv.height) }
+clearScreen();
+
+/* ---------------- EXECUTOR: sandboxed JS in a Web Worker ---------------- */
+function runSandboxed(code, ms=2000){
+  return new Promise(resolve=>{
+    const src=`onmessage=e=>{let out=[];const console={log:(...a)=>out.push(a.map(String).join(" "))};
+      try{const r=(new Function("console",e.data))(console);postMessage({ok:true,out:out.join("\\n"),ret:r===undefined?null:String(r)})}
+      catch(err){postMessage({ok:false,out:out.join("\\n"),err:String(err)})}}`;
+    const w=new Worker(URL.createObjectURL(new Blob([src],{type:"text/javascript"})));
+    const t=setTimeout(()=>{w.terminate();resolve({ok:false,err:"timeout"})},ms);
+    w.onmessage=e=>{clearTimeout(t);w.terminate();resolve(e.data)};
+    w.postMessage(code);
+  });
+}
+
+/* ---------------- INSTRUCTION SET ---------------- */
+const ISA = {
+  async write_file({path,content}){ await Disk.write(path,content??""); await renderDisk(); return `wrote ${path}` },
+  async read_file({path}){ const v=await Disk.read(path); return v===undefined?`ERR no file ${path}`:v.slice(0,800) },
+  async list_files(){ const k=await Disk.list(); return k.length?k.join(", "):"(empty)" },
+  async delete_file({path}){ await Disk.del(path); await renderDisk(); return `deleted ${path}` },
+  async run_js({code}){ const r=await runSandboxed(String(code||""));
+    return r.ok?`out: ${r.out||""}${r.ret!=null?" | return: "+r.ret:""}`:`ERR ${r.err} ${r.out||""}` },
+  async draw({shape,x=0,y=0,w=50,h=50,r=25,color="#fff",text=""}){
+    g.fillStyle=color; g.strokeStyle=color;
+    if(shape==="clear") clearScreen();
+    else if(shape==="rect") g.fillRect(+x,+y,+w,+h);
+    else if(shape==="circle"){ g.beginPath(); g.arc(+x,+y,+r,0,Math.PI*2); g.fill() }
+    else if(shape==="line"){ g.beginPath(); g.moveTo(+x,+y); g.lineTo(+x + +w,+y + +h); g.lineWidth=2; g.stroke() }
+    else if(shape==="text"){ g.font="16px monospace"; g.fillText(String(text),+x,+y) }
+    else return `ERR unknown shape ${shape}`;
+    return `drew ${shape}`;
+  },
+  async remember({note}){ RAM.notes.push(String(note)); if(RAM.notes.length>12) RAM.notes.shift(); return "noted" },
+  async print({text}){ log(String(text),"t-out"); return "printed" },
+  async halt({reason}){ RAM.halted=true; return `halt: ${reason||"done"}` },
+};
+const CMDS=Object.keys(ISA);
+
+const SCHEMA = JSON.stringify({
+  type:"object",
+  properties:{
+    thought:{type:"string"},
+    cmd:{type:"string",enum:CMDS},
+    args:{type:"object"}
+  },
+  required:["thought","cmd","args"]
+});
+
+const SYSTEM = `You are the CPU of a small computer. You act ONLY by emitting one JSON command per step:
+{"thought":"short reason","cmd":"<command>","args":{...}}
+Commands:
+- write_file {path, content}
+- read_file {path}
+- list_files {}
+- delete_file {path}
+- run_js {code}   (sandboxed JavaScript; use console.log to output; no DOM)
+- draw {shape:"rect"|"circle"|"line"|"text"|"clear", x, y, w, h, r, color, text}  (screen is 480x320)
+- remember {note}  (keep a fact in RAM across steps)
+- print {text}     (show text to the user)
+- halt {reason}    (when the goal is complete)
+You see the goal, RAM notes, disk listing and the results of your recent commands. Do one useful step at a time. When the goal is done, use halt.`;
+
+/* ---------------- CPU: the quantized model ---------------- */
+let engine=null;
+$("boot").onclick = async ()=>{
+  if(!navigator.gpu){ log("WebGPU not available in this browser. Use recent Chrome/Edge (desktop or Android).","t-err"); return }
+  $("boot").disabled=true; $("prog").hidden=false;
+  const model=$("model").value;
+  log(`booting ${model} … (first load downloads weights, then cached)`,"t-sys");
+  try{
+    engine = await webllm.CreateMLCEngine(model,{ initProgressCallback:p=>{
+      $("status").textContent=p.text; $("prog").value=p.progress||0 }});
+    $("status").textContent="ready"; $("prog").hidden=true;
+    $("goal").disabled=false; $("run").disabled=false;
+    log("CPU online.","t-sys");
+  }catch(e){ log("boot failed: "+e,"t-err"); $("boot").disabled=false }
+};
+
+async function buildContext(){
+  const files=await Disk.list();
+  const recent=RAM.history.slice(-6).map(h=>`> ${h.cmd} ${JSON.stringify(h.args)}\n< ${h.result}`).join("\n");
+  return `GOAL: ${RAM.goal}
+STEP: ${RAM.step}
+RAM notes: ${RAM.notes.length?RAM.notes.join(" | "):"(none)"}
+DISK: ${files.length?files.join(", "):"(empty)"}
+RECENT:
+${recent||"(nothing yet)"}
+Next command as JSON:`;
+}
+
+async function stepCPU(){
+  const reply = await engine.chat.completions.create({
+    messages:[{role:"system",content:SYSTEM},{role:"user",content:await buildContext()}],
+    temperature:0.3, max_tokens:400,
+    response_format:{type:"json_object",schema:SCHEMA}
+  });
+  const raw=reply.choices[0].message.content;
+  try{ return JSON.parse(raw) }catch{ return {thought:"bad output",cmd:"print",args:{text:"[unparseable] "+raw.slice(0,200)}} }
+}
+
+/* ---------------- CLOCK: the main loop ---------------- */
+async function runLoop(){
+  RAM.halted=false; $("run").disabled=true; $("stop").disabled=false;
+  const max=+$("maxSteps").value, tick=+$("tick").value;
+  while(!RAM.halted && RAM.step<max){
+    RAM.step++; $("status").textContent=`step ${RAM.step}/${max}`;
+    let op;
+    try{ op=await stepCPU() }catch(e){ log("CPU fault: "+e,"t-err"); break }
+    if(RAM.halted) break; // user hit Halt mid-inference
+    log(`· ${op.thought}`,"t-thought");
+    log(`$ ${op.cmd} ${JSON.stringify(op.args)}`,"t-cmd");
+    let result;
+    try{ result = ISA[op.cmd] ? await ISA[op.cmd](op.args||{}) : `ERR unknown cmd ${op.cmd}` }
+    catch(e){ result="ERR "+e }
+    log(String(result).slice(0,500), String(result).startsWith("ERR")?"t-err":"t-out");
+    RAM.history.push({cmd:op.cmd,args:op.args,result:String(result).slice(0,300)});
+    if(RAM.history.length>40) RAM.history.shift();
+    renderRAM();
+    await new Promise(r=>setTimeout(r,tick));
+  }
+  if(!RAM.halted) log(`stopped at step limit (${max})`,"t-sys");
+  RAM.halted=true; $("status").textContent="idle";
+  $("run").disabled=false; $("stop").disabled=true;
+}
+
+$("run").onclick=()=>{
+  const goal=$("goal").value.trim(); if(!goal) return;
+  RAM.goal=goal; RAM.step=0; RAM.history=[];
+  log(`\n=== TASK: ${goal} ===`,"t-sys"); renderRAM(); runLoop();
+};
+$("goal").onkeydown=e=>{ if(e.key==="Enter" && !$("run").disabled) $("run").click() };
+$("stop").onclick=()=>{ RAM.halted=true; log("halt requested","t-sys") };
+$("wipe").onclick=async()=>{ await Disk.clear(); await renderDisk(); RAM.notes=[]; renderRAM(); log("disk wiped","t-sys") };
+
+/* ---------------- power-on self test ---------------- */
+await Disk.open(); await renderDisk(); renderRAM();
+log("Qwen Computer prototype. Pick a model and press Power on.","t-sys");
+</script>
+</body>
+</html>
+

@@ -1,0 +1,13 @@
+const a = require("node:assert/strict");
+global.acorn = require("./acorn.js");
+require("./analysis.js");
+require("./comprehension.js");
+const g = Comprehension.investigate(Comprehension.sample);
+a.equal(g.unresolved.length, 0);
+a.ok(g.edges.some((e) => e.kind === "imports"));
+a.ok(g.nodes.some((n) => n.name === "mix"));
+a.deepEqual(Comprehension.impact(g, "demo/b.js"), ["demo/a.js"]);
+const h = Comprehension.investigate(Comprehension.sample.slice(0, 1));
+a.equal(h.unresolved.length, 1);
+a.equal(h.placement.status, "unresolved");
+console.log("6 comprehension checks passed");

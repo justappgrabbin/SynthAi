@@ -1,0 +1,20 @@
+{
+  "name": "independent-computer",
+  "private": true,
+  "scripts": {
+    "test:foundation": "node --test test_foundation.mjs",
+    "demo:foundation": "node foundation-demo.mjs",
+    "start": "node serve.cjs",
+    "bundle:model": "esbuild node_modules/@mlc-ai/web-llm/lib/index.js --bundle --format=esm --outfile=vendor/webllm.mjs"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "dependencies": {
+    "@mlc-ai/web-llm": "0.2.78",
+    "esbuild": "0.28.2"
+  },
+  "devDependencies": {
+    "playwright-core": "1.65.1"
+  }
+}

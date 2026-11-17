@@ -1,0 +1,10 @@
+global.acorn = require("./acorn.js");
+require("./execution.js");
+require("./polyglot.js");
+const a = require("node:assert/strict");
+let v = (s, args, expected) => Polyglot.verify(s, "main", [{ args, expected }]);
+a.equal(v("def main(a, b):\n    return a ^ b", [5, 1], 4).results[0].pass, true);
+a.equal(v("def main(a):\n    return a + 2", [3], 5).results[0].pass, true);
+a.equal(v("import os\ndef main():\n    return 1", [], 1).status, "blocked");
+a.equal(v("def main(a):\n    return a / 2", [2], 1).status, "blocked");
+console.log("4 Python adapter assertions passed");

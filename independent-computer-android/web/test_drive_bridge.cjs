@@ -1,0 +1,12 @@
+const assert=require('node:assert/strict');
+const path=require('node:path');
+const {execFileSync}=require('node:child_process');
+const base=__dirname;
+const out=execFileSync(process.execPath,['--no-warnings','--experimental-loader',path.join(base,'recovered/synthia-v11-loader.mjs'),path.join(base,'recovered/verify-v11-bridge.mjs')],{encoding:'utf8',timeout:30000});
+const result=JSON.parse(out.trim().split('\n').at(-1));
+assert.equal(result.bridge,'actual-donor-executed');
+assert.equal(result.sourceReadback,'exact');
+assert.equal(result.agentResponse,'42');
+assert.equal(result.agentActed,true);
+assert.ok(result.sourceBytes>5000);
+console.log('PASS actual Drive v11 runtime message adapter, '+result.sourceBytes+'-byte exact source readback and real local calculation receipt.');

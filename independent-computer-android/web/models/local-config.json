@@ -1,0 +1,12 @@
+[
+  {
+    "model": "/models/Qwen2.5-0.5B-Instruct-q4f32_1-MLC/",
+    "model_id": "Qwen2.5-0.5B-Instruct-q4f32_1-MLC",
+    "model_lib": "/models/Qwen2.5-0.5B-Instruct-q4f32_1-MLC/model.wasm",
+    "low_resource_required": true,
+    "vram_required_MB": 1060.2,
+    "overrides": {
+      "context_window_size": 4096
+    }
+  }
+]

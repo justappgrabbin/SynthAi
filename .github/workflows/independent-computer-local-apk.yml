@@ -1,0 +1,28 @@
+name: Independent Computer local APK
+on:
+  workflow_dispatch:
+  push:
+    branches: ['codex/independent-computer-android-20261117']
+    paths: ['independent-computer-android/**', '.github/workflows/independent-computer-local-apk.yml']
+permissions:
+  contents: read
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Build complete offline APK
+        working-directory: independent-computer-android
+        run: bash android/build-apk.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Independent-Computer-APK
+          path: |
+            independent-computer-android/dist/Independent-Computer.apk
+            independent-computer-android/dist/build-receipt.json
+            independent-computer-android/dist/signature-verification.txt

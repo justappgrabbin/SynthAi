@@ -1,0 +1,1408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FOUNDRY + World Engine - Qualia Consciousness System</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body {
+      font-family: 'JetBrains Mono', 'Courier New', monospace;
+      overflow: hidden;
+      background: #0a0a0a;
+      color: #e0e0e0;
+    }
+    
+    /* World Container */
+    #world-container {
+      position: fixed;
+      inset: 0;
+      perspective: 2000px;
+      perspective-origin: 50% 50%;
+      overflow: hidden;
+      transition: transform 0.1s ease-out;
+    }
+    
+    /* Sky Gradient */
+    #sky {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to bottom, 
+        #0a1a3e 0%, 
+        #1a4a8e 30%, 
+        #4a7ab8 60%,
+        #87ceeb 100%
+      );
+      z-index: 1;
+    }
+    
+    /* Celestial Body (Sun/Moon) */
+    #celestial {
+      position: absolute;
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 30%, #ffff99, #ffd700 40%, #ff8c00);
+      box-shadow: 0 0 80px rgba(255,200,0,0.6);
+      top: 15%;
+      right: 20%;
+      z-index: 3;
+      animation: celestialPulse 4s ease-in-out infinite;
+    }
+    
+    @keyframes celestialPulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.05); opacity: 0.9; }
+    }
+    
+    /* Ground Plane */
+    #ground {
+      position: absolute;
+      bottom: -20%;
+      left: -100%;
+      width: 300%;
+      height: 80%;
+      background: linear-gradient(to bottom, 
+        rgba(208, 232, 240, 0) 0%, 
+        rgba(208, 232, 240, 0.3) 40%,
+        rgba(180, 220, 235, 0.5) 100%
+      );
+      transform: rotateX(65deg);
+      transform-origin: bottom center;
+      z-index: 10;
+    }
+    
+    /* Grid */
+    #grid {
+      position: absolute;
+      bottom: 0;
+      left: -50%;
+      width: 200%;
+      height: 60%;
+      background-image: 
+        linear-gradient(90deg, rgba(168, 216, 232, 0.15) 1px, transparent 1px),
+        linear-gradient(rgba(168, 216, 232, 0.15) 1px, transparent 1px);
+      background-size: 80px 80px;
+      transform: rotateX(75deg) translateZ(-50px);
+      transform-origin: bottom center;
+      z-index: 11;
+    }
+    
+    /* Fog Layer */
+    #fog {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 50%;
+      background: linear-gradient(to top, 
+        rgba(208, 232, 240, 0.8) 0%, 
+        rgba(208, 232, 240, 0.3) 40%, 
+        transparent 100%
+      );
+      z-index: 12;
+      pointer-events: none;
+    }
+    
+    /* FOUNDRY - The Megastructure */
+    #foundry {
+      position: absolute;
+      bottom: 15%;
+      left: 5%;
+      width: 180px;
+      height: 220px;
+      background: linear-gradient(135deg, #1a1a2e 0%, #2a2a4e 100%);
+      border: 2px solid #8b5cf6;
+      border-radius: 8px;
+      z-index: 150;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 
+        0 20px 60px rgba(0,0,0,0.8),
+        0 0 40px rgba(139,92,246,0.3),
+        inset 0 0 30px rgba(139,92,246,0.1);
+      animation: foundryIdle 3s ease-in-out infinite;
+    }
+    
+    #foundry:hover {
+      transform: scale(1.05) translateY(-5px);
+      box-shadow: 
+        0 25px 80px rgba(0,0,0,0.9),
+        0 0 60px rgba(139,92,246,0.5);
+    }
+    
+    @keyframes foundryIdle {
+      0%, 100% { box-shadow: 0 20px 60px rgba(0,0,0,0.8), 0 0 40px rgba(139,92,246,0.3); }
+      50% { box-shadow: 0 20px 60px rgba(0,0,0,0.8), 0 0 60px rgba(139,92,246,0.5); }
+    }
+    
+    #foundry-label {
+      position: absolute;
+      top: 15px;
+      left: 0;
+      right: 0;
+      text-align: center;
+      font-size: 18px;
+      font-weight: bold;
+      color: #8b5cf6;
+      text-shadow: 0 0 10px rgba(139,92,246,0.5);
+    }
+    
+    #foundry-stats {
+      position: absolute;
+      bottom: 15px;
+      left: 15px;
+      right: 15px;
+      font-size: 9px;
+      color: #aaa;
+      line-height: 1.6;
+    }
+    
+    .foundry-stat {
+      display: flex;
+      justify-content: space-between;
+      margin: 3px 0;
+    }
+    
+    .foundry-pipes {
+      position: absolute;
+      bottom: -30px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 4px;
+      height: 30px;
+      background: linear-gradient(to bottom, #8b5cf6, transparent);
+      opacity: 0.5;
+    }
+    
+    /* Buildings */
+    .building {
+      position: absolute;
+      background: rgba(20, 20, 40, 0.85);
+      border: 1px solid;
+      border-radius: 8px;
+      padding: 12px 16px;
+      font-size: 11px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(10px);
+      z-index: 100;
+      min-width: 140px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+    }
+    
+    .building:hover {
+      transform: scale(1.1) translateY(-8px) !important;
+      z-index: 200;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.8);
+    }
+    
+    .building.selected {
+      border-width: 2px;
+      z-index: 250;
+    }
+    
+    /* File type specific styling */
+    .building[data-type="py"] {
+      border-color: #8b5cf6;
+      animation: buildingFloat 4s ease-in-out infinite, pyGlow 3s ease-in-out infinite;
+    }
+    
+    .building[data-type="md"] {
+      border-color: #3b82f6;
+      animation: buildingFloat 5s ease-in-out infinite, mdGlow 3s ease-in-out infinite;
+    }
+    
+    .building[data-type="json"] {
+      border-color: #10b981;
+      animation: buildingFloat 4.5s ease-in-out infinite, jsonGlow 3s ease-in-out infinite;
+    }
+    
+    .building[data-type="xml"] {
+      border-color: #f59e0b;
+      animation: buildingFloat 4.2s ease-in-out infinite, xmlGlow 3s ease-in-out infinite;
+    }
+    
+    .building[data-type="html"] {
+      border-color: #ec4899;
+      animation: buildingFloat 4.8s ease-in-out infinite, htmlGlow 3s ease-in-out infinite;
+    }
+    
+    @keyframes buildingFloat {
+      0%, 100% { transform: translateY(0) rotateY(0deg); }
+      25% { transform: translateY(-12px) rotateY(3deg); }
+      75% { transform: translateY(-6px) rotateY(-3deg); }
+    }
+    
+    @keyframes pyGlow {
+      0%, 100% { box-shadow: 0 10px 40px rgba(0,0,0,0.6), 0 0 20px rgba(139,92,246,0.3); }
+      50% { box-shadow: 0 10px 40px rgba(0,0,0,0.6), 0 0 40px rgba(139,92,246,0.5); }
+    }
+    
+    @keyframes mdGlow {
+      0%, 100% { box-shadow: 0 10px 40px rgba(0,0,0,0.6), 0 0 20px rgba(59,130,246,0.3); }
+      50% { box-shadow: 0 10px 40px rgba(0,0,0,0.6), 0 0 40px rgba(59,130,246,0.5); }
+    }
+    
+    @keyframes jsonGlow {
+      0%, 100% { box-shadow: 0 10px 40px rgba(0,0,0,0.6), 0 0 20px rgba(16,185,129,0.3); }
+      50% { box-shadow: 0 10px 40px rgba(0,0,0,0.6), 0 0 40px rgba(16,185,129,0.5); }
+    }
+    
+    @keyframes xmlGlow {
+      0%, 100% { box-shadow: 0 10px 40px rgba(0,0,0,0.6), 0 0 20px rgba(245,158,11,0.3); }
+      50% { box-shadow: 0 10px 40px rgba(0,0,0,0.6), 0 0 40px rgba(245,158,11,0.5); }
+    }
+    
+    @keyframes htmlGlow {
+      0%, 100% { box-shadow: 0 10px 40px rgba(0,0,0,0.6), 0 0 20px rgba(236,72,153,0.3); }
+      50% { box-shadow: 0 10px 40px rgba(0,0,0,0.6), 0 0 40px rgba(236,72,153,0.5); }
+    }
+    
+    .building-name {
+      font-weight: bold;
+      color: #fff;
+      margin-bottom: 6px;
+      font-size: 12px;
+    }
+    
+    .building-category {
+      font-size: 9px;
+      color: #888;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .building-glyph {
+      font-size: 20px;
+      margin-top: 8px;
+      text-align: center;
+      opacity: 0.7;
+    }
+    
+    /* Causal Graph Lines */
+    .causal-line {
+      position: absolute;
+      background: linear-gradient(90deg, rgba(59,130,246,0.4), rgba(59,130,246,0));
+      height: 2px;
+      transform-origin: left center;
+      z-index: 50;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    
+    .causal-line.visible {
+      opacity: 1;
+    }
+    
+    /* Entanglement Field */
+    .entanglement-line {
+      position: absolute;
+      background: linear-gradient(90deg, rgba(236,72,153,0.3), rgba(236,72,153,0));
+      height: 1px;
+      transform-origin: left center;
+      z-index: 45;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      animation: entanglementPulse 2s ease-in-out infinite;
+    }
+    
+    .entanglement-line.visible {
+      opacity: 1;
+    }
+    
+    @keyframes entanglementPulse {
+      0%, 100% { opacity: 0.3; }
+      50% { opacity: 0.6; }
+    }
+    
+    /* HUD */
+    #hud {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      background: rgba(0,0,0,0.9);
+      border: 1px solid rgba(139,92,246,0.5);
+      border-radius: 8px;
+      padding: 15px;
+      z-index: 10000;
+      min-width: 200px;
+      backdrop-filter: blur(10px);
+    }
+    
+    #hud h1 {
+      font-size: 14px;
+      color: #8b5cf6;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .hud-section {
+      margin-bottom: 12px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid rgba(139,92,246,0.2);
+    }
+    
+    .hud-section:last-child {
+      border-bottom: none;
+      margin-bottom: 0;
+    }
+    
+    .hud-title {
+      font-size: 9px;
+      color: #666;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+      letter-spacing: 1px;
+    }
+    
+    .hud-stat {
+      display: flex;
+      justify-content: space-between;
+      padding: 3px 0;
+      font-size: 11px;
+    }
+    
+    .hud-label { color: #888; }
+    .hud-value { color: #e0e0e0; font-weight: bold; }
+    .hud-value.purple { color: #a78bfa; }
+    .hud-value.blue { color: #60a5fa; }
+    .hud-value.green { color: #4ade80; }
+    .hud-value.amber { color: #fbbf24; }
+    
+    /* Layer Toggle */
+    #layer-toggle {
+      position: fixed;
+      bottom: 20px;
+      left: 20px;
+      background: rgba(0,0,0,0.9);
+      border: 1px solid rgba(139,92,246,0.3);
+      border-radius: 8px;
+      padding: 12px 15px;
+      z-index: 10000;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    
+    .layer-dot {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      cursor: pointer;
+      opacity: 0.3;
+      transition: all 0.3s ease;
+      border: 1px solid currentColor;
+    }
+    
+    .layer-dot:hover {
+      opacity: 0.6;
+      transform: scale(1.2);
+    }
+    
+    .layer-dot.active {
+      opacity: 1;
+      box-shadow: 0 0 15px currentColor;
+    }
+    
+    /* File Drop Zone */
+    #drop-zone {
+      position: fixed;
+      inset: 0;
+      background: rgba(139,92,246,0.1);
+      border: 3px dashed rgba(139,92,246,0.5);
+      z-index: 9999;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      color: #8b5cf6;
+      pointer-events: none;
+    }
+    
+    #drop-zone.active {
+      display: flex;
+    }
+    
+    /* Building Detail Panel */
+    #detail-panel {
+      position: fixed;
+      top: 50%;
+      right: 20px;
+      transform: translateY(-50%) translateX(400px);
+      width: 360px;
+      max-height: 80vh;
+      background: rgba(10,10,20,0.95);
+      border: 1px solid rgba(139,92,246,0.5);
+      border-radius: 12px;
+      padding: 20px;
+      z-index: 10001;
+      overflow-y: auto;
+      backdrop-filter: blur(20px);
+      transition: transform 0.3s ease;
+      box-shadow: 0 20px 80px rgba(0,0,0,0.9);
+    }
+    
+    #detail-panel.open {
+      transform: translateY(-50%) translateX(0);
+    }
+    
+    #detail-panel h2 {
+      font-size: 16px;
+      color: #8b5cf6;
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .detail-section {
+      margin-bottom: 20px;
+    }
+    
+    .detail-section h3 {
+      font-size: 11px;
+      color: #888;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 10px;
+    }
+    
+    .detail-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 5px 0;
+      font-size: 12px;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    
+    .detail-label { color: #999; }
+    .detail-value { color: #e0e0e0; font-weight: bold; }
+    
+    .qualia-bar {
+      width: 100%;
+      height: 20px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 4px;
+      overflow: hidden;
+      margin: 8px 0;
+    }
+    
+    .qualia-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #8b5cf6, #ec4899);
+      transition: width 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      padding-right: 8px;
+      color: #fff;
+      font-size: 10px;
+      font-weight: bold;
+    }
+    
+    .action-button {
+      width: 100%;
+      padding: 12px;
+      margin: 8px 0;
+      background: rgba(139,92,246,0.2);
+      border: 1px solid rgba(139,92,246,0.5);
+      border-radius: 6px;
+      color: #8b5cf6;
+      font-size: 12px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-align: center;
+    }
+    
+    .action-button:hover {
+      background: rgba(139,92,246,0.3);
+      border-color: #8b5cf6;
+      color: #fff;
+    }
+    
+    .action-button.primary {
+      background: #8b5cf6;
+      color: #fff;
+    }
+    
+    .action-button.primary:hover {
+      background: #7c3aed;
+    }
+    
+    #close-detail {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      width: 30px;
+      height: 30px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #888;
+      font-size: 18px;
+      transition: all 0.3s ease;
+    }
+    
+    #close-detail:hover {
+      background: rgba(255,255,255,0.1);
+      color: #fff;
+    }
+    
+    /* Foundry Panel */
+    #foundry-panel {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0.9);
+      width: 500px;
+      max-height: 80vh;
+      background: rgba(10,10,20,0.98);
+      border: 2px solid #8b5cf6;
+      border-radius: 12px;
+      padding: 30px;
+      z-index: 10002;
+      overflow-y: auto;
+      backdrop-filter: blur(20px);
+      box-shadow: 0 30px 100px rgba(0,0,0,0.95);
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.3s ease;
+    }
+    
+    #foundry-panel.open {
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1);
+      pointer-events: all;
+    }
+    
+    #foundry-panel h2 {
+      font-size: 20px;
+      color: #8b5cf6;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    
+    .foundry-section {
+      margin-bottom: 25px;
+      padding: 15px;
+      background: rgba(139,92,246,0.05);
+      border-radius: 8px;
+      border: 1px solid rgba(139,92,246,0.2);
+    }
+    
+    .foundry-section h3 {
+      font-size: 12px;
+      color: #a78bfa;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 12px;
+    }
+    
+    .storage-item {
+      padding: 10px;
+      margin: 8px 0;
+      background: rgba(0,0,0,0.3);
+      border-radius: 6px;
+      border: 1px solid rgba(255,255,255,0.05);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 11px;
+    }
+    
+    .storage-glyph {
+      font-size: 16px;
+      margin-right: 10px;
+    }
+    
+    /* Crosshair */
+    #crosshair {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 20px;
+      height: 20px;
+      z-index: 9998;
+      pointer-events: none;
+      opacity: 0.3;
+    }
+    
+    #crosshair::before,
+    #crosshair::after {
+      content: '';
+      position: absolute;
+      background: rgba(255,255,255,0.5);
+    }
+    
+    #crosshair::before {
+      width: 2px;
+      height: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+    
+    #crosshair::after {
+      height: 2px;
+      width: 100%;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+    
+    /* File Input */
+    #file-input {
+      display: none;
+    }
+    
+    /* Processing Animation */
+    @keyframes processingPulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.2); opacity: 0.7; }
+    }
+    
+    .processing {
+      animation: processingPulse 1s ease-in-out infinite;
+    }
+  </style>
+</head>
+<body>
+  <div id="world-container">
+    <div id="sky"></div>
+    <div id="celestial"></div>
+    <div id="ground"></div>
+    <div id="grid"></div>
+    <div id="fog"></div>
+    
+    <!-- FOUNDRY -->
+    <div id="foundry">
+      <div id="foundry-label">🏭 FOUNDRY</div>
+      <div id="foundry-stats">
+        <div class="foundry-stat">
+          <span>Processed:</span>
+          <span id="foundry-processed">0</span>
+        </div>
+        <div class="foundry-stat">
+          <span>Active:</span>
+          <span id="foundry-active">0</span>
+        </div>
+        <div class="foundry-stat">
+          <span>Storage:</span>
+          <span id="foundry-storage">0</span>
+        </div>
+      </div>
+      <div class="foundry-pipes"></div>
+    </div>
+    
+    <!-- Buildings get added here dynamically -->
+  </div>
+  
+  <div id="crosshair"></div>
+  <div id="drop-zone">📁 Drop files to process in FOUNDRY</div>
+  
+  <!-- HUD -->
+  <div id="hud">
+    <h1>🌍 WORLD ENGINE</h1>
+    <div class="hud-section">
+      <div class="hud-title">Environment</div>
+      <div class="hud-stat">
+        <span class="hud-label">Season</span>
+        <span class="hud-value amber">SUMMER</span>
+      </div>
+      <div class="hud-stat">
+        <span class="hud-label">Time</span>
+        <span class="hud-value blue">DAY</span>
+      </div>
+    </div>
+    <div class="hud-section">
+      <div class="hud-title">Statistics</div>
+      <div class="hud-stat">
+        <span class="hud-label">Buildings</span>
+        <span class="hud-value" id="building-count">0</span>
+      </div>
+      <div class="hud-stat">
+        <span class="hud-label">Connections</span>
+        <span class="hud-value" id="connection-count">0</span>
+      </div>
+      <div class="hud-stat">
+        <span class="hud-label">Status</span>
+        <span class="hud-value green">ACTIVE</span>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Layer Toggle -->
+  <div id="layer-toggle">
+    <div class="layer-dot active" data-layer="1" style="background:#8b5cf6;" title="L1: Embodiment"></div>
+    <div class="layer-dot" data-layer="2" style="background:#ec4899;" title="L2: Agency"></div>
+    <div class="layer-dot active" data-layer="3" style="background:#f59e0b;" title="L3: Persistence"></div>
+    <div class="layer-dot" data-layer="4" style="background:#3b82f6;" title="L4: Causality"></div>
+    <div class="layer-dot" data-layer="5" style="background:#10b981;" title="L5: Substrate"></div>
+  </div>
+  
+  <!-- Building Detail Panel -->
+  <div id="detail-panel">
+    <div id="close-detail">×</div>
+    <h2 id="detail-title">Building Details</h2>
+    
+    <div class="detail-section">
+      <h3>File Information</h3>
+      <div class="detail-row">
+        <span class="detail-label">Name</span>
+        <span class="detail-value" id="detail-name">-</span>
+      </div>
+      <div class="detail-row">
+        <span class="detail-label">Type</span>
+        <span class="detail-value" id="detail-type">-</span>
+      </div>
+      <div class="detail-row">
+        <span class="detail-label">Category</span>
+        <span class="detail-value" id="detail-category">-</span>
+      </div>
+      <div class="detail-row">
+        <span class="detail-label">Size</span>
+        <span class="detail-value" id="detail-size">-</span>
+      </div>
+    </div>
+    
+    <div class="detail-section">
+      <h3>Personal Qualia</h3>
+      <div style="font-size:10px; color:#999; margin-bottom:8px;">How it feels to engage with</div>
+      <div class="qualia-bar">
+        <div class="qualia-fill" id="personal-qualia" style="width:0%">0</div>
+      </div>
+      <div class="detail-row">
+        <span class="detail-label">Intensity</span>
+        <span class="detail-value" id="qualia-intensity">-</span>
+      </div>
+      <div class="detail-row">
+        <span class="detail-label">Complexity</span>
+        <span class="detail-value" id="qualia-complexity">-</span>
+      </div>
+    </div>
+    
+    <div class="detail-section">
+      <h3>Agentic Qualia</h3>
+      <div style="font-size:10px; color:#999; margin-bottom:8px;">Action affordances</div>
+      <div class="qualia-bar">
+        <div class="qualia-fill" id="agentic-qualia" style="width:0%; background:linear-gradient(90deg, #3b82f6, #10b981);">0</div>
+      </div>
+      <div class="detail-row">
+        <span class="detail-label">Executable</span>
+        <span class="detail-value" id="qualia-executable">-</span>
+      </div>
+      <div class="detail-row">
+        <span class="detail-label">Risk Level</span>
+        <span class="detail-value" id="qualia-risk">-</span>
+      </div>
+    </div>
+    
+    <div class="detail-section">
+      <h3>Actions</h3>
+      <button class="action-button primary" id="download-file">📥 DOWNLOAD FILE</button>
+      <button class="action-button" id="view-content">👁️ VIEW CONTENT</button>
+      <button class="action-button" id="show-connections">🔗 SHOW CONNECTIONS</button>
+    </div>
+  </div>
+  
+  <!-- Foundry Panel -->
+  <div id="foundry-panel">
+    <div id="close-detail" style="position:absolute;" onclick="closeFoundryPanel()">×</div>
+    <h2>🏭 FOUNDRY</h2>
+    <p style="color:#888; font-size:12px; margin-bottom:20px;">
+      Legacy Builder v2.0 - Material Processing System
+    </p>
+    
+    <div class="foundry-section">
+      <h3>📊 Processing Statistics</h3>
+      <div class="detail-row">
+        <span class="detail-label">Total Processed</span>
+        <span class="detail-value" id="fp-processed">0</span>
+      </div>
+      <div class="detail-row">
+        <span class="detail-label">Active in World</span>
+        <span class="detail-value" id="fp-active">0</span>
+      </div>
+      <div class="detail-row">
+        <span class="detail-label">In Storage</span>
+        <span class="detail-value" id="fp-storage">0</span>
+      </div>
+    </div>
+    
+    <div class="foundry-section">
+      <h3>🗄️ Storage (By Category)</h3>
+      <div id="storage-list">
+        <!-- Storage items added dynamically -->
+      </div>
+    </div>
+    
+    <div class="foundry-section">
+      <h3>🔧 Controls</h3>
+      <button class="action-button" onclick="document.getElementById('file-input').click()">
+        📂 Import Files
+      </button>
+      <button class="action-button" onclick="exportWorldState()">
+        💾 Export World State
+      </button>
+      <button class="action-button" onclick="clearStorage()">
+        🗑️ Clear Storage
+      </button>
+    </div>
+  </div>
+  
+  <input type="file" id="file-input" multiple accept="*/*">
+  
+  <script>
+    console.log('[FOUNDRY + World Engine] Initializing...');
+    
+    // ===========================================
+    // CORE STATE
+    // ===========================================
+    
+    const state = {
+      buildings: [],
+      activeLayers: new Set([1, 3]),
+      selectedBuilding: null,
+      foundryStats: {
+        processed: 0,
+        active: 0,
+        storage: 0
+      },
+      storage: {
+        ENGINE: [],
+        INTERFACE: [],
+        AGENT: [],
+        WORLD: [],
+        KNOWLEDGE: []
+      }
+    };
+    
+    // ===========================================
+    // LEGACY BUILDER (BRICK MAKER)
+    // ===========================================
+    
+    const LegacyBuilder = {
+      categories: {
+        ENGINE: {
+          glyph: "◈",
+          keywords: ["engine", "core", "system", "calculator", "state", "manager"],
+          patterns: [/engine/i, /core/i, /system/i],
+          description: "Core mechanics and logic"
+        },
+        INTERFACE: {
+          glyph: "◯",
+          keywords: ["component", "widget", "ui", "view", "screen", "display"],
+          patterns: [/component/i, /widget/i, /\.jsx$/],
+          description: "User-facing UI components"
+        },
+        AGENT: {
+          glyph: "◆",
+          keywords: ["agent", "ai", "bot", "oracle", "assistant"],
+          patterns: [/agent/i, /ai/i, /bot/i],
+          description: "Autonomous entities"
+        },
+        WORLD: {
+          glyph: "⬡",
+          keywords: ["spatial", "location", "world", "map", "universe"],
+          patterns: [/spatial/i, /map/i, /world/i],
+          description: "Spatial systems and environments"
+        },
+        KNOWLEDGE: {
+          glyph: "◉",
+          keywords: ["context", "knowledge", "data", "memory", "doc"],
+          patterns: [/context/i, /\.md$/, /data/i, /guide/i],
+          description: "Information and documentation"
+        }
+      },
+      
+      classify(filename, content) {
+        const scores = {};
+        
+        for (const [category, config] of Object.entries(this.categories)) {
+          let score = 0;
+          
+          // Check patterns
+          for (const pattern of config.patterns) {
+            if (pattern.test(filename)) {
+              score += 0.4;
+              break;
+            }
+          }
+          
+          // Check keywords in filename
+          for (const keyword of config.keywords) {
+            if (filename.toLowerCase().includes(keyword)) {
+              score += 0.2;
+              break;
+            }
+          }
+          
+          // Check keywords in content
+          if (content) {
+            const keywordCount = config.keywords.filter(kw => 
+              content.toLowerCase().includes(kw)
+            ).length;
+            score += Math.min(keywordCount * 0.1, 0.4);
+          }
+          
+          scores[category] = score;
+        }
+        
+        const bestCategory = Object.keys(scores).reduce((a, b) => 
+          scores[a] > scores[b] ? a : b
+        );
+        
+        const confidence = scores[bestCategory];
+        
+        return {
+          category: confidence > 0.2 ? bestCategory : 'ENGINE',
+          glyph: this.categories[bestCategory].glyph,
+          confidence: confidence > 0.2 ? confidence : 0.5,
+          description: this.categories[bestCategory].description
+        };
+      },
+      
+      createBrick(file, content) {
+        const classification = this.classify(file.name, content);
+        const fileType = file.name.split('.').pop() || 'unknown';
+        
+        return {
+          filename: file.name,
+          type: fileType,
+          size: file.size,
+          content: content,
+          category: classification.category,
+          glyph: classification.glyph,
+          confidence: classification.confidence,
+          description: classification.description,
+          timestamp: new Date().toISOString(),
+          qualiaHints: this.generateQualiaHints(fileType, content)
+        };
+      },
+      
+      generateQualiaHints(fileType, content) {
+        const hints = {
+          personal: { intensity: 5, complexity: 5 },
+          agentic: { executable: false, risk: 'low' }
+        };
+        
+        switch(fileType) {
+          case 'py':
+          case 'js':
+            hints.personal.intensity = 8;
+            hints.personal.complexity = 7;
+            hints.agentic.executable = true;
+            hints.agentic.risk = 'medium';
+            break;
+          case 'md':
+          case 'txt':
+            hints.personal.intensity = 3;
+            hints.personal.complexity = 4;
+            hints.agentic.risk = 'low';
+            break;
+          case 'json':
+          case 'xml':
+            hints.personal.intensity = 6;
+            hints.personal.complexity = 6;
+            hints.agentic.risk = 'low';
+            break;
+          case 'html':
+            hints.personal.intensity = 7;
+            hints.personal.complexity = 6;
+            hints.agentic.executable = true;
+            hints.agentic.risk = 'medium';
+            break;
+        }
+        
+        return hints;
+      }
+    };
+    
+    // ===========================================
+    // QUALIA ENGINE
+    // ===========================================
+    
+    const QualiaEngine = {
+      generatePersonalQualia(brick) {
+        const base = brick.qualiaHints.personal;
+        return {
+          intensity: base.intensity,
+          complexity: base.complexity,
+          score: (base.intensity + base.complexity) / 2
+        };
+      },
+      
+      generateAgenticQualia(brick) {
+        const base = brick.qualiaHints.agentic;
+        return {
+          executable: base.executable,
+          risk: base.risk,
+          score: base.executable ? 8 : 5
+        };
+      }
+    };
+    
+    // ===========================================
+    // WORLD ENGINE (MANIFESTATION)
+    // ===========================================
+    
+    const WorldEngine = {
+      manifestBuilding(brick) {
+        const building = {
+          id: Date.now() + Math.random(),
+          brick: brick,
+          position: this.calculatePosition(),
+          qualia: {
+            personal: QualiaEngine.generatePersonalQualia(brick),
+            agentic: QualiaEngine.generateAgenticQualia(brick)
+          }
+        };
+        
+        this.createBuildingElement(building);
+        state.buildings.push(building);
+        this.updateStats();
+        
+        return building;
+      },
+      
+      calculatePosition() {
+        // Distribute buildings in a loose grid with some randomness
+        const count = state.buildings.length;
+        const cols = 6;
+        const row = Math.floor(count / cols);
+        const col = count % cols;
+        
+        return {
+          x: 20 + (col * 12) + (Math.random() * 5),
+          y: 25 + (row * 15) + (Math.random() * 5),
+          z: Math.random() * 20
+        };
+      },
+      
+      createBuildingElement(building) {
+        const el = document.createElement('div');
+        el.className = 'building';
+        el.dataset.id = building.id;
+        el.dataset.type = building.brick.type;
+        el.dataset.category = building.brick.category;
+        
+        el.style.left = building.position.x + '%';
+        el.style.top = building.position.y + '%';
+        el.style.transform = `translateZ(${building.position.z}px)`;
+        el.style.animationDelay = (state.buildings.length * 0.1) + 's';
+        
+        el.innerHTML = `
+          <div class="building-name">${building.brick.filename}</div>
+          <div class="building-category">${building.brick.category} • ${building.brick.type.toUpperCase()}</div>
+          <div class="building-glyph">${building.brick.glyph}</div>
+        `;
+        
+        el.addEventListener('click', () => this.selectBuilding(building));
+        
+        document.getElementById('world-container').appendChild(el);
+      },
+      
+      selectBuilding(building) {
+        // Deselect previous
+        document.querySelectorAll('.building').forEach(el => {
+          el.classList.remove('selected');
+        });
+        
+        // Select new
+        const el = document.querySelector(`[data-id="${building.id}"]`);
+        if (el) el.classList.add('selected');
+        
+        state.selectedBuilding = building;
+        this.showBuildingDetails(building);
+      },
+      
+      showBuildingDetails(building) {
+        const panel = document.getElementById('detail-panel');
+        
+        document.getElementById('detail-name').textContent = building.brick.filename;
+        document.getElementById('detail-type').textContent = building.brick.type.toUpperCase();
+        document.getElementById('detail-category').textContent = building.brick.category;
+        document.getElementById('detail-size').textContent = this.formatBytes(building.brick.size);
+        
+        // Personal qualia
+        const personalScore = building.qualia.personal.score;
+        document.getElementById('personal-qualia').style.width = (personalScore * 10) + '%';
+        document.getElementById('personal-qualia').textContent = personalScore.toFixed(1);
+        document.getElementById('qualia-intensity').textContent = building.qualia.personal.intensity + '/10';
+        document.getElementById('qualia-complexity').textContent = building.qualia.personal.complexity + '/10';
+        
+        // Agentic qualia
+        const agenticScore = building.qualia.agentic.score;
+        document.getElementById('agentic-qualia').style.width = (agenticScore * 10) + '%';
+        document.getElementById('agentic-qualia').textContent = agenticScore.toFixed(1);
+        document.getElementById('qualia-executable').textContent = building.qualia.agentic.executable ? 'Yes' : 'No';
+        document.getElementById('qualia-risk').textContent = building.qualia.agentic.risk.toUpperCase();
+        
+        panel.classList.add('open');
+      },
+      
+      formatBytes(bytes) {
+        if (bytes < 1024) return bytes + ' B';
+        if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+        return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+      },
+      
+      updateStats() {
+        document.getElementById('building-count').textContent = state.buildings.length;
+        document.getElementById('foundry-active').textContent = state.buildings.length;
+        document.getElementById('foundry-processed').textContent = state.foundryStats.processed;
+        
+        // Update foundry panel stats
+        document.getElementById('fp-processed').textContent = state.foundryStats.processed;
+        document.getElementById('fp-active').textContent = state.buildings.length;
+        document.getElementById('fp-storage').textContent = state.foundryStats.storage;
+      }
+    };
+    
+    // ===========================================
+    // FILE INGESTION
+    // ===========================================
+    
+    async function processFile(file) {
+      console.log('[FOUNDRY] Processing:', file.name);
+      
+      // Show processing animation
+      const foundry = document.getElementById('foundry');
+      foundry.classList.add('processing');
+      
+      // Read file content
+      const content = await readFileContent(file);
+      
+      // Create brick via Legacy Builder
+      const brick = LegacyBuilder.createBrick(file, content);
+      
+      // Manifest building in world
+      setTimeout(() => {
+        WorldEngine.manifestBuilding(brick);
+        state.foundryStats.processed++;
+        foundry.classList.remove('processing');
+        console.log('[WORLD ENGINE] Building manifested:', brick.filename);
+      }, 500);
+    }
+    
+    function readFileContent(file) {
+      return new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          try {
+            resolve(e.target.result.substring(0, 5000)); // First 5000 chars
+          } catch(err) {
+            resolve('');
+          }
+        };
+        reader.onerror = () => resolve('');
+        reader.readAsText(file);
+      });
+    }
+    
+    // ===========================================
+    // FILE DROP HANDLING
+    // ===========================================
+    
+    const dropZone = document.getElementById('drop-zone');
+    
+    document.body.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dropZone.classList.add('active');
+    });
+    
+    document.body.addEventListener('dragleave', (e) => {
+      if (e.target === document.body) {
+        dropZone.classList.remove('active');
+      }
+    });
+    
+    document.body.addEventListener('drop', async (e) => {
+      e.preventDefault();
+      dropZone.classList.remove('active');
+      
+      const files = Array.from(e.dataTransfer.files);
+      console.log('[FOUNDRY] Files dropped:', files.length);
+      
+      for (const file of files) {
+        await processFile(file);
+      }
+    });
+    
+    document.getElementById('file-input').addEventListener('change', async (e) => {
+      const files = Array.from(e.target.files);
+      for (const file of files) {
+        await processFile(file);
+      }
+      e.target.value = '';
+    });
+    
+    // ===========================================
+    // LAYER CONTROLS
+    // ===========================================
+    
+    document.querySelectorAll('.layer-dot').forEach(dot => {
+      dot.addEventListener('click', () => {
+        const layer = parseInt(dot.dataset.layer);
+        
+        if (state.activeLayers.has(layer)) {
+          state.activeLayers.delete(layer);
+          dot.classList.remove('active');
+        } else {
+          state.activeLayers.add(layer);
+          dot.classList.add('active');
+        }
+        
+        updateLayerVisibility();
+      });
+    });
+    
+    function updateLayerVisibility() {
+      // Layer 4 = Causality (causal graph lines)
+      const causalLines = document.querySelectorAll('.causal-line');
+      causalLines.forEach(line => {
+        line.classList.toggle('visible', state.activeLayers.has(4));
+      });
+      
+      // Layer 5 = Substrate (entanglement field)
+      const entanglementLines = document.querySelectorAll('.entanglement-line');
+      entanglementLines.forEach(line => {
+        line.classList.toggle('visible', state.activeLayers.has(5));
+      });
+    }
+    
+    // ===========================================
+    // PANEL CONTROLS
+    // ===========================================
+    
+    document.getElementById('close-detail').addEventListener('click', () => {
+      document.getElementById('detail-panel').classList.remove('open');
+      if (state.selectedBuilding) {
+        const el = document.querySelector(`[data-id="${state.selectedBuilding.id}"]`);
+        if (el) el.classList.remove('selected');
+      }
+      state.selectedBuilding = null;
+    });
+    
+    document.getElementById('foundry').addEventListener('click', () => {
+      document.getElementById('foundry-panel').classList.add('open');
+    });
+    
+    function closeFoundryPanel() {
+      document.getElementById('foundry-panel').classList.remove('open');
+    }
+    
+    // ===========================================
+    // BUILDING ACTIONS
+    // ===========================================
+    
+    document.getElementById('download-file').addEventListener('click', () => {
+      if (!state.selectedBuilding) return;
+      
+      const building = state.selectedBuilding;
+      const blob = new Blob([building.brick.content], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = building.brick.filename;
+      a.click();
+      URL.revokeObjectURL(url);
+      
+      console.log('[DOWNLOAD]', building.brick.filename);
+    });
+    
+    document.getElementById('view-content').addEventListener('click', () => {
+      if (!state.selectedBuilding) return;
+      
+      const building = state.selectedBuilding;
+      const win = window.open('', '_blank');
+      win.document.write(`
+        <html>
+          <head><title>${building.brick.filename}</title></head>
+          <body style="font-family:monospace; padding:20px; background:#1a1a1a; color:#e0e0e0;">
+            <h2>${building.brick.filename}</h2>
+            <pre style="white-space:pre-wrap;">${building.brick.content}</pre>
+          </body>
+        </html>
+      `);
+    });
+    
+    document.getElementById('show-connections').addEventListener('click', () => {
+      if (!state.selectedBuilding) return;
+      alert('Connection visualization coming soon!');
+    });
+    
+    // ===========================================
+    // WORLD CONTROLS
+    // ===========================================
+    
+    function exportWorldState() {
+      const worldState = {
+        version: '2.0',
+        timestamp: new Date().toISOString(),
+        buildings: state.buildings.map(b => ({
+          filename: b.brick.filename,
+          type: b.brick.type,
+          category: b.brick.category,
+          glyph: b.brick.glyph,
+          position: b.position,
+          content: b.brick.content
+        })),
+        stats: state.foundryStats
+      };
+      
+      const blob = new Blob([JSON.stringify(worldState, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'world-state-' + Date.now() + '.json';
+      a.click();
+      URL.revokeObjectURL(url);
+      
+      console.log('[EXPORT] World state saved');
+    }
+    
+    function clearStorage() {
+      if (confirm('Clear all buildings from world?')) {
+        document.querySelectorAll('.building').forEach(el => el.remove());
+        state.buildings = [];
+        state.foundryStats = { processed: 0, active: 0, storage: 0 };
+        WorldEngine.updateStats();
+        console.log('[CLEAR] World cleared');
+      }
+    }
+    
+    // ===========================================
+    // PARALLAX CAMERA
+    // ===========================================
+    
+    document.addEventListener('mousemove', (e) => {
+      const x = (e.clientX / window.innerWidth - 0.5) * 15;
+      const y = (e.clientY / window.innerHeight - 0.5) * 8;
+      document.getElementById('world-container').style.transform = 
+        `rotateY(${x}deg) rotateX(${-y}deg)`;
+    });
+    
+    // ===========================================
+    // INITIALIZATION
+    // ===========================================
+    
+    console.log('[FOUNDRY + World Engine] Ready');
+    console.log('[FOUNDRY] Drop files to begin processing');
+    console.log('[WORLD ENGINE] 5 layers active');
+    console.log('[SYSTEM] Personal + Agentic qualia enabled');
+  </script>
+</body>
+</html>

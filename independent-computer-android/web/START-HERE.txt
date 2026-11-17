@@ -1,0 +1,18 @@
+INDEPENDENT COMPUTER — LOCAL BUILD
+
+1. Extract this complete folder.
+2. With Node.js 22 or later installed, run:
+
+   node serve.cjs
+
+3. Open http://127.0.0.1:8080 in a WebGPU-capable browser.
+4. Choose Start local model. Tiny Qwen weights are included locally.
+5. Describe your task, or import an implementation and ask it to acquire/reuse it.
+
+No OpenAI key, model account, external inference endpoint or npm installation is required.
+The Llama option requires separately installing its optional weights.
+
+Choose Run acquisition & reuse proof to test the foundation without loading the model.
+The original computer is linked in the header and preserved in index.html.
+
+See FOUNDATION.md for measured results, source lineage and remaining limitations.
