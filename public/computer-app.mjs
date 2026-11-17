@@ -202,15 +202,30 @@ function message(selector, text, good) {
   el.className = `message ${good === true ? 'good' : good === false ? 'bad' : ''}`;
 }
 
+// Direct mode: talk to api.github.com from the device, no outside server.
+async function gh(path) {
+  const token = $('#computerToken').value.trim();
+  const res = await fetch('https://api.github.com' + path, { headers: { Accept: 'application/vnd.github+json', ...(token ? { Authorization: 'Bearer ' + token } : {}) } });
+  if (!res.ok) throw new Error(`GitHub ${res.status}: ${(await res.json().catch(() => ({}))).message || res.statusText}`);
+  return res.json();
+}
+const direct = () => !$('#serverUrl').value.trim();
+async function githubRequest(action) {
+  if (!direct()) return computer.backends.request('github', { action });
+  if (action === 'status') return { user: (await gh('/user')).login };
+  const list = await gh('/user/repos?per_page=100&sort=pushed');
+  return { repos: list.map(r => ({ url: r.html_url, fullName: r.full_name, defaultBranch: r.default_branch, private: r.private })) };
+}
+
 async function connectGitHub() {
   const baseUrl = $('#serverUrl').value.trim().replace(/\/$/, '');
   const token = $('#computerToken').value;
   localStorage.synthaiServerUrl = baseUrl;
   localStorage.synthaiComputerToken = token;
-  computer.configureGitHub({ baseUrl, token });
+  if (baseUrl) computer.configureGitHub({ baseUrl, token });
   $('#githubPanelState').textContent = 'WIRED';
   try {
-    const result = await computer.backends.request('github', { action: 'status' });
+    const result = await githubRequest('status');
     $('#githubStatus').textContent = 'VERIFIED';
     $('#githubPanelState').textContent = 'VERIFIED';
     $('#githubDetail').textContent = `connected as ${result.user}`;
@@ -226,7 +241,7 @@ async function connectGitHub() {
 
 async function loadRepos() {
   try {
-    const result = await computer.backends.request('github', { action: 'list-repos' });
+    const result = await githubRequest('list-repos');
     const repos = result.repos || [];
     $('#repoCount').textContent = String(repos.length);
     $('#repoList').className = repos.length ? 'repo-list' : 'repo-list empty';
@@ -249,7 +264,7 @@ $('#clearActivity').addEventListener('click', () => { activity = []; renderActiv
 
 const savedServer = localStorage.synthaiServerUrl;
 const savedToken = localStorage.synthaiComputerToken;
-if (savedServer) $('#serverUrl').value = savedServer;
+if (savedServer !== undefined) $('#serverUrl').value = savedServer;
 if (savedToken) $('#computerToken').value = savedToken;
 
 $('#bootDot').classList.add('good');
@@ -262,4 +277,4 @@ renderProjects();
 renderSystems();
 renderActivity();
 if (currentProjectId && computer.projects.get(currentProjectId)) loadCurrentFile();
-if (savedServer && savedToken) connectGitHub();
+if (savedToken) connectGitHub();

@@ -110,8 +110,8 @@
           <article class="panel">
             <div class="panel-head"><div><small>SERVER BRIDGE</small><h3>GitHub connection</h3></div><strong id="githubPanelState">PRESENT</strong></div>
             <p class="muted">The GitHub credential stays on Synthia Server. This Computer stores only the server URL and your Computer access token on this device.</p>
-            <label>Synthia Server URL<input id="serverUrl" value="https://synthia-server.onrender.com"></label>
-            <label>Computer access token<input id="computerToken" type="password" placeholder="TERMINAL_TOKEN"></label>
+            <label>Synthia Server URL (leave empty to connect directly)<input id="serverUrl" value="" placeholder="optional, e.g. https://synthia-server.onrender.com"></label>
+            <label>Token (GitHub token when direct, TERMINAL_TOKEN with a server)<input id="computerToken" type="password" placeholder="ghp_... or TERMINAL_TOKEN"></label>
             <div class="row">
               <button class="primary" id="connectGitHub">Connect and verify</button>
               <button class="quiet" id="refreshRepos">Refresh repos</button>
