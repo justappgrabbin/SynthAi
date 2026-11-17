@@ -1,0 +1,33 @@
+name: Shared character morph checks
+on:
+  pull_request:
+    paths:
+      - 'computer/**'
+      - '.github/workflows/character-morph-checks.yml'
+  push:
+    branches:
+      - 'integration/shared-character-morph-*'
+permissions:
+  contents: read
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install existing Penta ephemeris donor prerequisite
+        run: python -m pip install ephem
+      - name: Verify morph provider routing and Computer mount integration
+        run: |
+          node --check computer/runtime/morph-capability.mjs
+          node --check computer/ComputerRuntime.mjs
+          node --test computer/tests/morph-capability.test.mjs
+      - name: Validate Computer browser package and existing contracts
+        run: npm test
